@@ -53,21 +53,24 @@ public class TaskFilterManagerTest {
 		tfmTest.filterTask(null);
 	}
 	
-	@Test
+	
 	/**
 	 * Test for passing an empty filter parameter
-	 * Expected: Returned all uncompleted tasks
+	 * Expected: Returned all uncompleted tasks. 
+	 * 					 In this case with the dummy data, everything should
+	 * 					 be there.
 	 * 
 	 */
+	@Test
 	public void testNoFilter() {
 		
-		ArrayList<Task> test = tfmTest.filterTask(new FilterParameter());
+		ArrayList<Task<?>> test = tfmTest.filterTask(new FilterParameter());
 		boolean isExist = true;
 		
 		for (Task t: test) {
 			
 			if (t instanceof TodoTask) {
-				isExist = compareTodo(t, tdmStub.getTodoTasks());
+				isExist = tdmStub.getTodoTasks().contains((TodoTask) t);
 			} else if(t instanceof EventTask) {
 				isExist = tdmStub.getEventTasks().contains((EventTask)t);
 			} else if(t instanceof DeadlineTask) {
@@ -82,6 +85,121 @@ public class TaskFilterManagerTest {
 		
 	}
 	
+	/**
+	 * Test for displaying deadlines only.
+	 * Expected: Deadlines only. In this case,
+	 * 					 all dummy data in deadlines.
+	 */
+	@Test
+	public void testDeadlinesOnly(){
+		
+		ArrayList<Task<?>> test = getResult(TaskFilterManager.DEADLINE);
+		
+		TreeSet<DeadlineTask> deadlines = tdmStub.getDeadlineTasks();
+		int numOfDeadlines = deadlines.size();
+		
+		assertTrue("Must be all deadlines!", numOfDeadlines == test.size() &&
+																				isTaskExist(test, deadlines,
+																										TaskType.DEADLINE));
+		
+	}
+	
+	/**
+	 * Test for displaying Todos only.
+	 * Expected: Todos only. In this case,
+	 * 					 all dummy data in Todos.
+	 */
+	@Test
+	public void testTodosOnly(){
+
+		ArrayList<Task<?>> test = getResult(TaskFilterManager.TODO);
+		TreeSet<TodoTask> todos = tdmStub.getTodoTasks();
+		int numOfTodos = todos.size();
+		
+		assertTrue("Must be all todos!", numOfTodos == test.size() &&
+																		 isTaskExist(test, todos,
+																				 				 TaskType.TODO));		
+	}
+	
+	/**
+	 * Test for displaying events only.
+	 * Expected: Events only. In this case,
+	 * 					 all dummy data in Events.
+	 */
+	@Test
+	public void testEventsOnly(){
+
+		ArrayList<Task<?>> test = getResult(TaskFilterManager.EVENT);
+		TreeSet<EventTask> events = tdmStub.getEventTasks();
+		int numOfEvents = events.size();
+		
+		assertTrue("Must be all events!", numOfEvents == test.size() &&
+																		 isTaskExist(test, events,
+																				 				 TaskType.EVENT));		
+	}
+	
+	/**
+	 * Get the result based on the keywords entered
+	 * 
+	 * @param cmd the string of keywords
+	 * @return An arrayList of tasks.
+	 */
+	private ArrayList<Task<?>> getResult(String cmd){
+		
+		String[] tokens = cmd.split(" ");
+		ArrayList<String> keywords = new ArrayList<String>();
+		
+		for (int i = 0; i < tokens.length; i++) {
+			keywords.add(tokens[i]);
+		}
+		
+		FilterParameter filter = new FilterParameter(keywords);
+		return tfmTest.filterTask(filter);
+	}
+	
+	/**
+	 * Compare the returned result to dummy data
+	 * 
+	 * @param test the arraylist of tasks
+	 * @param taskTree the dummy data for task
+	 * @param type the TaskType specified.
+	 * @return true if everything in the result is in specified tasks
+	 */
+	private boolean isTaskExist(ArrayList<Task<?>> test,
+															TreeSet<? extends Task<?>> taskTree,
+															TaskType type) {
+		
+		for (Task task: test) {
+			if( !(isTask(task, type) && taskTree.contains(task)) ) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private boolean isTask(Task task, TaskType type) {
+		
+		boolean isTask;
+		
+		switch (type) {
+			case DEADLINE :
+				isTask = task instanceof DeadlineTask;
+				break;
+			case TODO :
+				isTask = task instanceof TodoTask;
+				break;
+			case EVENT :
+				isTask = task instanceof EventTask;
+				break;
+			default:
+				isTask = false;
+		}
+		
+		return isTask;
+	}
+
+
 	/**
 	 * To compare with tasks for now. The current task compareTo
 	 * has a bug.

@@ -25,6 +25,10 @@ public class TaskFilterManager {
 	
 	private TaskDataManager _taskStore;
 	
+	public static final String DEADLINE = "deadline";
+	public static final String TODO = "todo";
+	public static final String EVENT = "event";
+	
 	public TaskFilterManager(TaskDataManager taskStore){
 		_taskStore = taskStore;
 	}
@@ -37,40 +41,88 @@ public class TaskFilterManager {
 	 * @return An arraylist of tasks that satisfied the task. 
 	 * 				 Empty if there's none
 	 */
-	public ArrayList<Task> filterTask(FilterParameter param) 
+	public ArrayList<Task<?>> filterTask(FilterParameter param) 
 																		throws NullPointerException{
 		//GuardClause
 		if (param==null) { 
 			throw new NullPointerException();
 		}
 		
-		//TODO remove this once TaskDataManager is stable
-		TaskDataManagerStub _taskStore;
-		_taskStore = (TaskDataManagerStub)this._taskStore;
+		ArrayList<String> filters = param.getFilters();
+		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
 		
-		//TODO clarify getAllTask from Joanne. For now, just use 
-		//stub methods.
-		TreeSet<TodoTask> todos = _taskStore.getTodoTasks();
-		TreeSet<EventTask> events = _taskStore.getEventTasks();
-		TreeSet<DeadlineTask> deadlines = _taskStore.getDeadlineTasks();		
+		if (filters.isEmpty()) {
+			result = getAllUncompletedTasks();
+			return result;
+		} 
 		
-		Iterator<TodoTask> todoIter = todos.iterator();
-		Iterator<EventTask> eventIter = events.iterator();
-		Iterator<DeadlineTask> deadlineIter = deadlines.iterator();
+		if (filters.contains(DEADLINE)) {
+			result.addAll(getDeadlines());
+		} 
 		
-		ArrayList<Task> result = new ArrayList<Task>();
-		
-		while (todoIter.hasNext()) {
-			result.add(todoIter.next());
+		if(filters.contains(TODO)) {
+			result.addAll(getTodos());
 		}
-		while (eventIter.hasNext()) {
-			result.add(eventIter.next());
+		
+		if (filters.contains(EVENT)) {
+			result.addAll(getEvents());
 		}
-		while (deadlineIter.hasNext()) {
-			result.add(deadlineIter.next());
-		}
+		
 		
 		return result;
+	}
+
+	public ArrayList<Task<?>> getAllUncompletedTasks() {
+		
+		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+		
+		result.addAll(getTodos());
+		result.addAll(getEvents());
+		result.addAll(getDeadlines());
+		
+		return result;
+	}
+	
+	private ArrayList<TodoTask> getTodos() {
+		//TODO clarify getAllTask from Joanne. For now, just use 
+		//stub methods.
+		TreeSet<TodoTask> todoSet = ((TaskDataManagerStub)_taskStore).getTodoTasks();
+		Iterator<TodoTask> todoIter = todoSet.iterator();
+		
+		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
+		
+		while (todoIter.hasNext()) {
+			todos.add(todoIter.next());
+		}
+		return todos;
+	}
+	
+	private ArrayList<EventTask> getEvents() {
+		//TODO clarify getAllTask from Joanne. For now, just use 
+		//stub methods.
+		TreeSet<EventTask> eventSet = ((TaskDataManagerStub)_taskStore).getEventTasks();
+		Iterator<EventTask> eventIter = eventSet.iterator();
+		
+		ArrayList<EventTask> events = new ArrayList<EventTask>();
+		
+		while (eventIter.hasNext()) {
+			events.add(eventIter.next());
+		}
+		return events;
+	}
+	
+	private ArrayList<DeadlineTask> getDeadlines() {
+		//TODO clarify getAllTask from Joanne. For now, just use 
+		//stub methods.
+		TreeSet<DeadlineTask> deadlinesSet = ((TaskDataManagerStub)_taskStore).getDeadlineTasks();
+		Iterator<DeadlineTask> deadlinesIter = deadlinesSet.iterator();
+		
+		ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
+		
+		while (deadlinesIter.hasNext()) {
+			deadlines.add(deadlinesIter.next());
+		}
+		return deadlines;
 	}
 	
 	/**
@@ -81,7 +133,7 @@ public class TaskFilterManager {
 	 * @return An arraylist of task that satisfied the keywords. 
 	 * 				 Empty if there's none.
 	 */
-	public ArrayList<Task> searchTasks(SearchParameter param){
+	public ArrayList<Task<?>> searchTasks(SearchParameter param){
 		return null;
 	}
 	
