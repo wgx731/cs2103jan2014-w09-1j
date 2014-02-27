@@ -43,7 +43,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _isCompleted = false;
     }
 
-    protected int compareTo(Task otherTask) {
+    protected int compareTo(Task<?> otherTask) {
         int priorityComparedResult = comparePriority(_priority,
                 otherTask._priority);
         if (priorityComparedResult == 0) {
