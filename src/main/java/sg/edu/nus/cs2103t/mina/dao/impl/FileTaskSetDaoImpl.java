@@ -34,12 +34,16 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  */
 public class FileTaskSetDaoImpl implements TaskSetDao {
 
+    private static Logger logger = LogManager
+            .getLogger(FileTaskSetDaoImpl.class.getName());
+
     private static final String INVALID_TASK_TYPE = "The given task type is invalid.";
     private static final String INVALID_FILE_STORAGE = "The given file path is an invalid file storage.";
     private static final String COMPLETED_SUFFIX = ".compl";
 
-    private static Logger logger = LogManager
-            .getLogger(FileTaskSetDaoImpl.class.getName());
+    public static String getCompletedSuffix() {
+        return COMPLETED_SUFFIX;
+    }
 
     private Map<TaskType, String> _fileLocationMap;
 
@@ -140,4 +144,5 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
             return null;
         }
     }
+
 }
