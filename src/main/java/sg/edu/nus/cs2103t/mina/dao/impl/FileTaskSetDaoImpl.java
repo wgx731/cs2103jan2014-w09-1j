@@ -36,6 +36,7 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
 
     private static final String INVALID_TASK_TYPE = "The given task type is invalid.";
     private static final String INVALID_FILE_STORAGE = "The given file path is an invalid file storage.";
+    private static final String COMPLETED_SUFFIX = ".compl";
 
     private static Logger logger = LogManager
             .getLogger(FileTaskSetDaoImpl.class.getName());
@@ -50,6 +51,14 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
     public FileTaskSetDaoImpl(Map<TaskType, String> fileLocationMap) {
         super();
         _fileLocationMap = fileLocationMap;
+    }
+
+    private String getFileLocation(TaskType taskType, boolean isCompleted) {
+        String fileLocation = _fileLocationMap.get(taskType);
+        if (isCompleted) {
+            fileLocation += COMPLETED_SUFFIX;
+        }
+        return fileLocation;
     }
 
     private void createFileIfNotExist(String fileName) throws IOException {
@@ -91,29 +100,36 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
 
     @Override
     public void saveTaskSet(TreeSet<? extends Task<?>> taskSet,
-            TaskType taskType) throws IOException, IllegalArgumentException {
+            TaskType taskType, boolean isCompleted) throws IOException,
+            IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
         }
-        String fileLocation = _fileLocationMap.get(taskType);
+        String fileLocation = getFileLocation(taskType, isCompleted);
+        createFileIfNotExist(fileLocation);
         ObjectOutput output = getOutputWriter(fileLocation);
         output.writeObject(taskSet);
         output.close();
     }
 
     @Override
-    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType)
-            throws IOException, IllegalArgumentException {
+    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) throws IOException, IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
         }
-        String fileLocation = _fileLocationMap.get(taskType);
+        String fileLocation = getFileLocation(taskType, isCompleted);
+        File f = new File(fileLocation);
+        if (!f.exists() || !f.isFile()) {
+            throw new IOException(INVALID_FILE_STORAGE);
+        }
         ObjectInput input = getInputReader(fileLocation);
         try {
             Object object = input.readObject();
             if (object == null) {
                 throw new IOException(INVALID_FILE_STORAGE);
             }
+            @SuppressWarnings("unchecked")
             TreeSet<? extends Task<?>> content = (TreeSet<? extends Task<?>>) object;
             input.close();
             return content;

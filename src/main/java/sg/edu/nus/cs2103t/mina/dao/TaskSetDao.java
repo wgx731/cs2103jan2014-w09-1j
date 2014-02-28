@@ -21,18 +21,21 @@ public interface TaskSetDao {
      * 
      * @param taskSet given task to be saved
      * @param taskType the task type to be saved
+     * @param isCompleted whether the task in the set is completed
      * @throws IOException
      */
     public void saveTaskSet(TreeSet<? extends Task<?>> taskSet,
-            TaskType taskType) throws IOException, IllegalArgumentException;
+            TaskType taskType, boolean isCompleted) throws IOException,
+            IllegalArgumentException;
 
     /**
      * load task set into memory from storage
      * 
      * @param taskType the task type to be loaded
+     * @param isCompleted whether the task in the set is completed
      * @return loaded task set
      * @throws IOException
      */
-    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType)
-            throws IOException, IllegalArgumentException;
+    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) throws IOException, IllegalArgumentException;
 }
