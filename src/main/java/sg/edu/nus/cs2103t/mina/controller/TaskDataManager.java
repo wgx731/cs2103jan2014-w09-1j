@@ -37,6 +37,18 @@ public class TaskDataManager {
         // empty constructor class
     }
 
+    public static TreeSet<TodoTask> getTodoTreeSet() {
+        return _todoTreeSet;
+    }
+
+    public static TreeSet<DeadlineTask> getDeadlineTreeSet() {
+        return _deadlineTreeSet;
+    }
+
+    public static TreeSet<EventTask> getEventTreeSet() {
+        return _eventTreeSet;
+    }
+
     /**
      * This method creates a Task depending on its type and parameters. If
      * changes are successfully saved by DAO, it returns a Task object to the
