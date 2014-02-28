@@ -85,7 +85,7 @@ public class TaskFilterManager {
 	private ArrayList<TodoTask> getTodos() {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
-		TreeSet<TodoTask> todoSet = TaskDataManager.getTodoTasks();
+		TreeSet<TodoTask> todoSet = _taskStore.getTodoTasks();
 		Iterator<TodoTask> todoIter = todoSet.iterator();
 
 		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
@@ -99,7 +99,7 @@ public class TaskFilterManager {
 	private ArrayList<EventTask> getEvents() {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
-		TreeSet<EventTask> eventSet = TaskDataManager.getEventTasks();
+		TreeSet<EventTask> eventSet = _taskStore.getEventTasks();
 		Iterator<EventTask> eventIter = eventSet.iterator();
 
 		ArrayList<EventTask> events = new ArrayList<EventTask>();
@@ -113,7 +113,7 @@ public class TaskFilterManager {
 	private ArrayList<DeadlineTask> getDeadlines() {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
-		TreeSet<DeadlineTask> deadlinesSet = TaskDataManager.getDeadlineTasks();
+		TreeSet<DeadlineTask> deadlinesSet = _taskStore.getDeadlineTasks();
 		Iterator<DeadlineTask> deadlinesIter = deadlinesSet.iterator();
 
 		ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();

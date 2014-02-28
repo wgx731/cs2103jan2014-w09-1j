@@ -8,15 +8,15 @@
 	<Appenders>
 		<Appender type="File" name="FILE" fileName="${filename}">
 			<Layout type="PatternLayout">
-				<Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+				<Pattern>%d %p %C{1.} [%t] %n===%n%m%n===%n</Pattern>
 			</Layout>
 		</Appender>
 	</Appenders>
 	<Loggers>
-		<Logger name="sg.edu.nus.cs2103t" level="trace" additivity="false">
+		<Logger name="sg.edu.nus.cs2103t" level="info" additivity="false">
 			<AppenderRef ref="FILE" />
 		</Logger>
-		<Root level="error">
+		<Root level="info">
 			<AppenderRef ref="FILE" />
 		</Root>
 	</Loggers>

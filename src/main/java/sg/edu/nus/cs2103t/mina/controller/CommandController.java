@@ -1,38 +1,54 @@
 package sg.edu.nus.cs2103t.mina.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
+
+import sg.edu.cs2103t.mina.stub.DataParameterStub;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+
 public class CommandController {
 
-    private static String _inputString;
-
+    private static String[] _inputString;
+	private static final int _maxInputStringArraySize = 2;
+	private static final int _userCommandPosition = 0;
+	private static final int _parameterPosition = 1;
+	private static final int _firstArrayIndex = 0;
+	
     enum CommandType {
-        ADD, DELETE, EDIT, FILTER, SEARCH, EXIT, INVALID
+        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, EXIT, INVALID
     };
-
+    
+    
+    // Constructor
+    public CommandController(){
+    	
+    }
+    
     // This operation is used to get input from the user and execute it till
     // exit
-    public static void processUserInput(String userInput) {
+    public void processUserInput(String userInput) {
         CommandType command;
-        _inputString = userInput;
+        _inputString = userInput.split(" ", _maxInputStringArraySize);
         command = determineCommand();
         processUserCommand(command);
     }
 
     // This operation is used to get the user input and extract the command from
     // inputString
-    private static CommandType determineCommand() {
-        CommandType command = null;
+    private CommandType determineCommand() {
+    	String userCommand = _inputString[_userCommandPosition];
+        CommandType command = CommandType.valueOf(userCommand.trim().toUpperCase());
         return command;
     }
 
     // This operation is used to process the extracted command and call the
     // respective functions
-    private static void processUserCommand(CommandType command) {
+    private void processUserCommand(CommandType command) {
         switch (command) {
             case ADD: {
-                // process inputString here
-                // TaskDataManager.addTask(addparams);
-                // addparams: (String des) (String des, Char prir) (String des,
-                // Date dead) (String des, Date start, Date end)
+                DataParameterStub addParameter = processAddParameter(_inputString[_parameterPosition]);
+                // TaskDataManager.addTask(addParameter);
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.getAllTask();
                 // call GUI display here
@@ -49,7 +65,7 @@ public class CommandController {
                 // call GUI display here
                 break;
             }
-            case EDIT: {
+            case MODIFY: {
                 // process inputString here
                 // TaskDataManager.editTask(addparams);
                 // editparams: (int id, String des) (int id, String des, Char
@@ -63,7 +79,7 @@ public class CommandController {
                 // call GUI display here
                 break;
             }
-            case FILTER: {
+            case DISPLAY: {
                 // process inputString here
                 // ArrayList<Task> display =
                 // TaskFilterManager.filterTask(filterparams);
@@ -90,4 +106,58 @@ public class CommandController {
             }
         }
     }
+    
+    public DataParameterStub processAddParameter(String parameterString){
+    	DataParameterStub addParam = new DataParameterStub();
+    	ArrayList<String> parameters = new ArrayList<String>();
+    	for(String word : parameterString.split(" ")) {
+    	    parameters.add(word);
+    	}
+    	if (parameters.contains("-start")){
+    		addParam.setNewTaskType(TaskType.EVENT);
+    		int endIndexOfDescription = parameterString.indexOf("-");
+    		String description = parameterString.substring(0, endIndexOfDescription).trim();
+    		addParam.setDescription(description);
+    		int indexOfStartDate = parameters.indexOf("-start")+1;
+    		int indexOfEndDate = parameters.indexOf("-end")+1;
+    		try{
+    			Date startDate = DateUtil.parse(parameters.get(indexOfStartDate));
+    			Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+    			addParam.setStartDate(startDate);
+    			addParam.setEndDate(endDate);
+    		} catch (Exception e){
+    			
+    		}    		
+    	} else if (parameters.contains("-end")){
+    		addParam.setNewTaskType(TaskType.DEADLINE);
+    		int endIndexOfDescription = parameterString.indexOf("-");
+    		String description = parameterString.substring(0, endIndexOfDescription).trim();
+    		addParam.setDescription(description);
+    		int indexOfEndDate = parameters.indexOf("-end")+1;
+    		try{
+    			Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+    			addParam.setEndDate(endDate);
+    		} catch (Exception e){
+    			
+    		} 
+    	} else {
+    		addParam.setNewTaskType(TaskType.TODO);
+    		int endIndexOfDescription = parameterString.indexOf("-");
+    		String description;
+    		if (endIndexOfDescription!=-1){
+    			description = parameterString.substring(0, endIndexOfDescription).trim();
+    		} else {
+    			description = parameterString;
+    		}
+    		addParam.setDescription(description);
+    	}
+    	if (parameters.contains("-priority")){
+    		int indexOfPriority = parameters.indexOf("-priority")+1;
+    		char priority = parameters.get(indexOfPriority).toCharArray()[_firstArrayIndex];
+    		addParam.setPriority(priority);
+    	}
+    	return addParam;
+    }
+    
+    
 }

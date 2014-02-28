@@ -29,23 +29,23 @@ public class TaskDataManager {
     // parameters of String after trimming
     public static final int PARAM_TASK_DESCRIPTION = 0;
 
-    private static TreeSet<TodoTask> _todoTreeSet = new TreeSet<TodoTask>();
-    private static TreeSet<DeadlineTask> _deadlineTreeSet = new TreeSet<DeadlineTask>();
-    private static TreeSet<EventTask> _eventTreeSet = new TreeSet<EventTask>();
+    private TreeSet<TodoTask> _todoTreeSet = new TreeSet<TodoTask>();
+    private TreeSet<DeadlineTask> _deadlineTreeSet = new TreeSet<DeadlineTask>();
+    private TreeSet<EventTask> _eventTreeSet = new TreeSet<EventTask>();
 
     public TaskDataManager() {
         // empty constructor class
     }
 
-    public static TreeSet<TodoTask> getTodoTasks() {
+    public TreeSet<TodoTask> getTodoTasks() {
         return _todoTreeSet;
     }
 
-    public static TreeSet<DeadlineTask> getDeadlineTasks() {
+    public TreeSet<DeadlineTask> getDeadlineTasks() {
         return _deadlineTreeSet;
     }
 
-    public static TreeSet<EventTask> getEventTasks() {
+    public TreeSet<EventTask> getEventTasks() {
         return _eventTreeSet;
     }
 

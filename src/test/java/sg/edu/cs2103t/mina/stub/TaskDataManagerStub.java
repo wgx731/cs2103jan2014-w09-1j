@@ -19,9 +19,11 @@ public class TaskDataManagerStub extends TaskDataManager{
 	
 	public TaskDataManagerStub(){
 		
-		_todoTasks = TaskDataManager.getTodoTasks();
-		_eventTasks = TaskDataManager.getEventTasks();
-		_deadlineTasks = TaskDataManager.getDeadlineTasks();
+		super();
+		
+		_todoTasks = getTodoTasks();
+		_eventTasks = getEventTasks();
+		_deadlineTasks = getDeadlineTasks();
 		
 		_compTodoTasks= new TreeSet<TodoTask>();
 		_compEventTasks = new TreeSet<EventTask>();
@@ -85,18 +87,6 @@ public class TaskDataManagerStub extends TaskDataManager{
 			
 		}
 		
-	}
-	
-	public static TreeSet<TodoTask> getTodoTasks() {
-		return _todoTasks;
-	}
-
-	public static TreeSet<EventTask> getEventTasks() {
-		return _eventTasks;
-	}
-
-	public static TreeSet<DeadlineTask> getDeadlineTasks() {
-		return _deadlineTasks;
 	}
 
 	public static TreeSet<TodoTask> getCompTodoTasks() {
