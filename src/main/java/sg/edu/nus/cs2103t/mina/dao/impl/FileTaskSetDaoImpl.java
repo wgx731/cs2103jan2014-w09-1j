@@ -14,7 +14,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -99,9 +99,8 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
     }
 
     @Override
-    public void saveTaskSet(TreeSet<? extends Task<?>> taskSet,
-            TaskType taskType, boolean isCompleted) throws IOException,
-            IllegalArgumentException {
+    public void saveTaskSet(Set<? extends Task<?>> taskSet, TaskType taskType,
+            boolean isCompleted) throws IOException, IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
         }
@@ -113,7 +112,7 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
     }
 
     @Override
-    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+    public Set<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException, IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
@@ -130,7 +129,7 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
                 throw new IOException(INVALID_FILE_STORAGE);
             }
             @SuppressWarnings("unchecked")
-            TreeSet<? extends Task<?>> content = (TreeSet<? extends Task<?>>) object;
+            Set<? extends Task<?>> content = (Set<? extends Task<?>>) object;
             input.close();
             return content;
         } catch (ClassNotFoundException e) {

@@ -1,7 +1,7 @@
 package sg.edu.nus.cs2103t.mina.dao;
 
 import java.io.IOException;
-import java.util.TreeSet;
+import java.util.Set;
 
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
@@ -24,9 +24,8 @@ public interface TaskSetDao {
      * @param isCompleted whether the task in the set is completed
      * @throws IOException
      */
-    public void saveTaskSet(TreeSet<? extends Task<?>> taskSet,
-            TaskType taskType, boolean isCompleted) throws IOException,
-            IllegalArgumentException;
+    public void saveTaskSet(Set<? extends Task<?>> taskSet, TaskType taskType,
+            boolean isCompleted) throws IOException, IllegalArgumentException;
 
     /**
      * load task set into memory from storage
@@ -36,6 +35,6 @@ public interface TaskSetDao {
      * @return loaded task set
      * @throws IOException
      */
-    public TreeSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+    public Set<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException, IllegalArgumentException;
 }
