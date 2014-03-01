@@ -65,7 +65,7 @@ public class CommandController {
             case DELETE: {
                 // GUI: ask user confirmation
                 // isConfirmedDelete()
-                // process inputString here
+                DataParameterStub deleteParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
                 // TaskDataManager.deleteTask(deleteparams);
                 // deleteparams: (int id)
                 // ArrayList<ArrayList<String>> display =
@@ -111,7 +111,11 @@ public class CommandController {
                 // (algorithm: combination of words)
                 // call GUI display here
                 break;
-            }            
+            } 
+            case COMPLETE:{
+            	DataParameterStub completeParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
+            	break;
+            }
             case UNDO: {
                 // Hmm?
                 break;
@@ -270,6 +274,24 @@ public class CommandController {
     		modifyParam.setDescription(newDescription);
     	}
     	return modifyParam;
+    }
+    
+ // This method process delete/complete parameter into a DataParameter instance
+    // @param parameterString
+    //			string contains parameter data
+    // @return markDeleteParam
+    //			DataParameter instance contains parameter for delete/complete method
+    
+    public DataParameterStub processMarkDeleteParameter(String parameterString){
+    	DataParameterStub markDeleteParam = new DataParameterStub();
+    	ArrayList<String> parameters = new ArrayList<String>();
+    	for(String word : parameterString.split(" ")) {
+    	    parameters.add(word);
+    	}
+    	TaskType original = processTaskTypeFromString(parameters.get(_firstArrayIndex));
+    	markDeleteParam.setOriginalTaskType(original);
+    	markDeleteParam.setTaskID(Integer.parseInt(parameters.get(_firstArrayIndex+1)));
+    	return markDeleteParam;
     }
     
     // This method process TaskType from String
