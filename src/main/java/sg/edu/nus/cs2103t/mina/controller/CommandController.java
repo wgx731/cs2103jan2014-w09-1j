@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import sg.edu.cs2103t.mina.stub.DataParameterStub;
+import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandController {
@@ -14,9 +17,11 @@ public class CommandController {
 	private static final int _userCommandPosition = 0;
 	private static final int _parameterPosition = 1;
 	private static final int _firstArrayIndex = 0;
+	private TaskDataManager TDM;
+	private TaskFilterManager TFM;
 	
     enum CommandType {
-        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, EXIT, INVALID
+        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
     };
     
     
@@ -30,6 +35,8 @@ public class CommandController {
     public void processUserInput(String userInput) {
         CommandType command;
         _inputString = userInput.split(" ", _maxInputStringArraySize);
+        TDM = new TaskDataManager();
+        TFM = new TaskFilterManager(TDM);
         command = determineCommand();
         processUserCommand(command);
     }
@@ -80,7 +87,13 @@ public class CommandController {
                 break;
             }
             case DISPLAY: {
-                // process inputString here
+                String filterParameterString = _inputString[_parameterPosition];
+                if (!filterParameterString.isEmpty()){
+                	FilterParameter filterParam = processFilterParameter(filterParameterString);
+                	ArrayList<Task<?>> filterResult = TFM.filterTask(filterParam);
+                } else {
+                // to be continue..
+                }
                 // ArrayList<Task> display =
                 // TaskFilterManager.filterTask(filterparams);
                 // filterparams: (Filter object)
@@ -88,13 +101,18 @@ public class CommandController {
                 break;
             }
             case SEARCH: {
-                // process inputString here
+                SearchParameter searchParameter = processSearchParameter(_inputString[_parameterPosition]);
+                ArrayList<Task<?>> searchResult = TFM.searchTasks(searchParameter);
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.searchTask(searchparams);
                 // searchparams: (String word), (String word1, String word2,
                 // String word1 + word2), ...
                 // (algorithm: combination of words)
                 // call GUI display here
+                break;
+            }            
+            case UNDO: {
+                // Hmm?
                 break;
             }
             case EXIT: {
@@ -106,6 +124,12 @@ public class CommandController {
             }
         }
     }
+    
+    // This method process add parameter into a DataParameter instance
+    // @param parameterString
+    //			string contains parameter data
+    // @return addParam
+    //			DataParameter instance contains parameter for add method
     
     public DataParameterStub processAddParameter(String parameterString){
     	DataParameterStub addParam = new DataParameterStub();
@@ -159,5 +183,34 @@ public class CommandController {
     	return addParam;
     }
     
+    // This method process search parameter into a SearchParameter instance
+    // @param parameterString
+    //			string contains parameter data
+    // @return searchParam
+    //			SearchParameter instance contains parameter for search method
+    
+    public SearchParameter processSearchParameter(String parameterString){
+    	ArrayList<String> parameters = new ArrayList<String>();
+    	for(String word : parameterString.split(" ")) {
+    	    parameters.add(word);
+    	}
+    	SearchParameter searchParam = new SearchParameter(parameters);
+    	return searchParam;
+    }
+    
+ // This method process filter parameter into a FilterParameter instance
+    // @param parameterString
+    //			string contains parameter data
+    // @return filterParam
+    //			FilterParameter instance contains parameter for filter method
+    
+    public FilterParameter processFilterParameter(String parameterString){
+    	ArrayList<String> parameters = new ArrayList<String>();
+    	for(String word : parameterString.split(" ")) {
+    	    parameters.add(word);
+    	}
+    	FilterParameter filterParam = new FilterParameter(parameters);
+    	return filterParam;
+    }
     
 }
