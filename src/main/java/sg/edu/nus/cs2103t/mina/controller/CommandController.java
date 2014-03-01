@@ -14,6 +14,7 @@ public class CommandController {
 
     private static String[] _inputString;
 	private static final int _maxInputStringArraySize = 2;
+	private static final int _modifyInputStringSplitSize = 3;
 	private static final int _userCommandPosition = 0;
 	private static final int _parameterPosition = 1;
 	private static final int _firstArrayIndex = 0;
@@ -73,7 +74,7 @@ public class CommandController {
                 break;
             }
             case MODIFY: {
-                // process inputString here
+                DataParameterStub modifyParameter = processModifyParameter(_inputString[_parameterPosition]);
                 // TaskDataManager.editTask(addparams);
                 // editparams: (int id, String des) (int id, String des, Char
                 // prir) (int id, Char prir)
@@ -213,4 +214,79 @@ public class CommandController {
     	return filterParam;
     }
     
+    // This method process modify parameter into a DataParameter instance
+    // @param parameterString
+    //			string contains parameter data
+    // @return modifyParam
+    //			DataParameter instance contains parameter for modify method
+    
+    public DataParameterStub processModifyParameter(String parameterString){
+    	DataParameterStub modifyParam = new DataParameterStub();
+    	ArrayList<String> parameters = new ArrayList<String>();
+    	for(String word : parameterString.split(" ")) {
+    	    parameters.add(word);
+    	}
+    	TaskType original = processTaskTypeFromString(parameters.get(_firstArrayIndex));
+    	modifyParam.setOriginalTaskType(original);
+    	modifyParam.setTaskID(Integer.parseInt(parameters.get(_firstArrayIndex+1)));
+    	if (parameters.contains("-totype")){
+    		int indexOfNewTaskType = parameters.indexOf("-totype")+1;
+    		TaskType newType = processTaskTypeFromString(parameters.get(indexOfNewTaskType));
+    		modifyParam.setNewTaskType(newType);
+    	} else {
+    		modifyParam.setNewTaskType(original);
+    	}
+    	if (parameters.contains("-priority")){
+    		int indexOfPriority = parameters.indexOf("-priority")+1;
+    		char priority = parameters.get(indexOfPriority).toCharArray()[_firstArrayIndex];
+    		modifyParam.setPriority(priority);
+    	}
+    	if (parameters.contains("-start")){
+    		int indexOfStartDate = parameters.indexOf("-start")+1;
+    		try{
+    			Date startDate = DateUtil.parse(parameters.get(indexOfStartDate));
+    			modifyParam.setStartDate(startDate);
+    		} catch (Exception e){
+    			
+    		}
+    	}
+    	if (parameters.contains("-end")){
+    		int indexOfEndDate = parameters.indexOf("-end")+1;
+    		try{
+    			Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+    			modifyParam.setEndDate(endDate);
+    		} catch (Exception e){
+    			
+    		}
+    	}
+    	if (parameters.contains("-description")){
+    		String newDescription;
+    		int indexOfDescription = parameterString.indexOf("-description");
+    		newDescription = parameterString.substring(indexOfDescription+13);
+    		int indexOfEndOfDescription = newDescription.indexOf("-");
+    		if (indexOfEndOfDescription!=-1){
+    			newDescription = newDescription.substring(0, indexOfEndOfDescription-1);
+    		}
+    		modifyParam.setDescription(newDescription);
+    	}
+    	return modifyParam;
+    }
+    
+    // This method process TaskType from String
+    // @param taskTypeString
+    //			string contains task type
+    // @return taskType
+    //			TaskType indicated by taskTypeString
+    
+    public TaskType processTaskTypeFromString(String taskTypeString){
+    	if (taskTypeString.equals("todo")){
+    		return TaskType.TODO;
+    	} else if (taskTypeString.equals("deadline")){
+    		return TaskType.DEADLINE;
+    	} else if (taskTypeString.equals("event")){
+    		return TaskType.EVENT;
+    	} else {
+    		return TaskType.UNKOWN;
+    	}
+    }
 }
