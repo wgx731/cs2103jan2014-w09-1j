@@ -99,7 +99,7 @@ public class DataParameterStub {
 	    if (!(o instanceof DataParameterStub))
 	        return false;
 	    final DataParameterStub om = (DataParameterStub)o;
-	    	return (om.getDescription().equals(_description)
+	    	return (((om.getDescription()==null&&_description==null)||om.getDescription().equals(_description))
 	    			&& om.getOriginalTaskType()==_original
 	    			&& om.getNewTaskType()==_new
 	    			&& ((om.getStartDate()==null&&_start==null)||om.getStartDate().equals(_start))
