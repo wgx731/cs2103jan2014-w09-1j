@@ -3,6 +3,7 @@ package sg.edu.cs2103t.mina.controller;
 import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -27,5 +28,28 @@ public class CommandControllerTest {
 				new DataParameterStub("meet friends", 'M', DateUtil.parse("11/11/1111"), DateUtil.parse("12/12/1212"), null, TaskType.EVENT, -1));
 		assertEquals(cc.processAddParameter("meet friends -start 11/11/1111 -end 12/12/1212 -priority L"),
 				new DataParameterStub("meet friends", 'L', DateUtil.parse("11/11/1111"), DateUtil.parse("12/12/1212"), null, TaskType.EVENT, -1));
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void testProcessSearchParameter(){
+		assertEquals(cc.processSearchParameter("yesterday today tomorrow").getKeywords(),
+				new ArrayList<String>(){
+				{
+					add("yesterday");
+					add("today");
+					add("tomorrow");
+				}});
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void testProcessFilterParameter(){
+		assertEquals(cc.processFilterParameter("complete todo event").getFilters(),
+				new ArrayList<String>(){{
+					add("complete");
+					add("todo");
+					add("event");
+				}});
 	}
 }
