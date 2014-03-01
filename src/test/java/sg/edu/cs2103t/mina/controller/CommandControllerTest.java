@@ -180,6 +180,18 @@ public class CommandControllerTest {
 	}
 	
 	@Test
+	public void testProcessMarkDeleteParameter(){
+		assertEquals(cc.processMarkDeleteParameter("todo 12"), 
+				new DataParameterStub(null, 'M', null, null, TaskType.TODO, null, 12));
+		assertEquals(cc.processMarkDeleteParameter("todo 7"), 
+				new DataParameterStub(null, 'M', null, null, TaskType.TODO, null, 7));
+		assertEquals(cc.processMarkDeleteParameter("deadline 7"), 
+				new DataParameterStub(null, 'M', null, null, TaskType.DEADLINE, null, 7));
+		assertEquals(cc.processMarkDeleteParameter("event 7"), 
+				new DataParameterStub(null, 'M', null, null, TaskType.EVENT, null, 7));
+	}
+	
+	@Test
 	public void testProcessTaskTypeFromString(){
 		assertEquals(cc.processTaskTypeFromString("todo"), TaskType.TODO);
 		assertEquals(cc.processTaskTypeFromString("deadline"), TaskType.DEADLINE);
