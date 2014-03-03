@@ -3,10 +3,9 @@ package sg.edu.nus.cs2103t.mina.controller;
 import java.util.ArrayList;
 import java.util.Date;
 
-import sg.edu.cs2103t.mina.stub.DataParameterStub;
-import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
@@ -62,7 +61,7 @@ public class CommandController {
     private void processUserCommand(CommandType command) {
         switch (command) {
             case ADD: {
-                DataParameterStub addParameter = processAddParameter(_inputString[_parameterPosition]);
+                DataParameter addParameter = processAddParameter(_inputString[_parameterPosition]);
                 // TaskDataManager.addTask(addParameter);
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.getAllTask();
@@ -72,7 +71,7 @@ public class CommandController {
             case DELETE: {
                 // GUI: ask user confirmation
                 // isConfirmedDelete()
-                DataParameterStub deleteParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
+                DataParameter deleteParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
                 // TaskDataManager.deleteTask(deleteparams);
                 // deleteparams: (int id)
                 // ArrayList<ArrayList<String>> display =
@@ -81,7 +80,7 @@ public class CommandController {
                 break;
             }
             case MODIFY: {
-                DataParameterStub modifyParameter = processModifyParameter(_inputString[_parameterPosition]);
+                DataParameter modifyParameter = processModifyParameter(_inputString[_parameterPosition]);
                 // TaskDataManager.editTask(addparams);
                 // editparams: (int id, String des) (int id, String des, Char
                 // prir) (int id, Char prir)
@@ -122,7 +121,7 @@ public class CommandController {
                 break;
             }
             case COMPLETE: {
-                DataParameterStub completeParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
+                DataParameter completeParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
                 break;
             }
             case UNDO: {
@@ -145,8 +144,8 @@ public class CommandController {
     // @return addParam
     // DataParameter instance contains parameter for add method
 
-    public DataParameterStub processAddParameter(String parameterString) {
-        DataParameterStub addParam = new DataParameterStub();
+    public DataParameter processAddParameter(String parameterString) {
+        DataParameter addParam = new DataParameter();
         ArrayList<String> parameters = new ArrayList<String>();
         for (String word : parameterString.split(" ")) {
             parameters.add(word);
@@ -237,8 +236,8 @@ public class CommandController {
     // @return modifyParam
     // DataParameter instance contains parameter for modify method
 
-    public DataParameterStub processModifyParameter(String parameterString) {
-        DataParameterStub modifyParam = new DataParameterStub();
+    public DataParameter processModifyParameter(String parameterString) {
+        DataParameter modifyParam = new DataParameter();
         ArrayList<String> parameters = new ArrayList<String>();
         for (String word : parameterString.split(" ")) {
             parameters.add(word);
@@ -301,8 +300,8 @@ public class CommandController {
     // @return markDeleteParam
     // DataParameter instance contains parameter for delete/complete method
 
-    public DataParameterStub processMarkDeleteParameter(String parameterString) {
-        DataParameterStub markDeleteParam = new DataParameterStub();
+    public DataParameter processMarkDeleteParameter(String parameterString) {
+        DataParameter markDeleteParam = new DataParameter();
         ArrayList<String> parameters = new ArrayList<String>();
         for (String word : parameterString.split(" ")) {
             parameters.add(word);
