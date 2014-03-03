@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,12 +22,11 @@ import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 
 public class TaskFilterManagerTest {
 
-
     private TaskDataManagerStub tdmStub = new TaskDataManagerStub();
     private TaskFilterManager tfmTest = new TaskFilterManager(tdmStub);
     private static Logger logger = LogManager
-        .getLogger(TaskFilterManagerTest.class.getName());
-    
+            .getLogger(TaskFilterManagerTest.class.getName());
+
     @Test
     public void viewOutput() {
         // check for output
@@ -101,7 +101,7 @@ public class TaskFilterManagerTest {
 
         ArrayList<Task<?>> test = getResult(TaskFilterManager.DEADLINE);
 
-        TreeSet<DeadlineTask> deadlines = tdmStub.getDeadlineTasks();
+        SortedSet<DeadlineTask> deadlines = tdmStub.getDeadlineTasks();
         int numOfDeadlines = deadlines.size();
 
         assertTrue("Must be all deadlines!", numOfDeadlines == test.size()
@@ -117,7 +117,7 @@ public class TaskFilterManagerTest {
     public void testTodosOnly() {
 
         ArrayList<Task<?>> test = getResult(TaskFilterManager.TODO);
-        TreeSet<TodoTask> todos = tdmStub.getTodoTasks();
+        SortedSet<TodoTask> todos = tdmStub.getTodoTasks();
         int numOfTodos = todos.size();
 
         assertTrue("Must be all todos!", numOfTodos == test.size()
@@ -132,7 +132,7 @@ public class TaskFilterManagerTest {
     public void testEventsOnly() {
 
         ArrayList<Task<?>> test = getResult(TaskFilterManager.EVENT);
-        TreeSet<EventTask> events = tdmStub.getEventTasks();
+        SortedSet<EventTask> events = tdmStub.getEventTasks();
         int numOfEvents = events.size();
 
         assertTrue("Must be all events!", numOfEvents == test.size()
@@ -167,7 +167,7 @@ public class TaskFilterManagerTest {
      * @return true if everything in the result is in specified tasks
      */
     private boolean isTaskExist(ArrayList<Task<?>> test,
-            TreeSet<? extends Task<?>> taskTree, TaskType type) {
+            SortedSet<? extends Task<?>> taskTree, TaskType type) {
 
         for (Iterator<Task<?>> iterator = test.iterator(); iterator.hasNext();) {
             Task<?> task = iterator.next();

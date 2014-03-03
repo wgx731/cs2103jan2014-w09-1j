@@ -1,7 +1,7 @@
 package sg.edu.nus.cs2103t.mina.dao;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
@@ -14,7 +14,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  * @author duzhiyuan
  * @author joannemah
  */
-public interface TaskSetDao {
+public interface TaskDao {
 
     /**
      * Save task set into storage
@@ -24,7 +24,7 @@ public interface TaskSetDao {
      * @param isCompleted whether the task in the set is completed
      * @throws IOException
      */
-    public void saveTaskSet(Set<? extends Task<?>> taskSet, TaskType taskType,
+    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet, TaskType taskType,
             boolean isCompleted) throws IOException, IllegalArgumentException;
 
     /**
@@ -35,6 +35,6 @@ public interface TaskSetDao {
      * @return loaded task set
      * @throws IOException
      */
-    public Set<? extends Task<?>> loadTaskSet(TaskType taskType,
+    public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException, IllegalArgumentException;
 }

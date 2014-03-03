@@ -1,16 +1,25 @@
 package sg.edu.nus.cs2103t.mina.controller;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up
@@ -23,30 +32,91 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
  */
 public class TaskDataManager {
 
+    private static Logger logger = LogManager.getLogger(TaskDataManager.class
+            .getName());
+
     // error messages
     public static final int ERROR_MISSING_TASK_DESCRIPTION = -2;
 
     // parameters of String after trimming
     public static final int PARAM_TASK_DESCRIPTION = 0;
+    public static final int SYNC_LIST_MAX = 6;
 
-    private TreeSet<TodoTask> _todoTreeSet = new TreeSet<TodoTask>();
-    private TreeSet<DeadlineTask> _deadlineTreeSet = new TreeSet<DeadlineTask>();
-    private TreeSet<EventTask> _eventTreeSet = new TreeSet<EventTask>();
+    private SortedSet<TodoTask> _todoTasks;
+    private SortedSet<DeadlineTask> _deadlineTasks;
+    private SortedSet<EventTask> _eventTasks;
+
+    private SortedSet<TodoTask> _compTodoTasks;
+    private SortedSet<EventTask> _compEventTasks;
+    private SortedSet<DeadlineTask> _compDeadlineTasks;
+
+    private List<SyncDataParameter> _syncList;
 
     public TaskDataManager() {
         // empty constructor class
+        _todoTasks = new TreeSet<TodoTask>();
+        _deadlineTasks = new TreeSet<DeadlineTask>();
+        _eventTasks = new TreeSet<EventTask>();
+        _compTodoTasks = new TreeSet<TodoTask>();
+        _compDeadlineTasks = new TreeSet<DeadlineTask>();
+        _compEventTasks = new TreeSet<EventTask>();
+        _syncList = new ArrayList<SyncDataParameter>(SYNC_LIST_MAX);
     }
 
-    public TreeSet<TodoTask> getTodoTasks() {
-        return _todoTreeSet;
+    @SuppressWarnings("unchecked")
+    public TaskDataManager(TaskDao storage) {
+        try {
+            _todoTasks = (SortedSet<TodoTask>) storage.loadTaskSet(
+                    TaskType.TODO, false);
+            _deadlineTasks = (SortedSet<DeadlineTask>) storage.loadTaskSet(
+                    TaskType.DEADLINE, false);
+            _eventTasks = (SortedSet<EventTask>) storage.loadTaskSet(
+                    TaskType.EVENT, false);
+
+            _compTodoTasks = (SortedSet<TodoTask>) storage.loadTaskSet(
+                    TaskType.TODO, true);
+            _compDeadlineTasks = (SortedSet<DeadlineTask>) storage.loadTaskSet(
+                    TaskType.DEADLINE, true);
+            _eventTasks = (SortedSet<EventTask>) storage.loadTaskSet(
+                    TaskType.EVENT, true);
+            _syncList = new ArrayList<SyncDataParameter>(SYNC_LIST_MAX);
+        } catch (IllegalArgumentException e) {
+            logger.error(e, e);
+        } catch (IOException e) {
+            logger.error(e, e);
+        }
     }
 
-    public TreeSet<DeadlineTask> getDeadlineTasks() {
-        return _deadlineTreeSet;
+    public SortedSet<TodoTask> getTodoTasks() {
+        return _todoTasks;
     }
 
-    public TreeSet<EventTask> getEventTasks() {
-        return _eventTreeSet;
+    public SortedSet<DeadlineTask> getDeadlineTasks() {
+        return _deadlineTasks;
+    }
+
+    public SortedSet<EventTask> getEventTasks() {
+        return _eventTasks;
+    }
+
+    public SortedSet<TodoTask> getCompTodoTasks() {
+        return _compTodoTasks;
+    }
+
+    public SortedSet<EventTask> getCompEventTasks() {
+        return _compEventTasks;
+    }
+
+    public SortedSet<DeadlineTask> getCompDeadlineTasks() {
+        return _compDeadlineTasks;
+    }
+
+    public List<SyncDataParameter> getSyncList() {
+        return _syncList;
+    }
+
+    public void clearSyncList() {
+        _syncList.clear();
     }
 
     /**
@@ -61,19 +131,19 @@ public class TaskDataManager {
         switch (determineTaskType(addParameters)) {
             case TODO:
                 TodoTask newTodoTask = createTodoTask(addParameters);
-                if (_todoTreeSet.add(newTodoTask)) {
+                if (_todoTasks.add(newTodoTask)) {
                     return newTodoTask;
                 }
                 break;
             case DEADLINE:
                 DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
-                if (_deadlineTreeSet.add(newDeadlineTask)) {
+                if (_deadlineTasks.add(newDeadlineTask)) {
                     return newDeadlineTask;
                 }
                 break;
             case EVENT:
                 EventTask newEventTask = createEventTask(addParameters);
-                if (_eventTreeSet.add(newEventTask)) {
+                if (_eventTasks.add(newEventTask)) {
                     return newEventTask;
                 }
                 break;
@@ -227,11 +297,11 @@ public class TaskDataManager {
         TreeSet<TodoTask> tempTodoTreeSet = new TreeSet<TodoTask>();
 
         for (int i = 0; i < (todoId - 1); i++) {
-            tempTodoTreeSet.add(_todoTreeSet.pollFirst());
+            tempTodoTreeSet.add(((TreeSet<TodoTask>) _todoTasks).pollFirst());
         }
 
-        TodoTask removedTodo = _todoTreeSet.pollFirst();
-        _todoTreeSet.addAll(tempTodoTreeSet);
+        TodoTask removedTodo = ((TreeSet<TodoTask>) _todoTasks).pollFirst();
+        _todoTasks.addAll(tempTodoTreeSet);
 
         return removedTodo;
     }
@@ -240,11 +310,13 @@ public class TaskDataManager {
         TreeSet<DeadlineTask> tempDeadlineTreeSet = new TreeSet<DeadlineTask>();
 
         for (int i = 0; i < (deadlineId - 1); i++) {
-            tempDeadlineTreeSet.add(_deadlineTreeSet.pollFirst());
+            tempDeadlineTreeSet.add(((TreeSet<DeadlineTask>) _deadlineTasks)
+                    .pollFirst());
         }
 
-        DeadlineTask removeDeadline = _deadlineTreeSet.pollFirst();
-        _deadlineTreeSet.addAll(tempDeadlineTreeSet);
+        DeadlineTask removeDeadline = ((TreeSet<DeadlineTask>) _deadlineTasks)
+                .pollFirst();
+        _deadlineTasks.addAll(tempDeadlineTreeSet);
 
         return removeDeadline;
     }
@@ -253,11 +325,12 @@ public class TaskDataManager {
         TreeSet<EventTask> tempEventTreeSet = new TreeSet<EventTask>();
 
         for (int i = 0; i < (eventId - 1); i++) {
-            tempEventTreeSet.add(_eventTreeSet.pollFirst());
+            tempEventTreeSet
+                    .add(((TreeSet<EventTask>) _eventTasks).pollFirst());
         }
 
-        EventTask removeEvent = _eventTreeSet.pollFirst();
-        _eventTreeSet.addAll(tempEventTreeSet);
+        EventTask removeEvent = ((TreeSet<EventTask>) _eventTasks).pollFirst();
+        _eventTasks.addAll(tempEventTreeSet);
 
         return removeEvent;
     }
@@ -412,7 +485,7 @@ public class TaskDataManager {
         DeadlineTask newDeadline = new DeadlineTask(description, newEndTime,
                 priority);
 
-        if (_deadlineTreeSet.add(newDeadline)) {
+        if (_deadlineTasks.add(newDeadline)) {
             return newDeadline;
         } else {
             System.out.println("Unable to add deadline.");
@@ -480,7 +553,7 @@ public class TaskDataManager {
         EventTask newEvent = new EventTask(description, newStartTime,
                 newEndTime, priority);
 
-        if (_eventTreeSet.add(newEvent)) {
+        if (_eventTasks.add(newEvent)) {
             return newEvent;
         } else {
             System.out.println("Unable to add event.");
@@ -542,7 +615,7 @@ public class TaskDataManager {
         }
         TodoTask newTodo = new TodoTask(description, priority);
 
-        if (_todoTreeSet.add(newTodo)) {
+        if (_todoTasks.add(newTodo)) {
             return newTodo;
         } else {
             System.out.println("Unable to add todo.");
@@ -680,7 +753,7 @@ public class TaskDataManager {
         EventTask newEvent = new EventTask(description, startDate, endDate,
                 priority);
 
-        if (_eventTreeSet.add(newEvent)) {
+        if (_eventTasks.add(newEvent)) {
             return newEvent;
         } else {
             System.out.println("Unable to add event.");
@@ -748,7 +821,7 @@ public class TaskDataManager {
 
         TodoTask newTodo = new TodoTask(description, priority);
 
-        if (_todoTreeSet.add(newTodo)) {
+        if (_todoTasks.add(newTodo)) {
             return newTodo;
         } else {
             System.out.println("Unable to add event.");
@@ -878,7 +951,7 @@ public class TaskDataManager {
         DeadlineTask newDeadline = new DeadlineTask(description, endDate,
                 priority);
 
-        if (_deadlineTreeSet.add(newDeadline)) {
+        if (_deadlineTasks.add(newDeadline)) {
             return newDeadline;
         } else {
             System.out.println("Unable to add deadline.");
@@ -905,7 +978,7 @@ public class TaskDataManager {
             case ("todo"):
                 TodoTask newTodo = modifyTodoParameters(oldTaskId,
                         newParameters);
-                if (_todoTreeSet.add(newTodo)) {
+                if (_todoTasks.add(newTodo)) {
                     return newTodo;
                 } else {
                     System.out.println("Unable to add todo.");
@@ -966,9 +1039,9 @@ public class TaskDataManager {
     /**
      * only to be used for testing
      */
-    public void resetTrees() {
-        _todoTreeSet.clear();
-        _deadlineTreeSet.clear();
-        _eventTreeSet.clear();
+    void resetTrees() {
+        _todoTasks.clear();
+        _deadlineTasks.clear();
+        _eventTasks.clear();
     }
 }
