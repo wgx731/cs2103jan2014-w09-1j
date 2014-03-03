@@ -33,18 +33,19 @@ public class CommandController {
         TFM = new TaskFilterManager(TDM);
     }
 
-    public CommandController(TaskDao taskDao) {
-        TDM = new TaskDataManager(taskDao);
-        TFM = new TaskFilterManager(TDM);
+    public CommandController(TaskDataManager tDM, TaskFilterManager tFM) {
+        TDM = tDM;
+        TFM = tFM;
     }
 
     // This operation is used to get input from the user and execute it till
     // exit
-    public void processUserInput(String userInput) {
+    public String processUserInput(String userInput) {
         CommandType command;
         _inputString = userInput.split(" ", _maxInputStringArraySize);
         command = determineCommand();
         processUserCommand(command);
+        return "command processed";
     }
 
     // This operation is used to get the user input and extract the command from
