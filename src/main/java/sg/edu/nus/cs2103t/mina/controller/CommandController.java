@@ -18,6 +18,7 @@ public class CommandController {
 	private static final int _userCommandPosition = 0;
 	private static final int _parameterPosition = 1;
 	private static final int _firstArrayIndex = 0;
+	
 	private TaskDataManager TDM;
 	private TaskFilterManager TFM;
 	
