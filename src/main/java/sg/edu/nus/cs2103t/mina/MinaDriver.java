@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
 import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
@@ -25,7 +28,11 @@ import sg.edu.nus.cs2103t.mina.view.MinaView;
  */
 public class MinaDriver {
 
+    private static Logger logger = LogManager.getLogger(MinaDriver.class
+            .getName());
+
     private static final String SYNC_INTERVAL_KEY = "synctime";
+    private static final String WELCOME_MESSAGE = "welcome to MINA.\r\n";
 
     private static CommandController commandController;
     private static TaskDataManager taskDataManager;
@@ -54,12 +61,23 @@ public class MinaDriver {
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
-    public static void main(String[] args) {
-        initComponents();
+    private static void processLoop() {
+        uiView.displayOutput(WELCOME_MESSAGE);
         while (true) {
             String userInput = uiView.getUserInput();
             String feedback = commandController.processUserInput(userInput);
             uiView.displayOutput(feedback);
         }
+    }
+
+    public static void main(String[] args) {
+        try {
+            initComponents();
+            processLoop();
+        } catch (Exception e) {
+            logger.error(e, e);
+            dataSyncManager.saveAll();
+        }
+
     }
 }

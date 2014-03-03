@@ -65,20 +65,32 @@ public class TaskDataManager {
 
     @SuppressWarnings("unchecked")
     public TaskDataManager(TaskDao storage) {
+        SortedSet<? extends Task<?>> tempTasks = null;
         try {
-            _todoTasks = (SortedSet<TodoTask>) storage.loadTaskSet(
-                    TaskType.TODO, false);
-            _deadlineTasks = (SortedSet<DeadlineTask>) storage.loadTaskSet(
-                    TaskType.DEADLINE, false);
-            _eventTasks = (SortedSet<EventTask>) storage.loadTaskSet(
-                    TaskType.EVENT, false);
+            tempTasks = storage.loadTaskSet(TaskType.TODO, false);
+            _todoTasks = tempTasks == null ? new TreeSet<TodoTask>()
+                    : (SortedSet<TodoTask>) tempTasks;
 
-            _compTodoTasks = (SortedSet<TodoTask>) storage.loadTaskSet(
-                    TaskType.TODO, true);
-            _compDeadlineTasks = (SortedSet<DeadlineTask>) storage.loadTaskSet(
-                    TaskType.DEADLINE, true);
-            _eventTasks = (SortedSet<EventTask>) storage.loadTaskSet(
-                    TaskType.EVENT, true);
+            tempTasks = storage.loadTaskSet(TaskType.DEADLINE, false);
+            _deadlineTasks = tempTasks == null ? new TreeSet<DeadlineTask>()
+                    : (SortedSet<DeadlineTask>) tempTasks;
+
+            tempTasks = storage.loadTaskSet(TaskType.EVENT, false);
+            _eventTasks = tempTasks == null ? new TreeSet<EventTask>()
+                    : (SortedSet<EventTask>) tempTasks;
+
+            tempTasks = storage.loadTaskSet(TaskType.TODO, true);
+            _compTodoTasks = tempTasks == null ? new TreeSet<TodoTask>()
+                    : (SortedSet<TodoTask>) tempTasks;
+
+            tempTasks = storage.loadTaskSet(TaskType.DEADLINE, true);
+            _compDeadlineTasks = tempTasks == null ? new TreeSet<DeadlineTask>()
+                    : (SortedSet<DeadlineTask>) tempTasks;
+
+            tempTasks = storage.loadTaskSet(TaskType.EVENT, true);
+            _compEventTasks = tempTasks == null ? new TreeSet<EventTask>()
+                    : (SortedSet<EventTask>) tempTasks;
+
             _syncList = new ArrayList<SyncDataParameter>(SYNC_LIST_MAX);
         } catch (IllegalArgumentException e) {
             logger.error(e, e);

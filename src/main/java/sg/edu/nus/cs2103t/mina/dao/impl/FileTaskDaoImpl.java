@@ -34,8 +34,8 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  */
 public class FileTaskDaoImpl implements TaskDao {
 
-    private static Logger logger = LogManager
-            .getLogger(FileTaskDaoImpl.class.getName());
+    private static Logger logger = LogManager.getLogger(FileTaskDaoImpl.class
+            .getName());
 
     private static final String INVALID_TASK_TYPE = "The given task type is invalid.";
     private static final String INVALID_FILE_STORAGE = "The given file path is an invalid file storage.";
@@ -55,6 +55,13 @@ public class FileTaskDaoImpl implements TaskDao {
     public FileTaskDaoImpl(Map<TaskType, String> fileLocationMap) {
         super();
         _fileLocationMap = fileLocationMap;
+        for (String fileLocation : fileLocationMap.values()) {
+            try {
+                createFileIfNotExist(fileLocation);
+            } catch (IOException e) {
+                logger.error(e, e);
+            }
+        }
     }
 
     private String getFileLocation(TaskType taskType, boolean isCompleted) {
@@ -110,7 +117,6 @@ public class FileTaskDaoImpl implements TaskDao {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
         }
         String fileLocation = getFileLocation(taskType, isCompleted);
-        createFileIfNotExist(fileLocation);
         ObjectOutput output = getOutputWriter(fileLocation);
         output.writeObject(taskSet);
         output.close();
@@ -131,7 +137,7 @@ public class FileTaskDaoImpl implements TaskDao {
         try {
             Object object = input.readObject();
             if (object == null) {
-                throw new IOException(INVALID_FILE_STORAGE);
+                return null;
             }
             @SuppressWarnings("unchecked")
             SortedSet<? extends Task<?>> content = (SortedSet<? extends Task<?>>) object;

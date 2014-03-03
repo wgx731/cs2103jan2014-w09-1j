@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
 
 /**
@@ -32,20 +33,43 @@ public class DataSyncManager extends TimerTask {
         _storage = storage;
     }
 
+    public void saveAll() {
+        try {
+            _storage.saveTaskSet(_memoryDataStore.getTodoTasks(),
+                    TaskType.TODO, false);
+            _storage.saveTaskSet(_memoryDataStore.getEventTasks(),
+                    TaskType.EVENT, false);
+            _storage.saveTaskSet(_memoryDataStore.getDeadlineTasks(),
+                    TaskType.DEADLINE, false);
+            _storage.saveTaskSet(_memoryDataStore.getTodoTasks(),
+                    TaskType.TODO, true);
+            _storage.saveTaskSet(_memoryDataStore.getEventTasks(),
+                    TaskType.EVENT, true);
+            _storage.saveTaskSet(_memoryDataStore.getDeadlineTasks(),
+                    TaskType.DEADLINE, true);
+        } catch (IllegalArgumentException e) {
+            logger.error(e, e);
+        } catch (IOException e) {
+            logger.error(e, e);
+        }
+    }
+
     @Override
     public void run() {
         List<SyncDataParameter> dataToSync = _memoryDataStore.getSyncList();
-        for (SyncDataParameter parameter : dataToSync) {
-            try {
-                _storage.saveTaskSet(parameter.getTaskSet(),
-                        parameter.getTaskType(), parameter.isCompleted());
-            } catch (IllegalArgumentException e) {
-                logger.error(e, e);
-            } catch (IOException e) {
-                logger.error(e, e);
+        if (!dataToSync.isEmpty()) {
+            for (SyncDataParameter parameter : dataToSync) {
+                try {
+                    _storage.saveTaskSet(parameter.getTaskSet(),
+                            parameter.getTaskType(), parameter.isCompleted());
+                } catch (IllegalArgumentException e) {
+                    logger.error(e, e);
+                } catch (IOException e) {
+                    logger.error(e, e);
+                }
             }
+            _memoryDataStore.clearSyncList();
         }
-        _memoryDataStore.clearSyncList();
     }
 
 }
