@@ -19,8 +19,8 @@ public class CommandController {
     private static final int _parameterPosition = 1;
     private static final int _firstArrayIndex = 0;
 
-    private TaskDataManager TDM;
-    private TaskFilterManager TFM;
+    private TaskDataManager _taskDataManager;
+    private TaskFilterManager _taskFilterManager;
 
     enum CommandType {
         ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
@@ -28,13 +28,23 @@ public class CommandController {
 
     // Constructor
     public CommandController() {
-        TDM = new TaskDataManager();
-        TFM = new TaskFilterManager(TDM);
+        _taskDataManager = new TaskDataManager();
+        _taskFilterManager = new TaskFilterManager(_taskDataManager);
     }
 
-    public CommandController(TaskDataManager tDM, TaskFilterManager tFM) {
-        TDM = tDM;
-        TFM = tFM;
+    public CommandController(TaskDataManager taskDataManager,
+            TaskFilterManager taskFilterManager) {
+        super();
+        this._taskDataManager = taskDataManager;
+        this._taskFilterManager = taskFilterManager;
+    }
+
+    public TaskDataManager getTaskDataManager() {
+        return _taskDataManager;
+    }
+
+    public TaskFilterManager getTaskFilterManager() {
+        return _taskFilterManager;
     }
 
     // This operation is used to get input from the user and execute it till
@@ -97,7 +107,7 @@ public class CommandController {
                 String filterParameterString = _inputString[_parameterPosition];
                 if (!filterParameterString.isEmpty()) {
                     FilterParameter filterParam = processFilterParameter(filterParameterString);
-                    ArrayList<Task<?>> filterResult = TFM
+                    ArrayList<Task<?>> filterResult = _taskFilterManager
                             .filterTask(filterParam);
                 } else {
                     // to be continue..
@@ -110,7 +120,7 @@ public class CommandController {
             }
             case SEARCH: {
                 SearchParameter searchParameter = processSearchParameter(_inputString[_parameterPosition]);
-                ArrayList<Task<?>> searchResult = TFM
+                ArrayList<Task<?>> searchResult = _taskFilterManager
                         .searchTasks(searchParameter);
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.searchTask(searchparams);
