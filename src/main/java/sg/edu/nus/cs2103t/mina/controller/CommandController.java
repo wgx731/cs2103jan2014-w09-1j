@@ -3,6 +3,8 @@ package sg.edu.nus.cs2103t.mina.controller;
 import java.util.ArrayList;
 import java.util.Date;
 
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
@@ -15,7 +17,6 @@ public class CommandController {
 
     private static String[] _inputString;
     private static final int MAX_INPUT_ARRAY_SIZE = 2;
-    private static final int MODIFY_ARRAY_SIZE = 3;
     private static final int COMMAND_POSITION = 0;
     private static final int PARAMETER_POSITION = 1;
     private static final int FISRT_ARRAY_INDEX = 0;
@@ -23,7 +24,7 @@ public class CommandController {
     private static final String INVALID_COMMAND = "command given is invalid.\r\n";
     private static final String EMPTY_STRING = "";
     private static final String SPACE = " ";
-    private static final String ADDED_MESSAGE = "Task %1$s has been added.\r\n";
+    private static final String ADDED_MESSAGE = "%1$s task %2$s has been added.\r\n";
     private static final String ADD_ERROR_MESSAGE = "Error occured whe system try to add new task.\r\n";
     private static final String TO_BE_DONE = "to be done.\r\n";
     private TaskDataManager _taskDataManager;
@@ -60,9 +61,11 @@ public class CommandController {
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
             return INVALID_COMMAND;
         }
-        // TODO: find a way to remove this line
-        userInput += " ";
+        //TODO: fix this bad design
         _inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
+        if (_inputString.length == 1) {
+            _inputString = (userInput + " ").split(SPACE, MAX_INPUT_ARRAY_SIZE);
+        }
         CommandType command;
         command = determineCommand();
         return processUserCommand(command);
@@ -86,12 +89,11 @@ public class CommandController {
         switch (command) {
             case ADD: {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
-                Task<?> todoTask = _taskDataManager.addTask(addParameter);
-                if (todoTask == null) {
+                Task<?> task = _taskDataManager.addTask(addParameter);
+                if (task == null) {
                     return ADD_ERROR_MESSAGE;
                 }
-                todoTask = (TodoTask) todoTask;
-                return String.format(ADDED_MESSAGE, todoTask.getDescription());
+                return String.format(ADDED_MESSAGE, task.getType(), task.getDescription());
             }
             case DELETE: {
                 // GUI: ask user confirmation
@@ -166,7 +168,23 @@ public class CommandController {
     private String getTaskListString(ArrayList<Task<?>> taskList) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < taskList.size(); i++) {
-            sb.append(i + SPACE + taskList.get(i).toString() + "\r\n");
+            Task<?> task = taskList.get(i);
+            switch (task.getType()) {
+                case TODO:
+                    task = (TodoTask) task;
+                    break;
+                case EVENT:
+                    task = (EventTask) task;
+                    break;
+                case DEADLINE:
+                    task = (DeadlineTask) task;
+                    break;
+                case UNKOWN:
+                    break;
+                default:
+                    break;
+            }
+            sb.append(i + SPACE + task.toString() + "\r\n");
         }
         return sb.toString();
     }

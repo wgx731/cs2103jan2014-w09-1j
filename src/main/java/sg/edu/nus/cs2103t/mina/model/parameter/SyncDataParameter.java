@@ -22,7 +22,6 @@ public class SyncDataParameter {
 
     public SyncDataParameter(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) {
-        super();
         _taskSet = taskSet;
         _taskType = taskType;
         _isCompleted = isCompleted;
@@ -38,6 +37,22 @@ public class SyncDataParameter {
 
     public boolean isCompleted() {
         return _isCompleted;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SyncDataParameter other = (SyncDataParameter) obj;
+        if (_isCompleted != other._isCompleted)
+            return false;
+        if (_taskType != other._taskType)
+            return false;
+        return true;
     }
 
 }

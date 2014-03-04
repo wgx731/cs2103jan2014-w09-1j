@@ -56,8 +56,7 @@ public class MinaDriver {
                 taskFilterManager);
         uiView = new ConsoleUI(System.in, System.out);
         dataSyncManager = new DataSyncManager(taskDataManager, taskDao);
-        Timer timer = new Timer();
-        timer.schedule(dataSyncManager, 0,
+        new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
@@ -78,6 +77,5 @@ public class MinaDriver {
             logger.error(e, e);
             dataSyncManager.saveAll();
         }
-
     }
 }

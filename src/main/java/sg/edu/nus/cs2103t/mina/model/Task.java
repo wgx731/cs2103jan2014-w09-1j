@@ -125,12 +125,12 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(_type);
-        sb.append("task: ");
+        sb.append(" task: ");
         sb.append(_description);
-        sb.append(" priority ");
+        sb.append(" priority (");
         sb.append(_priority);
-        sb.append(" done? ");
-        sb.append(_isCompleted ? "yes" : "no");
+        sb.append(") done? (");
+        sb.append(_isCompleted ? "yes)" : "no)");
         return sb.toString();
     }
 

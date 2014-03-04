@@ -145,18 +145,33 @@ public class TaskDataManager {
             case TODO:
                 TodoTask newTodoTask = createTodoTask(addParameter);
                 if (_todoTasks.add(newTodoTask)) {
+                    SyncDataParameter dataToSync = new SyncDataParameter(
+                            _todoTasks, TaskType.TODO, false);
+                    if (!_syncList.contains(dataToSync)) {
+                        _syncList.add(dataToSync);
+                    }
                     return newTodoTask;
                 }
                 return null;
             case DEADLINE:
                 DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
                 if (_deadlineTasks.add(newDeadlineTask)) {
+                    SyncDataParameter dataToSync = new SyncDataParameter(
+                            _deadlineTasks, TaskType.DEADLINE, false);
+                    if (!_syncList.contains(dataToSync)) {
+                        _syncList.add(dataToSync);
+                    }
                     return newDeadlineTask;
                 }
                 return null;
             case EVENT:
                 EventTask newEventTask = createEventTask(addParameter);
                 if (_eventTasks.add(newEventTask)) {
+                    SyncDataParameter dataToSync = new SyncDataParameter(
+                            _eventTasks, TaskType.EVENT, false);
+                    if (!_syncList.contains(dataToSync)) {
+                        _syncList.add(dataToSync);
+                    }
                     return newEventTask;
                 }
                 return null;

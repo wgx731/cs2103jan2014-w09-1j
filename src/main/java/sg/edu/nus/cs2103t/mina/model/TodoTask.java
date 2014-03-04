@@ -25,4 +25,11 @@ public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
     public int compareTo(TodoTask otherTask) {
         return super.compareTo((Task<?>) otherTask);
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+    
+    
 }
