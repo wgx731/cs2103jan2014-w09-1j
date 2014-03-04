@@ -19,6 +19,7 @@ import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
 
 /**
@@ -139,30 +140,29 @@ public class TaskDataManager {
      * @param String addParameters
      * @return
      */
-    public Task<?> addTask(String addParameters) {
-        switch (determineTaskType(addParameters)) {
+    public Task<?> addTask(DataParameter addParameter) {
+        switch (addParameter.getNewTaskType()) {
             case TODO:
-                TodoTask newTodoTask = createTodoTask(addParameters);
+                TodoTask newTodoTask = createTodoTask(addParameter);
                 if (_todoTasks.add(newTodoTask)) {
                     return newTodoTask;
                 }
-                break;
+                return null;
             case DEADLINE:
-                DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
+                DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
                 if (_deadlineTasks.add(newDeadlineTask)) {
                     return newDeadlineTask;
                 }
-                break;
+                return null;
             case EVENT:
-                EventTask newEventTask = createEventTask(addParameters);
+                EventTask newEventTask = createEventTask(addParameter);
                 if (_eventTasks.add(newEventTask)) {
                     return newEventTask;
                 }
-                break;
+                return null;
             default:
-                break;
+                return null;
         }
-        return null;
     }
 
     // TODO: change to private afterwards
@@ -183,97 +183,21 @@ public class TaskDataManager {
         }
     }
 
-    public TodoTask createTodoTask(String addParameters) {
-        TodoTask newTodo = null;
+    public TodoTask createTodoTask(DataParameter addParameter) {
+        return new TodoTask(addParameter.getDescription(),
+                addParameter.getPriority());
 
-        if (!addParameters.contains("-priority")) {
-            newTodo = new TodoTask(addParameters);
-
-        } else {
-            String[] parameters = addParameters.split("-priority");
-            char[] priority = parameters[1].trim().toCharArray();
-
-            // TODO: check > 1 instances of "-priority"
-            // TODO: check valid value for priority
-
-            newTodo = new TodoTask(parameters[PARAM_TASK_DESCRIPTION].trim(),
-                    priority[0]);
-        }
-
-        return newTodo;
     }
 
-    public DeadlineTask createDeadlineTask(String addParameters) {
-        String[] parameters = addParameters.split("-end|-priority");
-        String description = parameters[PARAM_TASK_DESCRIPTION].trim();
-        String endTimeString = parameters[1].trim();
-
-        // TODO: use this method to accept and check for different formats
-        SimpleDateFormat slashFormatter = new SimpleDateFormat(
-                "dd/MM/yyyy HH:mm:ss");
-        Date endTime;
-        try {
-            endTime = slashFormatter.parse(endTimeString + " 23:59:00"); // default,
-                                                                         // deadline
-                                                                         // submission
-                                                                         // 2359
-            if (parameters.length == 2) {
-                return new DeadlineTask(description, endTime);
-            } else {
-                char[] priority = parameters[2].trim().toCharArray();
-
-                return new DeadlineTask(description, endTime, priority[0]);
-            }
-
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return null;
+    public DeadlineTask createDeadlineTask(DataParameter addParameter) {
+        return new DeadlineTask(addParameter.getDescription(),
+                addParameter.getEndDate(), addParameter.getPriority());
     }
 
-    public EventTask createEventTask(String addParameters) {
-        // handle parameters
-        String[] parameters = addParameters.split("-start|-end|-priority");
-
-        String description = parameters[PARAM_TASK_DESCRIPTION].trim();
-
-        String startTimeString = parameters[1].trim();
-        String endTimeString = parameters[2].trim();
-
-        // handle date formats
-        if (startTimeString.contains(" ") && !endTimeString.contains(" ")) {
-            String[] startTimeParam = startTimeString.split(" ");
-            endTimeString = startTimeParam[0] + " " + endTimeString;
-        }
-
-        Date startTime, endTime;
-
-        // TODO: use this method to accept and check for different formats
-        SimpleDateFormat slashFormatter = new SimpleDateFormat(
-                "dd/MM/yyyy HHmm");
-
-        try {
-            startTime = slashFormatter.parse(startTimeString);
-            endTime = slashFormatter.parse(endTimeString);
-
-            // actual creation of events
-            if (parameters.length == 3) {
-                return new EventTask(description, startTime, endTime);
-            } else {
-                char[] priority = parameters[3].trim().toCharArray();
-
-                return new EventTask(description, startTime, endTime,
-                        priority[0]);
-            }
-
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return null;
+    public EventTask createEventTask(DataParameter addParameter) {
+        return new EventTask(addParameter.getDescription(),
+                addParameter.getStartDate(), addParameter.getEndDate(),
+                addParameter.getPriority());
     }
 
     // TODO: add a method that checks if priority is valid

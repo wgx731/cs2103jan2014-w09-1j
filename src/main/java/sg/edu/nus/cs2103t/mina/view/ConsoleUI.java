@@ -27,11 +27,15 @@ public class ConsoleUI implements MinaView {
 
     private BufferedReader _inputReader;
     private BufferedWriter _outputWriter;
+    private InputStream _input;
+    private OutputStream _output;
 
     public ConsoleUI(InputStream input, OutputStream output) {
         super();
-        _inputReader = new BufferedReader(new InputStreamReader(input));
-        _outputWriter = new BufferedWriter(new OutputStreamWriter(output));
+        _input = input;
+        _output = output;
+        _inputReader = new BufferedReader(new InputStreamReader(_input));
+        _outputWriter = new BufferedWriter(new OutputStreamWriter(_output));
     }
 
     @Override

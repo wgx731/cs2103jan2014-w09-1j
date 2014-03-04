@@ -5,6 +5,7 @@ import java.util.Date;
 
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
@@ -13,12 +14,18 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandController {
 
     private static String[] _inputString;
-    private static final int _maxInputStringArraySize = 2;
-    private static final int _modifyInputStringSplitSize = 3;
-    private static final int _userCommandPosition = 0;
-    private static final int _parameterPosition = 1;
-    private static final int _firstArrayIndex = 0;
+    private static final int MAX_INPUT_ARRAY_SIZE = 2;
+    private static final int MODIFY_ARRAY_SIZE = 3;
+    private static final int COMMAND_POSITION = 0;
+    private static final int PARAMETER_POSITION = 1;
+    private static final int FISRT_ARRAY_INDEX = 0;
 
+    private static final String INVALID_COMMAND = "command given is invalid.\r\n";
+    private static final String EMPTY_STRING = "";
+    private static final String SPACE = " ";
+    private static final String ADDED_MESSAGE = "Task %1$s has been added.\r\n";
+    private static final String ADD_ERROR_MESSAGE = "Error occured whe system try to add new task.\r\n";
+    private static final String TO_BE_DONE = "to be done.\r\n";
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
 
@@ -50,47 +57,55 @@ public class CommandController {
     // This operation is used to get input from the user and execute it till
     // exit
     public String processUserInput(String userInput) {
+        if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
+            return INVALID_COMMAND;
+        }
+        // TODO: find a way to remove this line
+        userInput += " ";
+        _inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
         CommandType command;
-        _inputString = userInput.split(" ", _maxInputStringArraySize);
         command = determineCommand();
-        processUserCommand(command);
-        return "command processed";
+        return processUserCommand(command);
     }
 
     // This operation is used to get the user input and extract the command from
     // inputString
     private CommandType determineCommand() {
-        String userCommand = _inputString[_userCommandPosition];
-        CommandType command = CommandType.valueOf(userCommand.trim()
-                .toUpperCase());
-        return command;
+        String userCommand = _inputString[COMMAND_POSITION];
+        try {
+            return CommandType.valueOf(userCommand.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return CommandType.INVALID;
+        }
+
     }
 
     // This operation is used to process the extracted command and call the
     // respective functions
-    private void processUserCommand(CommandType command) {
+    private String processUserCommand(CommandType command) {
         switch (command) {
             case ADD: {
-                DataParameter addParameter = processAddParameter(_inputString[_parameterPosition]);
-                // TaskDataManager.addTask(addParameter);
-                // ArrayList<ArrayList<String>> display =
-                // TaskFilterManager.getAllTask();
-                // call GUI display here
-                break;
+                DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
+                Task<?> todoTask = _taskDataManager.addTask(addParameter);
+                if (todoTask == null) {
+                    return ADD_ERROR_MESSAGE;
+                }
+                todoTask = (TodoTask) todoTask;
+                return String.format(ADDED_MESSAGE, todoTask.getDescription());
             }
             case DELETE: {
                 // GUI: ask user confirmation
                 // isConfirmedDelete()
-                DataParameter deleteParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
+                DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 // TaskDataManager.deleteTask(deleteparams);
                 // deleteparams: (int id)
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.getAllTask();
                 // call GUI display here
-                break;
+                return TO_BE_DONE;
             }
             case MODIFY: {
-                DataParameter modifyParameter = processModifyParameter(_inputString[_parameterPosition]);
+                DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
                 // TaskDataManager.editTask(addparams);
                 // editparams: (int id, String des) (int id, String des, Char
                 // prir) (int id, Char prir)
@@ -101,25 +116,22 @@ public class CommandController {
                 // ArrayList<ArrayList<String>> display =
                 // TaskFilterManager.getAllTask();
                 // call GUI display here
-                break;
+                return TO_BE_DONE;
             }
             case DISPLAY: {
-                String filterParameterString = _inputString[_parameterPosition];
+                String filterParameterString = _inputString[PARAMETER_POSITION];
+                FilterParameter filterParam;
                 if (!filterParameterString.isEmpty()) {
-                    FilterParameter filterParam = processFilterParameter(filterParameterString);
-                    ArrayList<Task<?>> filterResult = _taskFilterManager
-                            .filterTask(filterParam);
+                    filterParam = processFilterParameter(filterParameterString);
                 } else {
-                    // to be continue..
+                    filterParam = new FilterParameter();
                 }
-                // ArrayList<Task> display =
-                // TaskFilterManager.filterTask(filterparams);
-                // filterparams: (Filter object)
-                // call GUI display here
-                break;
+                ArrayList<Task<?>> filterResult = _taskFilterManager
+                        .filterTask(filterParam);
+                return getTaskListString(filterResult);
             }
             case SEARCH: {
-                SearchParameter searchParameter = processSearchParameter(_inputString[_parameterPosition]);
+                SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
                 ArrayList<Task<?>> searchResult = _taskFilterManager
                         .searchTasks(searchParameter);
                 // ArrayList<ArrayList<String>> display =
@@ -128,24 +140,35 @@ public class CommandController {
                 // String word1 + word2), ...
                 // (algorithm: combination of words)
                 // call GUI display here
-                break;
+                return TO_BE_DONE;
             }
             case COMPLETE: {
-                DataParameter completeParameter = processMarkDeleteParameter(_inputString[_parameterPosition]);
-                break;
+                DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
+                return TO_BE_DONE;
             }
             case UNDO: {
-                // Hmm?
-                break;
+                return TO_BE_DONE;
             }
             case EXIT: {
                 System.exit(0);
                 break;
             }
+            case INVALID: {
+                return INVALID_COMMAND;
+            }
             default: {
-                break;
+                return INVALID_COMMAND;
             }
         }
+        return INVALID_COMMAND;
+    }
+
+    private String getTaskListString(ArrayList<Task<?>> taskList) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < taskList.size(); i++) {
+            sb.append(i + SPACE + taskList.get(i).toString() + "\r\n");
+        }
+        return sb.toString();
     }
 
     // This method process add parameter into a DataParameter instance
@@ -157,7 +180,7 @@ public class CommandController {
     public DataParameter processAddParameter(String parameterString) {
         DataParameter addParam = new DataParameter();
         ArrayList<String> parameters = new ArrayList<String>();
-        for (String word : parameterString.split(" ")) {
+        for (String word : parameterString.split(SPACE)) {
             parameters.add(word);
         }
         if (parameters.contains("-start")) {
@@ -204,7 +227,7 @@ public class CommandController {
         }
         if (parameters.contains("-priority")) {
             int indexOfPriority = parameters.indexOf("-priority") + 1;
-            char priority = parameters.get(indexOfPriority).toCharArray()[_firstArrayIndex];
+            char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
             addParam.setPriority(priority);
         }
         return addParam;
@@ -233,7 +256,7 @@ public class CommandController {
 
     public FilterParameter processFilterParameter(String parameterString) {
         ArrayList<String> parameters = new ArrayList<String>();
-        for (String word : parameterString.split(" ")) {
+        for (String word : parameterString.split(SPACE)) {
             parameters.add(word);
         }
         FilterParameter filterParam = new FilterParameter(parameters);
@@ -253,10 +276,10 @@ public class CommandController {
             parameters.add(word);
         }
         TaskType original = processTaskTypeFromString(parameters
-                .get(_firstArrayIndex));
+                .get(FISRT_ARRAY_INDEX));
         modifyParam.setOriginalTaskType(original);
         modifyParam.setTaskID(Integer.parseInt(parameters
-                .get(_firstArrayIndex + 1)));
+                .get(FISRT_ARRAY_INDEX + 1)));
         if (parameters.contains("-totype")) {
             int indexOfNewTaskType = parameters.indexOf("-totype") + 1;
             TaskType newType = processTaskTypeFromString(parameters
@@ -267,7 +290,7 @@ public class CommandController {
         }
         if (parameters.contains("-priority")) {
             int indexOfPriority = parameters.indexOf("-priority") + 1;
-            char priority = parameters.get(indexOfPriority).toCharArray()[_firstArrayIndex];
+            char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
             modifyParam.setPriority(priority);
         }
         if (parameters.contains("-start")) {
@@ -317,10 +340,10 @@ public class CommandController {
             parameters.add(word);
         }
         TaskType original = processTaskTypeFromString(parameters
-                .get(_firstArrayIndex));
+                .get(FISRT_ARRAY_INDEX));
         markDeleteParam.setOriginalTaskType(original);
         markDeleteParam.setTaskID(Integer.parseInt(parameters
-                .get(_firstArrayIndex + 1)));
+                .get(FISRT_ARRAY_INDEX + 1)));
         return markDeleteParam;
     }
 
