@@ -29,6 +29,7 @@ public class CommandController {
     private static final String TO_BE_DONE = "to be done.\r\n";
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
+    private DataSyncManager _dataSyncManager;
 
     enum CommandType {
         ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
@@ -40,11 +41,12 @@ public class CommandController {
         _taskFilterManager = new TaskFilterManager(_taskDataManager);
     }
 
-    public CommandController(TaskDataManager taskDataManager,
-            TaskFilterManager taskFilterManager) {
+    public CommandController(DataSyncManager dataSyncManager,
+            TaskDataManager taskDataManager, TaskFilterManager taskFilterManager) {
         super();
-        this._taskDataManager = taskDataManager;
-        this._taskFilterManager = taskFilterManager;
+        _dataSyncManager = dataSyncManager;
+        _taskDataManager = taskDataManager;
+        _taskFilterManager = taskFilterManager;
     }
 
     public TaskDataManager getTaskDataManager() {
@@ -61,7 +63,7 @@ public class CommandController {
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
             return INVALID_COMMAND;
         }
-        //TODO: fix this bad design
+        // TODO: fix this bad design
         _inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
         if (_inputString.length == 1) {
             _inputString = (userInput + " ").split(SPACE, MAX_INPUT_ARRAY_SIZE);
@@ -93,7 +95,8 @@ public class CommandController {
                 if (task == null) {
                     return ADD_ERROR_MESSAGE;
                 }
-                return String.format(ADDED_MESSAGE, task.getType(), task.getDescription());
+                return String.format(ADDED_MESSAGE, task.getType(),
+                        task.getDescription());
             }
             case DELETE: {
                 // GUI: ask user confirmation
@@ -152,6 +155,7 @@ public class CommandController {
                 return TO_BE_DONE;
             }
             case EXIT: {
+                _dataSyncManager.saveAll();
                 System.exit(0);
                 break;
             }

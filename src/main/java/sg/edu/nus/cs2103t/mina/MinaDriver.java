@@ -52,10 +52,10 @@ public class MinaDriver {
         taskDao = new FileTaskDaoImpl(fileMap);
         taskDataManager = new TaskDataManager(taskDao);
         taskFilterManager = new TaskFilterManager(taskDataManager);
-        commandController = new CommandController(taskDataManager,
-                taskFilterManager);
-        uiView = new ConsoleUI(System.in, System.out);
         dataSyncManager = new DataSyncManager(taskDataManager, taskDao);
+        commandController = new CommandController(dataSyncManager,
+                taskDataManager, taskFilterManager);
+        uiView = new ConsoleUI(System.in, System.out);
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
