@@ -270,64 +270,78 @@ public class TaskDataManager {
      * @param deleteParameters
      * @return Task<?> (if successful), null otherwise
      */
-    public Task<?> deleteTask(String deleteParameters) {
-        String[] parameters = deleteParameters.split(" ", 2);
-        String taskTypeString = parameters[0].trim();
+	public Task<?> deleteTask(DataParameter deleteParameters) {
+		switch (deleteParameters.getOriginalTaskType()) {
+			case TODO :
+				TodoTask addedTodoTask = deleteTodoTask(deleteParameters);
+				return addedTodoTask;
+			case DEADLINE :
+				DeadlineTask addedDeadlineTask = deleteDeadlineTask(deleteParameters);
+				return addedDeadlineTask;
+			case EVENT :
+				EventTask addedEventTask = deleteEventTask(deleteParameters);
+				return addedEventTask;
+			default :
+				return null;
+		}
+	}
+	
 
-        switch (taskTypeString) {
-            case ("todo"):
-                return deleteTodo(Integer.parseInt(parameters[1].trim()));
-            case ("deadline"):
-                return deleteDeadline(Integer.parseInt(parameters[1].trim()));
-            case ("event"):
-                return deleteEvent(Integer.parseInt(parameters[1].trim()));
-            default:
-                break;
-        }
-        System.out.println("Unregconised task: " + taskTypeString);
-        return null;
-    }
+    private TodoTask deleteTodoTask(DataParameter deleteParameters) {
+    	getAllTodoTasks();
+    	TreeSet<TodoTask> tempTodoTreeSet = new TreeSet<TodoTask>();
+    	
+    	// assumes that TreeSet ordering matches the ID
+    	// TODO map delete id to TreeSetID
+		for (int i = 0; i < deleteParameters.getTaskId(); i++) {
+			tempTodoTreeSet.add(_completedTodoTreeSet.first());
+		}
+    	
+		TodoTask deletedTodoTask = _completedTodoTreeSet.first();
+		_completedTodoTreeSet.addAll(tempTodoTreeSet);
+		
+		saveAllTodoTasks();
+    	
+		return deletedTodoTask;
+	}
 
-    private TodoTask deleteTodo(int todoId) {
-        TreeSet<TodoTask> tempTodoTreeSet = new TreeSet<TodoTask>();
+	private DeadlineTask deleteDeadlineTask(DataParameter deleteParameters) {
+		getAllDeadlineTasks();
+    	TreeSet<DeadlineTask> tempDeadlineTreeSet = new TreeSet<DeadlineTask>();
+    	
+    	// assumes that TreeSet ordering matches the ID
+    	// TODO map delete id to TreeSetID
+		for (int i = 0; i < deleteParameters.getTaskId(); i++) {
+			tempDeadlineTreeSet.add(_completedDeadlineTreeSet.first());
+		}
+    	
+		DeadlineTask deletedDeadlineTask = _completedDeadlineTreeSet.first();
+		_completedDeadlineTreeSet.addAll(tempDeadlineTreeSet);
+		
+		saveAllDeadlineTasks();
+    	
+		return deletedDeadlineTask;
+	}
 
-        for (int i = 0; i < (todoId - 1); i++) {
-            tempTodoTreeSet.add(_todoTreeSet.pollFirst());
-        }
+	private EventTask deleteEventTask(DataParameter deleteParameters) {
+		getAllEventTasks();
+    	TreeSet<EventTask> tempEventTreeSet = new TreeSet<EventTask>();
+    	
+    	// assumes that TreeSet ordering matches the ID
+    	// TODO map delete id to TreeSetID
+		for (int i = 0; i < deleteParameters.getTaskId(); i++) {
+			tempEventTreeSet.add(_completedEventTreeSet.first());
+		}
+    	
+		EventTask deletedEventTask = _completedEventTreeSet.first();
+		_completedEventTreeSet.addAll(tempEventTreeSet);
+		
+		saveAllEventTasks();
+    	
+		return deletedEventTask;
+	}
 
-        TodoTask removedTodo = _todoTreeSet.pollFirst();
-        _todoTreeSet.addAll(tempTodoTreeSet);
-
-        return removedTodo;
-    }
-
-    private DeadlineTask deleteDeadline(int deadlineId) {
-        TreeSet<DeadlineTask> tempDeadlineTreeSet = new TreeSet<DeadlineTask>();
-
-        for (int i = 0; i < (deadlineId - 1); i++) {
-            tempDeadlineTreeSet.add(_deadlineTreeSet.pollFirst());
-        }
-
-        DeadlineTask removeDeadline = _deadlineTreeSet.pollFirst();
-        _deadlineTreeSet.addAll(tempDeadlineTreeSet);
-
-        return removeDeadline;
-    }
-
-    private EventTask deleteEvent(int eventId) {
-        TreeSet<EventTask> tempEventTreeSet = new TreeSet<EventTask>();
-
-        for (int i = 0; i < (eventId - 1); i++) {
-            tempEventTreeSet.add(_eventTreeSet.pollFirst());
-        }
-
-        EventTask removeEvent = _eventTreeSet.pollFirst();
-        _eventTreeSet.addAll(tempEventTreeSet);
-
-        return removeEvent;
-    }
-
-    /**
+	/**
      * This method checks what Task the user wants to modify, calls the command
      * of DAO to make the amendments, then returns the modified task.
      * 
