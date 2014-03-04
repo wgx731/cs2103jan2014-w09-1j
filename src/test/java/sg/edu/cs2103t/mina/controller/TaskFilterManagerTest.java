@@ -141,18 +141,30 @@ public class TaskFilterManagerTest {
 	}
 
 	/**
-	 * Test for completed events only Expected: Completed events only.
+	 * Test for completed tasks only. 
+	 * Expected: Completed events only.
 	 */
 	@Test
-    public void testCompletedOnly() {
-    	
-    	ArrayList<Task<?>> test = getResult(FILTER_COMPLETE);
-    	ArrayList<Task<?>> allCompleted = getCompletedDummyTasks();
-    	
-    	assertTrue("Tasks must be identical in both cases!", test.size() == allCompleted.size() &&
-    						hasCompletedTasks(test, allCompleted));
-    	
-    }
+  public void testCompletedOnly() {
+  	
+  	ArrayList<Task<?>> test = getResult(FILTER_COMPLETE);
+  	ArrayList<Task<?>> allCompleted = getCompletedDummyTasks();
+  	
+  	assertTrue("Tasks must be identical in both cases!", test.size() == allCompleted.size() &&
+  						hasCompletedTasks(test, allCompleted));
+  	
+  }
+	
+	/**
+	 * Test for completed+ tasks
+	 * Expected: Everything including completed tasks
+	 */
+	@Test
+	public void testCompletedPlus() {
+		
+		
+		
+	}
 
 	private boolean hasCompletedTasks(ArrayList<Task<?>> test,
 																		ArrayList<Task<?>> allCompleted) {
@@ -165,7 +177,7 @@ public class TaskFilterManagerTest {
 		
 		return true;
 	}
-
+	
 	private ArrayList<Task<?>> getCompletedDummyTasks() {
 		
 		TreeSet<EventTask> events = tdmStub.getCompEventTasks();
@@ -193,7 +205,7 @@ public class TaskFilterManagerTest {
 		
 		return tasks;
 	}
-
+	
 	/**
 	 * Get the result based on the keywords entered
 	 * 
