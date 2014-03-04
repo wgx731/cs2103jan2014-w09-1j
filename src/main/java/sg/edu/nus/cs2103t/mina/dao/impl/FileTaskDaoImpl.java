@@ -55,12 +55,15 @@ public class FileTaskDaoImpl implements TaskDao {
     public FileTaskDaoImpl(Map<TaskType, String> fileLocationMap) {
         super();
         _fileLocationMap = fileLocationMap;
-        for (String fileLocation : fileLocationMap.values()) {
-            try {
-                createFileIfNotExist(fileLocation);
-            } catch (IOException e) {
-                logger.error(e, e);
-            }
+        try {
+            createFileIfNotExist(getFileLocation(TaskType.TODO, false));
+            createFileIfNotExist(getFileLocation(TaskType.TODO, true));
+            createFileIfNotExist(getFileLocation(TaskType.EVENT, false));
+            createFileIfNotExist(getFileLocation(TaskType.EVENT, true));
+            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, false));
+            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, true));
+        } catch (IOException e) {
+            logger.error(e, e);
         }
     }
 
