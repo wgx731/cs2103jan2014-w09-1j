@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" strict="true" name="MINALoggerConfig"
+	packages="sg.edu.nus.cs2103t">
+	<Properties>
+		<Property name="filename">target/mina.log</Property>
+	</Properties>
+	<Filter type="ThresholdFilter" level="info" />
+	<Appenders>
+		<Appender type="File" name="FILE" fileName="${filename}">
+			<Layout type="PatternLayout">
+				<Pattern>%d %p %C{1.} [%t] %n===%n%m%n===%n</Pattern>
+			</Layout>
+		</Appender>
+	</Appenders>
+	<Loggers>
+		<Logger name="sg.edu.nus.cs2103t" level="info" additivity="false">
+			<AppenderRef ref="FILE" />
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="FILE" />
+		</Root>
+	</Loggers>
+</Configuration>
