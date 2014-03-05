@@ -239,14 +239,14 @@ public class TaskFilterManagerTest {
 
 	private boolean checkEverything(ArrayList<Task<?>> test) {
 		
-		SortedSet<TodoTask> todos = tdmStub.getTodoTasks();
-		SortedSet<TodoTask> todosComp = tdmStub.getCompTodoTasks();
+		SortedSet<TodoTask> todos = tdmStub.getAllTodoTasks();
+		SortedSet<TodoTask> todosComp = tdmStub.getPastTodoTasks();
 		
-		SortedSet<EventTask> events = tdmStub.getEventTasks();
-		SortedSet<EventTask> eventsComp = tdmStub.getCompEventTasks();
+		SortedSet<EventTask> events = tdmStub.getAllEventTasks();
+		SortedSet<EventTask> eventsComp = tdmStub.getPastEventTasks();
 		
-		SortedSet<DeadlineTask> deadlines = tdmStub.getDeadlineTasks();
-		SortedSet<DeadlineTask> deadlinesComp = tdmStub.getCompDeadlineTasks();
+		SortedSet<DeadlineTask> deadlines = tdmStub.getAllDeadlineTasks();
+		SortedSet<DeadlineTask> deadlinesComp = tdmStub.getPastDeadlineTasks();
 		
 		int totalTaskSize = deadlinesComp.size() +
 												eventsComp.size() + 
