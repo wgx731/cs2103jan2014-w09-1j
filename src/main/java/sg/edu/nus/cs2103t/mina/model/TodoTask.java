@@ -14,7 +14,6 @@ public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
 
     public TodoTask(String description) {
         super(TaskType.TODO, description);
-        _description = description;
     }
 
     public TodoTask(String description, char priority) {

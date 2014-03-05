@@ -25,7 +25,7 @@ public class DeadlineTask extends Task<DeadlineTask> implements
     public DeadlineTask(String description, Date end, char priority) {
         super(TaskType.DEADLINE, description);
         _endTime = end;
-        this._priority = priority;
+        _priority = priority;
     }
 
     public int compareTo(DeadlineTask otherTask) {
@@ -46,7 +46,7 @@ public class DeadlineTask extends Task<DeadlineTask> implements
     }
 
     public void setEndTime(Date endTime) {
-        this._endTime = endTime;
+        _endTime = endTime;
     }
 
 }
