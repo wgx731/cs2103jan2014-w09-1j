@@ -49,4 +49,14 @@ public class DeadlineTask extends Task<DeadlineTask> implements
         _endTime = endTime;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(" deadline(");
+        sb.append(_endTime.toString());
+        sb.append(")");
+        return sb.toString();
+    }
+
 }

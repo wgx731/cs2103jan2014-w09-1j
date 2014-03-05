@@ -58,4 +58,16 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
         _endTime = endTime;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(" start time(");
+        sb.append(_startTime.toString());
+        sb.append(") end time(");
+        sb.append(_endTime.toString());
+        sb.append(")");
+        return sb.toString();
+    }
+
 }

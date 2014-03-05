@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskSetDaoImpl;
+import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -47,12 +48,12 @@ public class FileTaskSetDaoImplTest {
     private static final Date startDate = new Date(1393243200);
     private static final Date endDate = new Date(1393333200);
 
-    private static Set<TodoTask> sampleTodoTaskSet;
-    private static Set<EventTask> sampleEventTaskSet;
-    private static Set<DeadlineTask> sampleDeadlineTaskSet;
+    private static SortedSet<TodoTask> sampleTodoTaskSet;
+    private static SortedSet<EventTask> sampleEventTaskSet;
+    private static SortedSet<DeadlineTask> sampleDeadlineTaskSet;
     private static Map<TaskType, String> storageMap;
 
-    private FileTaskSetDaoImpl storage;
+    private FileTaskDaoImpl storage;
 
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
@@ -82,7 +83,7 @@ public class FileTaskSetDaoImplTest {
                 getAbsoluteName(testFolder.newFile(EVENT_FILE_NAME)));
         storageMap.put(TaskType.DEADLINE,
                 getAbsoluteName(testFolder.newFile(DEADLINE_FILE_NAME)));
-        storage = new FileTaskSetDaoImpl(storageMap);
+        storage = new FileTaskDaoImpl(storageMap);
     }
 
     @After
@@ -131,8 +132,8 @@ public class FileTaskSetDaoImplTest {
         }
     }
 
-    private File saveTaskSet(Set<? extends Task<?>> taskSet, TaskType taskType,
-            boolean isCompleted) {
+    private File saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) {
         try {
             storage.saveTaskSet(taskSet, taskType, isCompleted);
         } catch (IllegalArgumentException e) {
@@ -157,7 +158,7 @@ public class FileTaskSetDaoImplTest {
         }
         if (isCompleted) {
             return new File(testFolder.getRoot() + "/" + fileName
-                    + FileTaskSetDaoImpl.getCompletedSuffix());
+                    + FileTaskDaoImpl.getCompletedSuffix());
         }
         return new File(testFolder.getRoot() + "/" + fileName);
     }

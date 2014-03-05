@@ -5,6 +5,7 @@ import java.util.Date;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 
+
 public class DataParameter {
 	private String _description;
 	private char _priority;
@@ -88,11 +89,11 @@ public class DataParameter {
 		if (modifyParam.getPriority() != 'M') {
 			setPriority(modifyParam.getPriority());
 		}
-		if (modifyParam.getStart() != null) {
-			setStartDate(modifyParam.getStart());
+		if (modifyParam.getStartDate() != null) {
+			setStartDate(modifyParam.getStartDate());
 		}
-		if (modifyParam.getEnd() != null) {
-			setEndDate(modifyParam.getEnd());
+		if (modifyParam.getEndDate() != null) {
+			setEndDate(modifyParam.getEndDate());
 		}
 		if (modifyParam.getOriginalTaskType() != null) {
 			setOriginalTaskType(modifyParam.getOriginalTaskType());
@@ -151,11 +152,11 @@ public class DataParameter {
 		return _priority;
 	}
 	
-	public Date getStart() {
+	public Date getStartDate() {
 		return _start;
 	}
 	
-	public Date getEnd() {
+	public Date getEndDate() {
 		return _end;
 	}
 	

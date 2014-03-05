@@ -14,12 +14,12 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.nus.cs2103t.mina.dao.TaskSetDao;
+import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 
@@ -32,10 +32,10 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  * @author duzhiyuan
  * @author joannemah
  */
-public class FileTaskSetDaoImpl implements TaskSetDao {
+public class FileTaskDaoImpl implements TaskDao {
 
-    private static Logger logger = LogManager
-            .getLogger(FileTaskSetDaoImpl.class.getName());
+    private static Logger logger = LogManager.getLogger(FileTaskDaoImpl.class
+            .getName());
 
     private static final String INVALID_TASK_TYPE = "The given task type is invalid.";
     private static final String INVALID_FILE_STORAGE = "The given file path is an invalid file storage.";
@@ -52,9 +52,19 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
      * 
      * @param fileLocationMap map of all the supported taskType with file path
      */
-    public FileTaskSetDaoImpl(Map<TaskType, String> fileLocationMap) {
+    public FileTaskDaoImpl(Map<TaskType, String> fileLocationMap) {
         super();
         _fileLocationMap = fileLocationMap;
+        try {
+            createFileIfNotExist(getFileLocation(TaskType.TODO, false));
+            createFileIfNotExist(getFileLocation(TaskType.TODO, true));
+            createFileIfNotExist(getFileLocation(TaskType.EVENT, false));
+            createFileIfNotExist(getFileLocation(TaskType.EVENT, true));
+            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, false));
+            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, true));
+        } catch (IOException e) {
+            logger.error(e, e);
+        }
     }
 
     private String getFileLocation(TaskType taskType, boolean isCompleted) {
@@ -103,20 +113,20 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
     }
 
     @Override
-    public void saveTaskSet(Set<? extends Task<?>> taskSet, TaskType taskType,
-            boolean isCompleted) throws IOException, IllegalArgumentException {
+    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) throws IOException,
+            IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
         }
         String fileLocation = getFileLocation(taskType, isCompleted);
-        createFileIfNotExist(fileLocation);
         ObjectOutput output = getOutputWriter(fileLocation);
         output.writeObject(taskSet);
         output.close();
     }
 
     @Override
-    public Set<? extends Task<?>> loadTaskSet(TaskType taskType,
+    public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException, IllegalArgumentException {
         if (!_fileLocationMap.containsKey(taskType)) {
             throw new IllegalArgumentException(INVALID_TASK_TYPE);
@@ -130,10 +140,10 @@ public class FileTaskSetDaoImpl implements TaskSetDao {
         try {
             Object object = input.readObject();
             if (object == null) {
-                throw new IOException(INVALID_FILE_STORAGE);
+                return null;
             }
             @SuppressWarnings("unchecked")
-            Set<? extends Task<?>> content = (Set<? extends Task<?>>) object;
+            SortedSet<? extends Task<?>> content = (SortedSet<? extends Task<?>>) object;
             input.close();
             return content;
         } catch (ClassNotFoundException e) {
