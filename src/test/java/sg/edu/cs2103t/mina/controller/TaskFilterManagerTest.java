@@ -34,7 +34,7 @@ public class TaskFilterManagerTest {
 		TaskDataManagerStub tdm = tdmStub;
 
 		Iterator<TodoTask> todoIterator;
-		todoIterator = tdm.getTodoTasks().iterator();
+		todoIterator = tdm.getAllTodoTasks().iterator();
 
 		while (todoIterator.hasNext()) {
 			TodoTask task = todoIterator.next();
@@ -43,14 +43,14 @@ public class TaskFilterManagerTest {
 		}
 
 		Iterator<EventTask> eventIterator;
-		eventIterator = tdm.getEventTasks().iterator();
+		eventIterator = tdm.getAllEventTasks().iterator();
 
 		while (eventIterator.hasNext()) {
 			printEvent(eventIterator.next());
 		}
 
 		Iterator<DeadlineTask> deadlineIterator;
-		deadlineIterator = tdm.getDeadlineTasks().iterator();
+		deadlineIterator = tdm.getAllDeadlineTasks().iterator();
 
 		while (deadlineIterator.hasNext()) {
 			printDeadline(deadlineIterator.next());
@@ -78,11 +78,11 @@ public class TaskFilterManagerTest {
 		for (Iterator<Task<?>> iterator = test.iterator(); iterator.hasNext();) {
 			Task<?> t = iterator.next();
 			if (t instanceof TodoTask) {
-				isExist = tdmStub.getTodoTasks().contains((TodoTask) t);
+				isExist = tdmStub.getAllTodoTasks().contains((TodoTask) t);
 			} else if (t instanceof EventTask) {
-				isExist = tdmStub.getEventTasks().contains((EventTask) t);
+				isExist = tdmStub.getAllEventTasks().contains((EventTask) t);
 			} else if (t instanceof DeadlineTask) {
-				isExist = tdmStub.getDeadlineTasks().contains((DeadlineTask) t);
+				isExist = tdmStub.getAllDeadlineTasks().contains((DeadlineTask) t);
 			}
 			if (!isExist) {
 				break;
@@ -102,7 +102,7 @@ public class TaskFilterManagerTest {
 
 		ArrayList<Task<?>> test = getResult(TaskFilterManager.DEADLINE);
 
-		TreeSet<DeadlineTask> deadlines = tdmStub.getDeadlineTasks();
+		TreeSet<DeadlineTask> deadlines = tdmStub.getAllDeadlineTasks();
 		int numOfDeadlines = deadlines.size();
 
 		assertTrue("Must be all deadlines!", numOfDeadlines == test.size()
@@ -118,7 +118,7 @@ public class TaskFilterManagerTest {
 	public void testTodosOnly() {
 
 		ArrayList<Task<?>> test = getResult(TaskFilterManager.TODO);
-		TreeSet<TodoTask> todos = tdmStub.getTodoTasks();
+		TreeSet<TodoTask> todos = tdmStub.getAllTodoTasks();
 		int numOfTodos = todos.size();
 
 		assertTrue("Must be all todos!", numOfTodos == test.size() && 
@@ -133,7 +133,7 @@ public class TaskFilterManagerTest {
 	public void testEventsOnly() {
 
 		ArrayList<Task<?>> test = getResult(TaskFilterManager.EVENT);
-		TreeSet<EventTask> events = tdmStub.getEventTasks();
+		TreeSet<EventTask> events = tdmStub.getAllEventTasks();
 		int numOfEvents = events.size();
 
 		assertTrue("Must be all events!", numOfEvents == test.size()
@@ -180,13 +180,13 @@ public class TaskFilterManagerTest {
 	
 	private ArrayList<Task<?>> getCompletedDummyTasks() {
 		
-		TreeSet<EventTask> events = tdmStub.getCompEventTasks();
+		TreeSet<EventTask> events = tdmStub.getPastEventTasks();
 		Iterator<EventTask> eventIter = events.iterator();
 		
-		TreeSet<DeadlineTask> deadlines = tdmStub.getCompDeadlineTasks();
+		TreeSet<DeadlineTask> deadlines = tdmStub.getPastDeadlineTasks();
 		Iterator<DeadlineTask> deadlineIter = deadlines.iterator();
 		
-		TreeSet<TodoTask> todos = tdmStub.getCompTodoTasks();
+		TreeSet<TodoTask> todos = tdmStub.getPastTodoTasks();
 		Iterator<TodoTask> todosIter = todos.iterator();
 		
 		ArrayList<Task<?>> tasks = new ArrayList<Task<?>>();

@@ -38,13 +38,13 @@ public class TaskDataManagerStub extends TaskDataManager{
 		_compEventTasks = new TreeMap<String, EventTask>();
 		_compDeadlineTasks = new TreeMap<String, DeadlineTask>();*/
 
-		_todoTasks = getTodoTasks();
-		_eventTasks = getEventTasks();
-		_deadlineTasks = getDeadlineTasks();
+		_todoTasks = getAllTodoTasks();
+		_eventTasks = getAllEventTasks();
+		_deadlineTasks = getAllDeadlineTasks();
 		
-		_compTodoTasks= getCompTodoTasks();
-		_compEventTasks = getCompEventTasks();
-		_compDeadlineTasks = getCompDeadlineTasks();
+		_compTodoTasks= getPastTodoTasks();
+		_compEventTasks = getPastEventTasks();
+		_compDeadlineTasks = getPastDeadlineTasks();
 		
 		char[] roulette = {'L', 'M', 'H'};
 		
