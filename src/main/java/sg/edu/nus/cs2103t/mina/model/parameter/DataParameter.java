@@ -1,8 +1,9 @@
-package sg.edu.nus.cs2103t.mina.model;
+package sg.edu.nus.cs2103t.mina.model.parameter;
 
 import java.util.Date;
 
-import sg.edu.cs2103t.mina.stub.DataParameterStub;
+import sg.edu.nus.cs2103t.mina.model.Task;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
 
 public class DataParameter {
 	private String _description;
@@ -20,21 +21,21 @@ public class DataParameter {
 	public DataParameter(){
 		setDescription(null);
 		setPriority('M');
-		setStart(null);
-		setEnd(null);
+		setStartDate(null);
+		setEndDate(null);
 		setOriginalTaskType(null);
 		setNewTaskType(null);
-		setTaskId(-1);
+		setTaskID(-1);
 	}
 	
 	public DataParameter(String des, char pri, Date start, Date end, TaskType origType, TaskType newType, int id){
 		setDescription(des);
 		setPriority(pri);
-		setStart(start);
-		setEnd(end);
+		setStartDate(start);
+		setEndDate(end);
 		setOriginalTaskType(origType);
 		setNewTaskType(newType);
-		setTaskId(id);
+		setTaskID(id);
 	}
 	
 	/**
@@ -70,8 +71,8 @@ public class DataParameter {
 		//TODO find a way to map the UUID for _id in task to a human readable ID value
 		setOriginalTaskType(taskToLoad.getType());
 		
-		setStart(null);
-		setEnd(null);
+		setStartDate(null);
+		setEndDate(null);
 		
 	}
 
@@ -88,10 +89,10 @@ public class DataParameter {
 			setPriority(modifyParam.getPriority());
 		}
 		if (modifyParam.getStart() != null) {
-			setStart(modifyParam.getStart());
+			setStartDate(modifyParam.getStart());
 		}
 		if (modifyParam.getEnd() != null) {
-			setEnd(modifyParam.getEnd());
+			setEndDate(modifyParam.getEnd());
 		}
 		if (modifyParam.getOriginalTaskType() != null) {
 			setOriginalTaskType(modifyParam.getOriginalTaskType());
@@ -99,30 +100,48 @@ public class DataParameter {
 			// there is an error, do something!!
 		}
 		if (modifyParam.getTaskId() != -1) {
-			setTaskId(modifyParam.getTaskId());
+			setTaskID(modifyParam.getTaskId());
 		}
 		
 		// deduce the new task type from the existing parameters
 		setNewTaskType(this.determineTaskType());
 	}
-	
-	/**
-	 * Overriding the comparator.
-	 */
+
 	@Override
-	public boolean equals(final Object o) {
-	    if (!(o instanceof DataParameterStub))
-	        return false;
-	    final DataParameterStub om = (DataParameterStub)o;
-	    	return (((om.getDescription()==null&&_description==null)||om.getDescription().equals(_description))
-	    			&& om.getOriginalTaskType()==_originalTaskType
-	    			&& om.getNewTaskType()==_newTaskType
-	    			&& ((om.getStartDate()==null&&_start==null)||om.getStartDate().equals(_start))
-	    			&& ((om.getEndDate()==null&&_end==null)||om.getEndDate().equals(_end))
-	    			&& om.getPriority()==_priority
-	    			&& om.getTaskID()==_taskID);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DataParameter other = (DataParameter) obj;
+		if (_description == null) {
+			if (other._description != null)
+				return false;
+		} else if (!_description.equals(other._description))
+			return false;
+		if (_end == null) {
+			if (other._end != null)
+				return false;
+		} else if (!_end.equals(other._end))
+			return false;
+		if (_newTaskType != other._newTaskType)
+			return false;
+		if (_originalTaskType != other._originalTaskType)
+			return false;
+		if (_priority != other._priority)
+			return false;
+		if (_start == null) {
+			if (other._start != null)
+				return false;
+		} else if (!_start.equals(other._start))
+			return false;
+		if (_taskID != other._taskID)
+			return false;
+		return true;
 	}
-	
+
 	/** get Methods */
 	public String getDescription() {
 		return _description;
@@ -161,11 +180,11 @@ public class DataParameter {
 		_priority = priority;
 	}
 
-	public void setStart(Date start) {
+	public void setStartDate(Date start) {
 		_start = start;
 	}
 
-	public void setEnd(Date end) {
+	public void setEndDate(Date end) {
 		_end = end;
 	}
 
@@ -177,7 +196,7 @@ public class DataParameter {
 		_newTaskType = newTaskType;
 	}
 
-	public void setTaskId(int taskID) {
+	public void setTaskID(int taskID) {
 		_taskID = taskID;
 	}
 	

@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskSetDaoImpl;
+import sg.edu.nus.cs2103t.mina.model.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
-import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up

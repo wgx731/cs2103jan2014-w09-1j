@@ -87,13 +87,13 @@ public class TaskFilterManager {
 			
 		ArrayList<Task<?>> tasks = new ArrayList<Task<?>>();
 		
-		TreeSet<TodoTask> todos = _taskStore.getCompTodoTasks();
+		TreeSet<TodoTask> todos = _taskStore.getPastTodoTasks();
 		Iterator<TodoTask> todoIter = todos.iterator();
 		
-		TreeSet<EventTask> events = _taskStore.getCompEventTasks();
+		TreeSet<EventTask> events = _taskStore.getPastEventTasks();
 		Iterator<EventTask> eventIter = events.iterator();
 		
-		TreeSet<DeadlineTask> deadlines = _taskStore.getCompDeadlineTasks();
+		TreeSet<DeadlineTask> deadlines = _taskStore.getPastDeadlineTasks();
 		Iterator<DeadlineTask> deadlineIter = deadlines.iterator();
 		
 		while (todoIter.hasNext()) {
@@ -126,7 +126,7 @@ public class TaskFilterManager {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
 		// Waiting for TreeMap edition.
-		TreeSet<TodoTask> todoSet = _taskStore.getTodoTasks();
+		TreeSet<TodoTask> todoSet = _taskStore.getAllTodoTasks();
 		Iterator<TodoTask> todoIter = todoSet.iterator();
 
 		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
@@ -141,7 +141,7 @@ public class TaskFilterManager {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
 		// Waiting for TreeMap edition.
-		TreeSet<EventTask> eventSet = _taskStore.getEventTasks();
+		TreeSet<EventTask> eventSet = _taskStore.getAllEventTasks();
 		Iterator<EventTask> eventIter = eventSet.iterator();
 
 		ArrayList<EventTask> events = new ArrayList<EventTask>();
@@ -155,7 +155,7 @@ public class TaskFilterManager {
 	private ArrayList<DeadlineTask> getDeadlines() {
 		// TODO clarify getAllTask from Joanne. For now, just use
 		// stub methods.
-		TreeSet<DeadlineTask> deadlinesSet = _taskStore.getDeadlineTasks();
+		TreeSet<DeadlineTask> deadlinesSet = _taskStore.getAllDeadlineTasks();
 		Iterator<DeadlineTask> deadlinesIter = deadlinesSet.iterator();
 
 		ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
