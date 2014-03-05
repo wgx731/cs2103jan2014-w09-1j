@@ -3,6 +3,7 @@ package sg.edu.cs2103t.mina.controller;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -166,6 +167,74 @@ public class TaskFilterManagerTest {
 		ArrayList<Task<?>> test = getResult(FILTER_COMPLETE_PLUS);
 		boolean hasEverything = checkEverything(test);
 		assertTrue("Need everything!", hasEverything);
+	}
+	
+	/**
+	 * Test for priority.
+	 * Expected: Tasks are ranked from highest to lowest.
+	 * 					 In the case of events, the closer the date,
+	 * 					 the more urgent it is.
+	 */
+	@Test
+	public void testPriority() {
+		ArrayList<Task<?>> test = getResult("priority");
+		assertTrue("Priorities are not sorted!", checkPriority(test));
+	}
+	
+	private boolean checkPriority(ArrayList<Task<?>> test) {
+		
+		int orderPriority = 0;
+		int dayPassed = 0;
+		Date prevCreated = new Date(0);
+		
+		for (Task<?> task: test) {
+			//todo task in the order of HHHHHH...MMMMMM...LLLL
+			if (task instanceof TodoTask) {
+				TodoTask todo = (TodoTask)task;
+				orderPriority = checkTodoContiguity(todo, orderPriority);
+				if(orderPriority==-1) {
+					return false;
+				}
+			} else if (task instanceof EventTask) {
+				
+			} else if (task instanceof DeadlineTask) {
+				
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param todo
+	 * @param orderPriority
+	 * @return
+	 */
+	private int checkTodoContiguity(TodoTask todo, int orderPriority) {
+		
+		int currPriority;
+		
+		switch (todo.getPriority()) {
+			case 'H':
+				currPriority = 0;
+				break;
+			case 'M':
+				currPriority = 1;
+				break;
+			case 'L':
+				currPriority = 2;
+				break;
+			default: 
+				return -1;
+		}
+		
+		if (currPriority>=orderPriority) {
+			return currPriority;
+		} else {
+			return -1;
+		}
+		
 	}
 
 	private boolean checkEverything(ArrayList<Task<?>> test) {

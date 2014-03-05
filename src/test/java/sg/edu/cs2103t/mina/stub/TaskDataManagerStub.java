@@ -26,6 +26,10 @@ public class TaskDataManagerStub extends TaskDataManager{
 	private TreeSet<EventTask> _compEventTasks;
 	private TreeSet<DeadlineTask> _compDeadlineTasks;
 	
+	public static final int COMP_DEADLINE = 6;
+	public static final int COMP_EVENT = 10;
+	public static final int COMP_TODOS = 5;
+	
 	public TaskDataManagerStub(){
 		
 		super();
@@ -56,7 +60,7 @@ public class TaskDataManagerStub extends TaskDataManager{
 			
 			TodoTask newTodoTask = new TodoTask("Do item " + i + " on the list", 
 																					roulette[i%3]);
-			if(i%5==0){
+			if(i%COMP_TODOS==0){
 				newTodoTask.setCompleted(true);
 				//_compTodoTasks.put(newTodoTask.getId(), newTodoTask);
 				_compTodoTasks.add(newTodoTask);
@@ -65,7 +69,7 @@ public class TaskDataManagerStub extends TaskDataManager{
 				_todoTasks.add(newTodoTask);
 			}
 			
-			int time = oneDay + rand.nextInt(oneDay*15);
+			int time = oneDay + i*oneDay;
 			Date startTime = new Date();
 			startTime.setTime(startTime.getTime() + time);
 			
@@ -73,7 +77,7 @@ public class TaskDataManagerStub extends TaskDataManager{
 			endDate.setTime(startTime.getTime() + oneHour*2);
 			
 			EventTask newEventTask = new EventTask("Event " + i, startTime, endDate);
-			if(i%10==0){
+			if(i%COMP_EVENT==0){
 				//Make it into the past
 				Date pastStart = new Date((new Date()).getTime() - time);
 				newEventTask.setStartTime(pastStart);
@@ -91,12 +95,12 @@ public class TaskDataManagerStub extends TaskDataManager{
 			}			
 			
 			
-			time = oneDay + rand.nextInt(oneDay*15);
+			time = oneDay + i*oneDay;
 			startTime = new Date();
 			startTime.setTime(startTime.getTime() + time);
 			
 			DeadlineTask newDeadline = new DeadlineTask("Deadline " + i, startTime);
-			if (i%6==0) { 
+			if (i%COMP_DEADLINE==0) { 
 				//Make it into the past
 				Date pastEnd = new Date((new Date()).getTime() - time);
 				newDeadline.setEndTime(pastEnd);

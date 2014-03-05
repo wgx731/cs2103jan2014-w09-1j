@@ -31,7 +31,7 @@ public class TaskFilterManager {
 	public static final String EVENT = "event";
 	public static final String COMPLETE = "complete";
 	public static final String COMPLETE_PLUS = "+complete";
-
+	
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
 	}
