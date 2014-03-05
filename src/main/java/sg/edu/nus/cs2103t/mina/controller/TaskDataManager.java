@@ -222,10 +222,10 @@ public class TaskDataManager {
 				addParameters.getPriority());
 
 		if (_completedTodoTreeSet.add(newTodoTask)) {	
+			saveAllTodoTasks();
+			
 			return newTodoTask;
 		}
-		
-		saveAllTodoTasks();
 
 		return null;
 	}
@@ -238,11 +238,11 @@ public class TaskDataManager {
 				addParameters.getPriority());
 
 		if (_completedDeadlineTreeSet.add(newDeadlineTask)) {
+			saveAllDeadlineTasks();
+
 			return newDeadlineTask;
 		}
-		
-		saveAllDeadlineTasks();
-
+			
 		return null;
 	}
 	
@@ -254,10 +254,11 @@ public class TaskDataManager {
 				addParameters.getPriority());
 
 		if (_completedEventTreeSet.add(newEventTask)) {
+			saveAllEventTasks();
+
 			return newEventTask;
 		}
-		
-		saveAllEventTasks();
+
 
 		return null;
 	}
