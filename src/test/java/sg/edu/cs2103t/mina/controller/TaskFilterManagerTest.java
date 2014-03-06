@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.cs2103t.mina.stub.TaskDataManagerStub;
@@ -31,6 +32,7 @@ public class TaskFilterManagerTest {
 	private static Logger logger = LogManager
 			.getLogger(TaskFilterManagerTest.class.getName());
 
+	@Ignore
 	@Test
 	public void viewOutput() {
 		// check for output
