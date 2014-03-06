@@ -183,24 +183,36 @@ public class TaskFilterManagerTest {
 
 		int orderPriority = 0;
 		int dayPassed = 0;
-		Date prevCreated = new Date(0);
+		Date prevCreatedEvent = new Date(0);
+		Date prevCreatedDeadline = new Date(0);
 
 		for (Task<?> task : test) {
 			// todo task in the order of HHHHHH...MMMMMM...LLLL
 			if (task instanceof TodoTask) {
 				TodoTask todo = (TodoTask) task;
 				orderPriority = checkTodoContiguity(todo, orderPriority);
-				if (orderPriority == -1) {
-					return false;
+				if (orderPriority != -1) {
+					continue;
 				}
 			} else if (task instanceof EventTask) {
-
+				EventTask event = (EventTask) task;
+				Date currDate = event.getStartTime();
+				if (currDate.after(prevCreatedEvent)){
+					prevCreatedEvent = currDate;
+					continue;
+				}
 			} else if (task instanceof DeadlineTask) {
-
+				DeadlineTask deadline = (DeadlineTask) task;
+				Date currDate = deadline.getEndTime();
+				if (currDate.after(prevCreatedDeadline)) {
+					prevCreatedDeadline = currDate;
+					continue;
+				}
 			}
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**

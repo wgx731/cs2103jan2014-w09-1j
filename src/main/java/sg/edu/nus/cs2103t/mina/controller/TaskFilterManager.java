@@ -11,6 +11,10 @@ package sg.edu.nus.cs2103t.mina.controller;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedSet;
 
@@ -22,7 +26,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {
-
+	
 	private TaskDataManager _taskStore;
 
 	public static final String DEADLINE = "deadline";
@@ -30,6 +34,7 @@ public class TaskFilterManager {
 	public static final String EVENT = "event";
 	public static final String COMPLETE = "complete";
 	public static final String COMPLETE_PLUS = "+complete";
+	public static final String PRIORITY = "priority";
 
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
@@ -53,7 +58,7 @@ public class TaskFilterManager {
 		ArrayList<String> filters = param.getFilters();
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
 
-		if (filters.isEmpty()) {
+		if (filters.isEmpty() || filters.contains(PRIORITY)) {
 			result = getAllUncompletedTasks();
 			return result;
 		}
@@ -78,7 +83,7 @@ public class TaskFilterManager {
 			result.addAll(getCompletedTasks());
 			result.addAll(getAllUncompletedTasks());
 		}
-
+		
 		return result;
 	}
 
