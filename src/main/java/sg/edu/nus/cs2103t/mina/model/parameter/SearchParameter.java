@@ -4,13 +4,17 @@ import java.util.ArrayList;
 
 public class SearchParameter {
 
-    private ArrayList<String> keywords;
+	private ArrayList<String> _keywords;
 
-    public SearchParameter(ArrayList<String> newKeywords) {
-        keywords = newKeywords;
-    }
+	public SearchParameter(ArrayList<String> newKeywords) {
+		_keywords = newKeywords;
+	}
 
-    public ArrayList<String> getKeywords() {
-        return keywords;
-    }
+	public SearchParameter() {
+		_keywords = new ArrayList<String>();
+	}
+
+	public ArrayList<String> getKeywords() {
+		return _keywords;
+	}
 }

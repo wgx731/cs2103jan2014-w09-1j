@@ -23,7 +23,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 
-public class TaskFilterManagerTest {
+public class TaskFilterManagerFilterTest {
 
 	private static final int EVERYTHING = 0;
 	private static final int COMPLETE = 1;
@@ -32,7 +32,7 @@ public class TaskFilterManagerTest {
 	private TaskDataManagerStub tdmStub = new TaskDataManagerStub();
 	private TaskFilterManager tfmTest = new TaskFilterManager(tdmStub);
 	private static Logger logger = LogManager
-			.getLogger(TaskFilterManagerTest.class.getName());
+			.getLogger(TaskFilterManagerFilterTest.class.getName());
 
 	@Ignore
 	@Test
@@ -360,7 +360,7 @@ public class TaskFilterManagerTest {
 				 				 tdmStub.getAllDeadlineTasks().size(); 
 		assertTrue("Contains all task!", checkAllUncompletedTasks(test));
 	}
-
+	
 	private boolean checkTwoTaskTypes(ArrayList<Task<?>> test, 
 																		TaskType firstType, 
 																		TaskType secondType, 

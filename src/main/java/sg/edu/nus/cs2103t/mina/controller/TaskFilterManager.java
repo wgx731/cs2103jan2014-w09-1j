@@ -176,7 +176,11 @@ public class TaskFilterManager {
 	 * Empty if there's none.
 	 */
 	public ArrayList<Task<?>> searchTasks(SearchParameter param) {
-		return null;
+		
+		//Guard clause
+		assert(param==null);
+		
+		return new ArrayList<Task<?>>();
 	}
 
 }
