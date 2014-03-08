@@ -20,21 +20,15 @@ import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {
-	
-	private TaskDataManager _taskStore;
 
-	public static final String DEADLINE = "deadline";
-	public static final String TODO = "todo";
-	public static final String EVENT = "event";
-	public static final String COMPLETE = "complete";
-	public static final String COMPLETE_PLUS = "+complete";
-	public static final String PRIORITY = "priority";
+	private TaskDataManager _taskStore;
 
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
@@ -48,121 +42,155 @@ public class TaskFilterManager {
 	 * @return An arraylist of tasks that satisfied the task. Empty if there's
 	 *         none
 	 */
-	public ArrayList<Task<?>> filterTask(FilterParameter param)
-			throws NullPointerException {
+	public ArrayList<Task<?>> filterTask(FilterParameter param) {
+		
 		// GuardClause
-		if (param == null) {
-			throw new NullPointerException();
-		}
+		assert(param==null);
 
-		ArrayList<String> filters = param.getFilters();
+		ArrayList<FilterType> filters = getFilters(param.getFilters());
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+		
+		//All tasks are already sorted. This is added for user's brevity 
+		filters.remove(FilterType.PRIORITY);
+		
+		//Based on the task status
+		if (filters.contains(FilterType.COMPLETE)) {
+			
+			filters.remove(FilterType.COMPLETE);
+			result = filterCompletedTasks(filters);
+			
+		} else if(filters.contains(FilterType.COMPLETE_PLUS)) {
+			
+			filters.remove(FilterType.COMPLETE_PLUS);
+			result.addAll(filterCompletedTasks(filters));
+			result.addAll(filterUncompletedTasks(filters));
+			
+		} else {
+			
+			if(filters.isEmpty()) {
+				filters = fillEmptyFilter();
+			}
+			
+			result = filterUncompletedTasks(filters);
+			
+		}
+		return result;
+		
+	}
+	
+	
+	/**
+	 * Convert the String into their appropriate types 
+	 * 
+	 * @param filters
+	 * @return Arraylist of filter type
+	 */
+	private ArrayList<FilterType> getFilters(ArrayList<String> rawFilters) {
+		
+		// TODO Discuss with the team about this.
+		ArrayList<FilterType> filters = new ArrayList<FilterType>();
+		
+		for (FilterType filterType: FilterType.values()) {
+			if(rawFilters.contains(filterType.getType())) {
+				filters.add(filterType);
+			}
+		}
+		return filters;
+	}
 
-		if (filters.isEmpty() || filters.contains(PRIORITY)) {
-			result = getAllUncompletedTasks();
-			return result;
+	private ArrayList<Task<?>> filterUncompletedTasks(ArrayList<FilterType> filters) {
+		
+		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+		ArrayList<Task<?>> neededTasks;
+		
+		if(filters.isEmpty()) {
+			filters = fillEmptyFilter();
+		}
+		
+		if (filters.contains(FilterType.DEADLINE)) {
+			neededTasks = getTasks(_taskStore.getAllDeadlineTasks());
+			result.addAll(neededTasks);
 		}
 
-		if (filters.contains(DEADLINE)) {
-			result.addAll(getDeadlines());
+		if (filters.contains(FilterType.TODO)) {
+			neededTasks = getTasks(_taskStore.getAllTodoTasks());
+			result.addAll(neededTasks);
 		}
 
-		if (filters.contains(TODO)) {
-			result.addAll(getTodos());
-		}
-
-		if (filters.contains(EVENT)) {
-			result.addAll(getEvents());
-		}
-
-		if (filters.contains(COMPLETE)) {
-			result.addAll(getCompletedTasks());
-		}
-
-		if (filters.contains(COMPLETE_PLUS)) {
-			result.addAll(getCompletedTasks());
-			result.addAll(getAllUncompletedTasks());
+		if (filters.contains(FilterType.EVENT)) {
+			neededTasks = getTasks(_taskStore.getAllEventTasks());
+			result.addAll(neededTasks);
 		}
 		
 		return result;
 	}
 
-	private ArrayList<Task<?>> getCompletedTasks() {
+	private ArrayList<Task<?>> filterCompletedTasks(ArrayList<FilterType> filters) {
+		
+		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+		ArrayList<Task<?>> neededTasks;
+		
+		if(filters.isEmpty()) {
+			filters = fillEmptyFilter();
+		}
+		
+		if (filters.contains(FilterType.DEADLINE)) {
+			neededTasks = getTasks(_taskStore.getPastDeadlineTasks());
+			result.addAll(neededTasks);
+		}
 
+		if (filters.contains(FilterType.TODO)) {
+			neededTasks = getTasks(_taskStore.getPastTodoTasks());
+			result.addAll(neededTasks);
+		}
+
+		if (filters.contains(FilterType.EVENT)) {
+			neededTasks = getTasks(_taskStore.getPastEventTasks());
+			result.addAll(neededTasks);
+		}
+		
+		return result;
+		
+	}
+
+	//TODO change SortedSet to SortedMap when we implement it.
+	/**
+	 * Convert the Tasks TreeSet into an arraylist. Note: All tasks 
+	 * set must be under the same superclass and iterable/has a way
+	 * to iterate its elements.
+	 * 
+	 * @param taskSet
+	 * @return The converted arraylist
+	 */
+	private ArrayList<Task<?>> getTasks(SortedSet<? extends Task<?>> taskSet) {
+		
+		Iterator<? extends Task<?>> tasksIter = taskSet.iterator();
 		ArrayList<Task<?>> tasks = new ArrayList<Task<?>>();
 
-		SortedSet<TodoTask> todos = _taskStore.getPastTodoTasks();
-		Iterator<TodoTask> todoIter = todos.iterator();
-
-		SortedSet<EventTask> events = _taskStore.getPastEventTasks();
-		Iterator<EventTask> eventIter = events.iterator();
-
-		SortedSet<DeadlineTask> deadlines = _taskStore.getPastDeadlineTasks();
-		Iterator<DeadlineTask> deadlineIter = deadlines.iterator();
-
-		while (todoIter.hasNext()) {
-			tasks.add(todoIter.next());
+		while (tasksIter.hasNext()) {
+			tasks.add(tasksIter.next());
 		}
-
-		while (eventIter.hasNext()) {
-			tasks.add(eventIter.next());
-		}
-
-		while (deadlineIter.hasNext()) {
-			tasks.add(deadlineIter.next());
-		}
-
-		return tasks;
+		return tasks;		
 	}
-
-	public ArrayList<Task<?>> getAllUncompletedTasks() {
-
-		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
-
-		result.addAll(getTodos());
-		result.addAll(getEvents());
-		result.addAll(getDeadlines());
-
-		return result;
-	}
-
-	private ArrayList<TodoTask> getTodos() {
-		SortedSet<TodoTask> todoSet = _taskStore.getAllTodoTasks();
-		Iterator<TodoTask> todoIter = todoSet.iterator();
-
-		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
-
-		while (todoIter.hasNext()) {
-			todos.add(todoIter.next());
-		}
-		return todos;
-	}
-
-	private ArrayList<EventTask> getEvents() {
-		SortedSet<EventTask> eventSet = _taskStore.getAllEventTasks();
-		Iterator<EventTask> eventIter = eventSet.iterator();
-
-		ArrayList<EventTask> events = new ArrayList<EventTask>();
-
-		while (eventIter.hasNext()) {
-			events.add(eventIter.next());
-		}
-		return events;
-	}
-
-	private ArrayList<DeadlineTask> getDeadlines() {
-		SortedSet<DeadlineTask> deadlinesSet = _taskStore.getAllDeadlineTasks();
-		Iterator<DeadlineTask> deadlinesIter = deadlinesSet.iterator();
-
-		ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
-
-		while (deadlinesIter.hasNext()) {
-			deadlines.add(deadlinesIter.next());
-		}
-		return deadlines;
-	}
-
+	
 	/**
+	 * If empty filters, put in every tasktype filters.
+	 * @return
+	 * 				a few filter that contains every tasktype filters
+	 */
+	private ArrayList<FilterType> fillEmptyFilter() {
+		
+		ArrayList<FilterType> newFilters = new ArrayList<FilterType>();
+		
+		newFilters.add(FilterType.DEADLINE);
+		newFilters.add(FilterType.EVENT);
+		newFilters.add(FilterType.TODO);
+		
+		return newFilters;
+	}
+
+	
+	/**.getType()
 	 * Search for tasks based on its keywords.
 	 * 
 	 * @param param
