@@ -22,8 +22,7 @@ public class AppWindow {
 
 	protected Shell shell;
 	private Display display;
-	private Text text;
-	private Text text_1;
+	private Text userInputTextField;
 
 	/**
 	 * Launch the application.
@@ -68,10 +67,10 @@ public class AppWindow {
 		shell.setSize(1080, 720);
 		shell.setText("SWT Application");
 		
-		text_1 = new Text(shell, SWT.NONE);
-		text_1.setForeground(SWTResourceManager.getColor(0, 51, 0));
-		text_1.setFont(SWTResourceManager.getFont("Comic Sans MS", 15, SWT.NORMAL));
-		text_1.setBounds(4, 680, 1076, 36);
+		userInputTextField = new Text(shell, SWT.NONE);
+		userInputTextField.setForeground(SWTResourceManager.getColor(0, 51, 0));
+		userInputTextField.setFont(SWTResourceManager.getFont("Comic Sans MS", 15, SWT.NORMAL));
+		userInputTextField.setBounds(4, 680, 1076, 36);
 		
 		Label lblEvent = new Label(shell, SWT.NONE);
 		lblEvent.setAlignment(SWT.CENTER);
@@ -86,8 +85,8 @@ public class AppWindow {
 		lblDeadline.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		lblDeadline.setFont(SWTResourceManager.getFont("Comic Sans MS", 15, SWT.BOLD));
 		lblDeadline.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-		lblDeadline.setBounds(362, 4, 354, 36);
-		lblDeadline.setText("Deadliness(d)");
+		lblDeadline.setBounds(362, 4, 356, 36);
+		lblDeadline.setText("Deadlines(d)");
 		
 		Label lblTodo = new Label(shell, SWT.NONE);
 		lblTodo.setAlignment(SWT.CENTER);
@@ -97,24 +96,24 @@ public class AppWindow {
 		lblTodo.setBounds(722, 4, 354, 36);
 		lblTodo.setText("To-do(td)");
 		
-		List list = new List(shell, SWT.NONE);
-		list.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		list.setFont(SWTResourceManager.getFont("Comic Sans MS", 15, SWT.NORMAL));
-		list.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-		list.setBounds(4, 40, 354, 636);
+		List eventList = new List(shell, SWT.NONE);
+		eventList.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		eventList.setFont(SWTResourceManager.getFont("Comic Sans MS", 15, SWT.NORMAL));
+		eventList.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+		eventList.setBounds(4, 40, 354, 636);
 		
-		List list_1 = new List(shell, SWT.NONE);
-		list_1.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-		list_1.setEnabled(false);
-		list_1.setBounds(362, 40, 356, 636);
+		List deadlineList = new List(shell, SWT.NONE);
+		deadlineList.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+		deadlineList.setEnabled(false);
+		deadlineList.setBounds(362, 40, 356, 636);
 		
-		List list_2 = new List(shell, SWT.NONE);
-		list_2.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-		list_2.setEnabled(false);
-		list_2.setBounds(722, 40, 354, 636);
+		List todoList = new List(shell, SWT.NONE);
+		todoList.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+		todoList.setEnabled(false);
+		todoList.setBounds(722, 40, 354, 636);
 		
-		for (int loopIndex = 0; loopIndex < 100; loopIndex++) {
-		      list.add("Item " + loopIndex);
+		for (int loopIndex = 0; loopIndex < 10; loopIndex++) {
+		      eventList.add("Event " + loopIndex);
 		}
 	}
 }
