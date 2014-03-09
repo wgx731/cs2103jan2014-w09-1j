@@ -177,10 +177,60 @@ public class TaskFilterManager {
 	 */
 	public ArrayList<Task<?>> searchTasks(SearchParameter param) {
 		
+		ArrayList<String> keywords = param.getKeywords();
+		ArrayList<Task<?>> result = new ArrayList<Task<?>>();		
+		
 		//Guard clause
 		assert(param==null);
+		if(keywords.isEmpty()) {
+			return result;
+		}
 		
-		return new ArrayList<Task<?>>();
+		ArrayList<FilterType> allTypes = fillEmptyFilter();
+		ArrayList<Task<?>> uncompletedTasks = filterUncompletedTasks(allTypes);
+		
+		for (Task<?> task: uncompletedTasks) {
+			if (searchKeywords(task, keywords)){
+				result.add(task);
+			}
+		}
+		
+		return result;
+	}
+
+	private boolean searchKeywords(Task<?> task, ArrayList<String> keywords) {
+		
+		for (String keyword: keywords) {
+			if(hasKeyword(task.getDescription(), keyword)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private boolean hasKeyword(String description, String keyword) {
+		
+		String[] tokens = sanitiseTokens(description);
+		
+		for (int i=0; i<tokens.length; i++) {
+			
+			if(tokens[i].equalsIgnoreCase(keyword)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Tokenise and strip any leading punctuation or whitespace.
+	 * @param description
+	 * @return
+	 */
+	private String[] sanitiseTokens(String description) {
+		String[] tokens = description.split(" ");
+		return tokens;
 	}
 
 }

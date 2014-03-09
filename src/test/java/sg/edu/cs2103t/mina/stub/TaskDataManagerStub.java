@@ -92,7 +92,9 @@ public class TaskDataManagerStub extends TaskDataManager {
 
     }
     
-    
+    public TaskDataManagerStub(int seed) {
+    	
+    }
     
     public SortedSet<TodoTask> getCompTodoTasks() {
         return _compTodoTasks;
