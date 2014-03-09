@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -220,7 +221,7 @@ public class TaskDataManager {
     public Task<?> deleteTask(DataParameter deleteParameters) {
         switch (deleteParameters.getOriginalTaskType()) {
             case TODO:
-                TodoTask addedTodoTask = deleteTodoTask(deleteParameters);
+                TodoTask addedTodoTask = deleteTodoTask(deleteParameters.getTaskId());
                 return addedTodoTask;
             case DEADLINE:
                 DeadlineTask addedDeadlineTask = deleteDeadlineTask(deleteParameters);
@@ -233,8 +234,18 @@ public class TaskDataManager {
         }
     }
 
-    private TodoTask deleteTodoTask(DataParameter deleteParameters) {
-        // TODO: finish delete todo
+    private TodoTask deleteTodoTask(int deleteTaskId) {
+    	Iterator<TodoTask> completedTodoTaskIterator =  _uncompletedTodoTasks.iterator();
+    	TodoTask deletedTodoTask;
+    	
+    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+    		deletedTodoTask = completedTodoTaskIterator.next();
+    		if(i == (deleteTaskId - 1)) {
+    			completedTodoTaskIterator.remove();
+    			return deletedTodoTask;
+    		}
+    	}
+    	
         return null;
     }
 

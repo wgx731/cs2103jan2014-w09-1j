@@ -133,5 +133,15 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_isCompleted ? "yes)" : "no)");
         return sb.toString();
     }
+    
+    @Override
+	public boolean equals(Object o) {
+		Task<?> taskCompared = (Task<?>) o;
+
+		return _type.equals(taskCompared.getType())
+				&& _description.equals(taskCompared.getDescription())
+				&& _priority == taskCompared.getPriority()
+				&& _isCompleted == taskCompared.isCompleted();
+	}
 
 }
