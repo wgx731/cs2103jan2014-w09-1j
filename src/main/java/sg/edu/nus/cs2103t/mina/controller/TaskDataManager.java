@@ -20,7 +20,9 @@ import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up
- * parameters for the tasks passes tasks to DAO to retrieve data from files
+ * parameters for the tasks passes tasks to DAO to retrieve data from files.
+ * <p>
+ * Existing functions related to MINA: addTask(), deleteTask()
  * 
  * @author wgx731
  * @author viettrung9012
@@ -49,7 +51,6 @@ public class TaskDataManager {
     private List<SyncDataParameter> _syncList;
 
     public TaskDataManager() {
-        // empty constructor class
         _uncompletedTodoTasks = new TreeSet<TodoTask>();
         _uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
         _uncompletedEventTasks = new TreeSet<EventTask>();
@@ -95,7 +96,7 @@ public class TaskDataManager {
         }
     }
 
-    /** load methods: uncompleted tasks */
+    /* load methods: uncompleted tasks */
     public SortedSet<TodoTask> getAllTodoTasks() {
         return _uncompletedTodoTasks;
     }
@@ -108,7 +109,7 @@ public class TaskDataManager {
         return _uncompletedEventTasks;
     }
 
-    /** load methods: completed tasks */
+    /* load methods: completed tasks */
     public SortedSet<TodoTask> getPastTodoTasks() {
         return _completedTodoTasks;
     }
@@ -120,7 +121,8 @@ public class TaskDataManager {
     public SortedSet<EventTask> getPastEventTasks() {
         return _completedEventTasks;
     }
-
+    
+    /* synclists controls */
     public List<SyncDataParameter> getSyncList() {
         return _syncList;
     }
@@ -142,74 +144,70 @@ public class TaskDataManager {
             case TODO:
                 TodoTask newTodoTask = createTodoTask(addParameter);
                 if (_uncompletedTodoTasks.add(newTodoTask)) {
-                    SyncDataParameter dataToSync = new SyncDataParameter(
-                            _uncompletedTodoTasks, TaskType.TODO, false);
-                    if (!_syncList.contains(dataToSync)) {
-                        _syncList.add(dataToSync);
-                    }
-                    return newTodoTask;
+                    return syncTasks(TaskType.TODO, newTodoTask);
                 }
                 return null;
+            
             case DEADLINE:
                 DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
                 if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
-                    SyncDataParameter dataToSync = new SyncDataParameter(
-                            _uncompletedDeadlineTasks, TaskType.DEADLINE, false);
-                    if (!_syncList.contains(dataToSync)) {
-                        _syncList.add(dataToSync);
-                    }
-                    return newDeadlineTask;
+                    return syncTasks(TaskType.DEADLINE, newDeadlineTask);
                 }
                 return null;
+            
             case EVENT:
                 EventTask newEventTask = createEventTask(addParameter);
                 if (_uncompletedEventTasks.add(newEventTask)) {
-                    SyncDataParameter dataToSync = new SyncDataParameter(
-                            _uncompletedEventTasks, TaskType.EVENT, false);
-                    if (!_syncList.contains(dataToSync)) {
-                        _syncList.add(dataToSync);
-                    }
-                    return newEventTask;
+                    return syncTasks(TaskType.EVENT, newEventTask);
                 }
                 return null;
+            
             default:
                 return null;
         }
     }
 
-    // TODO: change to private afterwards
-    // does not check for null parameters, this will be checked at addTask()
-    public TaskType determineTaskType(String addParameters) {
-        if (addParameters.equals("")) {
-            return TaskType.UNKOWN;
-        }
+	private TodoTask createTodoTask(DataParameter addParameter) {
+		return new TodoTask(addParameter.getDescription(),
+				addParameter.getPriority());
+	}
 
-        if (addParameters.contains("-end")) {
-            if (addParameters.contains("-start")) {
-                return TaskType.EVENT;
-            } else {
-                return TaskType.DEADLINE;
-            }
-        } else {
-            return TaskType.TODO;
-        }
-    }
+	private DeadlineTask createDeadlineTask(DataParameter addParameter) {
+		return new DeadlineTask(addParameter.getDescription(),
+				addParameter.getEndDate(), addParameter.getPriority());
+	}
 
-    public TodoTask createTodoTask(DataParameter addParameter) {
-        return new TodoTask(addParameter.getDescription(),
-                addParameter.getPriority());
-    }
+	private EventTask createEventTask(DataParameter addParameter) {
+		return new EventTask(addParameter.getDescription(),
+				addParameter.getStartDate(), addParameter.getEndDate(),
+				addParameter.getPriority());
+	}
 
-    private DeadlineTask createDeadlineTask(DataParameter addParameter) {
-        return new DeadlineTask(addParameter.getDescription(),
-                addParameter.getEndDate(), addParameter.getPriority());
-    }
+	private Task<?> syncTasks(TaskType taskType, Task<?> newTask) {
+		SyncDataParameter dataToSync;
 
-    private EventTask createEventTask(DataParameter addParameter) {
-        return new EventTask(addParameter.getDescription(),
-                addParameter.getStartDate(), addParameter.getEndDate(),
-                addParameter.getPriority());
-    }
+		switch (taskType) {
+			case TODO :
+				dataToSync = new SyncDataParameter(_uncompletedTodoTasks, taskType,
+						false);
+				break;
+			case DEADLINE :
+				dataToSync = new SyncDataParameter(_uncompletedDeadlineTasks,
+						taskType, false);
+				break;
+			case EVENT :
+				dataToSync = new SyncDataParameter(_uncompletedEventTasks,
+						taskType, false);
+				break;
+			default :
+				return null;
+		}
+
+		if (!_syncList.contains(dataToSync)) {
+			assert (_syncList.add(dataToSync));
+		}
+		return newTask;
+	}
 
     /**
      * This method deletes a specific task by identifying the Task with its type
