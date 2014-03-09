@@ -145,21 +145,21 @@ public class TaskDataManager {
             case TODO:
                 TodoTask newTodoTask = createTodoTask(addParameter);
                 if (_uncompletedTodoTasks.add(newTodoTask)) {
-                    return syncTasks(TaskType.TODO, newTodoTask);
+                    return syncUncompletedTasks(TaskType.TODO, newTodoTask);
                 }
                 return null;
             
             case DEADLINE:
                 DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
                 if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
-                    return syncTasks(TaskType.DEADLINE, newDeadlineTask);
+                    return syncUncompletedTasks(TaskType.DEADLINE, newDeadlineTask);
                 }
                 return null;
             
             case EVENT:
                 EventTask newEventTask = createEventTask(addParameter);
                 if (_uncompletedEventTasks.add(newEventTask)) {
-                    return syncTasks(TaskType.EVENT, newEventTask);
+                    return syncUncompletedTasks(TaskType.EVENT, newEventTask);
                 }
                 return null;
             
@@ -184,7 +184,7 @@ public class TaskDataManager {
 				addParameter.getPriority());
 	}
 
-	private Task<?> syncTasks(TaskType taskType, Task<?> newTask) {
+	private Task<?> syncUncompletedTasks(TaskType taskType, Task<?> newTask) {
 		SyncDataParameter dataToSync;
 
 		switch (taskType) {
@@ -293,9 +293,76 @@ public class TaskDataManager {
         return addTask(modifyParameters);
     }
 
-    // TODO: markCompleted
+    public Task<?> markCompleted(DataParameter completeParameters) {
+    	switch (completeParameters.getOriginalTaskType()) {
+        	case TODO :
+        		TodoTask deletedTodoTask = markTodoTask(completeParameters.getTaskId());
+        		return deletedTodoTask;
+        	case DEADLINE:
+        		DeadlineTask deletedDeadlineTask = markDeadlineTask(completeParameters.getTaskId());
+        		return deletedDeadlineTask;
+        	case EVENT:
+        		EventTask deletedEventTask = markEventTask(completeParameters.getTaskId());
+        		return deletedEventTask;
+        	default:
+        	System.out.println("Unable to determine Task Type.");
+            	return null;
+    	}
+    	
+    }
 
-    /**
+	private TodoTask markTodoTask(int taskId) {
+		TodoTask retrievedTask = deleteTodoTask(taskId);
+
+		retrievedTask.setCompleted(true);
+
+		SyncDataParameter dataToSync;
+		if (_completedTodoTasks.add(retrievedTask)) {
+			dataToSync = new SyncDataParameter(_completedTodoTasks,
+					TaskType.TODO, true);
+			if (!_syncList.contains(dataToSync)) {
+				assert (_syncList.add(dataToSync));
+			}
+		}
+
+		return retrievedTask;
+	}
+
+	private DeadlineTask markDeadlineTask(int taskId) {
+		DeadlineTask retrievedTask = deleteDeadlineTask(taskId);
+
+		retrievedTask.setCompleted(true);
+
+		SyncDataParameter dataToSync;
+		if (_completedDeadlineTasks.add(retrievedTask)) {
+			dataToSync = new SyncDataParameter(_completedDeadlineTasks,
+					TaskType.DEADLINE, true);
+			if (!_syncList.contains(dataToSync)) {
+				assert (_syncList.add(dataToSync));
+			}
+		}
+
+		return retrievedTask;
+	}
+
+	private EventTask markEventTask(int taskId) {
+		EventTask retrievedTask = deleteEventTask(taskId);
+
+		retrievedTask.setCompleted(true);
+
+		SyncDataParameter dataToSync;
+		if (_completedEventTasks.add(retrievedTask)) {
+			dataToSync = new SyncDataParameter(_completedEventTasks,
+					TaskType.DEADLINE, true);
+			if (!_syncList.contains(dataToSync)) {
+				assert (_syncList.add(dataToSync));
+			}
+		}
+
+		return retrievedTask;
+	}
+
+	/**
      * only to be used for testing
      */
     public void resetTrees() {
