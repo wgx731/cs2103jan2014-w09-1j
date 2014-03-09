@@ -221,15 +221,16 @@ public class TaskDataManager {
     public Task<?> deleteTask(DataParameter deleteParameters) {
         switch (deleteParameters.getOriginalTaskType()) {
             case TODO:
-                TodoTask addedTodoTask = deleteTodoTask(deleteParameters.getTaskId());
-                return addedTodoTask;
+                TodoTask deletedTodoTask = deleteTodoTask(deleteParameters.getTaskId());
+                return deletedTodoTask;
             case DEADLINE:
-                DeadlineTask addedDeadlineTask = deleteDeadlineTask(deleteParameters.getTaskId());
-                return addedDeadlineTask;
+                DeadlineTask deletedDeadlineTask = deleteDeadlineTask(deleteParameters.getTaskId());
+                return deletedDeadlineTask;
             case EVENT:
-                EventTask addedEventTask = deleteEventTask(deleteParameters.getTaskId());
-                return addedEventTask;
+                EventTask deletedEventTask = deleteEventTask(deleteParameters.getTaskId());
+                return deletedEventTask;
             default:
+            	System.out.println("Unable to determine Task Type.");
                 return null;
         }
     }
@@ -245,7 +246,7 @@ public class TaskDataManager {
     			return deletedTodoTask;
     		}
     	}
-    	
+    	System.out.println("Missed todo task to delete.");
         return null;
     }
 
@@ -260,7 +261,7 @@ public class TaskDataManager {
     			return deletedDeadlineTask;
     		}
     	}
-    	
+    	System.out.println("Missed deadline task to delete.");
         return null;
     }
 
@@ -275,7 +276,7 @@ public class TaskDataManager {
     			return deletedEventTask;
     		}
     	}
-    	
+    	System.out.println("Missed event task to delete.");
         return null;
     }
 
@@ -287,13 +288,12 @@ public class TaskDataManager {
      * @return
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
-        // TODO: finish modify task
-        return null;
+        deleteTask(modifyParameters);
+        
+        return addTask(modifyParameters);
     }
 
     // TODO: markCompleted
-    // TODO: getAll___Task
-    // TODO: getAllCompleted___Task
 
     /**
      * only to be used for testing
