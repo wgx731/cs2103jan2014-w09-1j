@@ -224,10 +224,10 @@ public class TaskDataManager {
                 TodoTask addedTodoTask = deleteTodoTask(deleteParameters.getTaskId());
                 return addedTodoTask;
             case DEADLINE:
-                DeadlineTask addedDeadlineTask = deleteDeadlineTask(deleteParameters);
+                DeadlineTask addedDeadlineTask = deleteDeadlineTask(deleteParameters.getTaskId());
                 return addedDeadlineTask;
             case EVENT:
-                EventTask addedEventTask = deleteEventTask(deleteParameters);
+                EventTask addedEventTask = deleteEventTask(deleteParameters.getTaskId());
                 return addedEventTask;
             default:
                 return null;
@@ -249,13 +249,33 @@ public class TaskDataManager {
         return null;
     }
 
-    private DeadlineTask deleteDeadlineTask(DataParameter deleteParameters) {
-        // TODO: finish delete deadline
+    private DeadlineTask deleteDeadlineTask(int deleteTaskId) {
+    	Iterator<DeadlineTask> completedTodoTaskIterator =  _uncompletedDeadlineTasks.iterator();
+    	DeadlineTask deletedDeadlineTask;
+    	
+    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+    		deletedDeadlineTask = completedTodoTaskIterator.next();
+    		if(i == (deleteTaskId - 1)) {
+    			completedTodoTaskIterator.remove();
+    			return deletedDeadlineTask;
+    		}
+    	}
+    	
         return null;
     }
 
-    private EventTask deleteEventTask(DataParameter deleteParameters) {
-        // TODO: finish delete event
+    private EventTask deleteEventTask(int deleteTaskId) {
+    	Iterator<EventTask> completedTodoTaskIterator =  _uncompletedEventTasks.iterator();
+    	EventTask deletedEventTask;
+    	
+    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+    		deletedEventTask = completedTodoTaskIterator.next();
+    		if(i == (deleteTaskId - 1)) {
+    			completedTodoTaskIterator.remove();
+    			return deletedEventTask;
+    		}
+    	}
+    	
         return null;
     }
 
