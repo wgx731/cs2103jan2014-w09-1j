@@ -14,8 +14,10 @@ import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.UIType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
+import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
 import sg.edu.nus.cs2103t.mina.view.MinaView;
 
 /**
@@ -32,7 +34,9 @@ public class MinaDriver {
             .getName());
 
     private static final String SYNC_INTERVAL_KEY = "synctime";
+    private static final String VIEW_TYPE_KEY = "viewtype";
     private static final String WELCOME_MESSAGE = "welcome to MINA.\r\n";
+    private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
     private static CommandController commandController;
     private static TaskDataManager taskDataManager;
@@ -55,7 +59,28 @@ public class MinaDriver {
         dataSyncManager = new DataSyncManager(taskDataManager, taskDao);
         commandController = new CommandController(dataSyncManager,
                 taskDataManager, taskFilterManager);
-        uiView = new ConsoleUI(System.in, System.out);
+        UIType viewType;
+        try {
+            viewType = UIType.valueOf(ConfigHelper.getProperty(VIEW_TYPE_KEY)
+                    .toUpperCase());
+        } catch (IllegalArgumentException e) {
+            viewType = UIType.CONSOLE;
+        }
+        switch (viewType) {
+            case GUI :
+                MinaGuiUI gui = new MinaGuiUI();
+                gui.open();
+                uiView = gui;
+                break;
+            case CONSOLE :
+                uiView = new ConsoleUI(System.in, System.out);
+                break;
+            default :
+                throw new Error(UNKOWN_TYPE_ERROR);
+        }
+        uiView.updateLists(taskDataManager.getAllEventTasks(),
+                taskDataManager.getAllDeadlineTasks(),
+                taskDataManager.getAllTodoTasks());
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
@@ -64,7 +89,14 @@ public class MinaDriver {
         uiView.displayOutput(WELCOME_MESSAGE);
         while (true) {
             String userInput = uiView.getUserInput();
-            String feedback = commandController.processUserInput(userInput);
+            //TODO: try to split UI and while true loop
+            if (userInput == null) {
+                continue;
+            }
+            String feedback = commandController.processUserInput(userInput);            
+            uiView.updateLists(taskDataManager.getAllEventTasks(),
+                    taskDataManager.getAllDeadlineTasks(),
+                    taskDataManager.getAllTodoTasks());
             uiView.displayOutput(feedback);
         }
     }

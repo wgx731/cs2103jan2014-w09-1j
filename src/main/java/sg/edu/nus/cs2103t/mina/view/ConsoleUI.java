@@ -7,9 +7,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 /**
  * 
@@ -30,12 +37,19 @@ public class ConsoleUI implements MinaView {
     private InputStream _input;
     private OutputStream _output;
 
+    private List<EventTask> _eventList;
+    private List<TodoTask> _todoList;
+    private List<DeadlineTask> _deadlineList;
+
     public ConsoleUI(InputStream input, OutputStream output) {
         super();
         _input = input;
         _output = output;
         _inputReader = new BufferedReader(new InputStreamReader(_input));
         _outputWriter = new BufferedWriter(new OutputStreamWriter(_output));
+        _eventList = new ArrayList<EventTask>();
+        _todoList = new ArrayList<TodoTask>();
+        _deadlineList = new ArrayList<DeadlineTask>();
     }
 
     @Override
@@ -56,6 +70,18 @@ public class ConsoleUI implements MinaView {
         } catch (IOException e) {
             logger.error(e, e);
         }
+    }
+
+    @Override
+    public void updateLists(SortedSet<EventTask> allEventTasks,
+            SortedSet<DeadlineTask> allDeadlineTasks,
+            SortedSet<TodoTask> allTodoTasks) {
+        _eventList.clear();
+        _eventList.addAll(allEventTasks);
+        _deadlineList.clear();
+        _deadlineList.addAll(allDeadlineTasks);
+        _todoList.clear();
+        _todoList.addAll(allTodoTasks);
     }
 
 }
