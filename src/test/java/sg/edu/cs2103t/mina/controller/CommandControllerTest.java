@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandControllerTest {
@@ -59,14 +61,15 @@ public class CommandControllerTest {
     @SuppressWarnings("serial")
     @Test
     public void testProcessFilterParameter() {
-        assertEquals(cc.processFilterParameter("complete todo event")
-                .getFilters(), new ArrayList<String>() {
+        ArrayList<FilterType> targetFilter = new ArrayList<FilterType>() {
             {
-                add("complete");
-                add("todo");
-                add("event");
+                add(FilterType.TODO);
+                add(FilterType.EVENT);
+                add(FilterType.COMPLETE);
             }
-        });
+        };
+        assertEquals(targetFilter,
+                cc.processFilterParameter("complete todo event").getFilters());
     }
 
     @Test
