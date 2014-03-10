@@ -136,18 +136,16 @@ public class TaskFilterManager {
 	                                        FilterParameter filters) {
 	    
 	    ArrayList<Task<?>> filteredResult = new ArrayList<Task<?>>();
-	    Date start = new Date(filters.getStart().getTime());
-	    Date end = new Date(filters.getEnd().getTime());
+	    Date start = filters.getStart();
+	    Date end = filters.getEnd();
 	    boolean hasTime = filters.hasTime();
 	    
         if (!hasTime) {
             start = sanitiseDate(start, IS_START);
             end = sanitiseDate(end, IS_END);    
         }
-	    
-        logger.info(start);
-        logger.info(end);
         
+        //Only EventTask / DeadlineTask will be checked
 	    for (Task<?> task: result) {
 	        if(task instanceof TodoTask || 
 	                isInDateRange(task, start, end, hasTime)) {
@@ -173,7 +171,7 @@ public class TaskFilterManager {
         //Guard clause
         assert(task instanceof EventTask || 
                 task instanceof DeadlineTask);
-        assert(start!=null && end!=null);
+        assert(start!=null || end!=null);
         
         Date targetDate;
         if (task instanceof EventTask) {
@@ -181,8 +179,14 @@ public class TaskFilterManager {
         } else {
             targetDate = ((DeadlineTask) task).getEndTime();
         }
-
-        return targetDate.after(start) && targetDate.before(end);
+        
+        if (start!=null && end!=null) {
+            return targetDate.after(start) && targetDate.before(end);
+        } else if(start!=null) {
+            return targetDate.after(start);
+        } else {
+            return targetDate.before(end);
+        } 
     }
     
     /**
@@ -197,6 +201,11 @@ public class TaskFilterManager {
      * If it's end, set to 23:59 of end date. 
      */
     private Date sanitiseDate(Date date, boolean isStart) {
+        
+        //Guard clause
+        if (date==null) {
+            return null;
+        }
         
         Calendar currDate = Calendar.getInstance();
         currDate.setTime(date);
@@ -222,7 +231,7 @@ public class TaskFilterManager {
 	 * @return
 	 */
 	private boolean hasDateRange(FilterParameter filters) {
-        return filters.contains(FilterType.START) && 
+        return filters.contains(FilterType.START) || 
                filters.contains(FilterType.END);
     }
 
