@@ -69,5 +69,15 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
         sb.append(")");
         return sb.toString();
     }
-
+    
+    @Override
+    public boolean equals(Object other) {
+    	if(other instanceof EventTask) {
+    		EventTask otherEvent = (EventTask) other;
+    		return this.compareTo(otherEvent)==0;
+    	} else {
+    		return false;
+    	}
+    }
+    
 }

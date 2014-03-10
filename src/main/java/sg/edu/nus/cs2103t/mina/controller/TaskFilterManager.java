@@ -21,6 +21,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {
 
+	private static final int FIRST_LETTER = 0;
 	private TaskDataManager _taskStore;
 
 	public TaskFilterManager(TaskDataManager taskStore) {
@@ -200,8 +201,10 @@ public class TaskFilterManager {
 
 	private boolean searchKeywords(Task<?> task, ArrayList<String> keywords) {
 		
+		String description = task.getDescription().toLowerCase();
+		
 		for (String keyword: keywords) {
-			if(hasKeyword(task.getDescription(), keyword)) {
+			if (description.contains(keyword.toLowerCase())) {
 				return true;
 			}
 		}
@@ -214,7 +217,6 @@ public class TaskFilterManager {
 		String[] tokens = sanitiseTokens(description);
 		
 		for (int i=0; i<tokens.length; i++) {
-			
 			if(tokens[i].equalsIgnoreCase(keyword)) {
 				return true;
 			}
@@ -229,8 +231,29 @@ public class TaskFilterManager {
 	 * @return
 	 */
 	private String[] sanitiseTokens(String description) {
-		String[] tokens = description.split(" ");
-		return tokens;
+		
+		String[] rawTokens = description.split(" ");
+		ArrayList<String> tokens = new ArrayList<String>();
+		
+		for (int i=0; i<rawTokens.length; i++) {
+			int lastLetter = rawTokens.length - 1;
+			rawTokens[i] = rawTokens[i].trim();
+			if(rawTokens[i].equals("")) {
+				continue;
+			}
+			
+			Character first = rawTokens[i].charAt(FIRST_LETTER);
+			Character last = rawTokens[i].charAt(lastLetter);
+			
+			if(!Character.isLetterOrDigit(first)) {
+				rawTokens[i] = rawTokens[i].substring(FIRST_LETTER + 1);
+				
+			}
+			
+			
+		}
+		
+		return rawTokens;
 	}
 
 }

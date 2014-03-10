@@ -135,12 +135,13 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     }
     
     @Override
-	public boolean equals(Object o) {
-		Task<?> taskCompared = (Task<?>) o;
-		return _type.equals(taskCompared.getType())
-				&& _description.equals(taskCompared.getDescription())
-				&& _priority == taskCompared.getPriority()
-				&& _isCompleted == taskCompared.isCompleted();
-	}
-
+    public boolean equals(Object other) {
+    	if(other instanceof Task<?>) {
+    		Task<?> otherTask = (Task<?>) other;
+    		return this.compareTo(otherTask)==0;
+    	} else {
+    		return false;
+    	}
+    }
+     
 }

@@ -1,5 +1,6 @@
 package sg.edu.cs2103t.mina.stub;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 import java.util.SortedSet;
@@ -7,11 +8,14 @@ import java.util.SortedSet;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 public class TaskDataManagerStub extends TaskDataManager {
 
-    private static SortedSet<TodoTask> _todoTasks;
+    public static final int PUNCTUATION_SEARCH = 0;
+    
+		private static SortedSet<TodoTask> _todoTasks;
     private static SortedSet<EventTask> _eventTasks;
     private static SortedSet<DeadlineTask> _deadlineTasks;
 
@@ -30,7 +34,15 @@ public class TaskDataManagerStub extends TaskDataManager {
         _compTodoTasks = getPastTodoTasks();
         _compEventTasks = getPastEventTasks();
         _compDeadlineTasks = getPastDeadlineTasks();
-
+        
+        _todoTasks.clear();
+        _eventTasks.clear();
+        _deadlineTasks.clear();
+        
+        _compTodoTasks.clear();
+        _compEventTasks.clear();
+        _compDeadlineTasks.clear();
+        
         char[] roulette = { 'L', 'M', 'H' };
 
         Random rand = new Random();
@@ -92,7 +104,29 @@ public class TaskDataManagerStub extends TaskDataManager {
 
     }
     
-    public TaskDataManagerStub(int seed) {
+    public TaskDataManagerStub(int cases) {
+    	
+    	super();
+    	
+      _todoTasks = getAllTodoTasks();
+      _eventTasks = getAllEventTasks();
+      _deadlineTasks = getAllDeadlineTasks();
+
+      _compTodoTasks = getPastTodoTasks();
+      _compEventTasks = getPastEventTasks();
+      _compDeadlineTasks = getPastDeadlineTasks();
+    	
+    	switch(cases) {
+    		case PUNCTUATION_SEARCH :
+    			_todoTasks.clear();
+    			_todoTasks.add(new TodoTask("1. Do laundry, grocery and walk the dog"));
+    			_todoTasks.add(new TodoTask("2. Buy the new Zack Hemsey's album"));
+    			_todoTasks.add(new TodoTask("3. Watch GITS 2nd gIg. Watch SAC as well."));
+    			_todoTasks.add(new TodoTask("4. we , might . have ! a ; puntuation o problem } I {} think. "));
+    			break;
+    		default:
+    			throw new Error("Woah, no such test case yet!");
+    	}
     	
     }
     

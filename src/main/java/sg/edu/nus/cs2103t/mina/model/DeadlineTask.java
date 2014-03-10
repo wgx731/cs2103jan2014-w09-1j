@@ -58,5 +58,14 @@ public class DeadlineTask extends Task<DeadlineTask> implements
         sb.append(")");
         return sb.toString();
     }
-
+    
+    @Override
+    public boolean equals(Object other) {
+    	if(other instanceof DeadlineTask) {
+    		DeadlineTask otherDeadline = (DeadlineTask) other;
+    		return this.compareTo(otherDeadline)==0;
+    	} else {
+    		return false;
+    	}
+    }
 }

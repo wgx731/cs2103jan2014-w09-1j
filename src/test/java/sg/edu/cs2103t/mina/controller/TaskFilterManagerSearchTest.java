@@ -48,10 +48,10 @@ public class TaskFilterManagerSearchTest {
 		
 		assertEquals(expected, test);
 		
-		test = getResult("1");
-		assertTrue("Only three tasks", 
-								test.size()==3 &&
-								compareToActualTasks(test));
+//		test = getResult("1");
+//		assertTrue("Only three tasks", 
+//								test.size()==3 &&
+//								compareToActualTasks(test));
 	}
 	
 	@Test
@@ -66,11 +66,39 @@ public class TaskFilterManagerSearchTest {
 		
 	}
 	
+	/**
+	 * Test to ensure punctuation are ignored.
+	 */
 	@Test
 	public void testPunctuations() {
 		
+		tdmStub = new TaskDataManagerStub(TaskDataManagerStub.PUNCTUATION_SEARCH);
+		tfmTest = new TaskFilterManager(tdmStub);
+		
+		ArrayList<TodoTask> test = convertToTodos(getResult("walk the"));
+		
+		ArrayList<TodoTask> expected = new ArrayList<TodoTask>();
+		expected.add(new TodoTask("1. Do laundry, grocery and walk the dog"));
+		expected.add(new TodoTask("2. Buy the new Zack Hemsey's album"));
+		assertEquals(expected, test);
+		expected.clear();
+		
+		test = convertToTodos(getResult("laundry"));
+		expected.add(new TodoTask("1. Do laundry, grocery and walk the dog"));
+		assertEquals(expected, test);
+		expected.clear();
+		
+		resetTdmTfm();
 	}
 	
+	private ArrayList<TodoTask> convertToTodos(ArrayList<Task<?>> result) {
+		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
+		for (Task<?> task: result) {
+			todos.add( (TodoTask) task );
+		}
+		return todos;
+	}
+
 	private boolean compareToActualTasks(ArrayList<Task<?>> test) {
 		
 		//guard clause
@@ -136,6 +164,11 @@ public class TaskFilterManagerSearchTest {
 		searchParam = new SearchParameter(keywords);
 		return tfmTest.searchTasks(searchParam);
 		
+	}
+	
+	public void resetTdmTfm() {
+		tdmStub = new TaskDataManagerStub();
+		tfmTest = new TaskFilterManager(tdmStub);
 	}
 	
 }
