@@ -26,10 +26,18 @@ public class CommandController {
     private static final String SPACE = " ";
     private static final String ADDED_MESSAGE = "%1$s task %2$s has been added.\r\n";
     private static final String ADD_ERROR_MESSAGE = "Error occured whe system try to add new task.\r\n";
+    private static final String DELETED_MESSAGE = "%1$s task %2$s has been deleted.\r\n";
+    private static final String DELETE_ERROR_MESSAGE = "Error occured whe system try to delete task.\r\n";
+    private static final String MODIFIED_MESSAGE = "Modified. %1$s task %2$s.\r\n";
+    private static final String MODIFY_ERROR_MESSAGE = "Error occured whe system try to modify task.\r\n";
+    private static final String COMPLETED_MESSAGE = "%1$s task %2$s has been makred as completed.\r\n";
+    private static final String COMPLETE_ERROR_MESSAGE = "Error occured whe system try to mark task as completed.\r\n";
+    private static final String SEARCH_NOT_FOUND = "Search cannot find any result.\r\n";
     private static final String TO_BE_DONE = "to be done.\r\n";
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
     private DataSyncManager _dataSyncManager;
+    // private AppWindow _appWindow;
 
     enum CommandType {
         ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
@@ -39,6 +47,7 @@ public class CommandController {
     public CommandController() {
         _taskDataManager = new TaskDataManager();
         _taskFilterManager = new TaskFilterManager(_taskDataManager);
+        // _appWindow = new AppWindow();
     }
 
     public CommandController(DataSyncManager dataSyncManager,
@@ -94,34 +103,31 @@ public class CommandController {
                 Task<?> task = _taskDataManager.addTask(addParameter);
                 if (task == null) {
                     return ADD_ERROR_MESSAGE;
-                }
+                } else {
+                // UIprocess();
                 return String.format(ADDED_MESSAGE, task.getType(),
                         task.getDescription());
+                }
             }
             case DELETE: {
-                // GUI: ask user confirmation
-                // isConfirmedDelete()
                 DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
-                // TaskDataManager.deleteTask(deleteparams);
-                // deleteparams: (int id)
-                // ArrayList<ArrayList<String>> display =
-                // TaskFilterManager.getAllTask();
-                // call GUI display here
-                return TO_BE_DONE;
+                Task<?> task = _taskDataManager.deleteTask(deleteParameter);
+                if (task == null){
+                	return DELETE_ERROR_MESSAGE;
+                } else {
+                	return String.format(DELETED_MESSAGE, task.getType(), 
+                			task.getDescription());
+                }
             }
             case MODIFY: {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
-                // TaskDataManager.editTask(addparams);
-                // editparams: (int id, String des) (int id, String des, Char
-                // prir) (int id, Char prir)
-                // (int id, String des, Date dead) (int id, Date dead)
-                // (int id, String des, Date start, Date end) (int id, Date
-                // start, Date end) // what happen if user want to change start
-                // or end only?
-                // ArrayList<ArrayList<String>> display =
-                // TaskFilterManager.getAllTask();
-                // call GUI display here
-                return TO_BE_DONE;
+                Task<?> task = _taskDataManager.modifyTask(modifyParameter);
+                if (task == null){
+                	return MODIFY_ERROR_MESSAGE;
+                } else {
+                	return String.format(MODIFIED_MESSAGE, task.getType(),
+                			task.getDescription());
+                }
             }
             case DISPLAY: {
                 String filterParameterString = _inputString[PARAMETER_POSITION];
@@ -139,17 +145,21 @@ public class CommandController {
                 SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
                 ArrayList<Task<?>> searchResult = _taskFilterManager
                         .searchTasks(searchParameter);
-                // ArrayList<ArrayList<String>> display =
-                // TaskFilterManager.searchTask(searchparams);
-                // searchparams: (String word), (String word1, String word2,
-                // String word1 + word2), ...
-                // (algorithm: combination of words)
-                // call GUI display here
-                return TO_BE_DONE;
+                if (searchResult.size()==0){
+                	return SEARCH_NOT_FOUND;
+                } else {
+                	return getTaskListString(searchResult);
+                }
             }
             case COMPLETE: {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
-                return TO_BE_DONE;
+                Task<?> task = _taskDataManager.markCompleted(completeParameter);
+                if (task==null){
+                	return COMPLETE_ERROR_MESSAGE;
+                } else {
+                	return String.format(COMPLETED_MESSAGE, task.getType(),
+                			task.getDescription());
+                }
             }
             case UNDO: {
                 return TO_BE_DONE;
@@ -168,6 +178,34 @@ public class CommandController {
         }
         return INVALID_COMMAND;
     }
+    
+    /*
+    private void UIprocess(){
+    	ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+    	SortedSet<TodoTask> todo = _taskDataManager.getAllTodoTasks();
+    	SortedSet<DeadlineTask> deadline = _taskDataManager.getAllDeadlineTasks();
+    	SortedSet<EventTask> event = _taskDataManager.getAllEventTasks();
+    	for (int i=0; i<3; i++){
+    		output.add(new ArrayList<String>());
+    	}
+    	output.get(0).add("1. empty");
+    	output.get(1).add("2. empty");
+    	output.get(2).add("3. empty");
+		Iterator<TodoTask> iterTodo = todo.iterator();
+		while (iterTodo.hasNext()){
+			output.get(0).add(iterTodo.next().getDescription());
+		}
+		Iterator<DeadlineTask> iterDeadline = deadline.iterator();
+		while (iterDeadline.hasNext()){
+			output.get(1).add(iterDeadline.next().getDescription());
+		}
+		Iterator<EventTask> iterEvent = event.iterator();
+		while (iterEvent.hasNext()){
+			output.get(2).add(iterEvent.next().getDescription());
+		}
+    	_appWindow.processOutput(output);
+    }
+    */
 
     private String getTaskListString(ArrayList<Task<?>> taskList) {
         StringBuilder sb = new StringBuilder();
