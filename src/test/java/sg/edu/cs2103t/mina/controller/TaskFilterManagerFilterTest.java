@@ -159,6 +159,8 @@ public class TaskFilterManagerFilterTest {
 	@Test
 	public void testPriority() {
 		ArrayList<Task<?>> test = getResult(FilterType.PRIORITY);
+		logger.info(tdmStub.getAllDeadlineTasks());
+		logger.info(test);
 		assertTrue("Priorities are not sorted!", checkPriority(test));
 	}
 	

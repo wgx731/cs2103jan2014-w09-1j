@@ -16,7 +16,8 @@ public enum FilterType {
 	COMPLETE("complete"),
 	COMPLETE_PLUS("+complete"),
 	PRIORITY("priority"), 
-	START("start");
+	START("start"), 
+	END("end");
 		
 	private String _type;
 		

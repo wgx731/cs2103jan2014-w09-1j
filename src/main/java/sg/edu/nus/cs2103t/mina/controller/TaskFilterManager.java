@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.SortedSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import sg.edu.cs2103t.mina.controller.TaskFilterManagerFilterTest;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
@@ -24,6 +28,9 @@ public class TaskFilterManager {
 	private static final int FIRST_LETTER = 0;
 	private TaskDataManager _taskStore;
 
+	private static Logger logger = LogManager
+			.getLogger(TaskFilterManagerFilterTest.class.getName());
+	
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
 	}

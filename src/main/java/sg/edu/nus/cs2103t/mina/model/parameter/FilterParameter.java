@@ -25,9 +25,8 @@ public class FilterParameter {
 												Date end) {
 		
 		_filters = getFilters(newFilters);
-		
-		_end = end;
-		_filters.add(FilterType.END);
+		setStart(start);
+		setEnd(end);
 	}
 
 	public ArrayList<FilterType> getFilters() {
@@ -58,11 +57,15 @@ public class FilterParameter {
 	}
 
 	public void setStart(Date start) {
+		
+		boolean hasStartFilter =  _filters.contains(FilterType.START);
+		
 		_start = start;
-		if(start!=null && _filters.contains(FilterType.START)) {
+		
+		if(start!=null && !hasStartFilter) {
 			_filters.add(FilterType.START);
-		} else if (_filters.contains(FilterType.START)){
-			
+		} else if (hasStartFilter){
+			_filters.remove(FilterType.START);
 		}
 	}
 
@@ -71,7 +74,15 @@ public class FilterParameter {
 	}
 
 	public void setEnd(Date end) {
+		boolean hasEndFilter =  _filters.contains(FilterType.END);
+		
 		_end = end;
+		
+		if(end!=null && !hasEndFilter) {
+			_filters.add(FilterType.END);
+		} else if (hasEndFilter){
+			_filters.remove(FilterType.END);
+		}
 	}
 	
 }
