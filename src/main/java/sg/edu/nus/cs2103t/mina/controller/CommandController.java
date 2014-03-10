@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
@@ -79,7 +80,11 @@ public class CommandController {
         }
         CommandType command;
         command = determineCommand();
-        return processUserCommand(command);
+        try{
+        	return processUserCommand(command);
+        } catch (Exception e){
+        	return processUserCommand(CommandType.INVALID);
+        }
     }
 
     // This operation is used to get the user input and extract the command from
@@ -91,7 +96,6 @@ public class CommandController {
         } catch (IllegalArgumentException e) {
             return CommandType.INVALID;
         }
-
     }
 
     // This operation is used to process the extracted command and call the
@@ -178,34 +182,6 @@ public class CommandController {
         }
         return INVALID_COMMAND;
     }
-    
-    /*
-    private void UIprocess(){
-    	ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
-    	SortedSet<TodoTask> todo = _taskDataManager.getAllTodoTasks();
-    	SortedSet<DeadlineTask> deadline = _taskDataManager.getAllDeadlineTasks();
-    	SortedSet<EventTask> event = _taskDataManager.getAllEventTasks();
-    	for (int i=0; i<3; i++){
-    		output.add(new ArrayList<String>());
-    	}
-    	output.get(0).add("1. empty");
-    	output.get(1).add("2. empty");
-    	output.get(2).add("3. empty");
-		Iterator<TodoTask> iterTodo = todo.iterator();
-		while (iterTodo.hasNext()){
-			output.get(0).add(iterTodo.next().getDescription());
-		}
-		Iterator<DeadlineTask> iterDeadline = deadline.iterator();
-		while (iterDeadline.hasNext()){
-			output.get(1).add(iterDeadline.next().getDescription());
-		}
-		Iterator<EventTask> iterEvent = event.iterator();
-		while (iterEvent.hasNext()){
-			output.get(2).add(iterEvent.next().getDescription());
-		}
-    	_appWindow.processOutput(output);
-    }
-    */
 
     private String getTaskListString(ArrayList<Task<?>> taskList) {
         StringBuilder sb = new StringBuilder();
@@ -423,5 +399,37 @@ public class CommandController {
         } else {
             return TaskType.UNKOWN;
         }
+    }
+    
+    public ArrayList<String> getTodoTask(){
+    	SortedSet<TodoTask> todo = _taskDataManager.getAllTodoTasks();
+    	ArrayList<TodoTask> todoList = new ArrayList<TodoTask>(todo);
+    	ArrayList<String> todoString = new ArrayList<String>();
+    	for (int i=0; i<todoList.size(); i++){
+    		todoString.add((i+1)+". "+todoList.get(i).getDescription());
+    	}
+    	return todoString;
+    }
+    
+    public ArrayList<String> getDeadlineTask(){
+    	SortedSet<DeadlineTask> deadline = _taskDataManager.getAllDeadlineTasks();
+    	ArrayList<DeadlineTask> deadlineList = new ArrayList<DeadlineTask>(deadline);
+    	ArrayList<String> deadlineString = new ArrayList<String>();
+    	for (int i=0; i<deadlineList.size(); i++){
+    		deadlineString.add((i+1)+". "+deadlineList.get(i).getDescription()+" by "+
+    					deadlineList.get(i).getEndTime());
+    	}
+    	return deadlineString;
+    }
+    
+    public ArrayList<String> getEventTask(){
+    	SortedSet<EventTask> event = _taskDataManager.getAllEventTasks();
+    	ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
+    	ArrayList<String> eventString = new ArrayList<String>();
+    	for (int i=0; i<eventList.size(); i++){
+    		eventString.add((i+1)+". "+eventList.get(i).getDescription()+" from "+
+    				eventList.get(i).getStartTime()+" to "+eventList.get(i).getEndTime());
+    	}
+    	return eventString;
     }
 }
