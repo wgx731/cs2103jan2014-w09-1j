@@ -74,6 +74,7 @@ public class FilterParameter {
 	}
 
 	public void setEnd(Date end) {
+		
 		boolean hasEndFilter =  _filters.contains(FilterType.END);
 		
 		_end = end;

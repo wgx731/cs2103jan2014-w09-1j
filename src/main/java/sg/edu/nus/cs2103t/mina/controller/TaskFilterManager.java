@@ -17,7 +17,6 @@ import java.util.SortedSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.cs2103t.mina.controller.TaskFilterManagerFilterTest;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
@@ -29,7 +28,7 @@ public class TaskFilterManager {
 	private TaskDataManager _taskStore;
 
 	private static Logger logger = LogManager
-			.getLogger(TaskFilterManagerFilterTest.class.getName());
+			.getLogger(TaskFilterManager.class.getName());
 	
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
@@ -47,7 +46,7 @@ public class TaskFilterManager {
 	public ArrayList<Task<?>> filterTask(FilterParameter param) {
 		
 		// GuardClause
-		assert(param==null);
+		assert(param!=null);
 
 		ArrayList<FilterType> filters = param.getFilters();
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
@@ -189,7 +188,7 @@ public class TaskFilterManager {
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();		
 		
 		//Guard clause
-		assert(param==null);
+		assert(param!=null);
 		if(keywords.isEmpty()) {
 			return result;
 		}
