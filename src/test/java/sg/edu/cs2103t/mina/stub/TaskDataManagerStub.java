@@ -1,6 +1,6 @@
 package sg.edu.cs2103t.mina.stub;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.SortedSet;
@@ -8,10 +8,13 @@ import java.util.SortedSet;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
-import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 public class TaskDataManagerStub extends TaskDataManager {
+
+    public static final int ONE_HOUR = 1000 * 60 * 60;
+
+    public static final int ONE_DAY = ONE_HOUR * 24;
 
     public static final int PUNCTUATION_SEARCH = 0;
     
@@ -44,11 +47,7 @@ public class TaskDataManagerStub extends TaskDataManager {
         _compDeadlineTasks.clear();
         
         char[] roulette = { 'L', 'M', 'H' };
-
-        Random rand = new Random();
-        int oneDay = 1000 * 60 * 60 * 24;
-        int oneHour = 1000 * 60 * 60;
-
+        
         for (int i = 0; i < 20; i++) {
 
             TodoTask newTodoTask = new TodoTask(
@@ -60,12 +59,12 @@ public class TaskDataManagerStub extends TaskDataManager {
                 _todoTasks.add(newTodoTask);
             }
 
-            int time = oneDay + rand.nextInt(oneDay * 15);
+            int time = ONE_DAY * (i+1);
             Date startTime = new Date();
             startTime.setTime(startTime.getTime() + time);
 
             Date endDate = new Date(startTime.getTime());
-            endDate.setTime(startTime.getTime() + oneHour * 2);
+            endDate.setTime(startTime.getTime() + ONE_HOUR * 2);
 
             EventTask newEventTask = new EventTask("Event " + i, startTime,
                     endDate);
@@ -74,7 +73,7 @@ public class TaskDataManagerStub extends TaskDataManager {
                 Date pastStart = new Date((new Date()).getTime() - time);
                 newEventTask.setStartTime(pastStart);
 
-                Date pastEnd = new Date(pastStart.getTime() + oneHour * 2);
+                Date pastEnd = new Date(pastStart.getTime() + ONE_HOUR * 2);
                 newEventTask.setEndTime(pastEnd);
 
                 newEventTask.setCompleted(true);
@@ -84,7 +83,7 @@ public class TaskDataManagerStub extends TaskDataManager {
                 _eventTasks.add(newEventTask);
             }
 
-            time = oneDay + rand.nextInt(oneDay * 15);
+            time = ONE_DAY * (i+1) ;
             startTime = new Date();
             startTime.setTime(startTime.getTime() + time);
 

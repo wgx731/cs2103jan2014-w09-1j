@@ -11,20 +11,35 @@ package sg.edu.nus.cs2103t.mina.controller;
  */
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {
 
-	private static final int FIRST_LETTER = 0;
+	private static final boolean IS_END = false;
+
+    private static final boolean IS_START = true;
+
+    private static final int FIRST_LETTER = 0;
+	
+	public static final int ONE_SECOND = 1000;
+	public static final int ONE_MINUTE = ONE_SECOND * 60;
+    public static final int ONE_HOUR = ONE_MINUTE * 60;
+    public static final int ONE_DAY = ONE_HOUR * 24;
+    
 	private TaskDataManager _taskStore;
 
 	private static Logger logger = LogManager
@@ -43,12 +58,11 @@ public class TaskFilterManager {
 	 * An arraylist of tasks that satisfied the task. 
 	 * Empty if there's none
 	 */
-	public ArrayList<Task<?>> filterTask(FilterParameter param) {
+	public ArrayList<Task<?>> filterTask(FilterParameter filters) {
 		
 		// GuardClause
-		assert(param!=null);
+		assert(filters.getFilters()!=null);
 
-		ArrayList<FilterType> filters = param.getFilters();
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
 		
 		//All tasks are already sorted. This is added for user's brevity 
@@ -79,7 +93,7 @@ public class TaskFilterManager {
 		
 	}
 
-	private ArrayList<Task<?>> filterUncompletedTasks(ArrayList<FilterType> filters) {
+	private ArrayList<Task<?>> filterUncompletedTasks(FilterParameter filters) {
 		
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
 		ArrayList<Task<?>> neededTasks;
@@ -103,10 +117,116 @@ public class TaskFilterManager {
 			result.addAll(neededTasks);
 		}
 		
+		if(hasDateRange(filters)) {
+		    result = filterByDate(result, filters);
+		}
+		
 		return result;
 	}
+	
+	/**
+	 * Filter each task by its date.
+	 * @param result 
+	 * @param filters 
+	 * @param start Starting date
+	 * @param end ending date
+	 * @return The pruned arraylist
+	 */
+	private ArrayList<Task<?>> filterByDate(ArrayList<Task<?>> result, 
+	                                        FilterParameter filters) {
+	    
+	    ArrayList<Task<?>> filteredResult = new ArrayList<Task<?>>();
+	    Date start = new Date(filters.getStart().getTime());
+	    Date end = new Date(filters.getEnd().getTime());
+	    boolean hasTime = filters.hasTime();
+	    
+        if (!hasTime) {
+            start = sanitiseDate(start, IS_START);
+            end = sanitiseDate(end, IS_END);    
+        }
+	    
+        logger.info(start);
+        logger.info(end);
+        
+	    for (Task<?> task: result) {
+	        if(task instanceof TodoTask || 
+	                isInDateRange(task, start, end, hasTime)) {
+	            filteredResult.add(task);
+	        }
+	    }
+	    
+        return filteredResult;
+    }
+	
+	/**
+	 * Check to see whether is it in date range
+	 * @param task
+	 * @param start
+	 * @param end
+	 * @param hasTime 
+	 * @return
+	 */
+    private boolean isInDateRange(Task<?> task, 
+                                 Date start, Date end, 
+                                 boolean hasTime) {
+        
+        //Guard clause
+        assert(task instanceof EventTask || 
+                task instanceof DeadlineTask);
+        assert(start!=null && end!=null);
+        
+        Date targetDate;
+        if (task instanceof EventTask) {
+            targetDate = ((EventTask) task).getStartTime();
+        } else {
+            targetDate = ((DeadlineTask) task).getEndTime();
+        }
 
-	private ArrayList<Task<?>> filterCompletedTasks(ArrayList<FilterType> filters) {
+        return targetDate.after(start) && targetDate.before(end);
+    }
+    
+    /**
+     * Sanitise the date based on its start or end.
+     *
+     * @param date 
+     * The date in question
+     * @param isStart 
+     * Is it a start date or end
+     * @return 
+     * If it's start, set to 23:59:59 of yesterday's start date
+     * If it's end, set to 23:59 of end date. 
+     */
+    private Date sanitiseDate(Date date, boolean isStart) {
+        
+        Calendar currDate = Calendar.getInstance();
+        currDate.setTime(date);
+        
+        if (isStart) {
+            currDate.set(currDate.get(Calendar.YEAR), 
+                        currDate.get(Calendar.MONTH), 
+                        currDate.get(Calendar.DATE) - 1, 
+                        23, 59, 59);
+        } else {
+            currDate.set(currDate.get(Calendar.YEAR), 
+                    currDate.get(Calendar.MONTH), 
+                    currDate.get(Calendar.DATE) + 1, 
+                    0, 0, 0);            
+        }
+        
+        return currDate.getTime();
+    }
+
+    /**
+	 * Check to see if there is date range
+	 * @param filters
+	 * @return
+	 */
+	private boolean hasDateRange(FilterParameter filters) {
+        return filters.contains(FilterType.START) && 
+               filters.contains(FilterType.END);
+    }
+
+    private ArrayList<Task<?>> filterCompletedTasks(FilterParameter filters) {
 		
 		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
 		ArrayList<Task<?>> neededTasks;
@@ -161,15 +281,15 @@ public class TaskFilterManager {
 	 * @return
 	 * 				a few filter that contains every tasktype filters
 	 */
-	private ArrayList<FilterType> fillEmptyFilter() {
+	private FilterParameter fillEmptyFilter() {
 		
-		ArrayList<FilterType> newFilters = new ArrayList<FilterType>();
+		ArrayList<String> newFilters = new ArrayList<String>();
 		
-		newFilters.add(FilterType.DEADLINE);
-		newFilters.add(FilterType.EVENT);
-		newFilters.add(FilterType.TODO);
+		newFilters.add(FilterType.DEADLINE.getType());
+		newFilters.add(FilterType.EVENT.getType());
+		newFilters.add(FilterType.TODO.getType());
 		
-		return newFilters;
+		return new FilterParameter(newFilters);
 	}
 
 	
@@ -193,7 +313,7 @@ public class TaskFilterManager {
 			return result;
 		}
 		
-		ArrayList<FilterType> allTypes = fillEmptyFilter();
+		FilterParameter allTypes = fillEmptyFilter();
 		ArrayList<Task<?>> uncompletedTasks = filterUncompletedTasks(allTypes);
 		
 		for (Task<?> task: uncompletedTasks) {

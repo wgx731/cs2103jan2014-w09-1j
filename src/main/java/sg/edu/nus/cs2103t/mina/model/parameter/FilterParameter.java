@@ -10,9 +10,10 @@ public class FilterParameter {
 	private ArrayList<FilterType> _filters;
 	private Date _start;
 	private Date _end;
-	
-	public FilterParameter(ArrayList<String> newFilters) {
-		this(newFilters, null, null);
+	private boolean _hasTime;
+
+    public FilterParameter(ArrayList<String> newFilters) {
+		this(newFilters, null, null, false);
 	}
 
 	public FilterParameter() {
@@ -21,15 +22,24 @@ public class FilterParameter {
 		_end = null;
 	}
 
-	public FilterParameter(ArrayList<String> newFilters, Date start,
-												Date end) {
+	/**
+	 * Create a new filer parameter with 
+	 * @param newFilters
+	 * @param start
+	 * @param end
+	 */
+	public FilterParameter(ArrayList<String> newFilters, 
+	                        Date start,
+							Date end,
+							boolean hasTime) {
 		
 		_filters = getFilters(newFilters);
 		setStart(start);
 		setEnd(end);
+		_hasTime = hasTime;
 	}
 
-	public ArrayList<FilterType> getFilters() {
+    public ArrayList<FilterType> getFilters() {
 		return _filters;
 	}
 
@@ -59,7 +69,6 @@ public class FilterParameter {
 	public void setStart(Date start) {
 		
 		boolean hasStartFilter =  _filters.contains(FilterType.START);
-		
 		_start = start;
 		
 		if(start!=null && !hasStartFilter) {
@@ -76,7 +85,6 @@ public class FilterParameter {
 	public void setEnd(Date end) {
 		
 		boolean hasEndFilter =  _filters.contains(FilterType.END);
-		
 		_end = end;
 		
 		if(end!=null && !hasEndFilter) {
@@ -86,4 +94,19 @@ public class FilterParameter {
 		}
 	}
 	
+   public boolean hasTime() {
+        return _hasTime;
+    }
+	
+	public boolean contains(FilterType type) {
+	    return _filters.contains(type);
+	}
+	
+	public boolean remove(FilterType type) {
+	    return _filters.remove(type);
+	}
+	
+	public boolean isEmpty() {
+	    return _filters.isEmpty();
+	}
 }
