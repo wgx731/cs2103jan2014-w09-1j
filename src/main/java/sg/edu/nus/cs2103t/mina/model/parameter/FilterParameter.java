@@ -10,8 +10,6 @@ public class FilterParameter {
 	private ArrayList<FilterType> _filters;
 	private Date _start;
 	private Date _end;
-	private boolean hasStart;
-	private boolean hasEnd;
 	
 	public FilterParameter(ArrayList<String> newFilters) {
 		this(newFilters, null, null);
@@ -22,50 +20,14 @@ public class FilterParameter {
 		_start = null;
 		_end = null;
 	}
-	
-	public Date getStart() {
-		return _start;
-	}
-
-	public void setStart(Date start) {
-		hasStart = (start==null);
-		_start = start;
-	}
-
-	public Date getEnd() {
-		return _end;
-	}
-
-	public void setEnd(Date end) {
-		hasEnd = (end==null);
-		_end = end;
-	}
-
-	public boolean hasStart() {
-		return hasStart;
-	}
-
-	public boolean hasEnd() {
-		return hasEnd;
-	}
 
 	public FilterParameter(ArrayList<String> newFilters, Date start,
 												Date end) {
+		
 		_filters = getFilters(newFilters);
-		_start = start;
+		
 		_end = end;
-		
-		if(start==null) {
-			hasStart = false;
-		} else {
-			hasStart = true;
-		}
-		
-		if(end==null) {
-			hasEnd = false;
-		} else {
-			hasEnd = true;
-		}
+		_filters.add(FilterType.END);
 	}
 
 	public ArrayList<FilterType> getFilters() {
@@ -89,6 +51,27 @@ public class FilterParameter {
 			}
 		}
 		return filters;
+	}
+	
+	public Date getStart() {
+		return _start;
+	}
+
+	public void setStart(Date start) {
+		_start = start;
+		if(start!=null && _filters.contains(FilterType.START)) {
+			_filters.add(FilterType.START);
+		} else if (_filters.contains(FilterType.START)){
+			
+		}
+	}
+
+	public Date getEnd() {
+		return _end;
+	}
+
+	public void setEnd(Date end) {
+		_end = end;
 	}
 	
 }

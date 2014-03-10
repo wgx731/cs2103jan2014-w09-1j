@@ -15,7 +15,8 @@ public enum FilterType {
 	EVENT("event"),
 	COMPLETE("complete"),
 	COMPLETE_PLUS("+complete"),
-	PRIORITY("priority");
+	PRIORITY("priority"), 
+	START("start");
 		
 	private String _type;
 		

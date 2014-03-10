@@ -361,6 +361,14 @@ public class TaskFilterManagerFilterTest {
 		assertTrue("Contains all task!", checkAllUncompletedTasks(test));
 	}
 	
+	/**
+	 * Test the date filter by range, start to end
+	 */
+	@Test
+	public void testDateFilterByRange(){
+		assertTrue(true);
+	}
+
 	private boolean checkTwoTaskTypes(ArrayList<Task<?>> test, 
 																		TaskType firstType, 
 																		TaskType secondType, 
