@@ -378,7 +378,7 @@ public class TaskFilterManagerFilterTest {
         // Test dates only. No time (00:00)
         // A week from now.
         Date[] dateRange = getRange(TODAY, new int[0], 
-                                    WEEK, 0, NO_TIME);
+                                    WEEK, new int[0], NO_TIME);
         ArrayList<Task<?>> test = getResult(dateFilters, dateRange[START],
                                             dateRange[END], NO_TIME);
         
@@ -392,8 +392,8 @@ public class TaskFilterManagerFilterTest {
         
         //Test date with time.
         //A week from now.
-        dateRange = getRange(2, new int[]{12,00,0},
-                             5, TaskFilterManager.ONE_HOUR *1 *-1, 
+        dateRange = getRange(2, new int[]{12,0,0},
+                             5, new int[]{9,0,0}, 
                              HAS_TIME);   
         test = getResult(dateFilters, dateRange[START],
                          dateRange[END], HAS_TIME);  
@@ -405,14 +405,14 @@ public class TaskFilterManagerFilterTest {
         assertEquals(expected, test);
         
         //Test date with start only
-        dateRange = getRange(TODAY, new int[0], 0, 0, NO_TIME);
+        dateRange = getRange(TODAY, new int[0], 0, new int[0], NO_TIME);
         test = getResult(dateFilters, dateRange[START],
                         null, HAS_TIME);  
         assertEquals(events, test);
        
         //Test date with end only
         dateRange = getRange(2, new int[]{12,00,0},
-                             5, TaskFilterManager.ONE_HOUR *1 *-1, HAS_TIME);
+                             5, new int[]{9,0,0}, HAS_TIME);
         test = getResult(dateFilters, null,
                          dateRange[END], HAS_TIME);  
         
@@ -443,7 +443,7 @@ public class TaskFilterManagerFilterTest {
      * A tuple with a start date and end date
      */
     private Date[] getRange(int startNumDay, int[] startMs, 
-                            int endNumDay, int endMs, boolean hasTime) {
+                            int range, int[] endMs, boolean hasTime) {
 
         Calendar startDate = Calendar.getInstance();
         startDate.setTime(new Date(TaskDataManagerStub.START_TIME));
@@ -461,9 +461,20 @@ public class TaskFilterManagerFilterTest {
         logger.info("START: " + startDate.getTime());
         
         Calendar endDate = Calendar.getInstance();
-        endDate.setTimeInMillis(startDate.getTimeInMillis() + 
-                               TaskDataManagerStub.ONE_DAY * endNumDay + 
-                               endMs);
+        endDate.setTime(startDate.getTime());
+        
+        if(hasTime) {
+            endDate.set(startDate.get(Calendar.YEAR), 
+                        startDate.get(Calendar.MONTH), 
+                        startDate.get(Calendar.DAY_OF_MONTH) + range, 
+                        endMs[HOUR], endMs[MIN], endMs[SEC]);
+        } else {
+            endDate.set(startDate.get(Calendar.YEAR), 
+                    startDate.get(Calendar.MONTH), 
+                    startDate.get(Calendar.DAY_OF_MONTH) + range, 
+                    0, 0, 0);           
+        }
+        
         logger.info("END: " + endDate.getTime());
         return new Date[]{startDate.getTime(), endDate.getTime()};
     }
