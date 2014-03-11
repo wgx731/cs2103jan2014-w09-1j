@@ -399,9 +399,10 @@ public class TaskFilterManagerFilterTest {
                          dateRange[END], HAS_TIME);  
         
         expected = new ArrayList<EventTask>();
-        for(int i=3; i<5; i++) {
+        for(int i=2; i<5; i++) {
             expected.add(events.get(i));
         } 
+
         assertEquals(expected, test);
         
         //Test date with start only

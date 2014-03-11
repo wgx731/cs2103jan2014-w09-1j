@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.SortedSet;
+import java.util.TimeZone;
 
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -133,9 +134,15 @@ public class TaskDataManagerStub extends TaskDataManager {
     		    _eventTasks.clear();
     		    _deadlineTasks.clear();
     		    
-    		    Calendar baseDate = Calendar.getInstance();
+    		    Calendar baseDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     		    baseDate.setTime(new Date(START_TIME));
-    		    
+    		   
+    		    baseDate.set(baseDate.get(Calendar.YEAR), 
+    		            baseDate.get(Calendar.MONTH), 
+    		            baseDate.get(Calendar.DATE), 
+    		            11, 45, 00);
+    		    baseDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+    		    System.out.println(baseDate.getTime());
     		    EventTask newEvent;
     		    DeadlineTask newDeadline;
     		    Date startDate;
