@@ -4,7 +4,8 @@
 	<Filter type="ThresholdFilter" level="info" />
 	<Appenders>
 		<Appender type="Console" name="STDOUT">
-			<Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %n===%n%m%n===%n" />
+			<Layout type="PatternLayout"
+				pattern="======%nTime: %d %nClass: %C{1.} [%t]%nMessage:[%p] %m%n======%n" />
 			<Filters>
 				<Filter type="MarkerFilter" marker="FLOW" onMatch="DENY"
 					onMismatch="NEUTRAL" />

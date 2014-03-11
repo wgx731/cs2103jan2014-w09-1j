@@ -89,7 +89,7 @@ public class MinaDriver {
         uiView.displayOutput(WELCOME_MESSAGE);
         while (true) {
             String userInput = uiView.getUserInput();
-            //TODO: try to split UI and while true loop
+            // TODO: try to split UI and while true loop
             if (userInput == null) {
                 continue;
             }
