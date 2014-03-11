@@ -230,7 +230,7 @@ public class TaskDataManager {
                 EventTask deletedEventTask = deleteEventTask(deleteParameters.getTaskId());
                 return deletedEventTask;
             default:
-            	System.out.println("Unable to determine Task Type.");
+            	//System.out.println("Unable to determine Task Type.");
                 return null;
         }
     }
@@ -246,7 +246,7 @@ public class TaskDataManager {
     			return deletedTodoTask;
     		}
     	}
-    	System.out.println("Unable to find todo task to delete.");
+    	//System.out.println("Unable to find todo task to delete.");
         return null;
     }
 
@@ -261,7 +261,7 @@ public class TaskDataManager {
     			return deletedDeadlineTask;
     		}
     	}
-    	System.out.println("Unable to find deadline task to delete.");
+    	//System.out.println("Unable to find deadline task to delete.");
         return null;
     }
 
@@ -276,7 +276,7 @@ public class TaskDataManager {
     			return deletedEventTask;
     		}
     	}
-    	System.out.println("Unable to find event task to delete.");
+    	//System.out.println("Unable to find event task to delete.");
         return null;
     }
 
@@ -305,7 +305,7 @@ public class TaskDataManager {
         		EventTask deletedEventTask = markEventTask(completeParameters.getTaskId());
         		return deletedEventTask;
         	default:
-        	System.out.println("Unable to determine Task Type.");
+        	//System.out.println("Unable to determine Task Type.");
             	return null;
     	}
     	
