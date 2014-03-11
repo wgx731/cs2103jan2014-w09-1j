@@ -122,9 +122,6 @@ public class DataParameter {
                 _description += (" by " + _end);
                 _end = null;
             } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.TODO) {
-                _description += (" to " + _end);
-                _end = null;
-            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.TODO){
                 _description += ( " from " + _start + " to " + _end);
                 _start = null;
                 _end = null;

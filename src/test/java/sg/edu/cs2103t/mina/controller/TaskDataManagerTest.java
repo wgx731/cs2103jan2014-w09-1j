@@ -208,8 +208,44 @@ public class TaskDataManagerTest {
                         TaskType.DEADLINE, TaskType.TODO, 1)));
         assertEquals(1, tdmTest.getAllTodoTasks().size());
         assertEquals(0, tdmTest.getAllDeadlineTasks().size());
-        
-        //TODO: deadline->event, event->To-do, event->deadline 
+
+        tdmTest.addTask(new DataParameter(
+                "Deadline task becomes an EventTask.", 'M', null, new Date(
+                        currDateMilliSec), null, TaskType.DEADLINE, 1));
+        assertEquals("Modify deadline to event", new EventTask(
+                "Deadline task becomes an EventTask.", new Date(
+                        currDateMilliSec), new Date(currDateMilliSec), 'M'),
+                tdmTest.modifyTask(new DataParameter(null, 'M', new Date(
+                        currDateMilliSec), null, TaskType.DEADLINE,
+                        TaskType.EVENT, 1)));
+        assertEquals(0, tdmTest.getAllDeadlineTasks().size());
+        assertEquals(1, tdmTest.getAllEventTasks().size());
+
+        tdmTest.resetTrees();
+
+        tdmTest.addTask(new DataParameter("Event task becomes TodoTask.", 'M',
+                new Date(currDateMilliSec), new Date(currDateMilliSec), null,
+                TaskType.EVENT, 1));
+        assertEquals("Modify deadline to event",
+                new TodoTask(
+                        "Event task becomes TodoTask. from " + new Date(
+                                currDateMilliSec) +
+                                " to " +
+                                new Date(currDateMilliSec), 'M'),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
+                        TaskType.EVENT, TaskType.TODO, 1)));
+        assertEquals(0, tdmTest.getAllEventTasks().size());
+        assertEquals(1, tdmTest.getAllTodoTasks().size());
+
+        tdmTest.addTask(new DataParameter("Event task becomes DeadlineTask.",
+                'M', new Date(currDateMilliSec), new Date(currDateMilliSec),
+                null, TaskType.EVENT, 2));
+        assertEquals("Modify deadline to event", new TodoTask(
+                "Event task becomes DeadlineTask."),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
+                        TaskType.EVENT, TaskType.DEADLINE, 1)));
+        assertEquals(0, tdmTest.getAllEventTasks().size());
+        assertEquals(1, tdmTest.getAllDeadlineTasks().size());
         
         tdmTest.resetTrees();
         
