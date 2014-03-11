@@ -30,7 +30,7 @@ public class CommandController {
     private static final String DELETED_MESSAGE = "%1$s task %2$s has been deleted.\r\n";
     private static final String DELETE_ERROR_MESSAGE = "Error occured whe system try to delete task.\r\n";
     private static final String MODIFIED_MESSAGE = "Modified. %1$s task %2$s.\r\n";
-    private static final String MODIFY_ERROR_MESSAGE = "Error occured whe system try to modify task.\r\n";
+    private static final String MODIFY_ERROR_MESSAGE = "Error occured when system try to modify task.\r\n";
     private static final String COMPLETED_MESSAGE = "%1$s task %2$s has been makred as completed.\r\n";
     private static final String COMPLETE_ERROR_MESSAGE = "Error occured whe system try to mark task as completed.\r\n";
     private static final String SEARCH_NOT_FOUND = "Search cannot find any result.\r\n";
@@ -104,6 +104,9 @@ public class CommandController {
         switch (command) {
             case ADD: {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
+                if (addParameter == null){
+                   	return INVALID_COMMAND;
+                }
                 Task<?> task = _taskDataManager.addTask(addParameter);
                 if (task == null) {
                     return ADD_ERROR_MESSAGE;
@@ -125,6 +128,9 @@ public class CommandController {
             }
             case MODIFY: {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
+            	if (modifyParameter==null){
+            	  	return INVALID_COMMAND;
+            	}
                 Task<?> task = _taskDataManager.modifyTask(modifyParameter);
                 if (task == null){
                 	return MODIFY_ERROR_MESSAGE;
@@ -231,8 +237,13 @@ public class CommandController {
                 Date startDate = DateUtil.parse(parameters
                         .get(indexOfStartDate));
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
-                addParam.setStartDate(startDate);
-                addParam.setEndDate(endDate);
+                if (startDate.before(endDate)){
+                	addParam.setStartDate(startDate);
+                	addParam.setEndDate(endDate);
+                } else {
+                  	addParam = null;
+                 	return addParam;
+                }   
             } catch (Exception e) {
 
             }
@@ -329,21 +340,29 @@ public class CommandController {
             char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
             modifyParam.setPriority(priority);
         }
+        if (parameters.contains("-end")) {
+            int indexOfEndDate = parameters.indexOf("-end") + 1;
+            try {
+                Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+                modifyParam.setEndDate(endDate);
+            } catch (Exception e) {
+
+            }
+        }
+        // NOTE: this can only detect error when user want to modify both start
+        // and end date, but not only one.
         if (parameters.contains("-start")) {
             int indexOfStartDate = parameters.indexOf("-start") + 1;
             try {
                 Date startDate = DateUtil.parse(parameters
                         .get(indexOfStartDate));
                 modifyParam.setStartDate(startDate);
-            } catch (Exception e) {
-
-            }
-        }
-        if (parameters.contains("-end")) {
-            int indexOfEndDate = parameters.indexOf("-end") + 1;
-            try {
-                Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
-                modifyParam.setEndDate(endDate);
+                if (modifyParam.getEndDate()!=null){
+                   	if (modifyParam.getStartDate().after(modifyParam.getEndDate())){
+                   		modifyParam = null;
+                   		return modifyParam;
+                	}
+                }
             } catch (Exception e) {
 
             }

@@ -11,7 +11,6 @@ import sg.edu.nus.cs2103t.mina.controller.CommandController;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
-import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandControllerTest {
@@ -38,6 +37,9 @@ public class CommandControllerTest {
                 new DataParameter("meet friends", 'M', DateUtil
                         .parse("11/11/1111"), DateUtil.parse("12/12/1212"),
                         null, TaskType.EVENT, -1));
+        assertEquals(
+        		cc.processAddParameter("meet friends -start 12/12/1212 -end 11/11/1111 -priority L"),
+        		null);
         assertEquals(
                 cc.processAddParameter("meet friends -start 11/11/1111 -end 12/12/1212 -priority L"),
                 new DataParameter("meet friends", 'L', DateUtil
@@ -169,6 +171,9 @@ public class CommandControllerTest {
                 new DataParameter(null, 'H', DateUtil.parse("11/11/2011"),
                         DateUtil.parse("12/12/2012"), TaskType.EVENT,
                         TaskType.EVENT, 12));
+        assertEquals(
+        		cc.processModifyParameter("event 12 -start 12/12/2012 -end 11/11/2011 -priority H"),
+        		null);
         assertEquals(
                 cc.processModifyParameter("event 12 -description meet friends -end 12/12/2012 -priority H"),
                 new DataParameter("meet friends", 'H', null, DateUtil

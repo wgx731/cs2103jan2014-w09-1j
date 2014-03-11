@@ -40,6 +40,12 @@ public class TaskFilterManager {
     public static final int ONE_HOUR = ONE_MINUTE * 60;
     public static final int ONE_DAY = ONE_HOUR * 24;
     
+    public static final int HOUR = 0;
+    public static final int MIN = 0;
+    public static final int SEC = 0;
+    public static final int START_TIME[] = {23, 59, 59};
+    public static final int END_TIME[] = {0,0,0};
+    
 	private TaskDataManager _taskStore;
 
 	private static Logger logger = LogManager
@@ -142,7 +148,7 @@ public class TaskFilterManager {
 	    
         if (!hasTime) {
             start = sanitiseDate(start, IS_START);
-            end = sanitiseDate(end, IS_END);    
+            end = sanitiseDate(end, IS_END);
         }
         
         //Only EventTask / DeadlineTask will be checked
@@ -193,7 +199,7 @@ public class TaskFilterManager {
      * Sanitise the date based on its start or end.
      *
      * @param date 
-     * The date in question
+     * The date in questionexit
      * @param isStart 
      * Is it a start date or end
      * @return 
@@ -214,12 +220,12 @@ public class TaskFilterManager {
             currDate.set(currDate.get(Calendar.YEAR), 
                         currDate.get(Calendar.MONTH), 
                         currDate.get(Calendar.DATE) - 1, 
-                        23, 59, 59);
+                        START_TIME[HOUR], START_TIME[MIN], START_TIME[SEC]);
         } else {
             currDate.set(currDate.get(Calendar.YEAR), 
                     currDate.get(Calendar.MONTH), 
                     currDate.get(Calendar.DATE) + 1, 
-                    0, 0, 0);            
+                    END_TIME[HOUR], END_TIME[MIN], END_TIME[SEC]);            
         }
         
         return currDate.getTime();

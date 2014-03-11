@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.SortedSet;
+import java.util.TimeZone;
 
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -12,11 +13,16 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 public class TaskDataManagerStub extends TaskDataManager {
 
+    //Thu Jan 08 11:43:28 SGT 1970
+    public static final int START_TIME = 620008200; 
+
     public static final int ONE_HOUR = 1000 * 60 * 60;
-
     public static final int ONE_DAY = ONE_HOUR * 24;
-
+    public static final int ONE_WEEK = ONE_DAY * 7;
+    
     public static final int PUNCTUATION_SEARCH = 0;
+
+    public static final int DATE_RANGE_SEARCH = 1;
     
 		private static SortedSet<TodoTask> _todoTasks;
     private static SortedSet<EventTask> _eventTasks;
@@ -123,6 +129,61 @@ public class TaskDataManagerStub extends TaskDataManager {
     			_todoTasks.add(new TodoTask("3. Watch GITS 2nd gIg. Watch SAC as well."));
     			_todoTasks.add(new TodoTask("4. we , might . have ! a ; puntuation o problem } I {} think. "));
     			break;
+    		case DATE_RANGE_SEARCH :
+    		    
+    		    _eventTasks.clear();
+    		    _deadlineTasks.clear();
+    		    
+    		    Calendar baseDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    		    baseDate.setTime(new Date(START_TIME));
+    		   
+    		    baseDate.set(baseDate.get(Calendar.YEAR), 
+    		            baseDate.get(Calendar.MONTH), 
+    		            baseDate.get(Calendar.DATE), 
+    		            3, 45, 00);
+    		    baseDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+    		    EventTask newEvent;
+    		    DeadlineTask newDeadline;
+    		    Date startDate;
+    		    Date endDate;
+    		    
+    		    for(int i=0; i<5; i++) {
+    		        
+                    baseDate.set(baseDate.get(Calendar.YEAR), 
+                            baseDate.get(Calendar.MONTH), 
+                            baseDate.get(Calendar.DATE) + 1, 
+                            3, 45, 00);
+    		        
+        		    startDate = baseDate.getTime();
+        		    startDate.setTime(startDate.getTime());
+        		    endDate = new Date(startDate.getTime() + 2 * ONE_HOUR);
+        		    
+        		    newDeadline = new DeadlineTask("Daily Deadline " + (i+1), startDate);
+        		    newEvent = new EventTask("Dailies " + (i+1), startDate, endDate);
+        		    _eventTasks.add(newEvent);
+        		    _deadlineTasks.add(newDeadline);
+    		    }
+    		    
+    		    baseDate.setTime(new Date(START_TIME));
+    		    
+    		    for (int i=0; i<3; i++) {
+    		        
+                    baseDate.set(baseDate.get(Calendar.YEAR), 
+                            baseDate.get(Calendar.MONTH), 
+                            baseDate.get(Calendar.DATE) + 7, 
+                            3, 45, 00);
+    		        
+                    startDate = baseDate.getTime();
+                    startDate.setTime(startDate.getTime() + (i+1)*ONE_WEEK);
+                    endDate = new Date(startDate.getTime() + 2 * ONE_HOUR);
+                    
+                    newDeadline = new DeadlineTask("Weekly Deadline " + (i+1), startDate);
+                    newEvent = new EventTask("Weekly " + (i+1), startDate, endDate);
+                    _eventTasks.add(newEvent);
+                    _deadlineTasks.add(newDeadline);
+    		    }
+    		    
+    		    break;
     		default:
     			throw new Error("Woah, no such test case yet!");
     	}
