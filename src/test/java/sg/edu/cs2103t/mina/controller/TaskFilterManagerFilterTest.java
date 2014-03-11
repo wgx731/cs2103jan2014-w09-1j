@@ -418,7 +418,11 @@ public class TaskFilterManagerFilterTest {
         assertEquals(expected, test);
         
     }
-
+    
+    /*
+     * Test the date range
+     */
+    
     /**
      * Get the range of date.
      * 
