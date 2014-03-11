@@ -288,9 +288,12 @@ public class TaskDataManager {
      * @return
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
-        deleteTask(modifyParameters);
+        DataParameter newSetOfParameters = new DataParameter();
         
-        return addTask(modifyParameters);
+        newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
+        newSetOfParameters.loadNewParameters(modifyParameters);
+        
+       return addTask(newSetOfParameters);
     }
 
     public Task<?> markCompleted(DataParameter completeParameters) {

@@ -29,15 +29,14 @@ public class TaskDataManagerTest {
                 tdmTest.addTask(new DataParameter("TodoTask2", 'H', null, null,
                         null, TaskType.TODO, 123)));
         assertEquals(2, tdmTest.getAllTodoTasks().size());
-        
-        assertEquals("Adding Deadline task.",
-                new DeadlineTask("DeadlineTask1", new Date(currDateMilliSec)),
-                tdmTest.addTask(new DataParameter("DeadlineTask1", 'M', null,
-                        new Date(currDateMilliSec), null, TaskType.DEADLINE,
-                        123)));
+
+        assertEquals("Adding Deadline task.", new DeadlineTask("DeadlineTask1",
+                new Date(currDateMilliSec)), tdmTest.addTask(new DataParameter(
+                "DeadlineTask1", 'M', null, new Date(currDateMilliSec), null,
+                TaskType.DEADLINE, 123)));
         assertEquals(1, tdmTest.getAllDeadlineTasks().size());
-        assertEquals("Adding Deadline task.",
-                new DeadlineTask("DeadlineTask2", new Date(currDateMilliSec), 'M'),
+        assertEquals("Adding Deadline task.", new DeadlineTask("DeadlineTask2",
+                new Date(currDateMilliSec), 'M'),
                 tdmTest.addTask(new DataParameter("DeadlineTask2", 'M', null,
                         new Date(currDateMilliSec), null, TaskType.DEADLINE,
                         123)));
@@ -129,8 +128,47 @@ public class TaskDataManagerTest {
         assertEquals(2, tdmTest.getAllEventTasks().size());
     }
 
+    @Test
+    public void testModifyTask() {
+        TaskDataManager tdmTest = new TaskDataManager();
+        Long currDateMilliSec = System.currentTimeMillis();
+
+        /* modify task parameters */
+
+        /* modify task type */
+
+        // basic modify
+        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask.",
+                'M', null, null, null, TaskType.TODO, 123));
+
+        assertEquals(
+                "Modify to-do to deadline.",
+                new DeadlineTask("TodoTask becomes a DeadlineTask.", new Date(
+                        currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
+                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1)));
+        assertEquals(0, tdmTest.getAllTodoTasks().size());
+        assertEquals(1, tdmTest.getAllDeadlineTasks().size());
+
+        // modify task in between SortedSet
+        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 1.",
+                'M', null, null, null, TaskType.TODO, 123));
+        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 2.",
+                'M', null, null, null, TaskType.TODO, 123));
+
+        assertEquals(
+                "Modify to-do to deadline.",
+                new DeadlineTask("TodoTask becomes a DeadlineTask 1.",
+                        new Date(currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
+                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1)));
+        assertEquals(1, tdmTest.getAllTodoTasks().size());
+        assertEquals(2, tdmTest.getAllDeadlineTasks().size());
+
+    }
+
     /*
-     * @Test public void testModifyTask() { fail("Not yet implemented"); }
+     * @Test public void markCompleted() { fail("Not yet implemented"); }
      */
 
 }
