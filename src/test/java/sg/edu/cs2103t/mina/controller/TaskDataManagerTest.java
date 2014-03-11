@@ -149,21 +149,25 @@ public class TaskDataManagerTest {
                         currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1)));
         assertEquals(0, tdmTest.getAllTodoTasks().size());
         assertEquals(1, tdmTest.getAllDeadlineTasks().size());
-
+        
+        tdmTest.resetTrees();
+        
         // modify task in between SortedSet
-        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 1.",
-                'M', null, null, null, TaskType.TODO, 123));
+        tdmTest.addTask(new DataParameter("TodoTask remains a TodoTask 1.",
+                'H', null, null, null, TaskType.TODO, 123));
         tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 2.",
                 'M', null, null, null, TaskType.TODO, 123));
 
         assertEquals(
                 "Modify to-do to deadline.",
-                new DeadlineTask("TodoTask becomes a DeadlineTask 1.",
+                new DeadlineTask("TodoTask becomes a DeadlineTask 2.",
                         new Date(currDateMilliSec)),
                 tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
-                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1)));
+                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 2)));
+        assertEquals(new TodoTask("TodoTask remains a TodoTask 1.", 'H'), tdmTest.getAllTodoTasks().first());
+        
         assertEquals(1, tdmTest.getAllTodoTasks().size());
-        assertEquals(2, tdmTest.getAllDeadlineTasks().size());
+        assertEquals(1, tdmTest.getAllDeadlineTasks().size());
 
     }
 
