@@ -142,15 +142,20 @@ public class TaskDataManagerStub extends TaskDataManager {
     		            baseDate.get(Calendar.DATE), 
     		            3, 45, 00);
     		    baseDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-    		    System.out.println(baseDate.getTime());
     		    EventTask newEvent;
     		    DeadlineTask newDeadline;
     		    Date startDate;
     		    Date endDate;
     		    
     		    for(int i=0; i<5; i++) {
+    		        
+                    baseDate.set(baseDate.get(Calendar.YEAR), 
+                            baseDate.get(Calendar.MONTH), 
+                            baseDate.get(Calendar.DATE) + 1, 
+                            3, 45, 00);
+    		        
         		    startDate = baseDate.getTime();
-        		    startDate.setTime(startDate.getTime() + i*ONE_DAY);
+        		    startDate.setTime(startDate.getTime());
         		    endDate = new Date(startDate.getTime() + 2 * ONE_HOUR);
         		    
         		    newDeadline = new DeadlineTask("Daily Deadline " + (i+1), startDate);
@@ -159,7 +164,15 @@ public class TaskDataManagerStub extends TaskDataManager {
         		    _deadlineTasks.add(newDeadline);
     		    }
     		    
+    		    baseDate.setTime(new Date(START_TIME));
+    		    
     		    for (int i=0; i<3; i++) {
+    		        
+                    baseDate.set(baseDate.get(Calendar.YEAR), 
+                            baseDate.get(Calendar.MONTH), 
+                            baseDate.get(Calendar.DATE) + 7, 
+                            3, 45, 00);
+    		        
                     startDate = baseDate.getTime();
                     startDate.setTime(startDate.getTime() + (i+1)*ONE_WEEK);
                     endDate = new Date(startDate.getTime() + 2 * ONE_HOUR);
