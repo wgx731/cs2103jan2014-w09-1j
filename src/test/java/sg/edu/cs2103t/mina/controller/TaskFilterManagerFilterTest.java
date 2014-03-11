@@ -377,6 +377,7 @@ public class TaskFilterManagerFilterTest {
         
         // Test dates only. No time (00:00)
         // A week from now.
+        logger.info("Testing dates with only");
         Date[] dateRange = getRange(TODAY, new int[0], 
                                     WEEK, new int[0], NO_TIME);
         ArrayList<Task<?>> test = getResult(dateFilters, dateRange[START],
@@ -392,6 +393,7 @@ public class TaskFilterManagerFilterTest {
         
         //Test date with time.
         //A week from now.
+        logger.info("Testing date with time");
         dateRange = getRange(2, new int[]{12,0,0},
                              5, new int[]{9,0,0}, 
                              HAS_TIME);   
@@ -399,19 +401,20 @@ public class TaskFilterManagerFilterTest {
                          dateRange[END], HAS_TIME);  
         
         expected = new ArrayList<EventTask>();
-        for(int i=2; i<5; i++) {
+        for(int i=3; i<5; i++) {
             expected.add(events.get(i));
         } 
-
         assertEquals(expected, test);
         
         //Test date with start only
+        logger.info("Testing date with start only");
         dateRange = getRange(TODAY, new int[0], 0, new int[0], NO_TIME);
         test = getResult(dateFilters, dateRange[START],
                         null, HAS_TIME);  
         assertEquals(events, test);
        
         //Test date with end only
+        logger.info("Testing date with end only");
         dateRange = getRange(2, new int[]{12,00,0},
                              5, new int[]{9,0,0}, HAS_TIME);
         test = getResult(dateFilters, null,

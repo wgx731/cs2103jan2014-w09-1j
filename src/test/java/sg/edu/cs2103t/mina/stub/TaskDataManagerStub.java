@@ -140,7 +140,7 @@ public class TaskDataManagerStub extends TaskDataManager {
     		    baseDate.set(baseDate.get(Calendar.YEAR), 
     		            baseDate.get(Calendar.MONTH), 
     		            baseDate.get(Calendar.DATE), 
-    		            11, 45, 00);
+    		            3, 45, 00);
     		    baseDate.setTimeZone(TimeZone.getTimeZone("UTC"));
     		    System.out.println(baseDate.getTime());
     		    EventTask newEvent;
