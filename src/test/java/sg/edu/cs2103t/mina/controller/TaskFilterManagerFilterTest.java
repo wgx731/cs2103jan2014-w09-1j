@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -374,7 +375,7 @@ public class TaskFilterManagerFilterTest {
         while (eventsIter.hasNext()) {
             events.add(eventsIter.next());
         }
-        
+        logger.info(events);
         // Test dates only. No time (00:00)
         // A week from now.
         logger.info("Testing dates with only");
@@ -386,7 +387,7 @@ public class TaskFilterManagerFilterTest {
         ArrayList<EventTask> expected = new ArrayList<EventTask>();
         
         
-        for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE + 1; i++) {
+        for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE; i++) {
             expected.add(events.get(i));
         }
         assertEquals(expected, test);
@@ -401,7 +402,7 @@ public class TaskFilterManagerFilterTest {
                          dateRange[END], HAS_TIME);  
         
         expected = new ArrayList<EventTask>();
-        for(int i=3; i<5; i++) {
+        for(int i=2; i<5; i++) {
             expected.add(events.get(i));
         } 
         assertEquals(expected, test);
@@ -451,6 +452,7 @@ public class TaskFilterManagerFilterTest {
 
         Calendar startDate = Calendar.getInstance();
         startDate.setTime(new Date(TaskDataManagerStub.START_TIME));
+        startDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         
         int year = startDate.get(Calendar.YEAR);
         int month = startDate.get(Calendar.MONTH);
