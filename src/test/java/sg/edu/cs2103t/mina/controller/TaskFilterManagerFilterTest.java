@@ -34,7 +34,7 @@ public class TaskFilterManagerFilterTest {
     private static final boolean NO_TIME = false;
     private static final int END = 1;
     private static final int START = 0;
-    private static final int DATE_RANGE_EVENT_EXPECTED_SIZE = 6;
+    private static final int DATE_RANGE_EVENT_EXPECTED_SIZE = 5;
     private static final int EVERYTHING = 0;
     private static final int COMPLETE = 1;
     private static final int UNCOMPLETE = 2;
@@ -45,7 +45,7 @@ public class TaskFilterManagerFilterTest {
     private static Logger logger = LogManager
             .getLogger(TaskFilterManagerFilterTest.class.getName());
     
-    //@Ignore
+    @Ignore
     @Test
     public void viewOutput() {
         // check for output
@@ -364,12 +364,15 @@ public class TaskFilterManagerFilterTest {
     @Test
     public void testDateFilterByRange() {
 
+        tdmStub = new TaskDataManagerStub(TaskDataManagerStub.DATE_RANGE_SEARCH);
+        tfmTest = new TaskFilterManager(tdmStub);
+        
         FilterType[] dateFilters = new FilterType[] { FilterType.EVENT };
-        Iterator<EventTask> eventIter = tdmStub.getAllEventTasks().iterator();
+        Iterator<EventTask> eventsIter = tdmStub.getAllEventTasks().iterator();
         ArrayList<EventTask> events = new ArrayList<EventTask>();
         
-        while (eventIter.hasNext()) {
-            events.add(eventIter.next());
+        while (eventsIter.hasNext()) {
+            events.add(eventsIter.next());
         }
         
         // Test dates only. No time (00:00)
@@ -380,21 +383,23 @@ public class TaskFilterManagerFilterTest {
                                             dateRange[END], NO_TIME);
         
         ArrayList<EventTask> expected = new ArrayList<EventTask>();
-        for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE; i++) {
+        
+        
+        for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE + 1; i++) {
             expected.add(events.get(i));
         }
         assertEquals(expected, test);
         
         //Test date with time.
         //A week from now.
-        dateRange = getRange(2, new int[]{15,00,0},
-                             WEEK, TaskFilterManager.ONE_HOUR *15 *-1, 
+        dateRange = getRange(2, new int[]{12,00,0},
+                             5, TaskFilterManager.ONE_HOUR *1 *-1, 
                              HAS_TIME);   
         test = getResult(dateFilters, dateRange[START],
                          dateRange[END], HAS_TIME);  
         
         expected = new ArrayList<EventTask>();
-        for(int i=1; i<DATE_RANGE_EVENT_EXPECTED_SIZE+1; i++) {
+        for(int i=3; i<5; i++) {
             expected.add(events.get(i));
         } 
         assertEquals(expected, test);
@@ -406,16 +411,18 @@ public class TaskFilterManagerFilterTest {
         assertEquals(events, test);
        
         //Test date with end only
-        dateRange = getRange(2, new int[]{15,00,0},
-                             WEEK, TaskFilterManager.ONE_HOUR *15 *-1, HAS_TIME);
+        dateRange = getRange(2, new int[]{12,00,0},
+                             5, TaskFilterManager.ONE_HOUR *1 *-1, HAS_TIME);
         test = getResult(dateFilters, null,
                          dateRange[END], HAS_TIME);  
         
         expected = new ArrayList<EventTask>();
-        for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE + 1; i++) {
+        for(int i=0; i<5; i++) {
             expected.add(events.get(i));
         }      
         assertEquals(expected, test);
+        
+        resetTdmTfm();
         
     }
     
@@ -439,6 +446,8 @@ public class TaskFilterManagerFilterTest {
                             int endNumDay, int endMs, boolean hasTime) {
 
         Calendar startDate = Calendar.getInstance();
+        startDate.setTime(new Date(TaskDataManagerStub.START_TIME));
+        
         int year = startDate.get(Calendar.YEAR);
         int month = startDate.get(Calendar.MONTH);
         int startDay = startDate.get(Calendar.DAY_OF_MONTH) + startNumDay;
@@ -449,13 +458,13 @@ public class TaskFilterManagerFilterTest {
             startDate.set(year, month, startDay, 0, 0, 0);     
         }
         
-        logger.info(startDate.getTime());
+        logger.info("START: " + startDate.getTime());
         
         Calendar endDate = Calendar.getInstance();
         endDate.setTimeInMillis(startDate.getTimeInMillis() + 
                                TaskDataManagerStub.ONE_DAY * endNumDay + 
                                endMs);
-        logger.info(endDate.getTime());
+        logger.info("END: " + endDate.getTime());
         return new Date[]{startDate.getTime(), endDate.getTime()};
     }
 
@@ -794,5 +803,10 @@ public class TaskFilterManagerFilterTest {
     public void printTodo(TodoTask task) {
         logger.info(toStringForTask(task));
     }
-
+    
+    public void resetTdmTfm() {
+        tdmStub = new TaskDataManagerStub();
+        tfmTest = new TaskFilterManager(tdmStub);
+    }
+    
 }
