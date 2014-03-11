@@ -246,7 +246,7 @@ public class TaskDataManager {
     			return deletedTodoTask;
     		}
     	}
-    	System.out.println("Missed todo task to delete.");
+    	System.out.println("Unable to find todo task to delete.");
         return null;
     }
 
@@ -261,7 +261,7 @@ public class TaskDataManager {
     			return deletedDeadlineTask;
     		}
     	}
-    	System.out.println("Missed deadline task to delete.");
+    	System.out.println("Unable to find deadline task to delete.");
         return null;
     }
 
@@ -276,7 +276,7 @@ public class TaskDataManager {
     			return deletedEventTask;
     		}
     	}
-    	System.out.println("Missed event task to delete.");
+    	System.out.println("Unable to find event task to delete.");
         return null;
     }
 
