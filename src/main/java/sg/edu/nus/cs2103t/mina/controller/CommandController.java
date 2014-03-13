@@ -421,7 +421,7 @@ public class CommandController {
     }
     
     public ArrayList<String> getTodoTask(){
-    	SortedSet<TodoTask> todo = _taskDataManager.getAllTodoTasks();
+    	SortedSet<TodoTask> todo = _taskDataManager.getUncompletedTodoTasks();
     	ArrayList<TodoTask> todoList = new ArrayList<TodoTask>(todo);
     	ArrayList<String> todoString = new ArrayList<String>();
     	for (int i=0; i<todoList.size(); i++){
@@ -431,7 +431,7 @@ public class CommandController {
     }
     
     public ArrayList<String> getDeadlineTask(){
-    	SortedSet<DeadlineTask> deadline = _taskDataManager.getAllDeadlineTasks();
+    	SortedSet<DeadlineTask> deadline = _taskDataManager.getUncompletedDeadlineTasks();
     	ArrayList<DeadlineTask> deadlineList = new ArrayList<DeadlineTask>(deadline);
     	ArrayList<String> deadlineString = new ArrayList<String>();
     	for (int i=0; i<deadlineList.size(); i++){
@@ -442,7 +442,7 @@ public class CommandController {
     }
     
     public ArrayList<String> getEventTask(){
-    	SortedSet<EventTask> event = _taskDataManager.getAllEventTasks();
+    	SortedSet<EventTask> event = _taskDataManager.getUncompletedEventTasks();
     	ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
     	ArrayList<String> eventString = new ArrayList<String>();
     	for (int i=0; i<eventList.size(); i++){

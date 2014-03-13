@@ -37,7 +37,7 @@ public class TaskFilterManagerSearchTest {
 		
 		ArrayList<Task<?>> test = getResult("deadline");
 		
-		Iterator<DeadlineTask> expectedIter = tdmStub.getAllDeadlineTasks().iterator();
+		Iterator<DeadlineTask> expectedIter = tdmStub.getUncompletedDeadlineTasks().iterator();
 		ArrayList<DeadlineTask> expected = new ArrayList<DeadlineTask>();
 		
 		while (expectedIter.hasNext()) {
@@ -56,8 +56,8 @@ public class TaskFilterManagerSearchTest {
 	public void testTwoWordsAndMore() {
 		
 		ArrayList<Task<?>> test = getResult("deadline event");
-		int expectedSize = tdmStub.getAllDeadlineTasks().size() + 
-											 tdmStub.getAllEventTasks().size();
+		int expectedSize = tdmStub.getUncompletedDeadlineTasks().size() + 
+											 tdmStub.getUncompletedEventTasks().size();
 		assertTrue("Must contain deadline and event", 
 								test.size()==expectedSize && 
 										compareToActualTasks(test));
@@ -104,21 +104,21 @@ public class TaskFilterManagerSearchTest {
 			return false;
 		}
 		
-		Iterator<DeadlineTask> deadlineIter = tdmStub.getAllDeadlineTasks().iterator();
+		Iterator<DeadlineTask> deadlineIter = tdmStub.getUncompletedDeadlineTasks().iterator();
 		ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
 		
 		while (deadlineIter.hasNext()) {
 			deadlines.add(deadlineIter.next());
 		}
 		
-		Iterator<EventTask> eventIter = tdmStub.getAllEventTasks().iterator();
+		Iterator<EventTask> eventIter = tdmStub.getUncompletedEventTasks().iterator();
 		ArrayList<EventTask> events = new ArrayList<EventTask>();
 		
 		while (eventIter.hasNext()) {
 			events.add(eventIter.next());
 		}
 		
-		Iterator<TodoTask> todoIter = tdmStub.getAllTodoTasks().iterator();
+		Iterator<TodoTask> todoIter = tdmStub.getUncompletedTodoTasks().iterator();
 		ArrayList<TodoTask> todos = new ArrayList<TodoTask>();
 		
 		while (todoIter.hasNext()) {
