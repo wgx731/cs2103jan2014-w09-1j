@@ -53,7 +53,7 @@ public class TaskFilterManagerFilterTest {
         TaskDataManagerStub tdm = tdmStub;
 
         Iterator<TodoTask> todoIterator;
-        todoIterator = tdm.getAllTodoTasks().iterator();
+        todoIterator = tdm.getUncompletedTodoTasks().iterator();
 
         while (todoIterator.hasNext()) {
             TodoTask task = todoIterator.next();
@@ -62,14 +62,14 @@ public class TaskFilterManagerFilterTest {
         }
 
         Iterator<EventTask> eventIterator;
-        eventIterator = tdm.getAllEventTasks().iterator();
+        eventIterator = tdm.getUncompletedEventTasks().iterator();
 
         while (eventIterator.hasNext()) {
             printEvent(eventIterator.next());
         }
 
         Iterator<DeadlineTask> deadlineIterator;
-        deadlineIterator = tdm.getAllDeadlineTasks().iterator();
+        deadlineIterator = tdm.getUncompletedDeadlineTasks().iterator();
 
         while (deadlineIterator.hasNext()) {
             printDeadline(deadlineIterator.next());
@@ -100,7 +100,7 @@ public class TaskFilterManagerFilterTest {
 
         ArrayList<Task<?>> test = getResult(FilterType.DEADLINE);
 
-        SortedSet<DeadlineTask> deadlines = tdmStub.getAllDeadlineTasks();
+        SortedSet<DeadlineTask> deadlines = tdmStub.getUncompletedDeadlineTasks();
         int numOfDeadlines = deadlines.size();
 
         assertTrue(
@@ -118,7 +118,7 @@ public class TaskFilterManagerFilterTest {
     public void testTodosOnly() {
 
         ArrayList<Task<?>> test = getResult(FilterType.TODO);
-        SortedSet<TodoTask> todos = tdmStub.getAllTodoTasks();
+        SortedSet<TodoTask> todos = tdmStub.getUncompletedTodoTasks();
         int numOfTodos = todos.size();
 
         assertTrue(
@@ -135,7 +135,7 @@ public class TaskFilterManagerFilterTest {
     public void testEventsOnly() {
 
         ArrayList<Task<?>> test = getResult(FilterType.EVENT);
-        SortedSet<EventTask> events = tdmStub.getAllEventTasks();
+        SortedSet<EventTask> events = tdmStub.getUncompletedEventTasks();
         int numOfEvents = events.size();
 
         assertTrue(
@@ -190,8 +190,8 @@ public class TaskFilterManagerFilterTest {
         FilterType[] filters = { FilterType.DEADLINE, FilterType.EVENT };
 
         ArrayList<Task<?>> test = getResult(filters);
-        int actualSize = tdmStub.getAllDeadlineTasks().size() + tdmStub
-                .getAllEventTasks().size();
+        int actualSize = tdmStub.getUncompletedDeadlineTasks().size() + tdmStub
+                .getUncompletedEventTasks().size();
 
         assertTrue(
                 "Contains only uncompleted deadline and events!",
@@ -201,8 +201,8 @@ public class TaskFilterManagerFilterTest {
         // With deadlines and todos
         filters = new FilterType[] { FilterType.DEADLINE, FilterType.TODO };
         test = getResult(filters);
-        actualSize = tdmStub.getAllDeadlineTasks().size() + tdmStub
-                .getAllTodoTasks().size();
+        actualSize = tdmStub.getUncompletedDeadlineTasks().size() + tdmStub
+                .getUncompletedTodoTasks().size();
         assertTrue(
                 "Contains only uncompleted deadline and todos!",
                 actualSize == test.size() && checkTwoTaskTypes(test,
@@ -211,8 +211,8 @@ public class TaskFilterManagerFilterTest {
         // With events and todos
         filters = new FilterType[] { FilterType.EVENT, FilterType.TODO };
         test = getResult(filters);
-        actualSize = tdmStub.getAllEventTasks().size() + tdmStub
-                .getAllTodoTasks().size();
+        actualSize = tdmStub.getUncompletedEventTasks().size() + tdmStub
+                .getUncompletedTodoTasks().size();
         assertTrue(
                 "Contains only uncompleted todos and events!",
                 actualSize == test.size() && checkTwoTaskTypes(test,
@@ -222,17 +222,17 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.DEADLINE, FilterType.TODO,
                 FilterType.EVENT };
         test = getResult(filters);
-        actualSize = tdmStub.getAllEventTasks().size() + tdmStub
-                .getAllTodoTasks().size() +
-                tdmStub.getAllDeadlineTasks().size();
+        actualSize = tdmStub.getUncompletedEventTasks().size() + tdmStub
+                .getUncompletedTodoTasks().size() +
+                tdmStub.getUncompletedDeadlineTasks().size();
         assertTrue("Contains all task!", checkAllUncompletedTasks(test));
 
         // Completed deadlines and events.
         filters = new FilterType[] { FilterType.COMPLETE, FilterType.EVENT,
                 FilterType.DEADLINE };
         test = getResult(filters);
-        actualSize = tdmStub.getPastEventTasks().size() + tdmStub
-                .getPastDeadlineTasks().size();
+        actualSize = tdmStub.getCompletedEventTasks().size() + tdmStub
+                .getCompletedDeadlineTasks().size();
         assertTrue(
                 "Contains completed deadlines and events!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -242,8 +242,8 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.COMPLETE, FilterType.TODO,
                 FilterType.DEADLINE };
         test = getResult(filters);
-        actualSize = tdmStub.getPastTodoTasks().size() + tdmStub
-                .getPastDeadlineTasks().size();
+        actualSize = tdmStub.getCompletedTodoTasks().size() + tdmStub
+                .getCompletedDeadlineTasks().size();
         assertTrue(
                 "Contains completed deadlines and todos!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -253,8 +253,8 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.COMPLETE, FilterType.TODO,
                 FilterType.EVENT };
         test = getResult(filters);
-        actualSize = tdmStub.getPastTodoTasks().size() + tdmStub
-                .getPastEventTasks().size();
+        actualSize = tdmStub.getCompletedTodoTasks().size() + tdmStub
+                .getCompletedEventTasks().size();
         assertTrue(
                 "Contains completed events and todos!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -263,9 +263,9 @@ public class TaskFilterManagerFilterTest {
         // Get all completed
         filters = new FilterType[] { FilterType.COMPLETE };
         test = getResult(filters);
-        actualSize = tdmStub.getPastTodoTasks().size() + tdmStub
-                .getPastEventTasks().size() +
-                tdmStub.getPastDeadlineTasks().size();
+        actualSize = tdmStub.getCompletedTodoTasks().size() + tdmStub
+                .getCompletedEventTasks().size() +
+                tdmStub.getCompletedDeadlineTasks().size();
         assertTrue(
                 "Contains all completed tasks",
                 test.size() == actualSize && hasCompletedTasks(test,
@@ -275,10 +275,10 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.COMPLETE_PLUS, FilterType.TODO,
                 FilterType.EVENT };
         test = getResult(filters);
-        actualSize = tdmStub.getPastTodoTasks().size() + tdmStub
-                .getPastEventTasks().size() +
-                tdmStub.getAllEventTasks().size() +
-                tdmStub.getAllTodoTasks().size();
+        actualSize = tdmStub.getCompletedTodoTasks().size() + tdmStub
+                .getCompletedEventTasks().size() +
+                tdmStub.getUncompletedEventTasks().size() +
+                tdmStub.getUncompletedTodoTasks().size();
         assertTrue(
                 "Contains all event and todos!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -288,10 +288,10 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.COMPLETE_PLUS,
                 FilterType.DEADLINE, FilterType.EVENT };
         test = getResult(filters);
-        actualSize = tdmStub.getPastDeadlineTasks().size() + tdmStub
-                .getPastEventTasks().size() +
-                tdmStub.getAllEventTasks().size() +
-                tdmStub.getAllDeadlineTasks().size();
+        actualSize = tdmStub.getCompletedDeadlineTasks().size() + tdmStub
+                .getCompletedEventTasks().size() +
+                tdmStub.getUncompletedEventTasks().size() +
+                tdmStub.getUncompletedDeadlineTasks().size();
         assertTrue(
                 "Contains all event and deadlines!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -301,10 +301,10 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.COMPLETE_PLUS,
                 FilterType.DEADLINE, FilterType.TODO };
         test = getResult(filters);
-        actualSize = tdmStub.getPastDeadlineTasks().size() + tdmStub
-                .getPastTodoTasks().size() +
-                tdmStub.getAllTodoTasks().size() +
-                tdmStub.getAllDeadlineTasks().size();
+        actualSize = tdmStub.getCompletedDeadlineTasks().size() + tdmStub
+                .getCompletedTodoTasks().size() +
+                tdmStub.getUncompletedTodoTasks().size() +
+                tdmStub.getUncompletedDeadlineTasks().size();
         assertTrue(
                 "Contains all deadlines and todos!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -313,12 +313,12 @@ public class TaskFilterManagerFilterTest {
         // No task type filters, only +complete
         filters = new FilterType[] { FilterType.COMPLETE_PLUS };
         test = getResult(filters);
-        actualSize = tdmStub.getPastDeadlineTasks().size() + tdmStub
-                .getPastTodoTasks().size() +
-                tdmStub.getAllTodoTasks().size() +
-                tdmStub.getAllDeadlineTasks().size() +
-                tdmStub.getPastEventTasks().size() +
-                tdmStub.getAllEventTasks().size();
+        actualSize = tdmStub.getCompletedDeadlineTasks().size() + tdmStub
+                .getCompletedTodoTasks().size() +
+                tdmStub.getUncompletedTodoTasks().size() +
+                tdmStub.getUncompletedDeadlineTasks().size() +
+                tdmStub.getCompletedEventTasks().size() +
+                tdmStub.getUncompletedEventTasks().size();
 
         assertTrue("Contains everything!",
                 test.size() == actualSize && checkEverything(test));
@@ -329,7 +329,7 @@ public class TaskFilterManagerFilterTest {
         // Single task
         filters = new FilterType[] { FilterType.PRIORITY, FilterType.DEADLINE };
         test = getResult(filters);
-        Iterator<DeadlineTask> deadlineSet = tdmStub.getAllDeadlineTasks()
+        Iterator<DeadlineTask> deadlineSet = tdmStub.getUncompletedDeadlineTasks()
                 .iterator();
         ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
 
@@ -343,8 +343,8 @@ public class TaskFilterManagerFilterTest {
         filters = new FilterType[] { FilterType.PRIORITY, FilterType.DEADLINE,
                 FilterType.TODO };
         test = getResult(filters);
-        actualSize = tdmStub.getAllTodoTasks().size() + tdmStub
-                .getAllDeadlineTasks().size();
+        actualSize = tdmStub.getUncompletedTodoTasks().size() + tdmStub
+                .getUncompletedDeadlineTasks().size();
         assertTrue(
                 "Contains deadlines and todos!",
                 test.size() == actualSize && checkTwoTaskTypes(test,
@@ -353,9 +353,9 @@ public class TaskFilterManagerFilterTest {
         // All tasks
         filters = new FilterType[] { FilterType.PRIORITY };
         test = getResult(filters);
-        actualSize = tdmStub.getAllEventTasks().size() + tdmStub
-                .getAllTodoTasks().size() +
-                tdmStub.getAllDeadlineTasks().size();
+        actualSize = tdmStub.getUncompletedEventTasks().size() + tdmStub
+                .getUncompletedTodoTasks().size() +
+                tdmStub.getUncompletedDeadlineTasks().size();
         assertTrue("Contains all task!", checkAllUncompletedTasks(test));
     }
 
@@ -369,7 +369,7 @@ public class TaskFilterManagerFilterTest {
         tfmTest = new TaskFilterManager(tdmStub);
         
         FilterType[] dateFilters = new FilterType[] { FilterType.EVENT };
-        Iterator<EventTask> eventsIter = tdmStub.getAllEventTasks().iterator();
+        Iterator<EventTask> eventsIter = tdmStub.getUncompletedEventTasks().iterator();
         ArrayList<EventTask> events = new ArrayList<EventTask>();
         
         while (eventsIter.hasNext()) {
@@ -591,14 +591,14 @@ public class TaskFilterManagerFilterTest {
 
     private boolean checkEverything(ArrayList<Task<?>> test) {
 
-        SortedSet<TodoTask> todos = tdmStub.getAllTodoTasks();
-        SortedSet<TodoTask> todosComp = tdmStub.getPastTodoTasks();
+        SortedSet<TodoTask> todos = tdmStub.getUncompletedTodoTasks();
+        SortedSet<TodoTask> todosComp = tdmStub.getCompletedTodoTasks();
 
-        SortedSet<EventTask> events = tdmStub.getAllEventTasks();
-        SortedSet<EventTask> eventsComp = tdmStub.getPastEventTasks();
+        SortedSet<EventTask> events = tdmStub.getUncompletedEventTasks();
+        SortedSet<EventTask> eventsComp = tdmStub.getCompletedEventTasks();
 
-        SortedSet<DeadlineTask> deadlines = tdmStub.getAllDeadlineTasks();
-        SortedSet<DeadlineTask> deadlinesComp = tdmStub.getPastDeadlineTasks();
+        SortedSet<DeadlineTask> deadlines = tdmStub.getUncompletedDeadlineTasks();
+        SortedSet<DeadlineTask> deadlinesComp = tdmStub.getCompletedDeadlineTasks();
 
         int totalTaskSize = deadlinesComp.size() + eventsComp.size() +
                 todosComp.size() +
@@ -646,13 +646,13 @@ public class TaskFilterManagerFilterTest {
 
     private ArrayList<Task<?>> getCompletedDummyTasks() {
 
-        SortedSet<EventTask> events = tdmStub.getPastEventTasks();
+        SortedSet<EventTask> events = tdmStub.getCompletedEventTasks();
         Iterator<EventTask> eventIter = events.iterator();
 
-        SortedSet<DeadlineTask> deadlines = tdmStub.getPastDeadlineTasks();
+        SortedSet<DeadlineTask> deadlines = tdmStub.getCompletedDeadlineTasks();
         Iterator<DeadlineTask> deadlineIter = deadlines.iterator();
 
-        SortedSet<TodoTask> todos = tdmStub.getPastTodoTasks();
+        SortedSet<TodoTask> todos = tdmStub.getCompletedTodoTasks();
         Iterator<TodoTask> todosIter = todos.iterator();
 
         ArrayList<Task<?>> tasks = new ArrayList<Task<?>>();
@@ -774,11 +774,11 @@ public class TaskFilterManagerFilterTest {
         for (Iterator<Task<?>> iterator = test.iterator(); iterator.hasNext();) {
             Task<?> t = iterator.next();
             if (t instanceof TodoTask) {
-                isExist = tdmStub.getAllTodoTasks().contains((TodoTask) t);
+                isExist = tdmStub.getUncompletedTodoTasks().contains((TodoTask) t);
             } else if (t instanceof EventTask) {
-                isExist = tdmStub.getAllEventTasks().contains((EventTask) t);
+                isExist = tdmStub.getUncompletedEventTasks().contains((EventTask) t);
             } else if (t instanceof DeadlineTask) {
-                isExist = tdmStub.getAllDeadlineTasks().contains(
+                isExist = tdmStub.getUncompletedDeadlineTasks().contains(
                         (DeadlineTask) t);
             }
             if (!isExist) {

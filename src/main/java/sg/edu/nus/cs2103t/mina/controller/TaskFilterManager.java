@@ -107,17 +107,17 @@ public class TaskFilterManager {
 		}
 		
 		if (filters.contains(FilterType.DEADLINE)) {
-			neededTasks = getTasks(_taskStore.getAllDeadlineTasks());
+			neededTasks = getTasks(_taskStore.getUncompletedDeadlineTasks());
 			result.addAll(neededTasks);
 		}
 
 		if (filters.contains(FilterType.TODO)) {
-			neededTasks = getTasks(_taskStore.getAllTodoTasks());
+			neededTasks = getTasks(_taskStore.getUncompletedTodoTasks());
 			result.addAll(neededTasks);
 		}
 
 		if (filters.contains(FilterType.EVENT)) {
-			neededTasks = getTasks(_taskStore.getAllEventTasks());
+			neededTasks = getTasks(_taskStore.getUncompletedEventTasks());
 			result.addAll(neededTasks);
 		}
 		
@@ -249,17 +249,17 @@ public class TaskFilterManager {
 		}
 		
 		if (filters.contains(FilterType.DEADLINE)) {
-			neededTasks = getTasks(_taskStore.getPastDeadlineTasks());
+			neededTasks = getTasks(_taskStore.getCompletedDeadlineTasks());
 			result.addAll(neededTasks);
 		}
 
 		if (filters.contains(FilterType.TODO)) {
-			neededTasks = getTasks(_taskStore.getPastTodoTasks());
+			neededTasks = getTasks(_taskStore.getCompletedTodoTasks());
 			result.addAll(neededTasks);
 		}
 
 		if (filters.contains(FilterType.EVENT)) {
-			neededTasks = getTasks(_taskStore.getPastEventTasks());
+			neededTasks = getTasks(_taskStore.getCompletedEventTasks());
 			result.addAll(neededTasks);
 		}
 		

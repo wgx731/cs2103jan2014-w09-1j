@@ -78,9 +78,9 @@ public class MinaDriver {
             default :
                 throw new Error(UNKOWN_TYPE_ERROR);
         }
-        uiView.updateLists(taskDataManager.getAllEventTasks(),
-                taskDataManager.getAllDeadlineTasks(),
-                taskDataManager.getAllTodoTasks());
+        uiView.updateLists(taskDataManager.getUncompletedEventTasks(),
+                taskDataManager.getUncompletedDeadlineTasks(),
+                taskDataManager.getUncompletedTodoTasks());
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
@@ -94,9 +94,9 @@ public class MinaDriver {
                 continue;
             }
             String feedback = commandController.processUserInput(userInput);            
-            uiView.updateLists(taskDataManager.getAllEventTasks(),
-                    taskDataManager.getAllDeadlineTasks(),
-                    taskDataManager.getAllTodoTasks());
+            uiView.updateLists(taskDataManager.getUncompletedEventTasks(),
+                    taskDataManager.getUncompletedDeadlineTasks(),
+                    taskDataManager.getUncompletedTodoTasks());
             uiView.displayOutput(feedback);
         }
     }

@@ -98,32 +98,32 @@ public class TaskDataManager {
     }
 
     /* load methods: uncompleted tasks */
-    public SortedSet<TodoTask> getAllTodoTasks() {
+    public SortedSet<TodoTask> getUncompletedTodoTasks() {
         return _uncompletedTodoTasks;
     }
 
-    public SortedSet<DeadlineTask> getAllDeadlineTasks() {
+    public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
         return _uncompletedDeadlineTasks;
     }
 
-    public SortedSet<EventTask> getAllEventTasks() {
+    public SortedSet<EventTask> getUncompletedEventTasks() {
         return _uncompletedEventTasks;
     }
 
     /* load methods: completed tasks */
-    public SortedSet<TodoTask> getPastTodoTasks() {
+    public SortedSet<TodoTask> getCompletedTodoTasks() {
         return _completedTodoTasks;
     }
 
-    public SortedSet<DeadlineTask> getPastDeadlineTasks() {
+    public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
         return _completedDeadlineTasks;
     }
 
-    public SortedSet<EventTask> getPastEventTasks() {
+    public SortedSet<EventTask> getCompletedEventTasks() {
         return _completedEventTasks;
     }
     
-    /* synclists controls */
+    /* sync-lists controls */
     public List<SyncDataParameter> getSyncList() {
         return _syncList;
     }

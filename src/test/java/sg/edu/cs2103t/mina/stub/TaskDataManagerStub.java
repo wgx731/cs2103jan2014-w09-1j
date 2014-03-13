@@ -36,13 +36,13 @@ public class TaskDataManagerStub extends TaskDataManager {
 
         super();
 
-        _todoTasks = getAllTodoTasks();
-        _eventTasks = getAllEventTasks();
-        _deadlineTasks = getAllDeadlineTasks();
+        _todoTasks = getUncompletedTodoTasks();
+        _eventTasks = getUncompletedEventTasks();
+        _deadlineTasks = getUncompletedDeadlineTasks();
 
-        _compTodoTasks = getPastTodoTasks();
-        _compEventTasks = getPastEventTasks();
-        _compDeadlineTasks = getPastDeadlineTasks();
+        _compTodoTasks = getCompletedTodoTasks();
+        _compEventTasks = getCompletedEventTasks();
+        _compDeadlineTasks = getCompletedDeadlineTasks();
         
         _todoTasks.clear();
         _eventTasks.clear();
@@ -113,13 +113,13 @@ public class TaskDataManagerStub extends TaskDataManager {
     	
     	super();
     	
-      _todoTasks = getAllTodoTasks();
-      _eventTasks = getAllEventTasks();
-      _deadlineTasks = getAllDeadlineTasks();
+      _todoTasks = getUncompletedTodoTasks();
+      _eventTasks = getUncompletedEventTasks();
+      _deadlineTasks = getUncompletedDeadlineTasks();
 
-      _compTodoTasks = getPastTodoTasks();
-      _compEventTasks = getPastEventTasks();
-      _compDeadlineTasks = getPastDeadlineTasks();
+      _compTodoTasks = getCompletedTodoTasks();
+      _compEventTasks = getCompletedEventTasks();
+      _compDeadlineTasks = getCompletedDeadlineTasks();
     	
     	switch(cases) {
     		case PUNCTUATION_SEARCH :

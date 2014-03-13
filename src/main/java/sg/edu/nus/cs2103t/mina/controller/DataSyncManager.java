@@ -35,17 +35,17 @@ public class DataSyncManager extends TimerTask {
 
     public void saveAll() {
         try {
-            _storage.saveTaskSet(_memoryDataStore.getAllTodoTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getUncompletedTodoTasks(),
                     TaskType.TODO, false);
-            _storage.saveTaskSet(_memoryDataStore.getAllEventTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getUncompletedEventTasks(),
                     TaskType.EVENT, false);
-            _storage.saveTaskSet(_memoryDataStore.getAllDeadlineTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getUncompletedDeadlineTasks(),
                     TaskType.DEADLINE, false);
-            _storage.saveTaskSet(_memoryDataStore.getPastTodoTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getCompletedTodoTasks(),
                     TaskType.TODO, true);
-            _storage.saveTaskSet(_memoryDataStore.getPastEventTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getCompletedEventTasks(),
                     TaskType.EVENT, true);
-            _storage.saveTaskSet(_memoryDataStore.getPastDeadlineTasks(),
+            _storage.saveTaskSet(_memoryDataStore.getCompletedDeadlineTasks(),
                     TaskType.DEADLINE, true);
         } catch (IllegalArgumentException e) {
             logger.error(e, e);
