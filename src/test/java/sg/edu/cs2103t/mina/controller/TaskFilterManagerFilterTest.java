@@ -1,6 +1,7 @@
 package sg.edu.cs2103t.mina.controller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,11 +20,11 @@ import sg.edu.cs2103t.mina.stub.TaskDataManagerStub;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
-import sg.edu.nus.cs2103t.mina.model.parameter.FilterType;
 
 public class TaskFilterManagerFilterTest {
 

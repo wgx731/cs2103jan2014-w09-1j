@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
-import sg.edu.nus.cs2103t.mina.model.parameter.FilterType;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandControllerTest {

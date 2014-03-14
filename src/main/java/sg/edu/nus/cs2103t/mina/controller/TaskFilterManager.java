@@ -21,10 +21,10 @@ import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
-import sg.edu.nus.cs2103t.mina.model.parameter.FilterType;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {

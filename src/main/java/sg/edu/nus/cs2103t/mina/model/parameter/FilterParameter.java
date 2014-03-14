@@ -3,6 +3,8 @@ package sg.edu.nus.cs2103t.mina.model.parameter;
 import java.util.ArrayList;
 import java.util.Date;
 
+import sg.edu.nus.cs2103t.mina.model.FilterType;
+
 public class FilterParameter {
 
 	private ArrayList<FilterType> _filters;
