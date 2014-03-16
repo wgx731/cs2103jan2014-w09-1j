@@ -189,24 +189,18 @@ public class MinaGuiUI extends MinaView {
     public void updateLists(ArrayList<String> allEventTasks,
             ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks) {
         StringBuilder sb = new StringBuilder();
-        int counter = 1;
         for (String event : allEventTasks) {
-            sb.append(counter + event);
-            counter++;
+            sb.append(event + "\n");
         }
         _eventListUI.setText(sb.toString());
         sb = new StringBuilder();
-        counter = 1;
         for (String deadline : allDeadlineTasks) {
-            sb.append(counter + deadline);
-            counter++;
+            sb.append(deadline + "\n");
         }
         _deadlineListUI.setText(sb.toString());
         sb = new StringBuilder();
-        counter = 1;
         for (String todo : allTodoTasks) {
-            sb.append(counter + todo);
-            counter++;
+            sb.append(todo + "\n");
         }
         _todoListUI.setText(sb.toString());      
     }

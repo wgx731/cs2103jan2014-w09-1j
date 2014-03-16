@@ -12,4 +12,4 @@ And the <type> list should contains <task>
 
 Examples:
 |command|feedback|type|task|
-|add test|TODO task test has been added.|todo|test|
+|add test|Operation completed|todo|test|

@@ -59,8 +59,7 @@ public class MinaAddTaskSteps extends StepSkeleton {
                 break;
         }
         assertNotEquals(UNKOWN_INDEX, listIndex);
-        assertNotEquals(null, bot.list(listIndex));
-        assertTrue(Arrays.toString(bot.list(listIndex).getItems()).contains(
-                task));
+        assertNotEquals(null, bot.styledText(listIndex));
+        assertTrue(bot.styledText(listIndex).getText().contains(task));
     }
 }
