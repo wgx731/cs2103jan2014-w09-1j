@@ -16,13 +16,19 @@
 		<emma-maven-plugin-version>1.0-alpha-3</emma-maven-plugin-version>
 		<maven-compiler-plugin-version>2.5.1</maven-compiler-plugin-version>
 		<swt-version>4.3</swt-version>
+		<swtbot-version>2.0.4</swtbot-version>
+		<date4j-version>1.5.1</date4j-version>
 		<java-version>1.7</java-version>
+		<jbehave-version>3.9.1</jbehave-version>
 	</properties>
-
 	<repositories>
 		<repository>
 			<id>swt-repo</id>
 			<url>https://swt-repo.googlecode.com/svn/repo/</url>
+		</repository>
+		<repository>
+			<id>neptuno-releases</id>
+			<url>https://neptuno.uca.es/nexus/content/groups/release-repos</url>
 		</repository>
 	</repositories>
 	<profiles>
@@ -108,13 +114,11 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 			<version>${log4j-version}</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j-version}</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -123,23 +127,69 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
- 			<groupId>com.darwinsys</groupId>
+			<groupId>com.darwinsys</groupId>
 			<artifactId>hirondelle-date4j</artifactId>
-			<version>1.5.1</version>
-  			<scope>compile</scope>
+			<version>${date4j-version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.swtbot</groupId>
+			<artifactId>junit4_x</artifactId>
+			<version>${swtbot-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbehave</groupId>
+			<artifactId>jbehave-core</artifactId>
+			<version>${jbehave-version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<reporting>
+	<build>
 		<plugins>
-			<!-- Normally, dependency report takes time, skip it -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${report-plugin-version}</version>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin-version}</version>
 				<configuration>
-					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+					<source>${java-version}</source>
+					<target>${java-version}</target>
+					<compilerArgument></compilerArgument>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.jbehave</groupId>
+				<artifactId>jbehave-maven-plugin</artifactId>
+				<version>${jbehave-version}</version>
+				<executions>
+					<execution>
+						<id>run-stories-as-paths</id>
+						<phase>integration-test</phase>
+						<configuration>
+							<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+							<includes>
+								<include>**/*Story.java</include>
+							</includes>
+							<ignoreFailureInStories>false</ignoreFailureInStories>
+							<ignoreFailureInView>false</ignoreFailureInView>
+							<scope>test</scope>
+						</configuration>
+						<goals>
+							<goal>run-stories-as-paths</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+						<version>1.2.17</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>emma-maven-plugin</artifactId>
@@ -148,19 +198,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${maven-compiler-plugin-version}</version>
-					<configuration>
-						<source>${java-version}</source>
-						<target>${java-version}</target>
-						<compilerArgument></compilerArgument>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 </project>

@@ -2,7 +2,6 @@ package sg.edu.cs2103t.mina.stub;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Random;
 import java.util.SortedSet;
 import java.util.TimeZone;
 

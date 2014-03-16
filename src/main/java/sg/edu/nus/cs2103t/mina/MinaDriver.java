@@ -6,6 +6,7 @@ import java.util.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.widgets.Shell;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
 import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
@@ -45,7 +46,7 @@ public class MinaDriver {
     private static MinaView uiView;
     private static DataSyncManager dataSyncManager;
 
-    private static void initComponents() {
+    static void initDao() {
         Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
         fileMap.put(TaskType.TODO,
                 ConfigHelper.getProperty(TaskType.TODO.getType()));
@@ -54,11 +55,28 @@ public class MinaDriver {
         fileMap.put(TaskType.DEADLINE,
                 ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
         taskDao = new FileTaskDaoImpl(fileMap);
+    }
+
+    static void initTDM() {
         taskDataManager = new TaskDataManager(taskDao);
+    }
+
+    static void initTFM() {
         taskFilterManager = new TaskFilterManager(taskDataManager);
+    }
+
+    static void initSync() {
         dataSyncManager = new DataSyncManager(taskDataManager, taskDao);
+        new Timer().schedule(dataSyncManager, 0,
+                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
+    }
+
+    static void initCC() {
         commandController = new CommandController(dataSyncManager,
                 taskDataManager, taskFilterManager);
+    }
+
+    static void initView() {
         UIType viewType;
         try {
             viewType = UIType.valueOf(ConfigHelper.getProperty(VIEW_TYPE_KEY)
@@ -67,44 +85,54 @@ public class MinaDriver {
             viewType = UIType.CONSOLE;
         }
         switch (viewType) {
-            case GUI :
-                MinaGuiUI gui = new MinaGuiUI();
+            case GUI:
+                MinaGuiUI gui = new MinaGuiUI(commandController);
                 gui.open();
                 uiView = gui;
                 break;
-            case CONSOLE :
-                uiView = new ConsoleUI(System.in, System.out);
+            case CONSOLE:
+                uiView = new ConsoleUI(System.in, System.out, commandController);
                 break;
-            default :
+            default:
                 throw new Error(UNKOWN_TYPE_ERROR);
         }
-        uiView.updateLists(taskDataManager.getUncompletedEventTasks(),
-                taskDataManager.getUncompletedDeadlineTasks(),
-                taskDataManager.getUncompletedTodoTasks());
-        new Timer().schedule(dataSyncManager, 0,
-                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
+        uiView.updateLists(commandController.getEventTask(),
+                commandController.getDeadlineTask(),
+                commandController.getTodoTask());
     }
 
-    private static void processLoop() {
+    private void initComponents() {
+        initDao();
+        initTDM();
+        initTFM();
+        initSync();
+        initCC();
+        initView();
+    }
+
+    public Shell guiTestSetUp() {
+        initDao();
+        initTDM();
+        initTFM();
+        initSync();
+        initCC();
+        MinaGuiUI gui = new MinaGuiUI(commandController);
+        gui.updateLists(commandController.getEventTask(),
+                commandController.getDeadlineTask(),
+                commandController.getTodoTask());
+        return gui.open();
+    }
+
+    public void processLoop() {
         uiView.displayOutput(WELCOME_MESSAGE);
-        while (true) {
-            String userInput = uiView.getUserInput();
-            // TODO: try to split UI and while true loop
-            if (userInput == null) {
-                continue;
-            }
-            String feedback = commandController.processUserInput(userInput);            
-            uiView.updateLists(taskDataManager.getUncompletedEventTasks(),
-                    taskDataManager.getUncompletedDeadlineTasks(),
-                    taskDataManager.getUncompletedTodoTasks());
-            uiView.displayOutput(feedback);
-        }
+        uiView.loop();
     }
 
     public static void main(String[] args) {
         try {
-            initComponents();
-            processLoop();
+            MinaDriver driver = new MinaDriver();
+            driver.initComponents();
+            driver.processLoop();
         } catch (Exception e) {
             logger.error(e, e);
             dataSyncManager.saveAll();

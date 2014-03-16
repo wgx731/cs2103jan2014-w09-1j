@@ -122,8 +122,8 @@ public class TaskDataManager {
     public SortedSet<EventTask> getCompletedEventTasks() {
         return _completedEventTasks;
     }
-    
-    /* sync-lists controls */
+
+    /* synclists controls */
     public List<SyncDataParameter> getSyncList() {
         return _syncList;
     }
@@ -148,67 +148,68 @@ public class TaskDataManager {
                     return syncUncompletedTasks(TaskType.TODO, newTodoTask);
                 }
                 return null;
-            
+
             case DEADLINE:
                 DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
                 if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
-                    return syncUncompletedTasks(TaskType.DEADLINE, newDeadlineTask);
+                    return syncUncompletedTasks(TaskType.DEADLINE,
+                            newDeadlineTask);
                 }
                 return null;
-            
+
             case EVENT:
                 EventTask newEventTask = createEventTask(addParameters);
                 if (_uncompletedEventTasks.add(newEventTask)) {
                     return syncUncompletedTasks(TaskType.EVENT, newEventTask);
                 }
                 return null;
-            
+
             default:
                 return null;
         }
     }
 
-	private TodoTask createTodoTask(DataParameter addParameters) {
-		return new TodoTask(addParameters.getDescription(),
-				addParameters.getPriority());
-	}
+    private TodoTask createTodoTask(DataParameter addParameter) {
+        return new TodoTask(addParameter.getDescription(),
+                addParameter.getPriority());
+    }
 
-	private DeadlineTask createDeadlineTask(DataParameter addParameters) {
-		return new DeadlineTask(addParameters.getDescription(),
-				addParameters.getEndDate(), addParameters.getPriority());
-	}
+    private DeadlineTask createDeadlineTask(DataParameter addParameter) {
+        return new DeadlineTask(addParameter.getDescription(),
+                addParameter.getEndDate(), addParameter.getPriority());
+    }
 
-	private EventTask createEventTask(DataParameter addParameters) {
-		return new EventTask(addParameters.getDescription(),
-				addParameters.getStartDate(), addParameters.getEndDate(),
-				addParameters.getPriority());
-	}
+    private EventTask createEventTask(DataParameter addParameter) {
+        return new EventTask(addParameter.getDescription(),
+                addParameter.getStartDate(), addParameter.getEndDate(),
+                addParameter.getPriority());
+    }
 
-	private Task<?> syncUncompletedTasks(TaskType taskType, Task<?> newTask) {
-		SyncDataParameter dataToSync;
+    private Task<?> syncUncompletedTasks(TaskType taskType, Task<?> newTask) {
+        SyncDataParameter dataToSync;
 
-		switch (taskType) {
-			case TODO :
-				dataToSync = new SyncDataParameter(_uncompletedTodoTasks, taskType,
-						false);
-				break;
-			case DEADLINE :
-				dataToSync = new SyncDataParameter(_uncompletedDeadlineTasks,
-						taskType, false);
-				break;
-			case EVENT :
-				dataToSync = new SyncDataParameter(_uncompletedEventTasks,
-						taskType, false);
-				break;
-			default :
-				return null;
-		}
+        switch (taskType) {
+            case TODO:
+                dataToSync = new SyncDataParameter(_uncompletedTodoTasks,
+                        taskType, false);
+                break;
+            case DEADLINE:
+                dataToSync = new SyncDataParameter(_uncompletedDeadlineTasks,
+                        taskType, false);
+                break;
+            case EVENT:
+                dataToSync = new SyncDataParameter(_uncompletedEventTasks,
+                        taskType, false);
+                break;
+            default:
+                return null;
+        }
 
-		if (!_syncList.contains(dataToSync)) {
-			assert (_syncList.add(dataToSync));
-		}
-		return newTask;
-	}
+        if (!_syncList.contains(dataToSync)) {
+            assert (_syncList.add(dataToSync));
+        }
+        return newTask;
+    }
 
     /**
      * This method deletes a specific task by identifying the Task with its type
@@ -221,62 +222,68 @@ public class TaskDataManager {
     public Task<?> deleteTask(DataParameter deleteParameters) {
         switch (deleteParameters.getOriginalTaskType()) {
             case TODO:
-                TodoTask deletedTodoTask = deleteTodoTask(deleteParameters.getTaskId());
+                TodoTask deletedTodoTask = deleteTodoTask(deleteParameters
+                        .getTaskId());
                 return deletedTodoTask;
             case DEADLINE:
-                DeadlineTask deletedDeadlineTask = deleteDeadlineTask(deleteParameters.getTaskId());
+                DeadlineTask deletedDeadlineTask = deleteDeadlineTask(deleteParameters
+                        .getTaskId());
                 return deletedDeadlineTask;
             case EVENT:
-                EventTask deletedEventTask = deleteEventTask(deleteParameters.getTaskId());
+                EventTask deletedEventTask = deleteEventTask(deleteParameters
+                        .getTaskId());
                 return deletedEventTask;
             default:
-            	//System.out.println("Unable to determine Task Type.");
+                // System.out.println("Unable to determine Task Type.");
                 return null;
         }
     }
 
     private TodoTask deleteTodoTask(int deleteTaskId) {
-    	Iterator<TodoTask> completedTodoTaskIterator =  _uncompletedTodoTasks.iterator();
-    	TodoTask deletedTodoTask;
-    	
-    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
-    		deletedTodoTask = completedTodoTaskIterator.next();
-    		if(i == (deleteTaskId - 1)) {
-    			completedTodoTaskIterator.remove();
-    			return deletedTodoTask;
-    		}
-    	}
-    	//System.out.println("Unable to find todo task to delete.");
+        Iterator<TodoTask> completedTodoTaskIterator = _uncompletedTodoTasks
+                .iterator();
+        TodoTask deletedTodoTask;
+
+        for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+            deletedTodoTask = completedTodoTaskIterator.next();
+            if (i == (deleteTaskId - 1)) {
+                completedTodoTaskIterator.remove();
+                return deletedTodoTask;
+            }
+        }
+        // System.out.println("Unable to find todo task to delete.");
         return null;
     }
 
     private DeadlineTask deleteDeadlineTask(int deleteTaskId) {
-    	Iterator<DeadlineTask> completedTodoTaskIterator =  _uncompletedDeadlineTasks.iterator();
-    	DeadlineTask deletedDeadlineTask;
-    	
-    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
-    		deletedDeadlineTask = completedTodoTaskIterator.next();
-    		if(i == (deleteTaskId - 1)) {
-    			completedTodoTaskIterator.remove();
-    			return deletedDeadlineTask;
-    		}
-    	}
-    	//System.out.println("Unable to find deadline task to delete.");
+        Iterator<DeadlineTask> completedTodoTaskIterator = _uncompletedDeadlineTasks
+                .iterator();
+        DeadlineTask deletedDeadlineTask;
+
+        for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+            deletedDeadlineTask = completedTodoTaskIterator.next();
+            if (i == (deleteTaskId - 1)) {
+                completedTodoTaskIterator.remove();
+                return deletedDeadlineTask;
+            }
+        }
+        // System.out.println("Unable to find deadline task to delete.");
         return null;
     }
 
     private EventTask deleteEventTask(int deleteTaskId) {
-    	Iterator<EventTask> completedTodoTaskIterator =  _uncompletedEventTasks.iterator();
-    	EventTask deletedEventTask;
-    	
-    	for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
-    		deletedEventTask = completedTodoTaskIterator.next();
-    		if(i == (deleteTaskId - 1)) {
-    			completedTodoTaskIterator.remove();
-    			return deletedEventTask;
-    		}
-    	}
-    	//System.out.println("Unable to find event task to delete.");
+        Iterator<EventTask> completedTodoTaskIterator = _uncompletedEventTasks
+                .iterator();
+        EventTask deletedEventTask;
+
+        for (int i = 0; completedTodoTaskIterator.hasNext(); i++) {
+            deletedEventTask = completedTodoTaskIterator.next();
+            if (i == (deleteTaskId - 1)) {
+                completedTodoTaskIterator.remove();
+                return deletedEventTask;
+            }
+        }
+        // System.out.println("Unable to find event task to delete.");
         return null;
     }
 
@@ -289,7 +296,7 @@ public class TaskDataManager {
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
         DataParameter newSetOfParameters = new DataParameter();
- 
+
         newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
         newSetOfParameters.loadNewParameters(modifyParameters);
 
@@ -297,75 +304,78 @@ public class TaskDataManager {
     }
 
     public Task<?> markCompleted(DataParameter completeParameters) {
-    	switch (completeParameters.getOriginalTaskType()) {
-        	case TODO :
-        		TodoTask deletedTodoTask = markTodoTask(completeParameters.getTaskId());
-        		return deletedTodoTask;
-        	case DEADLINE:
-        		DeadlineTask deletedDeadlineTask = markDeadlineTask(completeParameters.getTaskId());
-        		return deletedDeadlineTask;
-        	case EVENT:
-        		EventTask deletedEventTask = markEventTask(completeParameters.getTaskId());
-        		return deletedEventTask;
-        	default:
-        	//System.out.println("Unable to determine Task Type.");
-            	return null;
-    	}
-    	
+        switch (completeParameters.getOriginalTaskType()) {
+            case TODO:
+                TodoTask deletedTodoTask = markTodoTask(completeParameters
+                        .getTaskId());
+                return deletedTodoTask;
+            case DEADLINE:
+                DeadlineTask deletedDeadlineTask = markDeadlineTask(completeParameters
+                        .getTaskId());
+                return deletedDeadlineTask;
+            case EVENT:
+                EventTask deletedEventTask = markEventTask(completeParameters
+                        .getTaskId());
+                return deletedEventTask;
+            default:
+                // System.out.println("Unable to determine Task Type.");
+                return null;
+        }
+
     }
 
-	private TodoTask markTodoTask(int taskId) {
-		TodoTask retrievedTask = deleteTodoTask(taskId);
+    private TodoTask markTodoTask(int taskId) {
+        TodoTask retrievedTask = deleteTodoTask(taskId);
 
-		retrievedTask.setCompleted(true);
+        retrievedTask.setCompleted(true);
 
-		SyncDataParameter dataToSync;
-		if (_completedTodoTasks.add(retrievedTask)) {
-			dataToSync = new SyncDataParameter(_completedTodoTasks,
-					TaskType.TODO, true);
-			if (!_syncList.contains(dataToSync)) {
-				assert (_syncList.add(dataToSync));
-			}
-		}
+        SyncDataParameter dataToSync;
+        if (_completedTodoTasks.add(retrievedTask)) {
+            dataToSync = new SyncDataParameter(_completedTodoTasks,
+                    TaskType.TODO, true);
+            if (!_syncList.contains(dataToSync)) {
+                assert (_syncList.add(dataToSync));
+            }
+        }
 
-		return retrievedTask;
-	}
+        return retrievedTask;
+    }
 
-	private DeadlineTask markDeadlineTask(int taskId) {
-		DeadlineTask retrievedTask = deleteDeadlineTask(taskId);
+    private DeadlineTask markDeadlineTask(int taskId) {
+        DeadlineTask retrievedTask = deleteDeadlineTask(taskId);
 
-		retrievedTask.setCompleted(true);
+        retrievedTask.setCompleted(true);
 
-		SyncDataParameter dataToSync;
-		if (_completedDeadlineTasks.add(retrievedTask)) {
-			dataToSync = new SyncDataParameter(_completedDeadlineTasks,
-					TaskType.DEADLINE, true);
-			if (!_syncList.contains(dataToSync)) {
-				assert (_syncList.add(dataToSync));
-			}
-		}
+        SyncDataParameter dataToSync;
+        if (_completedDeadlineTasks.add(retrievedTask)) {
+            dataToSync = new SyncDataParameter(_completedDeadlineTasks,
+                    TaskType.DEADLINE, true);
+            if (!_syncList.contains(dataToSync)) {
+                assert (_syncList.add(dataToSync));
+            }
+        }
 
-		return retrievedTask;
-	}
+        return retrievedTask;
+    }
 
-	private EventTask markEventTask(int taskId) {
-		EventTask retrievedTask = deleteEventTask(taskId);
+    private EventTask markEventTask(int taskId) {
+        EventTask retrievedTask = deleteEventTask(taskId);
 
-		retrievedTask.setCompleted(true);
+        retrievedTask.setCompleted(true);
 
-		SyncDataParameter dataToSync;
-		if (_completedEventTasks.add(retrievedTask)) {
-			dataToSync = new SyncDataParameter(_completedEventTasks,
-					TaskType.DEADLINE, true);
-			if (!_syncList.contains(dataToSync)) {
-				assert (_syncList.add(dataToSync));
-			}
-		}
+        SyncDataParameter dataToSync;
+        if (_completedEventTasks.add(retrievedTask)) {
+            dataToSync = new SyncDataParameter(_completedEventTasks,
+                    TaskType.DEADLINE, true);
+            if (!_syncList.contains(dataToSync)) {
+                assert (_syncList.add(dataToSync));
+            }
+        }
 
-		return retrievedTask;
-	}
+        return retrievedTask;
+    }
 
-	/**
+    /**
      * only to be used for testing
      */
     public void resetTrees() {

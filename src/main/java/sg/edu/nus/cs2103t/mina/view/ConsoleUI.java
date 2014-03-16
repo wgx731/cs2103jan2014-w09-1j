@@ -9,14 +9,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
-import sg.edu.nus.cs2103t.mina.model.EventTask;
-import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.controller.CommandController;
 
 /**
  * 
@@ -27,7 +24,7 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
  * @author duzhiyuan
  * @author joannemah
  */
-public class ConsoleUI implements MinaView {
+public class ConsoleUI extends MinaView {
 
     private static Logger logger = LogManager.getLogger(ConsoleUI.class
             .getName());
@@ -37,19 +34,20 @@ public class ConsoleUI implements MinaView {
     private InputStream _input;
     private OutputStream _output;
 
-    private List<EventTask> _eventList;
-    private List<TodoTask> _todoList;
-    private List<DeadlineTask> _deadlineList;
+    private List<String> _eventList;
+    private List<String> _todoList;
+    private List<String> _deadlineList;
 
-    public ConsoleUI(InputStream input, OutputStream output) {
-        super();
+    public ConsoleUI(InputStream input, OutputStream output,
+            CommandController commandController) {
+        super(commandController);
         _input = input;
         _output = output;
         _inputReader = new BufferedReader(new InputStreamReader(_input));
         _outputWriter = new BufferedWriter(new OutputStreamWriter(_output));
-        _eventList = new ArrayList<EventTask>();
-        _todoList = new ArrayList<TodoTask>();
-        _deadlineList = new ArrayList<DeadlineTask>();
+        _eventList = new ArrayList<String>();
+        _todoList = new ArrayList<String>();
+        _deadlineList = new ArrayList<String>();
     }
 
     @Override
@@ -73,9 +71,8 @@ public class ConsoleUI implements MinaView {
     }
 
     @Override
-    public void updateLists(SortedSet<EventTask> allEventTasks,
-            SortedSet<DeadlineTask> allDeadlineTasks,
-            SortedSet<TodoTask> allTodoTasks) {
+    public void updateLists(ArrayList<String> allEventTasks,
+            ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks) {
         _eventList.clear();
         _eventList.addAll(allEventTasks);
         _deadlineList.clear();
@@ -84,4 +81,8 @@ public class ConsoleUI implements MinaView {
         _todoList.addAll(allTodoTasks);
     }
 
+    public void loop() {
+        String feedback = _commandController.processUserInput(getUserInput());
+        displayOutput(feedback);
+    }
 }

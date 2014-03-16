@@ -1,6 +1,7 @@
 package sg.edu.cs2103t.mina.controller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -97,6 +98,7 @@ public class TaskFilterManagerSearchTest {
 		return todos;
 	}
 
+
 	private boolean compareToActualTasks(ArrayList<Task<?>> test) {
 		
 		//guard clause
@@ -147,26 +149,26 @@ public class TaskFilterManagerSearchTest {
 		return true;
 	}
 
-	public ArrayList<Task<?>> getResult(String rawKeywords) {
-		
-		String[] tokens = rawKeywords.split(" ");
-		ArrayList<String> keywords = new ArrayList<String>();
-		SearchParameter searchParam;
-		
-		for (int i=0; i<tokens.length; i++) {
-			if (!tokens[i].trim().equals("")) {
-				keywords.add(tokens[i]);
-			}
-		}
-		
-		searchParam = new SearchParameter(keywords);
-		return tfmTest.searchTasks(searchParam);
-		
-	}
-	
-	public void resetTdmTfm() {
-		tdmStub = new TaskDataManagerStub();
-		tfmTest = new TaskFilterManager(tdmStub);
-	}
-	
+    public ArrayList<Task<?>> getResult(String rawKeywords) {
+
+        String[] tokens = rawKeywords.split(" ");
+        ArrayList<String> keywords = new ArrayList<String>();
+        SearchParameter searchParam;
+
+        for (int i = 0; i < tokens.length; i++) {
+            if (!tokens[i].trim().equals("")) {
+                keywords.add(tokens[i]);
+            }
+        }
+
+        searchParam = new SearchParameter(keywords);
+        return tfmTest.searchTasks(searchParam);
+
+    }
+
+    public void resetTdmTfm() {
+        tdmStub = new TaskDataManagerStub();
+        tfmTest = new TaskFilterManager(tdmStub);
+    }
+
 }
