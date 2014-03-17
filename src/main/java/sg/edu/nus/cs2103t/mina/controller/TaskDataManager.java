@@ -140,24 +140,24 @@ public class TaskDataManager {
      * @param String addParameters
      * @return
      */
-    public Task<?> addTask(DataParameter addParameter) {
-        switch (addParameter.getNewTaskType()) {
+    public Task<?> addTask(DataParameter addParameters) {
+        switch (addParameters.getNewTaskType()) {
             case TODO:
-                TodoTask newTodoTask = createTodoTask(addParameter);
+                TodoTask newTodoTask = createTodoTask(addParameters);
                 if (_uncompletedTodoTasks.add(newTodoTask)) {
                     return syncUncompletedTasks(TaskType.TODO, newTodoTask);
                 }
                 return null;
             
             case DEADLINE:
-                DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
+                DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
                 if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
                     return syncUncompletedTasks(TaskType.DEADLINE, newDeadlineTask);
                 }
                 return null;
             
             case EVENT:
-                EventTask newEventTask = createEventTask(addParameter);
+                EventTask newEventTask = createEventTask(addParameters);
                 if (_uncompletedEventTasks.add(newEventTask)) {
                     return syncUncompletedTasks(TaskType.EVENT, newEventTask);
                 }
@@ -168,20 +168,20 @@ public class TaskDataManager {
         }
     }
 
-	private TodoTask createTodoTask(DataParameter addParameter) {
-		return new TodoTask(addParameter.getDescription(),
-				addParameter.getPriority());
+	private TodoTask createTodoTask(DataParameter addParameters) {
+		return new TodoTask(addParameters.getDescription(),
+				addParameters.getPriority());
 	}
 
-	private DeadlineTask createDeadlineTask(DataParameter addParameter) {
-		return new DeadlineTask(addParameter.getDescription(),
-				addParameter.getEndDate(), addParameter.getPriority());
+	private DeadlineTask createDeadlineTask(DataParameter addParameters) {
+		return new DeadlineTask(addParameters.getDescription(),
+				addParameters.getEndDate(), addParameters.getPriority());
 	}
 
-	private EventTask createEventTask(DataParameter addParameter) {
-		return new EventTask(addParameter.getDescription(),
-				addParameter.getStartDate(), addParameter.getEndDate(),
-				addParameter.getPriority());
+	private EventTask createEventTask(DataParameter addParameters) {
+		return new EventTask(addParameters.getDescription(),
+				addParameters.getStartDate(), addParameters.getEndDate(),
+				addParameters.getPriority());
 	}
 
 	private Task<?> syncUncompletedTasks(TaskType taskType, Task<?> newTask) {
