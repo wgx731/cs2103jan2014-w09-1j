@@ -156,11 +156,12 @@ public class CommandController {
                 SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
                 ArrayList<Task<?>> searchResult = _taskFilterManager
                         .searchTasks(searchParameter);
-                if (searchResult.size()==0){
+                if (searchResult.size()==0){                	
                 	return SEARCH_NOT_FOUND;
                 } else {
                 	return getTaskListString(searchResult);
                 }
+                
             }
             case COMPLETE: {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
