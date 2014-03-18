@@ -132,7 +132,7 @@ public class TaskDataManager {
         return _completedEventTasks;
     }
 
-    /* sync-lists controls */
+    /* synclists controls */
     public List<SyncDataParameter> getSyncList() {
         return _syncList;
     }

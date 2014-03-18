@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -86,8 +87,7 @@ public class TaskFilterManagerFilterTest {
      */
     @Test
     public void testNoFilter() {
-
-        ArrayList<Task<?>> test = tfmTest.filterTask(new FilterParameter());
+        ArrayList<Task<?>> test = getResult(new FilterType[]{});
         assertTrue("Must have everything!", checkAllUncompletedTasks(test));
 
     }
@@ -117,7 +117,7 @@ public class TaskFilterManagerFilterTest {
      */
     @Test
     public void testTodosOnly() {
-
+        
         ArrayList<Task<?>> test = getResult(FilterType.TODO);
         SortedSet<TodoTask> todos = tdmStub.getUncompletedTodoTasks();
         int numOfTodos = todos.size();
@@ -700,7 +700,15 @@ public class TaskFilterManagerFilterTest {
         }
 
         FilterParameter filter = new FilterParameter(keywords, start, end, hasTime);
-        return tfmTest.filterTask(filter);
+        HashMap<TaskType, ArrayList<Task<?>>> resultMap = tfmTest.filterTask(filter);
+        
+        ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+        
+        for(TaskType type: resultMap.keySet()) {
+            result.addAll(resultMap.get(type));
+        }
+        
+        return result;
     }
 
     /**

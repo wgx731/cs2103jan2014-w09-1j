@@ -13,6 +13,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 
@@ -23,6 +24,7 @@ import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.Task;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
@@ -62,12 +64,12 @@ public class TaskFilterManager {
 	 * An arraylist of tasks that satisfied the task. 
 	 * Empty if there's none
 	 */
-	public ArrayList<Task<?>> filterTask(FilterParameter filters) {
+	public HashMap<TaskType, ArrayList<Task<?>>> filterTask(FilterParameter filters) {
 		
 		// GuardClause
 		assert(filters.getFilters()!=null);
-
-		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+		
+		HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		
 		//All tasks are already sorted. This is added for user's brevity 
 		filters.remove(FilterType.PRIORITY);
@@ -81,8 +83,7 @@ public class TaskFilterManager {
 		} else if(filters.contains(FilterType.COMPLETE_PLUS)) {
 			
 			filters.remove(FilterType.COMPLETE_PLUS);
-			result.addAll(filterCompletedTasks(filters));
-			result.addAll(filterUncompletedTasks(filters));
+			result = combineCompUncompTasks(filters);
 			
 		} else {
 			
@@ -93,13 +94,33 @@ public class TaskFilterManager {
 			result = filterUncompletedTasks(filters);
 			
 		}
+		
 		return result;
 		
 	}
 
-	private ArrayList<Task<?>> filterUncompletedTasks(FilterParameter filters) {
+    private HashMap<TaskType, ArrayList<Task<?>>> combineCompUncompTasks(FilterParameter filters) {
+        
+        HashMap<TaskType, ArrayList<Task<?>>> completedTasks;
+        HashMap<TaskType, ArrayList<Task<?>>> uncompletedTasks;
+        HashMap<TaskType, ArrayList<Task<?>>> result;
+        completedTasks = filterCompletedTasks(filters);
+        uncompletedTasks = filterUncompletedTasks(filters);
+        result = new HashMap<TaskType, ArrayList<Task<?>>>();
+        
+        for (TaskType type: uncompletedTasks.keySet()) {
+            ArrayList<Task<?>> currentTasks = uncompletedTasks.get(type);
+            currentTasks.addAll(completedTasks.get(type));
+            result.put(type, currentTasks);
+        }
+        
+        
+        return result;
+    }
+
+    private HashMap<TaskType, ArrayList<Task<?>>> filterUncompletedTasks(FilterParameter filters) {
 		
-		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+        HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		ArrayList<Task<?>> neededTasks;
 		
 		if(filters.isEmpty()) {
@@ -108,27 +129,59 @@ public class TaskFilterManager {
 		
 		if (filters.contains(FilterType.DEADLINE)) {
 			neededTasks = getTasks(_taskStore.getUncompletedDeadlineTasks());
-			result.addAll(neededTasks);
+			result.put(TaskType.DEADLINE, neededTasks);
 		}
 
 		if (filters.contains(FilterType.TODO)) {
 			neededTasks = getTasks(_taskStore.getUncompletedTodoTasks());
-			result.addAll(neededTasks);
+			result.put(TaskType.TODO, neededTasks);
 		}
 
 		if (filters.contains(FilterType.EVENT)) {
 			neededTasks = getTasks(_taskStore.getUncompletedEventTasks());
-			result.addAll(neededTasks);
+			result.put(TaskType.EVENT, neededTasks);
 		}
 		
 		if(hasDateRange(filters)) {
-		    result = filterByDate(result, filters);
+		    //Note that the individual type will mix up
+		    result = filterResultsByDate(TaskType.DEADLINE, result, filters);
+		    result = filterResultsByDate(TaskType.EVENT, result, filters);  
 		}
 		
 		return result;
 	}
 	
-	/**
+    
+    /**
+     * @author Du Zhiyuan
+     * 
+     * Filter the result further by filter's date range. 
+     * If the type does not exist in the result, nothing will change
+     * 
+     * @param currType
+     * @param result
+     * @param filters
+     * @return
+     */
+	private HashMap<TaskType, ArrayList<Task<?>>> filterResultsByDate(TaskType currType, 
+                                                                    HashMap<TaskType, ArrayList<Task<?>>> result,
+                                                                    FilterParameter filters) {
+	    
+	    assert(result!=null);
+	    assert(filters!=null);
+	    
+	    ArrayList<Task<?>> filteredResult;
+	    ArrayList<Task<?>> timedTasks;
+	    
+	    if (result.containsKey(currType)) {
+	        timedTasks = result.get(currType);
+	        filteredResult = filterByDate(timedTasks, filters);
+	        result.put(currType, filteredResult);
+	    }
+	    return result;
+	}
+
+    /**
 	 * Filter each task by its date.
 	 * @param result 
 	 * @param filters 
@@ -151,8 +204,8 @@ public class TaskFilterManager {
         
         //Only EventTask / DeadlineTask will be checked
 	    for (Task<?> task: result) {
-	        if(task instanceof TodoTask || 
-	                isInDateRange(task, start, end, hasTime)) {
+	        assert(!(task instanceof TodoTask));
+	        if(isInDateRange(task, start, end, hasTime)) {
 	            filteredResult.add(task);
 	        }
 	    }
@@ -239,30 +292,36 @@ public class TaskFilterManager {
                filters.contains(FilterType.END);
     }
 
-    private ArrayList<Task<?>> filterCompletedTasks(FilterParameter filters) {
+    private HashMap<TaskType, ArrayList<Task<?>>> filterCompletedTasks(FilterParameter filters) {
 		
-		ArrayList<Task<?>> result = new ArrayList<Task<?>>();
+        HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		ArrayList<Task<?>> neededTasks;
 		
 		if(filters.isEmpty()) {
 			filters = fillEmptyFilter();
 		}
 		
-		if (filters.contains(FilterType.DEADLINE)) {
-			neededTasks = getTasks(_taskStore.getCompletedDeadlineTasks());
-			result.addAll(neededTasks);
-		}
+        if (filters.contains(FilterType.DEADLINE)) {
+            neededTasks = getTasks(_taskStore.getCompletedDeadlineTasks());
+            result.put(TaskType.DEADLINE, neededTasks);
+        }
 
-		if (filters.contains(FilterType.TODO)) {
-			neededTasks = getTasks(_taskStore.getCompletedTodoTasks());
-			result.addAll(neededTasks);
-		}
+        if (filters.contains(FilterType.TODO)) {
+            neededTasks = getTasks(_taskStore.getCompletedTodoTasks());
+            result.put(TaskType.TODO, neededTasks);
+        }
 
-		if (filters.contains(FilterType.EVENT)) {
-			neededTasks = getTasks(_taskStore.getCompletedEventTasks());
-			result.addAll(neededTasks);
-		}
+        if (filters.contains(FilterType.EVENT)) {
+            neededTasks = getTasks(_taskStore.getCompletedEventTasks());
+            result.put(TaskType.EVENT, neededTasks);
+        }
 		
+        if(hasDateRange(filters)) {
+            //Note that the individual type will mix up
+            result = filterResultsByDate(TaskType.DEADLINE, result, filters);
+            result = filterResultsByDate(TaskType.EVENT, result, filters);  
+        }
+        
 		return result;
 		
 	}
@@ -315,10 +374,11 @@ public class TaskFilterManager {
 	 * An arraylist of task that satisfied the keywords. 
 	 * Empty if there's none.
 	 */
-	public ArrayList<Task<?>> searchTasks(SearchParameter param) {
+	public HashMap<TaskType, ArrayList<Task<?>>> searchTasks(SearchParameter param) {
 		
 		ArrayList<String> keywords = param.getKeywords();
-		ArrayList<Task<?>> result = new ArrayList<Task<?>>();		
+		HashMap<TaskType, ArrayList<Task<?>>> result; 	
+		result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		
 		//Guard clause
 		assert(param!=null);
@@ -327,12 +387,19 @@ public class TaskFilterManager {
 		}
 		
 		FilterParameter allTypes = fillEmptyFilter();
-		ArrayList<Task<?>> uncompletedTasks = filterUncompletedTasks(allTypes);
+		HashMap<TaskType, ArrayList<Task<?>>> uncompletedTasks;
+		uncompletedTasks = filterUncompletedTasks(allTypes);
 		
-		for (Task<?> task: uncompletedTasks) {
-			if (searchKeywords(task, keywords)){
-				result.add(task);
-			}
+		for(TaskType type: uncompletedTasks.keySet()){
+		    
+		    ArrayList<Task<?>> specificResult = new ArrayList<Task<?>>();
+    		for (Task<?> task: uncompletedTasks.get(type)) {
+    			if (searchKeywords(task, keywords)) {
+    			    specificResult.add(task);
+    			}
+    		}
+    		result.put(type, specificResult);
+    		
 		}
 		
 		return result;
