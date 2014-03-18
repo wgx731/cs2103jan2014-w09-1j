@@ -65,6 +65,32 @@ public class DataParameter {
             setStartDate(eventTaskObj.getStartTime());
         }
     }
+    
+    public DataParameter(String des, char pri, Date start, Date end,
+            TaskType origType, TaskType newType, int id, Task<?> taskObj) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
+
+        setTaskObject(taskObj);
+
+        if (taskObj.getType() == TaskType.DEADLINE) {
+            DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
+            
+            setEndDate(end == null ? deadlineTaskObj.getEndTime() : end);
+        }
+
+        if (taskObj.getType() == TaskType.EVENT) {
+            EventTask eventTaskObj = (EventTask) taskObj;
+
+            setEndDate(end == null ? eventTaskObj.getEndTime() : end);
+            setStartDate(start == null ? eventTaskObj.getStartTime() : start);
+        }
+    }
 
     /**
      * This method checks the existing parameters within DataParameter and
@@ -142,6 +168,7 @@ public class DataParameter {
         if (modifyParam.getTaskId() != -1) {
             setTaskID(modifyParam.getTaskId());
         }
+        
         if (_originalTaskType != _newTaskType) {
             if (_originalTaskType == TaskType.DEADLINE && _newTaskType == TaskType.TODO) {
                 _description += (" by " + _end);

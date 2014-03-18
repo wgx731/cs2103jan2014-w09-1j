@@ -237,7 +237,7 @@ public class TaskDataManager {
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
         DataParameter newSetOfParameters = new DataParameter();
-
+        
         newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
         newSetOfParameters.loadNewParameters(modifyParameters);
 

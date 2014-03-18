@@ -137,146 +137,148 @@ public class TaskDataManagerTest {
 
     @Test
     public void testModifyTask() {
-//        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
-//        fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
-//        fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
-//        fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
-//        
-//        TaskDataManager tdmTest = new TaskDataManager(new FileTaskDaoImplStub(fileMap));
-//        Long currDateMilliSec = System.currentTimeMillis();
-//
-//        /* modify task parameters */
-//        tdmTest.addTask(new DataParameter("TodoTask I am slack.", 'L', null,
-//                null, null, TaskType.TODO, 1));
-//        assertEquals("Modify todo description and priority.", new TodoTask(
-//                "TodoTask I am not slack anymore.", 'H'),
-//                tdmTest.modifyTask(new DataParameter(
-//                        "TodoTask I am not slack anymore.", 'H', null, null,
-//                        TaskType.TODO, TaskType.TODO, 1)));
-//       
-//        tdmTest.addTask(new DataParameter("Deadline I am slack.", 'L', null,
-//                new Date(currDateMilliSec), null, TaskType.DEADLINE, 1));
-//        assertEquals("Modify deadline description, endDate and priority.",
-//                new DeadlineTask("Deadline I am not slack anymore.", new Date(
-//                        currDateMilliSec - 100000), 'H'),
-//                tdmTest.modifyTask(new DataParameter(
-//                        "Deadline I am not slack anymore.", 'H', null,
-//                        new Date(currDateMilliSec - 100000), TaskType.DEADLINE,
-//                        TaskType.DEADLINE, 1)));
-//
-//        tdmTest.addTask(new DataParameter("Event I am slack.", 'L', new Date(
-//                currDateMilliSec), new Date(currDateMilliSec), null,
-//                TaskType.EVENT, 1));
-//        assertEquals("Modify deadline description, endDate and priority.",
-//                new EventTask("Deadline I am not slack anymore.", new Date(
-//                        currDateMilliSec - 100000), new Date(
-//                        currDateMilliSec - 100000), 'H'),
-//                tdmTest.modifyTask(new DataParameter(
-//                        "Deadline I am not slack anymore.", 'H', new Date(
-//                                currDateMilliSec - 100000), new Date(
-//                                currDateMilliSec - 100000), TaskType.EVENT,
-//                        TaskType.EVENT, 1)));
-//        
-//        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
-//        
-//        tdmTest.resetTrees();
-//        
-//        /* modify task type */
-//
-//        // basic modify
-//        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask.",
-//                'M', null, null, null, TaskType.TODO, 123));
-//
-//        assertEquals(
-//                "Modify to-do to deadline.",
-//                new DeadlineTask("TodoTask becomes a DeadlineTask.", new Date(
-//                        currDateMilliSec)),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
-//                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1)));
-//        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
-//        
-//        tdmTest.addTask(new DataParameter("TodoTask becomes an EventTask.",
-//                'M', null, null, null, TaskType.TODO, 123));
-//        assertEquals(
-//                "Modify to-do to event.",
-//                new EventTask("TodoTask becomes an EventTask.", new Date(
-//                        currDateMilliSec), new Date(currDateMilliSec)),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', new Date(
-//                        currDateMilliSec), new Date(
-//                        currDateMilliSec), TaskType.TODO, TaskType.EVENT, 1)));
-//        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
-//        
-//        tdmTest.resetTrees();
-//        tdmTest.addTask(new DataParameter("Deadline task becomes a TodoTask.",
-//                'M', null, new Date(currDateMilliSec), null, TaskType.DEADLINE,
-//                123));
-//        assertEquals("Modify deadline to to-do.", new TodoTask(
-//                "Deadline task becomes a TodoTask. by " + new Date(currDateMilliSec)),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
-//                        TaskType.DEADLINE, TaskType.TODO, 1)));
-//        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
-//
-//        tdmTest.addTask(new DataParameter(
-//                "Deadline task becomes an EventTask.", 'M', null, new Date(
-//                        currDateMilliSec), null, TaskType.DEADLINE, 1));
-//        assertEquals("Modify deadline to event", new EventTask(
-//                "Deadline task becomes an EventTask.", new Date(
-//                        currDateMilliSec), new Date(currDateMilliSec), 'M'),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', new Date(
-//                        currDateMilliSec), null, TaskType.DEADLINE,
-//                        TaskType.EVENT, 1)));
-//        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
-//
-//        tdmTest.resetTrees();
-//
-//        tdmTest.addTask(new DataParameter("Event task becomes TodoTask.", 'M',
-//                new Date(currDateMilliSec), new Date(currDateMilliSec), null,
-//                TaskType.EVENT, 1));
-//        assertEquals("Modify deadline to event",
-//                new TodoTask(
-//                        "Event task becomes TodoTask. from " + new Date(
-//                                currDateMilliSec) +
-//                                " to " +
-//                                new Date(currDateMilliSec), 'M'),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
-//                        TaskType.EVENT, TaskType.TODO, 1)));
-//        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
-//
-//        tdmTest.addTask(new DataParameter("Event task becomes DeadlineTask.",
-//                'M', new Date(currDateMilliSec), new Date(currDateMilliSec),
-//                null, TaskType.EVENT, 2));
-//        assertEquals("Modify deadline to event", new TodoTask(
-//                "Event task becomes DeadlineTask."),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
-//                        TaskType.EVENT, TaskType.DEADLINE, 1)));
-//        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
-//        
-//        tdmTest.resetTrees();
-//        
-//        // modify task in between SortedSet
-//        tdmTest.addTask(new DataParameter("TodoTask remains a TodoTask 1.",
-//                'H', null, null, null, TaskType.TODO, 123));
-//        tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 2.",
-//                'M', null, null, null, TaskType.TODO, 123));
-//
-//        assertEquals(
-//                "Modify to-do to deadline.",
-//                new DeadlineTask("TodoTask becomes a DeadlineTask 2.",
-//                        new Date(currDateMilliSec)),
-//                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
-//                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 2)));
-//        assertEquals(new TodoTask("TodoTask remains a TodoTask 1.", 'H'), tdmTest.getUncompletedTodoTasks().first());
-//        
-//        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
+        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
+        fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
+        fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
+        fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
+        
+        TaskDataManager tdmTest = new TaskDataManager(new FileTaskDaoImplStub(fileMap));
+        Long currDateMilliSec = System.currentTimeMillis();
+
+        /* modify task parameters */
+        TodoTask testTodo1 = (TodoTask) tdmTest.addTask(new DataParameter("TodoTask I am slack.", 'L', null,
+                null, null, TaskType.TODO, 1));
+        assertEquals("Modify todo description and priority.", new TodoTask(
+                "TodoTask I am not slack anymore.", 'H'),
+                tdmTest.modifyTask(new DataParameter(
+                        "TodoTask I am not slack anymore.", 'H', null, null,
+                        TaskType.TODO, TaskType.TODO, 1, testTodo1)));
+        
+        DeadlineTask testDeadline1 = (DeadlineTask) tdmTest.addTask(new DataParameter("Deadline I am slack.", 'L', null,
+                new Date(currDateMilliSec), null, TaskType.DEADLINE, 1));
+        assertEquals("Modify deadline description, endDate and priority.",
+                new DeadlineTask("Deadline I am not slack anymore.", new Date(
+                        currDateMilliSec - 100000), 'H'),
+                tdmTest.modifyTask(new DataParameter(
+                        "Deadline I am not slack anymore.", 'H', null,
+                        new Date(currDateMilliSec - 100000), TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1, testDeadline1)));
+
+        EventTask testEvent1 = (EventTask) tdmTest
+                .addTask(new DataParameter("Event I am slack.", 'L', new Date(
+                        currDateMilliSec), new Date(currDateMilliSec), null,
+                        TaskType.EVENT, 1));
+        assertEquals("Modify deadline description, endDate and priority.",
+                new EventTask("Deadline I am not slack anymore.", new Date(
+                        currDateMilliSec - 100000), new Date(
+                        currDateMilliSec - 100000), 'H'),
+                tdmTest.modifyTask(new DataParameter(
+                        "Deadline I am not slack anymore.", 'H', new Date(
+                                currDateMilliSec - 100000), new Date(
+                                currDateMilliSec - 100000), TaskType.EVENT,
+                        TaskType.EVENT, 1, testEvent1)));
+        
+        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
+        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
+        
+        tdmTest.resetTrees();
+        
+        /* modify task type */
+
+        // basic modify
+        TodoTask testTodo2 = (TodoTask) tdmTest.addTask(new DataParameter(
+                "TodoTask becomes a DeadlineTask.", 'M', null, null, null,
+                TaskType.TODO, 123));
+
+        assertEquals("Modify to-do to deadline.",
+                new DeadlineTask("TodoTask becomes a DeadlineTask.", new Date(
+                        currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
+                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 1,
+                        testTodo2)));
+        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
+        
+        TodoTask testTodo3 = (TodoTask) tdmTest.addTask(new DataParameter("TodoTask becomes an EventTask.",
+                'M', null, null, null, TaskType.TODO, 123));
+        assertEquals(
+                "Modify to-do to event.",
+                new EventTask("TodoTask becomes an EventTask.", new Date(
+                        currDateMilliSec), new Date(currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', new Date(
+                        currDateMilliSec), new Date(
+                        currDateMilliSec), TaskType.TODO, TaskType.EVENT, 1, testTodo3)));
+        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
+        
+        tdmTest.resetTrees();
+        DeadlineTask testDeadline2 = (DeadlineTask) tdmTest.addTask(new DataParameter("Deadline task becomes a TodoTask.",
+                'M', null, new Date(currDateMilliSec), null, TaskType.DEADLINE,
+                123));
+        assertEquals("Modify deadline to to-do.", new TodoTask(
+                "Deadline task becomes a TodoTask. by " + new Date(currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
+                        TaskType.DEADLINE, TaskType.TODO, 1, testDeadline2)));
+        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
+
+        DeadlineTask testDeadline3 = (DeadlineTask) tdmTest.addTask(new DataParameter(
+                "Deadline task becomes an EventTask.", 'M', null, new Date(
+                        currDateMilliSec), null, TaskType.DEADLINE, 1));
+        assertEquals("Modify deadline to event", new EventTask(
+                "Deadline task becomes an EventTask.", new Date(
+                        currDateMilliSec), new Date(currDateMilliSec), 'M'),
+                tdmTest.modifyTask(new DataParameter(null, 'M', new Date(
+                        currDateMilliSec), null, TaskType.DEADLINE,
+                        TaskType.EVENT, 1, testDeadline3)));
+        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
+        assertEquals(1, tdmTest.getUncompletedEventTasks().size());
+
+        tdmTest.resetTrees();
+
+        EventTask testEvent2 = (EventTask) tdmTest.addTask(new DataParameter("Event task becomes TodoTask.", 'M',
+                new Date(currDateMilliSec), new Date(currDateMilliSec), null,
+                TaskType.EVENT, 1));
+        assertEquals("Modify deadline to event",
+                new TodoTask(
+                        "Event task becomes TodoTask. from " + new Date(
+                                currDateMilliSec) +
+                                " to " +
+                                new Date(currDateMilliSec), 'M'),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
+                        TaskType.EVENT, TaskType.TODO, 1, testEvent2)));
+        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
+        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
+
+        EventTask testEvent3 = (EventTask) tdmTest.addTask(new DataParameter("Event task becomes DeadlineTask.",
+                'M', new Date(currDateMilliSec), new Date(currDateMilliSec),
+                null, TaskType.EVENT, 2));
+        assertEquals("Modify deadline to event", new TodoTask(
+                "Event task becomes DeadlineTask."),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
+                        TaskType.EVENT, TaskType.DEADLINE, 1, testEvent3)));
+        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
+        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
+        
+        tdmTest.resetTrees();
+        
+        // modify task in between SortedSet
+        tdmTest.addTask(new DataParameter("TodoTask remains a TodoTask 1.",
+                'H', null, null, null, TaskType.TODO, 123));
+        TodoTask testTodo4 = (TodoTask) tdmTest.addTask(new DataParameter("TodoTask becomes a DeadlineTask 2.",
+                'M', null, null, null, TaskType.TODO, 123));
+
+        assertEquals(
+                "Modify to-do to deadline.",
+                new DeadlineTask("TodoTask becomes a DeadlineTask 2.",
+                        new Date(currDateMilliSec)),
+                tdmTest.modifyTask(new DataParameter(null, 'M', null, new Date(
+                        currDateMilliSec), TaskType.TODO, TaskType.DEADLINE, 2, testTodo4)));
+        assertEquals(new TodoTask("TodoTask remains a TodoTask 1.", 'H'), tdmTest.getUncompletedTodoTasks().first());
+        
+        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
 
     }
 
