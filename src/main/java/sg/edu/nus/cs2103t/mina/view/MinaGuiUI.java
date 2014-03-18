@@ -115,6 +115,8 @@ public class MinaGuiUI extends MinaView {
         lblTodo.setText("To-do(td)");
 
         _eventListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _eventListUI.setEnabled(false);
+        _eventListUI.setEditable(false);
         _eventListUI
                 .setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _eventListUI.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
@@ -124,6 +126,8 @@ public class MinaGuiUI extends MinaView {
         _eventListUI.setBounds(4, 40, 354, 496);
 
         _deadlineListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _deadlineListUI.setEnabled(false);
+        _deadlineListUI.setEditable(false);
         _deadlineListUI.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
         _deadlineListUI.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
@@ -133,6 +137,8 @@ public class MinaGuiUI extends MinaView {
         _deadlineListUI.setBounds(362, 40, 356, 496);
 
         _todoListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _todoListUI.setEnabled(false);
+        _todoListUI.setEditable(false);
         _todoListUI.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _todoListUI.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
                 SWT.NORMAL));
