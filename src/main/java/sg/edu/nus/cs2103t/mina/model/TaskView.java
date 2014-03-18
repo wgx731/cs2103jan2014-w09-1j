@@ -29,6 +29,11 @@ public class TaskView {
         _status = status;
     }
     
+    public TaskView(String status) {
+        _tasksOutput = new HashMap<TaskType, ArrayList<Task<?>>>();
+        _status = status;        
+    }
+    
     public boolean hasTasks(TaskType type) {
         return _tasksOutput.containsKey(type);
     }
@@ -53,7 +58,7 @@ public class TaskView {
         return _status;
     }
     
-    public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException{
+    public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{
         /* Pg   items
          * 1  - 0-4
          * 2  - 5-9
@@ -71,7 +76,7 @@ public class TaskView {
         return getTasks(type, start, end);
     }
     
-    private ArrayList<Task<?>> getTasks(TaskType type, int start, int end) throws NumberFormatException {
+    private ArrayList<Task<?>> getTasks(TaskType type, int start, int end) throws IndexOutOfBoundsException {
         
         //Guard clause and sanity check
         if(!hasTasks(type)){
@@ -84,7 +89,7 @@ public class TaskView {
         ArrayList<Task<?>> output = new ArrayList<Task<?>>();
         
         if (start >= tasks.size()) {
-           throw new NumberFormatException();
+           throw new IndexOutOfBoundsException();
         }
         
         for(int i=start; i<end && i<tasks.size(); i++) {

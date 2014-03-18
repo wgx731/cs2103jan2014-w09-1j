@@ -15,7 +15,6 @@ import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
-import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 
 public class TaskViewTest {
@@ -67,14 +66,32 @@ public class TaskViewTest {
         assertTrue("Should start from page 2, 5-9", isSame);
         
         //Last page
-        
+        currPage = taskView.getPage(TaskType.DEADLINE, 4);
+        assertTrue(currPage.size()==1);
+        assertEquals(currPage.get(0), expected.get(expected.size()-1));
         
         //No pages in events 
+        currPage = taskView.getPage(TaskType.EVENT, 2);
+        assertTrue(currPage.isEmpty());        
         
         //Negative pages or zero page 
-        
+        boolean hasNegative = false;
+        try{
+            currPage = taskView.getPage(TaskType.TODO, -1);
+        } catch(NumberFormatException e){
+            hasNegative = true;
+        } finally {
+            assertTrue(hasNegative);
+        }
         //Exceed the number of pages
-        
+        boolean hasExceed = false;
+        try{
+            currPage = taskView.getPage(TaskType.TODO, 1000);
+        } catch(IndexOutOfBoundsException e){
+            hasExceed = true;
+        } finally {
+            assertTrue(hasExceed);
+        }
         //
     }
     
