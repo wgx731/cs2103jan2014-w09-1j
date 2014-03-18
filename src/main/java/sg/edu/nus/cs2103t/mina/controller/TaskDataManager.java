@@ -65,7 +65,7 @@ public class TaskDataManager {
     @SuppressWarnings("unchecked")
     public TaskDataManager(TaskDao storage) {
         SortedSet<? extends Task<?>> tempTasks = null;
-        initiateVariables();
+        
         _daoStorage = (FileTaskDaoImpl) storage;
         
         try {
