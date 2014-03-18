@@ -10,7 +10,9 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -29,10 +31,33 @@ public class MinaGuiUI extends MinaView {
     private StyledText _eventListUI;
     private StyledText _deadlineListUI;
     private StyledText _todoListUI;
+    private StyledText _backgroundBox;
+    private Label _lblEvent;
+    private Label _lblDeadline;
+    private Label _lblTodo;
+    
+    private int _eventPage;
+    private int _deadlinePage;
+    private int _todoPage;
+    
+    private Label _eventPrevPage;
+    private Label _eventNextPage;
+
+    private Label _deadlinePrevPage;
+    private Label _deadlineNextPage;
+
+    private Label _todoPrevPage;
+    private Label _todoNextPage;
+    
+    private final String RIGHT_ARROW = "\u2192";
+    private final String LEFT_ARROW = "\u2190";
     
     private LinkedList<String> _commandHistory;
     private int _commandPosition;
     private boolean _historyUp;
+    
+    private int _currentTab;
+    // private boolean _highlightOn;
     
     private static final String ERROR = "Operation failed. Please try again.";
     private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
@@ -67,6 +92,13 @@ public class MinaGuiUI extends MinaView {
         _commandHistory = new LinkedList<String>();
         _commandPosition = 0;
         _historyUp = true;
+        
+        _currentTab = 0;
+        // _highlightOn = false;
+        
+        _eventPage = 0;
+        _deadlinePage = 0;
+        _todoPage = 0;
 
         _shell = new Shell(_display, SWT.NO_TRIM);
         _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
@@ -85,34 +117,82 @@ public class MinaGuiUI extends MinaView {
         _userInputTextField.setFont(SWTResourceManager.getFont("Comic Sans MS",
                 15, SWT.NORMAL));
         _userInputTextField.setBounds(4, 540, 714, 36);
-
-        Label lblEvent = new Label(_shell, SWT.NONE);
-        lblEvent.setAlignment(SWT.CENTER);
-        lblEvent.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        lblEvent.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
+        
+        _lblEvent = new Label(_shell, SWT.NONE);
+        _lblEvent.setAlignment(SWT.CENTER);
+        _lblEvent.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _lblEvent.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
                 SWT.BOLD));
-        lblEvent.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-        lblEvent.setBounds(4, 4, 354, 36);
-        lblEvent.setText("Events(e)");
+        _lblEvent.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _lblEvent.setBounds(4, 4, 354, 36);
+        _lblEvent.setText("Events(e)");
 
-        Label lblDeadline = new Label(_shell, SWT.NONE);
-        lblDeadline.setAlignment(SWT.CENTER);
-        lblDeadline.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        lblDeadline.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
+        _lblDeadline = new Label(_shell, SWT.NONE);
+        _lblDeadline.setAlignment(SWT.CENTER);
+        _lblDeadline.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _lblDeadline.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
                 SWT.BOLD));
-        lblDeadline.setBackground(SWTResourceManager
+        _lblDeadline.setBackground(SWTResourceManager
                 .getColor(SWT.COLOR_DARK_CYAN));
-        lblDeadline.setBounds(362, 4, 356, 36);
-        lblDeadline.setText("Deadlines(d)");
+        _lblDeadline.setBounds(362, 4, 356, 36);
+        _lblDeadline.setText("Deadlines(d)");
 
-        Label lblTodo = new Label(_shell, SWT.NONE);
-        lblTodo.setAlignment(SWT.CENTER);
-        lblTodo.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        lblTodo.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
+        _lblTodo = new Label(_shell, SWT.NONE);
+        _lblTodo.setAlignment(SWT.CENTER);
+        _lblTodo.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _lblTodo.setFont(SWTResourceManager.getFont("Comic Sans MS", 15,
                 SWT.BOLD));
-        lblTodo.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
-        lblTodo.setBounds(722, 4, 354, 36);
-        lblTodo.setText("To-do(td)");
+        _lblTodo.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _lblTodo.setBounds(722, 4, 354, 36);
+        _lblTodo.setText("To-do(td)");
+        
+        _todoNextPage = new Label(_shell, SWT.NONE);
+        _todoNextPage.setText(RIGHT_ARROW);
+        _todoNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _todoNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _todoNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _todoNextPage.setAlignment(SWT.CENTER);
+        _todoNextPage.setBounds(992, 500, 84, 36);
+        
+        _todoPrevPage = new Label(_shell, SWT.NONE);
+        _todoPrevPage.setText(LEFT_ARROW);
+        _todoPrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _todoPrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _todoPrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _todoPrevPage.setAlignment(SWT.CENTER);
+        _todoPrevPage.setBounds(722, 500, 84, 36);
+        
+        _deadlinePrevPage = new Label(_shell, SWT.NONE);
+        _deadlinePrevPage.setText("←");
+        _deadlinePrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _deadlinePrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _deadlinePrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _deadlinePrevPage.setAlignment(SWT.CENTER);
+        _deadlinePrevPage.setBounds(362, 500, 84, 36);
+        
+        _deadlineNextPage = new Label(_shell, SWT.NONE);
+        _deadlineNextPage.setText("→");
+        _deadlineNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _deadlineNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _deadlineNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _deadlineNextPage.setAlignment(SWT.CENTER);
+        _deadlineNextPage.setBounds(634, 500, 84, 36);
+        
+        _eventPrevPage = new Label(_shell, SWT.NONE);
+        _eventPrevPage.setText("←");
+        _eventPrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _eventPrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _eventPrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _eventPrevPage.setAlignment(SWT.CENTER);
+        _eventPrevPage.setBounds(4, 500, 84, 36);
+        
+        _eventNextPage = new Label(_shell, SWT.NONE);
+        _eventNextPage.setText("→");
+        _eventNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _eventNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
+        _eventNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
+        _eventNextPage.setAlignment(SWT.CENTER);
+        _eventNextPage.setBounds(274, 500, 84, 36);
 
         _eventListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
         _eventListUI.setEnabled(false);
@@ -184,8 +264,7 @@ public class MinaGuiUI extends MinaView {
                     				_userInputTextField.setSelection(_userInputTextField.getCharCount());
                     				if (_commandPosition<_commandHistory.size()-1){
                     					_commandPosition++;
-                    				}
-                    				
+                    				}                    				
                     		}
                     	}
                     	break;
@@ -222,6 +301,43 @@ public class MinaGuiUI extends MinaView {
                 }
             }
         });
+        
+        _backgroundBox = new StyledText(_shell, SWT.NONE);
+        _backgroundBox.setDoubleClickEnabled(false);
+        _backgroundBox.setEnabled(false);
+        _backgroundBox.setEditable(false);
+        _backgroundBox.setBackground(SWTResourceManager
+                .getColor(255, 140, 0));
+        _backgroundBox.setBounds(0, 0, 362, 540);
+        
+        
+        _shell.addListener(SWT.KeyDown, new Listener() {
+            public void handleEvent(Event event) {
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.TAB) {
+                    _currentTab = (_currentTab+1)%3;
+                	if (_currentTab==0){
+                    	_backgroundBox.setBackground(SWTResourceManager
+                                .getColor(255, 140, 0));
+                        _backgroundBox.setBounds(0, 0, 362, 540);
+                    } else if (_currentTab==1){
+                    	_backgroundBox.setBackground(SWTResourceManager
+                                .getColor(255, 140, 0));
+                        _backgroundBox.setBounds(358, 0, 364, 540);
+                    } else {
+                    	_backgroundBox.setBackground(SWTResourceManager
+                                .getColor(255, 140, 0));
+                        _backgroundBox.setBounds(718, 0, 362, 540);
+                    }
+                }
+                if (event.stateMask != SWT.CTRL && ((event.keyCode>31 && event.keyCode<127)||(event.keyCode==SWT.ARROW_UP||
+                		event.keyCode==SWT.ARROW_DOWN||event.keyCode==SWT.ARROW_LEFT||event.keyCode==SWT.ARROW_RIGHT))) {
+                    _userInputTextField.forceFocus();
+                    if (event.keyCode>31&&event.keyCode<127) {
+                    	_userInputTextField.append(String.valueOf((char)event.keyCode));
+                    }
+                }
+            }});
+        
     }
 
     @Override
@@ -284,5 +400,4 @@ public class MinaGuiUI extends MinaView {
             }
         }
     }
-
 }

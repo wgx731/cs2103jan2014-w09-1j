@@ -168,7 +168,7 @@ public class CommandController {
                 
                 String output;
                 
-                if (searchResult.size()==0){
+                if (searchResult.size()==0){                	
                     output = SEARCH_NOT_FOUND;
                 } else {
                 	output = DISPLAYING_SEARCHES;
