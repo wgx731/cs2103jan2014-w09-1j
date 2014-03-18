@@ -15,6 +15,8 @@ public class DataParameter {
     private TaskType _originalTaskType;
     private TaskType _newTaskType;
     private int _taskID;
+    
+    private Task<?> _taskObject;
 
     /**
      * Constructors for DataParameter
@@ -28,6 +30,7 @@ public class DataParameter {
         setOriginalTaskType(null);
         setNewTaskType(null);
         setTaskID(-1);
+        setTaskObject(null);
     }
 
     public DataParameter(String des, char pri, Date start, Date end,
@@ -39,6 +42,27 @@ public class DataParameter {
         setOriginalTaskType(origType);
         setNewTaskType(newType);
         setTaskID(id);
+    }
+    
+    public DataParameter(Task<?> taskObj) {
+        setDescription(taskObj.getDescription());
+        setPriority(taskObj.getPriority());
+        setOriginalTaskType(taskObj.getType());
+        setNewTaskType(null);
+        //setTaskID(taskObj.getId());
+        
+        if (taskObj.getType() == TaskType.DEADLINE) {
+            DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
+            
+            setEndDate(deadlineTaskObj.getEndTime());
+        }
+        
+        if (taskObj.getType() == TaskType.EVENT) {
+            EventTask eventTaskObj = (EventTask) taskObj;
+            
+            setEndDate(eventTaskObj.getEndTime());
+            setStartDate(eventTaskObj.getStartTime());
+        }
     }
 
     /**
@@ -198,6 +222,10 @@ public class DataParameter {
         return _taskID;
     }
 
+    public Task<?> getTaskObject() {
+        return _taskObject;
+    }
+    
     /** set Methods */
     public void setDescription(String description) {
         _description = description;
@@ -225,6 +253,10 @@ public class DataParameter {
 
     public void setTaskID(int taskID) {
         _taskID = taskID;
+    }
+
+    public void setTaskObject(Task<?> _taskObject) {
+        this._taskObject = _taskObject;
     }
 
 }
