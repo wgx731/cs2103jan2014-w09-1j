@@ -34,7 +34,6 @@ public class TaskFilterManager {
 
 	private static final boolean IS_END = false;
     private static final boolean IS_START = true;
-    private static final int FIRST_LETTER = 0;
     
 	public static final int ONE_SECOND = 1000;
 	public static final int ONE_MINUTE = ONE_SECOND * 60;
