@@ -15,13 +15,13 @@ import java.util.HashMap;
 
 public class TaskView {
     
+    private static final int MIN_PAGE = 1;
     HashMap<TaskType, ArrayList<Task<?>>> _tasksOutput;
     String _status;
-    private static final String EMPTY = "";
-    private static final String SPACE = " ";
+
     private static final int EVERYTHING = -1;
     private static final int PAGE_ONE = 0;
-    private static final int ITEMS_PER_PAGE = 5;
+    public static final int ITEMS_PER_PAGE = 5;
     
     public TaskView(String status, 
                     HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
@@ -37,15 +37,15 @@ public class TaskView {
      * Get all todos tasks in String
      * @return String representation of all todos.
      */
-    public String getTodos() {
+    public ArrayList<Task<?>> getTodos() {
         return getTasks(TaskType.TODO, PAGE_ONE, EVERYTHING);
     }
     
-    public String getEvents() {
+    public ArrayList<Task<?>> getEvents() {
         return getTasks(TaskType.EVENT, PAGE_ONE, EVERYTHING);
     }
     
-    public String getDeadlines() {
+    public ArrayList<Task<?>> getDeadlines() {
         return getTasks(TaskType.DEADLINE, PAGE_ONE, EVERYTHING);        
     }
     
@@ -53,7 +53,7 @@ public class TaskView {
         return _status;
     }
     
-    public String getPage(TaskType type, int page){
+    public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException{
         /* Pg   items
          * 1  - 0-4
          * 2  - 5-9
@@ -61,26 +61,36 @@ public class TaskView {
          * 4  - 15-19
          * ...
          */
+        //Guard clause
+        if (page<MIN_PAGE) {
+           throw new NumberFormatException(); 
+        }
+        
         int end = page * ITEMS_PER_PAGE - 1;
-        int start = end - ITEMS_PER_PAGE;
+        int start = end - ITEMS_PER_PAGE + 1;
         return getTasks(type, start, end);
     }
     
-    private String getTasks(TaskType type, int start, int end) {
+    private ArrayList<Task<?>> getTasks(TaskType type, int start, int end) throws NumberFormatException {
         
-        //Guard clause
+        //Guard clause and sanity check
         if(!hasTasks(type)){
-            return EMPTY;
+            return new ArrayList<Task<?>>();
         }       
+        assert(start<end);
+        
         
         ArrayList<Task<?>> tasks = _tasksOutput.get(type);
-        StringBuilder outputBuild = new StringBuilder();
-        for(int i=start; i<end; i++) {
-            int index = i+1;
-            Task<?> task = tasks.get(i);
-            outputBuild.append(index + SPACE + task.toString() + "\r\n");
+        ArrayList<Task<?>> output = new ArrayList<Task<?>>();
+        
+        if (start >= tasks.size()) {
+           throw new NumberFormatException();
         }
-        return outputBuild.toString();
+        
+        for(int i=start; i<end && i<tasks.size(); i++) {
+            output.add(tasks.get(i));
+        }
+        return output;
     }
     
     

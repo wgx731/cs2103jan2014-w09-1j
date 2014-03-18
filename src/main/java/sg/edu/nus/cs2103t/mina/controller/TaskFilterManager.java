@@ -10,6 +10,7 @@ package sg.edu.nus.cs2103t.mina.controller;
  * @author joannemah
  */
 
+//@author Du Zhiyuan
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,7 +55,7 @@ public class TaskFilterManager {
 	public TaskFilterManager(TaskDataManager taskStore) {
 		_taskStore = taskStore;
 	}
-
+	
 	/**
 	 * Filter the tasks based on its critieria
 	 * 
@@ -98,7 +99,7 @@ public class TaskFilterManager {
 		return result;
 		
 	}
-
+	
     private HashMap<TaskType, ArrayList<Task<?>>> combineCompUncompTasks(FilterParameter filters) {
         
         HashMap<TaskType, ArrayList<Task<?>>> completedTasks;
@@ -117,7 +118,7 @@ public class TaskFilterManager {
         
         return result;
     }
-
+    
     private HashMap<TaskType, ArrayList<Task<?>>> filterUncompletedTasks(FilterParameter filters) {
 		
         HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
@@ -150,10 +151,8 @@ public class TaskFilterManager {
 		
 		return result;
 	}
-	
-    
+	 
     /**
-     * @author Du Zhiyuan
      * 
      * Filter the result further by filter's date range. 
      * If the type does not exist in the result, nothing will change
@@ -180,7 +179,7 @@ public class TaskFilterManager {
 	    }
 	    return result;
 	}
-
+	
     /**
 	 * Filter each task by its date.
 	 * @param result 
@@ -212,7 +211,7 @@ public class TaskFilterManager {
 	    
         return filteredResult;
     }
-	
+
 	/**
 	 * Check to see whether is it in date range
 	 * @param task

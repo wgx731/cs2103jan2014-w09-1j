@@ -20,6 +20,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
+//@author Du Zhiyuan
 public class TaskFilterManagerSearchTest {
 
     private TaskDataManagerStub tdmStub = new TaskDataManagerStub();

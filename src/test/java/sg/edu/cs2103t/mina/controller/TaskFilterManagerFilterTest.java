@@ -27,6 +27,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 
+//@author Du Zhiyuan
 public class TaskFilterManagerFilterTest {
 
     private static final int SEC = 2;
@@ -134,7 +135,7 @@ public class TaskFilterManagerFilterTest {
      */
     @Test
     public void testEventsOnly() {
-
+        
         ArrayList<Task<?>> test = getResult(FilterType.EVENT);
         SortedSet<EventTask> events = tdmStub.getUncompletedEventTasks();
         int numOfEvents = events.size();
@@ -189,7 +190,7 @@ public class TaskFilterManagerFilterTest {
 
         // With deadlines and events
         FilterType[] filters = { FilterType.DEADLINE, FilterType.EVENT };
-
+        
         ArrayList<Task<?>> test = getResult(filters);
         int actualSize = tdmStub.getUncompletedDeadlineTasks().size() + tdmStub
                 .getUncompletedEventTasks().size();
@@ -198,7 +199,7 @@ public class TaskFilterManagerFilterTest {
                 "Contains only uncompleted deadline and events!",
                 actualSize == test.size() && checkTwoTaskTypes(test,
                         TaskType.DEADLINE, TaskType.EVENT, UNCOMPLETE));
-
+        
         // With deadlines and todos
         filters = new FilterType[] { FilterType.DEADLINE, FilterType.TODO };
         test = getResult(filters);
@@ -359,7 +360,7 @@ public class TaskFilterManagerFilterTest {
                 tdmStub.getUncompletedDeadlineTasks().size();
         assertTrue("Contains all task!", checkAllUncompletedTasks(test));
     }
-
+    
     /**
      * Test the date filter by range, start to end
      */
@@ -430,6 +431,47 @@ public class TaskFilterManagerFilterTest {
         
         resetTdmTfm();
         
+    } 
+    
+    
+    @Test
+    /**
+     * The ArrayList has already been tested.
+     * Now, it's just to test whether the keys only
+     * cover what the users want.
+     * Note we need not do this on Search 
+     */
+    public void testHashMap(){
+        ArrayList<String> newKeywords= new ArrayList<String>();
+        FilterParameter param;
+        HashMap<TaskType, ArrayList<Task<?>>> result;
+        
+        //Test one type  
+        newKeywords.add("deadline");
+        param = new FilterParameter(newKeywords);
+        result = tfmTest.filterTask(param);
+        assertTrue("Must contain only DEADLINE", result.containsKey(TaskType.DEADLINE) &&
+                                                 result.keySet().size()==1);
+        newKeywords.clear();
+        
+        //Test two type
+        newKeywords.add("deadline");
+        newKeywords.add("event");
+        param = new FilterParameter(newKeywords);
+        result = tfmTest.filterTask(param);
+        assertTrue("Must contain only DEADLINE and Event", result.containsKey(TaskType.DEADLINE) &&
+                                                            result.containsKey(TaskType.EVENT) &&
+                                                            result.keySet().size()==2);
+        newKeywords.clear();
+        
+        //Test three types
+        param = new FilterParameter(newKeywords);
+        result = tfmTest.filterTask(param);
+        assertTrue("Must contain only DEADLINE and TODO", result.containsKey(TaskType.DEADLINE) &&
+                                                            result.containsKey(TaskType.EVENT) &&
+                                                            result.containsKey(TaskType.TODO) &&
+                                                            result.keySet().size()==3);
+        newKeywords.clear();
     }
     
     /*
