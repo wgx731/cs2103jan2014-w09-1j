@@ -22,13 +22,12 @@ public class TaskDataManagerTest {
     @Test
     public void testAddTask() {
         Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
-
-        
         fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
         fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
         fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
         
         TaskDataManager tdmTest = new TaskDataManager(new FileTaskDaoImplStub(fileMap));
+        
         Long currDateMilliSec = System.currentTimeMillis();
 
         /* Basic add */

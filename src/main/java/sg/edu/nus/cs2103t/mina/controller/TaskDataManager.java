@@ -353,6 +353,19 @@ public class TaskDataManager {
     }
 
     /**
+     * Saves all tasks into storage by calling all the sync methods
+     */
+    public void saveAllTasks() {
+        syncUncompletedTasks(TaskType.TODO);
+        syncUncompletedTasks(TaskType.DEADLINE);
+        syncUncompletedTasks(TaskType.EVENT);
+        
+        syncCompletedTasks(TaskType.TODO);
+        syncCompletedTasks(TaskType.DEADLINE);
+        syncCompletedTasks(TaskType.EVENT);
+    }
+
+    /**
      * only to be used for testing
      */
     public void resetTrees() {
@@ -363,5 +376,7 @@ public class TaskDataManager {
         _uncompletedTodoTasks.clear();
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
+        
+        saveAllTasks();
     }
 }
