@@ -1,10 +1,8 @@
 package sg.edu.cs2103t.mina.steps;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
-
-import java.util.Arrays;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;

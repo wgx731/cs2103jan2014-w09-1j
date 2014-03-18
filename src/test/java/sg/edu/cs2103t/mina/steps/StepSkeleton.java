@@ -6,8 +6,8 @@ import java.util.concurrent.CyclicBarrier;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.SWTBot;
-import org.jbehave.core.annotations.AfterStory;
-import org.jbehave.core.annotations.BeforeStory;
+import org.jbehave.core.annotations.AfterStories;
+import org.jbehave.core.annotations.BeforeStories;
 
 import sg.edu.nus.cs2103t.mina.MinaDriver;
 
@@ -19,9 +19,9 @@ public abstract class StepSkeleton {
     protected static final int EVENT_LABEL_INDEX = 0;
     protected static final int DEADLINE_LABEL_INDEX = 1;
     protected static final int TODO_LABEL_INDEX = 2;
-    
+
     protected static final String EMPTY_COMMAND = "";
-    
+
     protected static SWTBot bot;
     protected static MinaDriver driver;
 
@@ -62,12 +62,12 @@ public abstract class StepSkeleton {
         uiThread.setDaemon(true);
     }
 
-    @BeforeStory
+    @BeforeStories
     public void setUp() throws InterruptedException, BrokenBarrierException {
         swtBarrier.await();
     }
 
-    @AfterStory
+    @AfterStories
     public void tearDown() throws InterruptedException {
         Display.getDefault().syncExec(new Runnable() {
             public void run() {

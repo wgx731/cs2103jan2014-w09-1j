@@ -2,7 +2,6 @@ package sg.edu.nus.cs2103t.mina.view;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.text.StrBuilder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
@@ -202,7 +201,7 @@ public class MinaGuiUI extends MinaView {
         for (String todo : allTodoTasks) {
             sb.append(todo + "\n");
         }
-        _todoListUI.setText(sb.toString());      
+        _todoListUI.setText(sb.toString());
     }
 
     public void loop() {

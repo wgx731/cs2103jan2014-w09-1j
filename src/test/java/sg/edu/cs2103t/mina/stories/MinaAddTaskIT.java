@@ -1,9 +1,9 @@
 package sg.edu.cs2103t.mina.stories;
 
 import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.TXT;
 import static org.jbehave.core.reporters.Format.HTML;
 import static org.jbehave.core.reporters.Format.IDE_CONSOLE;
+import static org.jbehave.core.reporters.Format.TXT;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.junit.JUnitStory;
@@ -13,7 +13,7 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 
 import sg.edu.cs2103t.mina.steps.MinaAddTaskSteps;
 
-public class MinaAddTaskStory extends JUnitStory {
+public class MinaAddTaskIT extends JUnitStory {
 
     @Override
     public Configuration configuration() {
@@ -26,4 +26,5 @@ public class MinaAddTaskStory extends JUnitStory {
     public InjectableStepsFactory stepsFactory() {
         return new InstanceStepsFactory(configuration(), new MinaAddTaskSteps());
     }
+
 }
