@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.controller;
+package sg.edu.nus.cs2103t.mina.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import sg.edu.cs2103t.mina.stub.TaskDataManagerStub;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
@@ -19,6 +18,7 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
+import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
 
 //@author Du Zhiyuan
 public class TaskFilterManagerSearchTest {

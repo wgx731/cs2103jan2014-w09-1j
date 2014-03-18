@@ -6,4 +6,4 @@
  * @author duzhiyuan
  * @author joannemah
  */
-package sg.edu.cs2103t.mina.stories;
+package sg.edu.nus.cs2103t.mina.steps;

@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.steps;
+package sg.edu.nus.cs2103t.mina.steps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

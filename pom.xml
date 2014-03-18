@@ -31,7 +31,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		
+
 		<!-- Plugin -->
 		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
 		<maven.clean.plugin.version>2.5</maven.clean.plugin.version>
@@ -53,6 +53,7 @@
 		<date4j.version>1.5.1</date4j.version>
 		<jdk.version>1.7</jdk.version>
 		<jbehave.version>3.9.1</jbehave.version>
+		<gson.version>2.2.4</gson.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -141,6 +142,12 @@
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>${swt-artifactId}</artifactId>
 			<version>${swt.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

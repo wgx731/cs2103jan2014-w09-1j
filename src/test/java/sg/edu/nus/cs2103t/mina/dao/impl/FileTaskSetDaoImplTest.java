@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.dao.impl;
+package sg.edu.nus.cs2103t.mina.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskDaoImpl;
+import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -53,7 +53,7 @@ public class FileTaskSetDaoImplTest {
     private static SortedSet<DeadlineTask> sampleDeadlineTaskSet;
     private static Map<TaskType, String> storageMap;
 
-    private FileTaskDaoImpl storage;
+    private ObjectFileTaskDaoImpl storage;
 
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
@@ -83,7 +83,7 @@ public class FileTaskSetDaoImplTest {
                 getAbsoluteName(testFolder.newFile(EVENT_FILE_NAME)));
         storageMap.put(TaskType.DEADLINE,
                 getAbsoluteName(testFolder.newFile(DEADLINE_FILE_NAME)));
-        storage = new FileTaskDaoImpl(storageMap);
+        storage = new ObjectFileTaskDaoImpl();
     }
 
     @After
@@ -158,7 +158,7 @@ public class FileTaskSetDaoImplTest {
         }
         if (isCompleted) {
             return new File(testFolder.getRoot() + "/" + fileName
-                    + FileTaskDaoImpl.getCompletedSuffix());
+                    + ObjectFileTaskDaoImpl.getCompletedSuffix());
         }
         return new File(testFolder.getRoot() + "/" + fileName);
     }

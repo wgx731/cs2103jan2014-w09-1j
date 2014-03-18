@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.stories;
+package sg.edu.nus.cs2103t.mina.stories;
 
 import static org.jbehave.core.reporters.Format.CONSOLE;
 import static org.jbehave.core.reporters.Format.HTML;
@@ -11,7 +11,7 @@ import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
 
-import sg.edu.cs2103t.mina.steps.MinaAddTaskSteps;
+import sg.edu.nus.cs2103t.mina.steps.MinaAddTaskSteps;
 
 public class MinaAddTaskIT extends JUnitStory {
 

@@ -13,7 +13,8 @@ import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
-import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskDaoImpl;
+import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
+import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.UIType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
@@ -53,25 +54,23 @@ public class MinaDriver {
                 ConfigHelper.getProperty(TaskType.EVENT.getType()));
         fileMap.put(TaskType.DEADLINE,
                 ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
-        taskDao = new FileTaskDaoImpl(fileMap);
+        taskDao = new ObjectFileTaskDaoImpl();
+        dataSyncManager = new DataSyncManager(taskDao);
+        new Timer().schedule(dataSyncManager, 0,
+                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
     static void initTDM() {
-        taskDataManager = new TaskDataManager(taskDao);
+        taskDataManager = new TaskDataManager(dataSyncManager);
     }
 
     static void initTFM() {
         taskFilterManager = new TaskFilterManager(taskDataManager);
     }
 
-    static void initSync() {
-        dataSyncManager = new DataSyncManager(taskDataManager, taskDao);
-        new Timer().schedule(dataSyncManager, 0,
-                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
-    }
-
     static void initCC() {
-        commandController = new CommandController(taskDataManager, taskFilterManager);
+        commandController = new CommandController(taskDataManager,
+                taskFilterManager);
     }
 
     static void initView() {
@@ -101,7 +100,6 @@ public class MinaDriver {
         initDao();
         initTDM();
         initTFM();
-        initSync();
         initCC();
         initView();
     }
@@ -110,7 +108,6 @@ public class MinaDriver {
         initDao();
         initTDM();
         initTFM();
-        initSync();
         initCC();
         MinaGuiUI gui = new MinaGuiUI(commandController);
         gui.updateLists();
@@ -129,7 +126,7 @@ public class MinaDriver {
             driver.processLoop();
         } catch (Exception e) {
             logger.error(e, e);
-            dataSyncManager.saveAll();
+            taskDataManager.saveAllTasks();
         }
     }
 }

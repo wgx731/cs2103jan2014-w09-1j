@@ -15,7 +15,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskView;
  * @author joannemah
  */
 public abstract class MinaView {
-
+    
     protected CommandController _commandController;
     
     public MinaView(CommandController commandController) {

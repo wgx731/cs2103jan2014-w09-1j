@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.model;
+package sg.edu.nus.cs2103t.mina.model;
 
 import static org.junit.Assert.*;
 
@@ -10,12 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import sg.edu.cs2103t.mina.stub.TaskDataManagerStub;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
+import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
 
 public class TaskViewTest {
     

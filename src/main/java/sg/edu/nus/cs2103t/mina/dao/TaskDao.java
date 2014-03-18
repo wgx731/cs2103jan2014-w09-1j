@@ -14,6 +14,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  * @author duzhiyuan
  * @author joannemah
  */
+// @author A0105853H
 public interface TaskDao {
 
     /**
@@ -24,8 +25,8 @@ public interface TaskDao {
      * @param isCompleted whether the task in the set is completed
      * @throws IOException
      */
-    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet, TaskType taskType,
-            boolean isCompleted) throws IOException, IllegalArgumentException;
+    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) throws IOException;
 
     /**
      * load task set into memory from storage
@@ -36,5 +37,5 @@ public interface TaskDao {
      * @throws IOException
      */
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
-            boolean isCompleted) throws IOException, IllegalArgumentException;
+            boolean isCompleted) throws IOException;
 }

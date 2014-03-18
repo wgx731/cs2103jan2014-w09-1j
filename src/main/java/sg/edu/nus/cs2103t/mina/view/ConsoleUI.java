@@ -39,7 +39,7 @@ public class ConsoleUI extends MinaView {
     private List<Task<?>> _eventList;
     private List<Task<?>> _todoList;
     private List<Task<?>> _deadlineList;
-    
+
     private TaskView _taskView;
 
     public ConsoleUI(InputStream input, OutputStream output,
@@ -82,7 +82,8 @@ public class ConsoleUI extends MinaView {
     }
 
     public void loop() {
-        _taskView = _commandController.processUserInput(getUserInput(), 1, 1, 1);
+        _taskView = _commandController
+                .processUserInput(getUserInput(), 1, 1, 1);
         displayOutput();
     }
 }

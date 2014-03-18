@@ -7,7 +7,6 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * Helper class to read properties from config file for MINA
  * 
@@ -28,8 +27,7 @@ public class ConfigHelper {
     private static Properties setUp() {
         prop = new Properties();
         try {
-            prop.load(ConfigHelper.class
-                    .getResourceAsStream(CONFIG_FILE_PATH));
+            prop.load(ConfigHelper.class.getResourceAsStream(CONFIG_FILE_PATH));
         } catch (FileNotFoundException e) {
             logger.error(e, e);
         } catch (IOException e) {

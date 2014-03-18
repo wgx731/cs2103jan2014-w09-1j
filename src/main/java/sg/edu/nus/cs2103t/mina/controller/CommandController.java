@@ -44,16 +44,15 @@ public class CommandController {
     private static final String COMPLETE_ERROR_MESSAGE = "Error occured whe system try to mark task as completed.";
     private static final String SEARCH_NOT_FOUND = "Search cannot find any result.";
     private static final String TO_BE_DONE = "to be done.";
-    
+
     private int _currentEventPage;
     private int _currentDeadlinePage;
     private int _currentTodoPage;
-    
+
     private TaskView _taskView;
-    
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
-    
+
     private static Logger logger = LogManager.getLogger(CommandController.class
             .getName());
 
@@ -66,10 +65,11 @@ public class CommandController {
         _taskDataManager = new TaskDataManager();
         _taskFilterManager = new TaskFilterManager(_taskDataManager);
         initializeTaskView();
+
     }
 
-    public CommandController(TaskDataManager taskDataManager, TaskFilterManager taskFilterManager) {
-        super();
+    public CommandController(TaskDataManager taskDataManager,
+            TaskFilterManager taskFilterManager) {
         _taskDataManager = taskDataManager;
         _taskFilterManager = taskFilterManager;
         initializeTaskView();
@@ -82,18 +82,20 @@ public class CommandController {
     public TaskFilterManager getTaskFilterManager() {
         return _taskFilterManager;
     }
-    
-    public TaskView getTaskView(){
-    	return _taskView;
+
+    public TaskView getTaskView() {
+        return _taskView;
     }
-    
-    public void initializeTaskView(){
-    	_taskView = new TaskView(WELCOME_MESSAGE, _taskFilterManager.filterTask(new FilterParameter()));
+
+    public void initializeTaskView() {
+        _taskView = new TaskView(WELCOME_MESSAGE,
+                _taskFilterManager.filterTask(new FilterParameter()));
     }
 
     // This operation is used to get input from the user and execute it till
     // exit
-    public TaskView processUserInput(String userInput, int eventPage, int deadlinePage, int todoPage) {
+    public TaskView processUserInput(String userInput, int eventPage,
+            int deadlinePage, int todoPage) {
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
             return new TaskView(INVALID_COMMAND);
         }
@@ -107,12 +109,12 @@ public class CommandController {
         }
         CommandType command;
         command = determineCommand();
-        try{
-        	processUserCommand(command);
-        	return _taskView;
-        } catch (Exception e){
-        	processUserCommand(CommandType.INVALID);
-        	return _taskView;
+        try {
+            processUserCommand(command);
+            return _taskView;
+        } catch (Exception e) {
+            processUserCommand(CommandType.INVALID);
+            return _taskView;
         }
     }
 
@@ -133,44 +135,44 @@ public class CommandController {
         switch (command) {
             case ADD: {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
-                if (addParameter == null){
-                	_taskView = errorCommandReturn(CommandType.INVALID);
+                if (addParameter == null) {
+                    _taskView = errorCommandReturn(CommandType.INVALID);
                 }
                 Task<?> task = _taskDataManager.addTask(addParameter);
                 if (task == null) {
                     _taskView = errorCommandReturn(CommandType.ADD);
                 } else {
-                // UIprocess();
-                String output = String.format(ADDED_MESSAGE, task.getType(),
-                                              task.getDescription());
-                _taskView = updatedTaskView(output);
+                    // UIprocess();
+                    String output = String.format(ADDED_MESSAGE,
+                            task.getType(), task.getDescription());
+                    _taskView = updatedTaskView(output);
                 }
                 break;
             }
             case DELETE: {
                 DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager.deleteTask(deleteParameter);
-                if (task == null){
-                	_taskView = errorCommandReturn(CommandType.DELETE);
+                if (task == null) {
+                    _taskView = errorCommandReturn(CommandType.DELETE);
                 } else {
-                	String output = String.format(DELETED_MESSAGE, task.getType(), 
-                			                       task.getDescription());
-                	_taskView = updatedTaskView(output);
+                    String output = String.format(DELETED_MESSAGE,
+                            task.getType(), task.getDescription());
+                    _taskView = updatedTaskView(output);
                 }
                 break;
             }
             case MODIFY: {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
-            	if (modifyParameter==null){
-            	  	_taskView = errorCommandReturn(CommandType.INVALID);
-            	}
+                if (modifyParameter == null) {
+                    _taskView = errorCommandReturn(CommandType.INVALID);
+                }
                 Task<?> task = _taskDataManager.modifyTask(modifyParameter);
-                if (task == null){
-                	_taskView = errorCommandReturn(CommandType.MODIFY);
+                if (task == null) {
+                    _taskView = errorCommandReturn(CommandType.MODIFY);
                 } else {
-                    String output = String.format(MODIFIED_MESSAGE, task.getType(),
-                                                task.getDescription());
-                	_taskView = updatedTaskView(output);
+                    String output = String.format(MODIFIED_MESSAGE,
+                            task.getType(), task.getDescription());
+                    _taskView = updatedTaskView(output);
                 }
                 break;
             }
@@ -188,30 +190,31 @@ public class CommandController {
                 break;
             }
             case SEARCH: {
-                
+
                 SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
-                
+
                 HashMap<TaskType, ArrayList<Task<?>>> searchResult;
                 searchResult = _taskFilterManager.searchTasks(searchParameter);
-                
+
                 String output;
-                
-                if (searchResult.size()==0){                	
+
+                if (searchResult.size() == 0) {
                     output = SEARCH_NOT_FOUND;
                 } else {
-                	output = DISPLAYING_SEARCHES;
+                    output = DISPLAYING_SEARCHES;
                 }
                 _taskView = new TaskView(output, searchResult);
                 break;
             }
             case COMPLETE: {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
-                Task<?> task = _taskDataManager.markCompleted(completeParameter);
-                if (task==null){
-                	_taskView = errorCommandReturn(CommandType.COMPLETE);
+                Task<?> task = _taskDataManager
+                        .markCompleted(completeParameter);
+                if (task == null) {
+                    _taskView = errorCommandReturn(CommandType.COMPLETE);
                 } else {
-                    String output = String.format(COMPLETED_MESSAGE, task.getType(),
-                                                task.getDescription());
+                    String output = String.format(COMPLETED_MESSAGE,
+                            task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
                 }
                 break;
@@ -235,52 +238,59 @@ public class CommandController {
             }
         }
     }
-    
-    private TaskView updatedTaskView(String statusMessage){
-    	return new TaskView(statusMessage, _taskFilterManager.filterTask(new FilterParameter()));
+
+    private TaskView updatedTaskView(String statusMessage) {
+        return new TaskView(statusMessage,
+                _taskFilterManager.filterTask(new FilterParameter()));
     }
-    
-    private TaskView errorCommandReturn(CommandType type){
-    	switch(type){
-    	case ADD:
-    		return new TaskView(ADD_ERROR_MESSAGE, _taskFilterManager.filterTask(new FilterParameter()));
-    	case DELETE:
-    		return new TaskView(DELETE_ERROR_MESSAGE, _taskFilterManager.filterTask(new FilterParameter()));
-    	case MODIFY:
-    		return new TaskView(MODIFY_ERROR_MESSAGE, _taskFilterManager.filterTask(new FilterParameter()));
-    	case COMPLETE:
-    		return new TaskView(COMPLETE_ERROR_MESSAGE, _taskFilterManager.filterTask(new FilterParameter()));
-    	case INVALID:
-    		return new TaskView(INVALID_COMMAND, _taskFilterManager.filterTask(new FilterParameter()));
-    	default:
-    		return new TaskView(INVALID_COMMAND, _taskFilterManager.filterTask(new FilterParameter()));
-    	}
+
+    private TaskView errorCommandReturn(CommandType type) {
+        switch (type) {
+            case ADD:
+                return new TaskView(ADD_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case DELETE:
+                return new TaskView(DELETE_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case MODIFY:
+                return new TaskView(MODIFY_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case COMPLETE:
+                return new TaskView(COMPLETE_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case INVALID:
+                return new TaskView(INVALID_COMMAND,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            default:
+                return new TaskView(INVALID_COMMAND,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+        }
     }
-    
-//Legacy method, retainign it just in case
-//    private String getTaskListString(ArrayList<Task<?>> taskList) {
-//        StringBuilder sb = new StringBuilder();
-//        for (int i = 0; i < taskList.size(); i++) {
-//            Task<?> task = taskList.get(i);
-//            switch (task.getType()) {
-//                case TODO:
-//                    task = (TodoTask) task;
-//                    break;
-//                case EVENT:
-//                    task = (EventTask) task;
-//                    break;
-//                case DEADLINE:
-//                    task = (DeadlineTask) task;
-//                    break;
-//                case UNKOWN:
-//                    break;
-//                default:
-//                    break;
-//            }
-//            sb.append(i + SPACE + task.toString() + "\r\n");
-//        }
-//        return sb.toString();
-//    }
+
+    // Legacy method, retainign it just in case
+    // private String getTaskListString(ArrayList<Task<?>> taskList) {
+    // StringBuilder sb = new StringBuilder();
+    // for (int i = 0; i < taskList.size(); i++) {
+    // Task<?> task = taskList.get(i);
+    // switch (task.getType()) {
+    // case TODO:
+    // task = (TodoTask) task;
+    // break;
+    // case EVENT:
+    // task = (EventTask) task;
+    // break;
+    // case DEADLINE:
+    // task = (DeadlineTask) task;
+    // break;
+    // case UNKOWN:
+    // break;
+    // default:
+    // break;
+    // }
+    // sb.append(i + SPACE + task.toString() + "\r\n");
+    // }
+    // return sb.toString();
+    // }
 
     // This method process add parameter into a DataParameter instance
     // @param parameterString
@@ -306,15 +316,15 @@ public class CommandController {
                 Date startDate = DateUtil.parse(parameters
                         .get(indexOfStartDate));
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
-                if (startDate.before(endDate)){
-                	addParam.setStartDate(startDate);
-                	addParam.setEndDate(endDate);
+                if (startDate.before(endDate)) {
+                    addParam.setStartDate(startDate);
+                    addParam.setEndDate(endDate);
                 } else {
-                  	addParam = null;
-                 	return addParam;
-                }   
+                    addParam = null;
+                    return addParam;
+                }
             } catch (ParseException e) {
-            	logger.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
             }
         } else if (parameters.contains("-end")) {
             addParam.setNewTaskType(TaskType.DEADLINE);
@@ -327,7 +337,7 @@ public class CommandController {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 addParam.setEndDate(endDate);
             } catch (ParseException e) {
-            	logger.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
             }
         } else {
             addParam.setNewTaskType(TaskType.TODO);
@@ -382,20 +392,19 @@ public class CommandController {
             try {
                 endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 parameters.remove(indexOfEndDate);
-                parameters.remove(indexOfEndDate-1);
+                parameters.remove(indexOfEndDate - 1);
             } catch (ParseException e) {
-            	logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
         }
         if (parameters.contains("-start")) {
             int indexOfStartDate = parameters.indexOf("-start") + 1;
             try {
-                startDate = DateUtil.parse(parameters
-                        .get(indexOfStartDate));
+                startDate = DateUtil.parse(parameters.get(indexOfStartDate));
                 parameters.remove(indexOfStartDate);
-                parameters.remove(indexOfStartDate-1);
+                parameters.remove(indexOfStartDate - 1);
             } catch (ParseException e) {
-            	logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
         }
         FilterParameter filterParam = new FilterParameter(parameters);
@@ -422,17 +431,18 @@ public class CommandController {
         int userfriendlyTaskID = Integer.parseInt(parameters
                 .get(FISRT_ARRAY_INDEX + 1));
         int pageNum;
-        if (original==TaskType.EVENT){
-        	pageNum = _currentEventPage;
-        } else if (original == TaskType.DEADLINE){
-        	pageNum = _currentDeadlinePage;
-        } else if (original == TaskType.TODO){
-        	pageNum = _currentTodoPage;
+        if (original == TaskType.EVENT) {
+            pageNum = _currentEventPage;
+        } else if (original == TaskType.DEADLINE) {
+            pageNum = _currentDeadlinePage;
+        } else if (original == TaskType.TODO) {
+            pageNum = _currentTodoPage;
         } else {
-        	pageNum = 0;
+            pageNum = 0;
         }
-        ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original, pageNum);
-        Task<?> markDeleteTask = pageOfModifyObject.get(userfriendlyTaskID-1);
+        ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original,
+                pageNum);
+        Task<?> markDeleteTask = pageOfModifyObject.get(userfriendlyTaskID - 1);
         modifyParam.setTaskObject(markDeleteTask);
         modifyParam.setTaskID(userfriendlyTaskID);
         if (parameters.contains("-totype")) {
@@ -454,7 +464,7 @@ public class CommandController {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 modifyParam.setEndDate(endDate);
             } catch (ParseException e) {
-            	logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
         }
         // NOTE: this can only detect error when user want to modify both start
@@ -465,14 +475,15 @@ public class CommandController {
                 Date startDate = DateUtil.parse(parameters
                         .get(indexOfStartDate));
                 modifyParam.setStartDate(startDate);
-                if (modifyParam.getEndDate()!=null){
-                   	if (modifyParam.getStartDate().after(modifyParam.getEndDate())){
-                   		modifyParam = null;
-                   		return modifyParam;
-                	}
+                if (modifyParam.getEndDate() != null) {
+                    if (modifyParam.getStartDate().after(
+                            modifyParam.getEndDate())) {
+                        modifyParam = null;
+                        return modifyParam;
+                    }
                 }
             } catch (ParseException e) {
-            	logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
         }
         if (parameters.contains("-description")) {
@@ -508,20 +519,22 @@ public class CommandController {
         int userfriendlyTaskID = Integer.parseInt(parameters
                 .get(FISRT_ARRAY_INDEX + 1));
         int pageNum;
-        if (original==TaskType.EVENT){
-        	pageNum = _currentEventPage;
-        } else if (original == TaskType.DEADLINE){
-        	pageNum = _currentDeadlinePage;
-        } else if (original == TaskType.TODO){
-        	pageNum = _currentTodoPage;
+        if (original == TaskType.EVENT) {
+            pageNum = _currentEventPage;
+        } else if (original == TaskType.DEADLINE) {
+            pageNum = _currentDeadlinePage;
+        } else if (original == TaskType.TODO) {
+            pageNum = _currentTodoPage;
         } else {
-        	pageNum = 0;
+            pageNum = 0;
         }
-        ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original, pageNum);
-        Task<?> markDeleteTask = pageOfMarkDeleteObject.get(userfriendlyTaskID-1);
+        ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original,
+                pageNum);
+        Task<?> markDeleteTask = pageOfMarkDeleteObject
+                .get(userfriendlyTaskID - 1);
         markDeleteParam.setTaskObject(markDeleteTask);
         markDeleteParam.setTaskID(userfriendlyTaskID);
-        
+
         return markDeleteParam;
     }
 
@@ -542,36 +555,41 @@ public class CommandController {
             return TaskType.UNKOWN;
         }
     }
-    
-    public ArrayList<String> getTodoTask(){
-    	SortedSet<TodoTask> todo = _taskDataManager.getUncompletedTodoTasks();
-    	ArrayList<TodoTask> todoList = new ArrayList<TodoTask>(todo);
-    	ArrayList<String> todoString = new ArrayList<String>();
-    	for (int i=0; i<todoList.size(); i++){
-    		todoString.add((i+1)+". "+todoList.get(i).getDescription());
-    	}
-    	return todoString;
+
+    public ArrayList<String> getTodoTask() {
+        SortedSet<TodoTask> todo = _taskDataManager.getUncompletedTodoTasks();
+        ArrayList<TodoTask> todoList = new ArrayList<TodoTask>(todo);
+        ArrayList<String> todoString = new ArrayList<String>();
+        for (int i = 0; i < todoList.size(); i++) {
+            todoString.add((i + 1) + ". " + todoList.get(i).getDescription());
+        }
+        return todoString;
     }
-    
-    public ArrayList<String> getDeadlineTask(){
-    	SortedSet<DeadlineTask> deadline = _taskDataManager.getUncompletedDeadlineTasks();
-    	ArrayList<DeadlineTask> deadlineList = new ArrayList<DeadlineTask>(deadline);
-    	ArrayList<String> deadlineString = new ArrayList<String>();
-    	for (int i=0; i<deadlineList.size(); i++){
-    		deadlineString.add((i+1)+". "+deadlineList.get(i).getDescription()+" by "+
-    					deadlineList.get(i).getEndTime());
-    	}
-    	return deadlineString;
+
+    public ArrayList<String> getDeadlineTask() {
+        SortedSet<DeadlineTask> deadline = _taskDataManager
+                .getUncompletedDeadlineTasks();
+        ArrayList<DeadlineTask> deadlineList = new ArrayList<DeadlineTask>(
+                deadline);
+        ArrayList<String> deadlineString = new ArrayList<String>();
+        for (int i = 0; i < deadlineList.size(); i++) {
+            deadlineString.add((i + 1) + ". "
+                    + deadlineList.get(i).getDescription() + " by "
+                    + deadlineList.get(i).getEndTime());
+        }
+        return deadlineString;
     }
-    
-    public ArrayList<String> getEventTask(){
-    	SortedSet<EventTask> event = _taskDataManager.getUncompletedEventTasks();
-    	ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
-    	ArrayList<String> eventString = new ArrayList<String>();
-    	for (int i=0; i<eventList.size(); i++){
-    		eventString.add((i+1)+". "+eventList.get(i).getDescription()+" from "+
-    				eventList.get(i).getStartTime()+" to "+eventList.get(i).getEndTime());
-    	}
-    	return eventString;
+
+    public ArrayList<String> getEventTask() {
+        SortedSet<EventTask> event = _taskDataManager
+                .getUncompletedEventTasks();
+        ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
+        ArrayList<String> eventString = new ArrayList<String>();
+        for (int i = 0; i < eventList.size(); i++) {
+            eventString.add((i + 1) + ". " + eventList.get(i).getDescription()
+                    + " from " + eventList.get(i).getStartTime() + " to "
+                    + eventList.get(i).getEndTime());
+        }
+        return eventString;
     }
 }

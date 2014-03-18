@@ -55,4 +55,10 @@ public class SyncDataParameter {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "SyncDataParameter [_taskSet=" + _taskSet + ", _taskType="
+                + _taskType + ", _isCompleted=" + _isCompleted + "]";
+    }
+
 }

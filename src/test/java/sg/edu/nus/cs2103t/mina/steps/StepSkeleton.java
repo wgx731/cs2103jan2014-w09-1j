@@ -1,4 +1,4 @@
-package sg.edu.cs2103t.mina.steps;
+package sg.edu.nus.cs2103t.mina.steps;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
