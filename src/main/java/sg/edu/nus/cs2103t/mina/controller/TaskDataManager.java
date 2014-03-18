@@ -313,7 +313,6 @@ public class TaskDataManager {
     private void syncUncompletedTasks(TaskType taskType) {
         SyncDataParameter dataToSync;
         
-
         switch (taskType) {
             case TODO :
                 dataToSync = new SyncDataParameter(_uncompletedTodoTasks,
@@ -331,6 +330,12 @@ public class TaskDataManager {
                 System.out.println("Unable to determine task type.");
                 return;
         }
+
+        if (!_syncList.contains(dataToSync)) {
+            assert (_syncList.add(dataToSync));
+        }
+        //TODO: Interact with the stub from DAO
+    }
         _daoStorage.updateChange(dataToSync);
         
 //        if (!_syncList.contains(dataToSync)) {
