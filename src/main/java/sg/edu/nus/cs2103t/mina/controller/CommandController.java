@@ -2,12 +2,14 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.TaskView;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
@@ -16,6 +18,8 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandController {
 
+    private static final String DISPLAYING_SEARCHES = "Displaying searches!";
+    private static final String RESULTS_DISPLAYED = "Results displayed";
     private static String[] _inputString;
     private static final int MAX_INPUT_ARRAY_SIZE = 2;
     private static final int COMMAND_POSITION = 0;
@@ -70,9 +74,9 @@ public class CommandController {
 
     // This operation is used to get input from the user and execute it till
     // exit
-    public String processUserInput(String userInput) {
+    public TaskView processUserInput(String userInput) {
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
-            return INVALID_COMMAND;
+            return new TaskView(INVALID_COMMAND);
         }
         // TODO: fix this bad design
         _inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
@@ -101,43 +105,46 @@ public class CommandController {
 
     // This operation is used to process the extracted command and call the
     // respective functions
-    private String processUserCommand(CommandType command) {
+    private TaskView processUserCommand(CommandType command) {
         switch (command) {
             case ADD: {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
                 if (addParameter == null){
-                   	return INVALID_COMMAND;
+                   	return new TaskView(INVALID_COMMAND);
                 }
                 Task<?> task = _taskDataManager.addTask(addParameter);
                 if (task == null) {
-                    return ADD_ERROR_MESSAGE;
+                    return new TaskView(ADD_ERROR_MESSAGE);
                 } else {
                 // UIprocess();
-                return String.format(ADDED_MESSAGE, task.getType(),
-                        task.getDescription());
+                String output = String.format(ADDED_MESSAGE, task.getType(),
+                                              task.getDescription());
+                return new TaskView(output);
                 }
             }
             case DELETE: {
                 DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager.deleteTask(deleteParameter);
                 if (task == null){
-                	return DELETE_ERROR_MESSAGE;
+                	return new TaskView(DELETE_ERROR_MESSAGE);
                 } else {
-                	return String.format(DELETED_MESSAGE, task.getType(), 
-                			task.getDescription());
+                	String output = String.format(DELETED_MESSAGE, task.getType(), 
+                			                       task.getDescription());
+                	return new TaskView(output);
                 }
             }
             case MODIFY: {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
             	if (modifyParameter==null){
-            	  	return INVALID_COMMAND;
+            	  	return new TaskView(INVALID_COMMAND);
             	}
                 Task<?> task = _taskDataManager.modifyTask(modifyParameter);
                 if (task == null){
-                	return MODIFY_ERROR_MESSAGE;
+                	return new TaskView(MODIFY_ERROR_MESSAGE);
                 } else {
-                	return String.format(MODIFIED_MESSAGE, task.getType(),
-                			task.getDescription());
+                    String output = String.format(MODIFIED_MESSAGE, task.getType(),
+                                                task.getDescription());
+                	return new TaskView(output);
                 }
             }
             case DISPLAY: {
@@ -148,32 +155,39 @@ public class CommandController {
                 } else {
                     filterParam = new FilterParameter();
                 }
-                ArrayList<Task<?>> filterResult = _taskFilterManager
-                        .filterTask(filterParam);
-                return getTaskListString(filterResult);
+                HashMap<TaskType, ArrayList<Task<?>>> filterResult;
+                filterResult = _taskFilterManager.filterTask(filterParam);
+                return new TaskView(RESULTS_DISPLAYED, filterResult);
             }
             case SEARCH: {
+                
                 SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
-                ArrayList<Task<?>> searchResult = _taskFilterManager
-                        .searchTasks(searchParameter);
+                
+                HashMap<TaskType, ArrayList<Task<?>>> searchResult;
+                searchResult = _taskFilterManager.searchTasks(searchParameter);
+                
+                String output;
+                
                 if (searchResult.size()==0){
-                	return SEARCH_NOT_FOUND;
+                    output = SEARCH_NOT_FOUND;
                 } else {
-                	return getTaskListString(searchResult);
+                	output = DISPLAYING_SEARCHES;
                 }
+                return new TaskView(output, searchResult);
             }
             case COMPLETE: {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager.markCompleted(completeParameter);
                 if (task==null){
-                	return COMPLETE_ERROR_MESSAGE;
+                	return new TaskView(COMPLETE_ERROR_MESSAGE);
                 } else {
-                	return String.format(COMPLETED_MESSAGE, task.getType(),
-                			task.getDescription());
+                    String output = String.format(COMPLETED_MESSAGE, task.getType(),
+                                                task.getDescription());
+                    return new TaskView(output);
                 }
             }
             case UNDO: {
-                return TO_BE_DONE;
+                return new TaskView(TO_BE_DONE);
             }
             case EXIT: {
                 _dataSyncManager.saveAll();
@@ -181,38 +195,39 @@ public class CommandController {
                 break;
             }
             case INVALID: {
-                return INVALID_COMMAND;
+                return new TaskView(INVALID_COMMAND);
             }
             default: {
-                return INVALID_COMMAND;
+                return new TaskView(INVALID_COMMAND);
             }
         }
-        return INVALID_COMMAND;
+        return new TaskView(INVALID_COMMAND);
     }
-
-    private String getTaskListString(ArrayList<Task<?>> taskList) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < taskList.size(); i++) {
-            Task<?> task = taskList.get(i);
-            switch (task.getType()) {
-                case TODO:
-                    task = (TodoTask) task;
-                    break;
-                case EVENT:
-                    task = (EventTask) task;
-                    break;
-                case DEADLINE:
-                    task = (DeadlineTask) task;
-                    break;
-                case UNKOWN:
-                    break;
-                default:
-                    break;
-            }
-            sb.append(i + SPACE + task.toString() + "\r\n");
-        }
-        return sb.toString();
-    }
+    
+//Legacy method, retainign it just in case
+//    private String getTaskListString(ArrayList<Task<?>> taskList) {
+//        StringBuilder sb = new StringBuilder();
+//        for (int i = 0; i < taskList.size(); i++) {
+//            Task<?> task = taskList.get(i);
+//            switch (task.getType()) {
+//                case TODO:
+//                    task = (TodoTask) task;
+//                    break;
+//                case EVENT:
+//                    task = (EventTask) task;
+//                    break;
+//                case DEADLINE:
+//                    task = (DeadlineTask) task;
+//                    break;
+//                case UNKOWN:
+//                    break;
+//                default:
+//                    break;
+//            }
+//            sb.append(i + SPACE + task.toString() + "\r\n");
+//        }
+//        return sb.toString();
+//    }
 
     // This method process add parameter into a DataParameter instance
     // @param parameterString
