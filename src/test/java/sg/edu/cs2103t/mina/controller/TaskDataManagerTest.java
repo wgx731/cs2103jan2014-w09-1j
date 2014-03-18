@@ -135,9 +135,14 @@ public class TaskDataManagerTest {
 
     }
 
-//    @Test
-//    public void testModifyTask() {
-//        TaskDataManager tdmTest = new TaskDataManager();
+    @Test
+    public void testModifyTask() {
+//        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
+//        fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
+//        fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
+//        fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
+//        
+//        TaskDataManager tdmTest = new TaskDataManager(new FileTaskDaoImplStub(fileMap));
 //        Long currDateMilliSec = System.currentTimeMillis();
 //
 //        /* modify task parameters */
@@ -272,50 +277,55 @@ public class TaskDataManagerTest {
 //        
 //        assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
 //        assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
-//
-//    }
 
-//    @Test
-//    public void markCompleted() {
-//        TaskDataManager tdmTest = new TaskDataManager();
-//        Long currDateMilliSec = System.currentTimeMillis();
-//        
-//        tdmTest.addTask(new DataParameter("Mark this TodoTask complete", 'M',
-//                null, null, null, TaskType.TODO, 123));
-//
-//        TodoTask expectedTodo = new TodoTask("Mark this TodoTask complete", 'M');
-//        expectedTodo.setCompleted(true);
-//        assertEquals("Mark Todo completed", expectedTodo,
-//                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-//                        TaskType.TODO, null, 1)));
-//        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
-//        assertEquals(1, tdmTest.getCompletedTodoTasks().size());
-//
-//        tdmTest.addTask(new DataParameter("Mark this DeadlineTask complete", 'M',
-//                null, new Date(currDateMilliSec), null, TaskType.DEADLINE, 123));
-//
-//        DeadlineTask expectedDeadline = new DeadlineTask(
-//                "Mark this DeadlineTask complete", new Date(currDateMilliSec),
-//                'M');
-//        expectedDeadline.setCompleted(true);
-//        assertEquals("Mark Deadline completed", expectedDeadline,
-//                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-//                        TaskType.DEADLINE, null, 1)));
-//        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
-//        assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
-//
-//        tdmTest.addTask(new DataParameter("Mark this EventTask complete", 'M',
-//                new Date(currDateMilliSec), new Date(currDateMilliSec), null,
-//                TaskType.EVENT, 123));
-//
-//        EventTask expectedEvent = new EventTask("Mark this EventTask complete",
-//                new Date(currDateMilliSec), new Date(currDateMilliSec), 'M');
-//        expectedEvent.setCompleted(true);
-//        assertEquals("Mark Event completed", expectedEvent,
-//                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-//                        TaskType.EVENT, null, 1)));
-//        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
-//        assertEquals(1, tdmTest.getCompletedEventTasks().size());
-//    }
+    }
+
+    @Test
+    public void markCompleted() {
+        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
+        fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
+        fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
+        fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
+        
+        TaskDataManager tdmTest = new TaskDataManager(new FileTaskDaoImplStub(fileMap));
+        
+        Long currDateMilliSec = System.currentTimeMillis();
+        
+        TodoTask testTodo1 = (TodoTask) tdmTest.addTask(new DataParameter("Mark this TodoTask complete", 'M',
+                null, null, null, TaskType.TODO, 123));
+
+        TodoTask expectedTodo = new TodoTask("Mark this TodoTask complete", 'M');
+        expectedTodo.setCompleted(true);
+        
+        assertEquals("Mark Todo completed", expectedTodo,
+                tdmTest.markCompleted(new DataParameter(testTodo1)));
+        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getCompletedTodoTasks().size());
+
+        DeadlineTask testDeadline1 = (DeadlineTask) tdmTest.addTask(new DataParameter("Mark this DeadlineTask complete", 'M',
+                null, new Date(currDateMilliSec), null, TaskType.DEADLINE, 123));
+
+        DeadlineTask expectedDeadline = new DeadlineTask(
+                "Mark this DeadlineTask complete", new Date(currDateMilliSec),
+                'M');
+        expectedDeadline.setCompleted(true);
+        assertEquals("Mark Deadline completed", expectedDeadline,
+                tdmTest.markCompleted(new DataParameter(testDeadline1)));
+        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
+        assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
+
+        EventTask testEventTask1 = (EventTask) tdmTest
+                .addTask(new DataParameter("Mark this EventTask complete", 'M',
+                        new Date(currDateMilliSec), new Date(currDateMilliSec),
+                        null, TaskType.EVENT, 123));
+
+        EventTask expectedEvent = new EventTask("Mark this EventTask complete",
+                new Date(currDateMilliSec), new Date(currDateMilliSec), 'M');
+        expectedEvent.setCompleted(true);
+        assertEquals("Mark Event completed", expectedEvent,
+                tdmTest.markCompleted(new DataParameter(testEventTask1)));
+        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
+        assertEquals(1, tdmTest.getCompletedEventTasks().size());
+    }
 
 }
