@@ -1,8 +1,10 @@
 package sg.edu.nus.cs2103t.mina.view;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -27,7 +29,11 @@ public class MinaGuiUI extends MinaView {
     private StyledText _eventListUI;
     private StyledText _deadlineListUI;
     private StyledText _todoListUI;
-
+    
+    private LinkedList<String> _commandHistory;
+    private int _commandPosition;
+    private boolean _historyUp;
+    
     private static final String ERROR = "Operation failed. Please try again.";
     private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
     private static final String SUCCESS = "Operation completed";
@@ -57,6 +63,10 @@ public class MinaGuiUI extends MinaView {
      */
     protected void createContents() {
         _display = Display.getDefault();
+        
+        _commandHistory = new LinkedList<String>();
+        _commandPosition = 0;
+        _historyUp = true;
 
         _shell = new Shell(_display, SWT.NO_TRIM);
         _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
@@ -136,6 +146,12 @@ public class MinaGuiUI extends MinaView {
                 switch (key) {
                     case SWT.CR:
                         String command = _userInputTextField.getText();
+                        if (_commandHistory.size()<5){
+                        	_commandHistory.offer(command);
+                        } else {
+                        	_commandHistory.poll();
+                        	_commandHistory.offer(command);
+                        }
                         String feedback = _commandController
                                 .processUserInput(command);
                         _userInputTextField.setText(EMPTY_STRING);
@@ -144,6 +160,57 @@ public class MinaGuiUI extends MinaView {
                                 _commandController.getDeadlineTask(),
                                 _commandController.getTodoTask());
                         break;
+                    case SWT.ARROW_UP:
+                    	if (_commandHistory.size()!=0){
+                    		if (_historyUp){
+                    			if (_commandPosition<_commandHistory.size()-1){
+                    				_userInputTextField.setText(_commandHistory.get(_commandPosition)+" ");
+                    				_userInputTextField.setSelection(_userInputTextField.getCharCount());
+                    				_commandPosition++;
+                    			} else {
+                    				_userInputTextField.setText(_commandHistory.get(_commandPosition)+" ");
+                    				_userInputTextField.setSelection(_userInputTextField.getCharCount());
+                    			}
+                    		} else {
+                    				_commandPosition++;
+                    				_historyUp = true;
+                    				_userInputTextField.setText(_commandHistory.get(_commandPosition)+" ");
+                    				_userInputTextField.setSelection(_userInputTextField.getCharCount());
+                    				if (_commandPosition<_commandHistory.size()-1){
+                    					_commandPosition++;
+                    				}
+                    				
+                    		}
+                    	}
+                    	break;
+                    case SWT.ARROW_DOWN:
+                    	if (_commandHistory.size()!=0){
+                    		if (_commandPosition>0){
+                    			_commandPosition--;
+                    			_userInputTextField.setText(_commandHistory.get(_commandPosition));
+                    			_userInputTextField.setSelection(_userInputTextField.getCharCount());
+                    		} else {
+                    			_commandPosition = -1;
+                    			_userInputTextField.setText(EMPTY_STRING);
+                    		}
+                    		_historyUp = false;
+                    	}
+                    	break;
+                    default:
+                        break;
+                }
+            }
+            public void keyReleased(KeyEvent e) {
+                int key = e.keyCode;
+                switch (key) {
+                    case SWT.CR:
+                        break;
+                    case SWT.ARROW_UP:
+            			_userInputTextField.setText(_userInputTextField.getText().trim());
+            			_userInputTextField.setSelection(_userInputTextField.getCharCount());
+                    	break;
+                    case SWT.ARROW_DOWN:
+                    	break;
                     default:
                         break;
                 }
@@ -199,7 +266,7 @@ public class MinaGuiUI extends MinaView {
         _deadlineListUI.setText(sb.toString());
         sb = new StringBuilder();
         for (String todo : allTodoTasks) {
-            sb.append(todo + "\n");
+        	sb.append(todo + "\n");
         }
         _todoListUI.setText(sb.toString());
     }
