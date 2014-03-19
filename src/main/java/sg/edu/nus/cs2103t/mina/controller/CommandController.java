@@ -1,9 +1,13 @@
 package sg.edu.nus.cs2103t.mina.controller;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.SortedSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
@@ -44,6 +48,9 @@ public class CommandController {
     private TaskFilterManager _taskFilterManager;
     private DataSyncManager _dataSyncManager;
     // private AppWindow _appWindow;
+    
+    private static Logger logger = LogManager.getLogger(CommandController.class
+            .getName());
 
     enum CommandType {
         ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
@@ -87,7 +94,7 @@ public class CommandController {
         command = determineCommand();
         try{
         	return processUserCommand(command);
-        } catch (Exception e){
+        } catch (NullPointerException e){
         	return processUserCommand(CommandType.INVALID);
         }
     }
@@ -260,8 +267,8 @@ public class CommandController {
                   	addParam = null;
                  	return addParam;
                 }   
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(), e);
             }
         } else if (parameters.contains("-end")) {
             addParam.setNewTaskType(TaskType.DEADLINE);
@@ -273,8 +280,8 @@ public class CommandController {
             try {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 addParam.setEndDate(endDate);
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(), e);
             }
         } else {
             addParam.setNewTaskType(TaskType.TODO);
@@ -361,8 +368,8 @@ public class CommandController {
             try {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 modifyParam.setEndDate(endDate);
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(),e);
             }
         }
         // NOTE: this can only detect error when user want to modify both start
@@ -379,8 +386,8 @@ public class CommandController {
                    		return modifyParam;
                 	}
                 }
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(),e);
             }
         }
         if (parameters.contains("-description")) {

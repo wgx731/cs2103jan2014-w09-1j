@@ -3,6 +3,9 @@ package sg.edu.nus.cs2103t.mina.view;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -63,6 +66,9 @@ public class MinaGuiUI extends MinaView {
     private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
     private static final String SUCCESS = "Operation completed";
 
+    private static Logger logger = LogManager.getLogger(MinaGuiUI.class
+            .getName());
+    
     public MinaGuiUI(CommandController commandController) {
         super(commandController);
         createContents();
@@ -72,12 +78,15 @@ public class MinaGuiUI extends MinaView {
      * Open the window.
      */
     public Shell open() {
+    	logger.log(Level.INFO, "shell open");
         Monitor primary = _display.getPrimaryMonitor();
         Rectangle bounds = primary.getBounds();
         Rectangle rect = _shell.getBounds();
         int x = bounds.x + (bounds.width - rect.width) / 2;
         int y = bounds.y + (bounds.height - rect.height) / 2;
         _shell.setLocation(x, y);
+        
+    	logger.log(Level.INFO, "shell set position");
         _shell.open();
         _shell.layout();
         return _shell;
@@ -87,6 +96,7 @@ public class MinaGuiUI extends MinaView {
      * Create contents of the window.
      */
     protected void createContents() {
+    	logger.log(Level.INFO, "shell create contents");
         _display = Display.getDefault();
         
         _commandHistory = new LinkedList<String>();
@@ -342,11 +352,13 @@ public class MinaGuiUI extends MinaView {
 
     @Override
     public String getUserInput() {
+    	logger.log(Level.INFO, "shell get user input");
         return _userInputTextField.getText();
     }
 
     @Override
     public void displayOutput(String message) {
+    	logger.log(Level.INFO, "shell diplay output");
         final String outputMessage = message;
         _display.asyncExec(new Runnable() {
             @Override
@@ -376,6 +388,7 @@ public class MinaGuiUI extends MinaView {
     @Override
     public void updateLists(ArrayList<String> allEventTasks,
             ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks) {
+    	logger.log(Level.INFO, "shell update lists");
         StringBuilder sb = new StringBuilder();
         for (String event : allEventTasks) {
             sb.append(event + "\n");
@@ -394,6 +407,7 @@ public class MinaGuiUI extends MinaView {
     }
 
     public void loop() {
+    	logger.log(Level.INFO, "shell running loop");
         while (!_shell.isDisposed()) {
             if (!_display.readAndDispatch()) {
                 _display.sleep();
