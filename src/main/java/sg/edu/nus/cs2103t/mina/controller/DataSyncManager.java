@@ -53,9 +53,10 @@ public class DataSyncManager extends TimerTask {
             logger.error(e, e);
         }
     }
-
+    
     @Override
     public void run() {
+    	/*
         List<SyncDataParameter> dataToSync = _memoryDataStore.getSyncList();
         if (!dataToSync.isEmpty()) {
             for (SyncDataParameter parameter : dataToSync) {
@@ -70,6 +71,7 @@ public class DataSyncManager extends TimerTask {
             }
             _memoryDataStore.clearSyncList();
         }
+        */
     }
 
 }
