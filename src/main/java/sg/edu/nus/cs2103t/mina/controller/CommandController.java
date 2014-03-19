@@ -419,8 +419,22 @@ public class CommandController {
         TaskType original = processTaskTypeFromString(parameters
                 .get(FISRT_ARRAY_INDEX));
         modifyParam.setOriginalTaskType(original);
-        modifyParam.setTaskID(Integer.parseInt(parameters
-                .get(FISRT_ARRAY_INDEX + 1)));
+        int userfriendlyTaskID = Integer.parseInt(parameters
+                .get(FISRT_ARRAY_INDEX + 1));
+        int pageNum;
+        if (original==TaskType.EVENT){
+        	pageNum = _currentEventPage;
+        } else if (original == TaskType.DEADLINE){
+        	pageNum = _currentDeadlinePage;
+        } else if (original == TaskType.TODO){
+        	pageNum = _currentTodoPage;
+        } else {
+        	pageNum = 0;
+        }
+        ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original, pageNum);
+        Task<?> markDeleteTask = pageOfModifyObject.get(userfriendlyTaskID-1);
+        modifyParam.setTaskObject(markDeleteTask);
+        modifyParam.setTaskID(userfriendlyTaskID);
         if (parameters.contains("-totype")) {
             int indexOfNewTaskType = parameters.indexOf("-totype") + 1;
             TaskType newType = processTaskTypeFromString(parameters
