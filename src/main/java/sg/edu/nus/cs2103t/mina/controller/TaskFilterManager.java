@@ -32,7 +32,8 @@ import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
 public class TaskFilterManager {
 
-	private static final boolean IS_END = false;
+	private static final String LOGGING_FUNCTION_END = "-------------End-----------";
+    private static final boolean IS_END = false;
     private static final boolean IS_START = true;
     
 	public static final int ONE_SECOND = 1000;
@@ -67,7 +68,8 @@ public class TaskFilterManager {
 	public HashMap<TaskType, ArrayList<Task<?>>> filterTask(FilterParameter filters) {
 		
 		// GuardClause
-		assert(filters.getFilters()!=null);
+		assert(filters!=null);
+		logger.info("Filtering tasks with " + filters.getFilters());
 		
 		HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		
@@ -128,26 +130,31 @@ public class TaskFilterManager {
 		}
 		
 		if (filters.contains(FilterType.DEADLINE)) {
+		    logger.info("Getting uncompleted deadlines");
 			neededTasks = getTasks(_taskStore.getUncompletedDeadlineTasks());
 			result.put(TaskType.DEADLINE, neededTasks);
 		}
 
 		if (filters.contains(FilterType.TODO)) {
+		    logger.info("Getting uncompleted todos");
 			neededTasks = getTasks(_taskStore.getUncompletedTodoTasks());
 			result.put(TaskType.TODO, neededTasks);
 		}
 
 		if (filters.contains(FilterType.EVENT)) {
+		    logger.info("Getting uncompleted events");
 			neededTasks = getTasks(_taskStore.getUncompletedEventTasks());
 			result.put(TaskType.EVENT, neededTasks);
 		}
 		
 		if(hasDateRange(filters)) {
 		    //Note that the individual type will mix up
+		    logger.info("Filtering uncompleted tasks by date range");
 		    result = filterResultsByDate(TaskType.DEADLINE, result, filters);
 		    result = filterResultsByDate(TaskType.EVENT, result, filters);  
 		}
 		
+		logger.info(LOGGING_FUNCTION_END);
 		return result;
 	}
 	 
@@ -161,9 +168,10 @@ public class TaskFilterManager {
      * @param filters
      * @return
      */
-	private HashMap<TaskType, ArrayList<Task<?>>> filterResultsByDate(TaskType currType, 
-                                                                    HashMap<TaskType, ArrayList<Task<?>>> result,
-                                                                    FilterParameter filters) {
+	private HashMap<TaskType, ArrayList<Task<?>>> 
+	            filterResultsByDate(TaskType currType, 
+	                                HashMap<TaskType, ArrayList<Task<?>>> result,
+                                    FilterParameter filters) {
 	    
 	    assert(result!=null);
 	    assert(filters!=null);
@@ -171,11 +179,14 @@ public class TaskFilterManager {
 	    ArrayList<Task<?>> filteredResult;
 	    ArrayList<Task<?>> timedTasks;
 	    
+	    logger.info("Checking to see it contains " + currType);
 	    if (result.containsKey(currType)) {
+	        logger.info("Found " + currType + " filtering date.");
 	        timedTasks = result.get(currType);
 	        filteredResult = filterByDate(timedTasks, filters);
 	        result.put(currType, filteredResult);
 	    }
+	    
 	    return result;
 	}
 	
@@ -196,15 +207,22 @@ public class TaskFilterManager {
 	    boolean hasTime = filters.hasTime();
 	    
         if (!hasTime) {
+            logger.info("Writing date to appropriate format for START: " + start + "and END: " + end);
             start = sanitiseDate(start, IS_START);
             end = sanitiseDate(end, IS_END);
+            logger.info("Date returned START: " + start + "and END: " + end);
         }
         
         //Only EventTask / DeadlineTask will be checked
 	    for (Task<?> task: result) {
 	        assert(!(task instanceof TodoTask));
+	        logger.info("START: " + start + "END: " + end);
+	        logger.info(task);
 	        if(isInDateRange(task, start, end, hasTime)) {
+	            logger.info("Within range");
 	            filteredResult.add(task);
+	        } else {
+	            logger.info("Not within range");
 	        }
 	    }
 	    
@@ -300,26 +318,31 @@ public class TaskFilterManager {
 		}
 		
         if (filters.contains(FilterType.DEADLINE)) {
+            logger.info("Getting completed deadlines");
             neededTasks = getTasks(_taskStore.getCompletedDeadlineTasks());
             result.put(TaskType.DEADLINE, neededTasks);
         }
 
         if (filters.contains(FilterType.TODO)) {
+            logger.info("Getting completed todos");
             neededTasks = getTasks(_taskStore.getCompletedTodoTasks());
             result.put(TaskType.TODO, neededTasks);
         }
 
         if (filters.contains(FilterType.EVENT)) {
+            logger.info("Getting completed events");
             neededTasks = getTasks(_taskStore.getCompletedEventTasks());
             result.put(TaskType.EVENT, neededTasks);
         }
 		
         if(hasDateRange(filters)) {
             //Note that the individual type will mix up
+            logger.info("Filtering completed tasks by date range");
             result = filterResultsByDate(TaskType.DEADLINE, result, filters);
             result = filterResultsByDate(TaskType.EVENT, result, filters);  
         }
         
+        logger.info(LOGGING_FUNCTION_END);
 		return result;
 		
 	}
@@ -353,6 +376,8 @@ public class TaskFilterManager {
 	 */
 	private FilterParameter fillEmptyFilter() {
 		
+	    logger.info("Default filters: uncompleted deadlines, events and todos");
+	    
 		ArrayList<String> newFilters = new ArrayList<String>();
 		
 		newFilters.add(FilterType.DEADLINE.getType());
@@ -384,22 +409,34 @@ public class TaskFilterManager {
 			return result;
 		}
 		
+		
+		logger.info("Getting task set");
+		
 		FilterParameter allTypes = fillEmptyFilter();
 		HashMap<TaskType, ArrayList<Task<?>>> uncompletedTasks;
 		uncompletedTasks = filterUncompletedTasks(allTypes);
 		
 		for(TaskType type: uncompletedTasks.keySet()){
 		    
+		    logger.info("Searching for " + param.getKeywords());
+		    
 		    ArrayList<Task<?>> specificResult = new ArrayList<Task<?>>();
     		for (Task<?> task: uncompletedTasks.get(type)) {
+    		  
+    		    logger.info("Searching by " + type + " in " + task);  
     			if (searchKeywords(task, keywords)) {
+    			    logger.info("Found");  
     			    specificResult.add(task);
+    			} else {
+    			    logger.info("Not found");
     			}
     		}
+    		logger.info("Finished with " + type);
     		result.put(type, specificResult);
     		
 		}
 		
+		logger.info(LOGGING_FUNCTION_END);
 		return result;
 	}
 
