@@ -46,8 +46,6 @@ public class CommandController {
     
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
-    private DataSyncManager _dataSyncManager;
-    // private AppWindow _appWindow;
     
     private static Logger logger = LogManager.getLogger(CommandController.class
             .getName());
@@ -60,13 +58,11 @@ public class CommandController {
     public CommandController() {
         _taskDataManager = new TaskDataManager();
         _taskFilterManager = new TaskFilterManager(_taskDataManager);
-        // _appWindow = new AppWindow();
     }
 
     public CommandController(DataSyncManager dataSyncManager,
             TaskDataManager taskDataManager, TaskFilterManager taskFilterManager) {
         super();
-        _dataSyncManager = dataSyncManager;
         _taskDataManager = taskDataManager;
         _taskFilterManager = taskFilterManager;
     }
@@ -197,7 +193,7 @@ public class CommandController {
                 return new TaskView(TO_BE_DONE);
             }
             case EXIT: {
-                _dataSyncManager.saveAll();
+                _taskDataManager.saveAllTasks();
                 System.exit(0);
                 break;
             }
@@ -329,7 +325,32 @@ public class CommandController {
         for (String word : parameterString.split(SPACE)) {
             parameters.add(word);
         }
+        Date startDate = null;
+        Date endDate = null;
+        if (parameters.contains("-end")) {
+            int indexOfEndDate = parameters.indexOf("-end") + 1;
+            try {
+                endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+                parameters.remove(indexOfEndDate);
+                parameters.remove(indexOfEndDate-1);
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(),e);
+            }
+        }
+        if (parameters.contains("-start")) {
+            int indexOfStartDate = parameters.indexOf("-start") + 1;
+            try {
+                startDate = DateUtil.parse(parameters
+                        .get(indexOfStartDate));
+                parameters.remove(indexOfStartDate);
+                parameters.remove(indexOfStartDate-1);
+            } catch (ParseException e) {
+            	logger.error(e.getMessage(),e);
+            }
+        }
         FilterParameter filterParam = new FilterParameter(parameters);
+        filterParam.setStart(startDate);
+        filterParam.setEnd(endDate);
         return filterParam;
     }
 
