@@ -506,6 +506,7 @@ public class CommandController {
         ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original, pageNum);
         Task<?> markDeleteTask = pageOfMarkDeleteObject.get(userfriendlyTaskID-1);
         markDeleteParam.setTaskObject(markDeleteTask);
+        markDeleteParam.setTaskID(userfriendlyTaskID);
         
         return markDeleteParam;
     }

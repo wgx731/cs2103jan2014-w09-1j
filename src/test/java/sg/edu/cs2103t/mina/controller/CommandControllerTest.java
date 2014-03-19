@@ -342,18 +342,30 @@ public class CommandControllerTest {
 
     @Test
     public void testProcessMarkDeleteParameter() {
-        assertEquals(cc.processMarkDeleteParameter("todo 12"),
-                new DataParameter(null, 'M', null, null, TaskType.TODO, null,
-                        12));
-        assertEquals(
-                cc.processMarkDeleteParameter("todo 7"),
-                new DataParameter(null, 'M', null, null, TaskType.TODO, null, 7));
-        assertEquals(cc.processMarkDeleteParameter("deadline 7"),
+    	cc.processUserInput("add task1", 1, 1, 1);
+    	cc.processUserInput("add task2", 1, 1, 1);
+    	cc.processUserInput("add task3", 1, 1, 1);
+    	cc.processUserInput("add task4", 1, 1, 1);
+    	cc.processUserInput("add task5", 1, 1, 1);
+    	cc.processUserInput("add task1 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task2 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task3 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task4 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task5 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task1 -start 20140402 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task2 -start 20140402 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task3 -start 20140402 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task4 -start 20140402 -end 20140403", 1, 1, 1);
+    	cc.processUserInput("add task5 -start 20140402 -end 20140403", 1, 1, 1);
+    	assertEquals(
+                cc.processMarkDeleteParameter("todo 1"),
+                new DataParameter(null, 'M', null, null, TaskType.TODO, null, 1));
+        assertEquals(cc.processMarkDeleteParameter("deadline 1"),
                 new DataParameter(null, 'M', null, null, TaskType.DEADLINE,
-                        null, 7));
-        assertEquals(cc.processMarkDeleteParameter("event 7"),
+                        null, 1));
+        assertEquals(cc.processMarkDeleteParameter("event 1"),
                 new DataParameter(null, 'M', null, null, TaskType.EVENT, null,
-                        7));
+                        1));
     }
 
     @Test
