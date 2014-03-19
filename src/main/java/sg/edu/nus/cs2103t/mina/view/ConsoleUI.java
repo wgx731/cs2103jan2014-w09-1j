@@ -14,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.model.Task;
+import sg.edu.nus.cs2103t.mina.model.TaskView;
 
 /**
  * 
@@ -34,9 +36,11 @@ public class ConsoleUI extends MinaView {
     private InputStream _input;
     private OutputStream _output;
 
-    private List<String> _eventList;
-    private List<String> _todoList;
-    private List<String> _deadlineList;
+    private List<Task<?>> _eventList;
+    private List<Task<?>> _todoList;
+    private List<Task<?>> _deadlineList;
+    
+    private TaskView _taskView;
 
     public ConsoleUI(InputStream input, OutputStream output,
             CommandController commandController) {
@@ -45,9 +49,9 @@ public class ConsoleUI extends MinaView {
         _output = output;
         _inputReader = new BufferedReader(new InputStreamReader(_input));
         _outputWriter = new BufferedWriter(new OutputStreamWriter(_output));
-        _eventList = new ArrayList<String>();
-        _todoList = new ArrayList<String>();
-        _deadlineList = new ArrayList<String>();
+        _eventList = new ArrayList<Task<?>>();
+        _todoList = new ArrayList<Task<?>>();
+        _deadlineList = new ArrayList<Task<?>>();
     }
 
     @Override
@@ -61,9 +65,9 @@ public class ConsoleUI extends MinaView {
     }
 
     @Override
-    public void displayOutput(String message) {
+    public void displayOutput() {
         try {
-            _outputWriter.write(message);
+            _outputWriter.write(_taskView.getStatus());
             _outputWriter.flush();
         } catch (IOException e) {
             logger.error(e, e);
@@ -71,18 +75,14 @@ public class ConsoleUI extends MinaView {
     }
 
     @Override
-    public void updateLists(ArrayList<String> allEventTasks,
-            ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks) {
-        _eventList.clear();
-        _eventList.addAll(allEventTasks);
-        _deadlineList.clear();
-        _deadlineList.addAll(allDeadlineTasks);
-        _todoList.clear();
-        _todoList.addAll(allTodoTasks);
+    public void updateLists() {
+        _eventList = _taskView.getEvents();
+        _deadlineList = _taskView.getDeadlines();
+        _todoList = _taskView.getTodos();
     }
 
     public void loop() {
-        String feedback = _commandController.processUserInput(getUserInput());
-        displayOutput(feedback);
+        _taskView = _commandController.processUserInput(getUserInput(), 1, 1, 1);
+        displayOutput();
     }
 }

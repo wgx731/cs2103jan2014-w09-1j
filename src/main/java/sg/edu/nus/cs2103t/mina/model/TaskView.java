@@ -88,11 +88,15 @@ public class TaskView {
         ArrayList<Task<?>> tasks = _tasksOutput.get(type);
         ArrayList<Task<?>> output = new ArrayList<Task<?>>();
         
+        if (tasks.size()==0){
+        	return output;
+        }
+        
         if (start >= tasks.size()) {
            throw new IndexOutOfBoundsException();
         }
         
-        for(int i=start; i<end && i<tasks.size(); i++) {
+        for(int i=start; i<=end && i<tasks.size(); i++) {
             output.add(tasks.get(i));
         }
         return output;

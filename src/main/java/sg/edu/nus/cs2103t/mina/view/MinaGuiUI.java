@@ -22,10 +22,18 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.Task;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.TaskView;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 public class MinaGuiUI extends MinaView {
 
     private static final String EMPTY_STRING = "";
+    
+    private TaskView _taskView;
 
     private Shell _shell;
     private Display _display;
@@ -106,10 +114,12 @@ public class MinaGuiUI extends MinaView {
         _currentTab = 0;
         // _highlightOn = false;
         
-        _eventPage = 0;
-        _deadlinePage = 0;
-        _todoPage = 0;
+        _eventPage = 1;
+        _deadlinePage = 1;
+        _todoPage = 1;
 
+        _taskView = _commandController.getTaskView();
+        
         _shell = new Shell(_display, SWT.NO_TRIM);
         _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
         _shell.setSize(1080, 580);
@@ -248,13 +258,11 @@ public class MinaGuiUI extends MinaView {
                         	_commandHistory.poll();
                         	_commandHistory.offer(command);
                         }
-                        String feedback = _commandController
-                                .processUserInput(command);
+                        _taskView = _commandController
+                                .processUserInput(command, _eventPage, _deadlinePage, _todoPage);
                         _userInputTextField.setText(EMPTY_STRING);
-                        displayOutput(feedback);
-                        updateLists(_commandController.getEventTask(),
-                                _commandController.getDeadlineTask(),
-                                _commandController.getTodoTask());
+                        displayOutput();
+                        updateLists();
                         break;
                     case SWT.ARROW_UP:
                     	if (_commandHistory.size()!=0){
@@ -357,9 +365,9 @@ public class MinaGuiUI extends MinaView {
     }
 
     @Override
-    public void displayOutput(String message) {
+    public void displayOutput() {
     	logger.log(Level.INFO, "shell diplay output");
-        final String outputMessage = message;
+        final String outputMessage = _taskView.getStatus();
         _display.asyncExec(new Runnable() {
             @Override
             public void run() {
@@ -386,24 +394,29 @@ public class MinaGuiUI extends MinaView {
     }
 
     @Override
-    public void updateLists(ArrayList<String> allEventTasks,
-            ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks) {
+    public void updateLists() {
     	logger.log(Level.INFO, "shell update lists");
-        StringBuilder sb = new StringBuilder();
-        for (String event : allEventTasks) {
-            sb.append(event + "\n");
-        }
-        _eventListUI.setText(sb.toString());
-        sb = new StringBuilder();
-        for (String deadline : allDeadlineTasks) {
-            sb.append(deadline + "\n");
-        }
-        _deadlineListUI.setText(sb.toString());
-        sb = new StringBuilder();
-        for (String todo : allTodoTasks) {
-        	sb.append(todo + "\n");
-        }
-        _todoListUI.setText(sb.toString());
+    	ArrayList<Task<?>> eventList = _taskView.getPage(TaskType.EVENT, _eventPage);
+    	ArrayList<Task<?>> deadlineList = _taskView.getPage(TaskType.DEADLINE, _deadlinePage);
+    	ArrayList<Task<?>> todoList = _taskView.getPage(TaskType.TODO, _todoPage);
+
+    	_eventListUI.setText(EMPTY_STRING);
+    	for (int i=0; i<eventList.size(); i++) {
+    		EventTask event = (EventTask) eventList.get(i);
+    		_eventListUI.append((i+1)+". "+event.getDescription()
+    				+ " from "+event.getStartTime()+" to "+event.getEndTime()+"\n");
+    	}
+    	_deadlineListUI.setText(EMPTY_STRING);
+    	for (int i=0; i<deadlineList.size(); i++) {
+    		DeadlineTask deadline = (DeadlineTask) deadlineList.get(i);
+    		_deadlineListUI.append((i+1)+". "+deadline.getDescription()
+    				+" by "+deadline.getEndTime()+"\n");
+    	}
+    	_todoListUI.setText(EMPTY_STRING);
+    	for (int i=0; i<todoList.size(); i++) {
+    		TodoTask todo = (TodoTask) todoList.get(i);
+    		_todoListUI.append((i+1)+". "+todo.getDescription()+"\n");
+    	}
     }
 
     public void loop() {

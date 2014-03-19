@@ -36,7 +36,6 @@ public class MinaDriver {
 
     private static final String SYNC_INTERVAL_KEY = "synctime";
     private static final String VIEW_TYPE_KEY = "viewtype";
-    private static final String WELCOME_MESSAGE = "welcome to MINA.\r\n";
     private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
     private static CommandController commandController;
@@ -72,8 +71,7 @@ public class MinaDriver {
     }
 
     static void initCC() {
-        commandController = new CommandController(dataSyncManager,
-                taskDataManager, taskFilterManager);
+        commandController = new CommandController(taskDataManager, taskFilterManager);
     }
 
     static void initView() {
@@ -96,9 +94,7 @@ public class MinaDriver {
             default:
                 throw new Error(UNKOWN_TYPE_ERROR);
         }
-        uiView.updateLists(commandController.getEventTask(),
-                commandController.getDeadlineTask(),
-                commandController.getTodoTask());
+        uiView.updateLists();
     }
 
     private void initComponents() {
@@ -117,14 +113,12 @@ public class MinaDriver {
         initSync();
         initCC();
         MinaGuiUI gui = new MinaGuiUI(commandController);
-        gui.updateLists(commandController.getEventTask(),
-                commandController.getDeadlineTask(),
-                commandController.getTodoTask());
+        gui.updateLists();
         return gui.open();
     }
 
     public void processLoop() {
-        uiView.displayOutput(WELCOME_MESSAGE);
+        uiView.displayOutput();
         uiView.loop();
     }
 

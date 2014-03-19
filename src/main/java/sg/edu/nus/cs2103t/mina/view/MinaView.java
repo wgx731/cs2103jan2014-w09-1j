@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.view;
 import java.util.ArrayList;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.model.TaskView;
 
 /**
  * 
@@ -16,7 +17,7 @@ import sg.edu.nus.cs2103t.mina.controller.CommandController;
 public abstract class MinaView {
 
     protected CommandController _commandController;
-
+    
     public MinaView(CommandController commandController) {
         _commandController = commandController;
     }
@@ -33,7 +34,7 @@ public abstract class MinaView {
      * 
      * @param message output message to be displayed
      */
-    public abstract void displayOutput(String message);
+    public abstract void displayOutput();
 
     /**
      * Update List Data in UI
@@ -42,9 +43,7 @@ public abstract class MinaView {
      * @param deadlineList the deadline task list
      * @param todoList the todo task list
      */
-    public abstract void updateLists(ArrayList<String> allEventTasks,
-            ArrayList<String> allDeadlineTasks, ArrayList<String> allTodoTasks);
+    public abstract void updateLists();
 
     public abstract void loop();
-
 }
