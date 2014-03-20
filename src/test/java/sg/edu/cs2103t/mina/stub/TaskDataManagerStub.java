@@ -34,7 +34,7 @@ public class TaskDataManagerStub extends TaskDataManager {
     public TaskDataManagerStub() {
 
         super();
-
+        
         _todoTasks = getUncompletedTodoTasks();
         _eventTasks = getUncompletedEventTasks();
         _deadlineTasks = getUncompletedDeadlineTasks();
@@ -188,7 +188,7 @@ public class TaskDataManagerStub extends TaskDataManager {
     	}
     	
     }
-    
+
     public SortedSet<TodoTask> getCompTodoTasks() {
         return _compTodoTasks;
     }
