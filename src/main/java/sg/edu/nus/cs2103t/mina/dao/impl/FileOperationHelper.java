@@ -42,6 +42,13 @@ public class FileOperationHelper {
         _fileExtension = fileExtension;
     }
 
+    FileOperationHelper(String completedSuffix, String fileExtension,
+            Map<TaskType, String> fileLocationMap) {
+        _fileLocationMap = fileLocationMap;
+        _completedSuffix = completedSuffix;
+        _fileExtension = fileExtension;
+    }
+
     boolean createFileStorage() {
         try {
             createFileIfNotExist(getFileLocation(TaskType.TODO, false));

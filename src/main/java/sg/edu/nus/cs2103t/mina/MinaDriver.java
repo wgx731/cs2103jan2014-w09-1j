@@ -55,6 +55,7 @@ public class MinaDriver {
         fileMap.put(TaskType.DEADLINE,
                 ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
         taskDao = new ObjectFileTaskDaoImpl();
+        // taskDao = new JsonFileTaskDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao);
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));

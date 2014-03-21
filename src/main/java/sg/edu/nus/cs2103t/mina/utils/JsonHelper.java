@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import sg.edu.nus.cs2103t.mina.model.Task;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Helper class to translate between json and java objects
@@ -30,10 +31,12 @@ public class JsonHelper {
         return gson.toJson(taskSet);
     }
 
-    public static Object jsonToTaskSet(String json) {
+    public static SortedSet<? extends Task<?>> jsonToTaskSet(String json) {
         if (gson == null) {
             gson = setUp();
         }
-        return gson.fromJson(json, null);
+        return gson.fromJson(json,
+                new TypeToken<SortedSet<? extends Task<?>>>() {
+                }.getType());
     }
 }

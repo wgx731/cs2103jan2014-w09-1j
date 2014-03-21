@@ -3,7 +3,6 @@ package sg.edu.nus.cs2103t.mina.dao.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,17 +23,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
-public class FileTaskSetDaoImplTest {
+public class ObjectFileTaskSetDaoImplTest {
 
     private static Logger logger = LogManager
-            .getLogger(FileTaskSetDaoImplTest.class.getName());
+            .getLogger(ObjectFileTaskSetDaoImplTest.class.getName());
 
     private static final String TODO_DESCRIPTION = "This is a todo task.";
     private static final String TODO_FILE_NAME = "todo";
@@ -42,8 +40,6 @@ public class FileTaskSetDaoImplTest {
     private static final String EVENT_FILE_NAME = "event";
     private static final String DEADLINE_DESCRIPTION = "This is an deadline task";
     private static final String DEADLINE_FILE_NAME = "deadline";
-
-    private static final String UNEXPECTED_ERROR = "unexpected error occured.";
 
     private static final Date startDate = new Date(1393243200);
     private static final Date endDate = new Date(1393333200);
@@ -90,46 +86,6 @@ public class FileTaskSetDaoImplTest {
     public void tearDown() throws Exception {
         storageMap = null;
         storage = null;
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnknownTaskTypeCompleted() {
-        try {
-            storage.loadTaskSet(TaskType.UNKOWN, true);
-        } catch (IOException e) {
-            logger.error(e, e);
-            fail(UNEXPECTED_ERROR);
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnknownTaskTypeUnCompleted() {
-        try {
-            storage.loadTaskSet(TaskType.UNKOWN, false);
-        } catch (IOException e) {
-            logger.error(e, e);
-            fail(UNEXPECTED_ERROR);
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullCompleted() {
-        try {
-            storage.loadTaskSet(null, true);
-        } catch (IOException e) {
-            logger.error(e, e);
-            fail(UNEXPECTED_ERROR);
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullUnCompleted() {
-        try {
-            storage.loadTaskSet(null, false);
-        } catch (IOException e) {
-            logger.error(e, e);
-            fail(UNEXPECTED_ERROR);
-        }
     }
 
     private File saveTaskSet(SortedSet<? extends Task<?>> taskSet,

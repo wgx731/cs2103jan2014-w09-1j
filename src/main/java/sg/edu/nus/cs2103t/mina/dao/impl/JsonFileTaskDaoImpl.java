@@ -75,25 +75,26 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         while ((line = reader.readLine()) != null) {
             sb.append(line);
         }
-        Object loadObject = JsonHelper.jsonToTaskSet(sb.toString());
+        SortedSet<? extends Task<?>> loadObject = JsonHelper.jsonToTaskSet(sb
+                .toString());
         if (loadObject == null) {
             throw new IOException();
         }
-        SortedSet<? extends Task<?>> taskSet = null;
-        switch (taskType) {
-            case TODO:
-                taskSet = (SortedSet<TodoTask>) loadObject;
-                break;
-            case DEADLINE:
-                taskSet = (SortedSet<DeadlineTask>) loadObject;
-                break;
-            case EVENT:
-                taskSet = (SortedSet<EventTask>) loadObject;
-                break;
-            default:
-                break;
-        }
-        return taskSet;
+        // SortedSet<? extends Task<?>> taskSet = null;
+        // switch (taskType) {
+        // case TODO:
+        // taskSet = (SortedSet<TodoTask>) loadObject;
+        // break;
+        // case DEADLINE:
+        // taskSet = (SortedSet<DeadlineTask>) loadObject;
+        // break;
+        // case EVENT:
+        // taskSet = (SortedSet<EventTask>) loadObject;
+        // break;
+        // default:
+        // break;
+        // }
+        return loadObject;
     }
 
 }
