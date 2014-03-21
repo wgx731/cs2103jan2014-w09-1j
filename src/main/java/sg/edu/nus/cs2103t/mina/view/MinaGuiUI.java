@@ -167,7 +167,6 @@ public class MinaGuiUI extends MinaView {
         _lblTodo.setText("To-do(td)");
         
         _todoNextPage = new Label(_shell, SWT.NONE);
-        _todoNextPage.setText(RIGHT_ARROW);
         _todoNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _todoNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _todoNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
@@ -175,7 +174,6 @@ public class MinaGuiUI extends MinaView {
         _todoNextPage.setBounds(992, 500, 84, 36);
         
         _todoPrevPage = new Label(_shell, SWT.NONE);
-        _todoPrevPage.setText(LEFT_ARROW);
         _todoPrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _todoPrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _todoPrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
@@ -183,7 +181,6 @@ public class MinaGuiUI extends MinaView {
         _todoPrevPage.setBounds(722, 500, 84, 36);
         
         _deadlinePrevPage = new Label(_shell, SWT.NONE);
-        _deadlinePrevPage.setText("←");
         _deadlinePrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _deadlinePrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _deadlinePrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
@@ -191,7 +188,6 @@ public class MinaGuiUI extends MinaView {
         _deadlinePrevPage.setBounds(362, 500, 84, 36);
         
         _deadlineNextPage = new Label(_shell, SWT.NONE);
-        _deadlineNextPage.setText("→");
         _deadlineNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _deadlineNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _deadlineNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
@@ -199,7 +195,6 @@ public class MinaGuiUI extends MinaView {
         _deadlineNextPage.setBounds(634, 500, 84, 36);
         
         _eventPrevPage = new Label(_shell, SWT.NONE);
-        _eventPrevPage.setText("←");
         _eventPrevPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _eventPrevPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _eventPrevPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
@@ -207,12 +202,13 @@ public class MinaGuiUI extends MinaView {
         _eventPrevPage.setBounds(4, 500, 84, 36);
         
         _eventNextPage = new Label(_shell, SWT.NONE);
-        _eventNextPage.setText("→");
         _eventNextPage.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         _eventNextPage.setFont(SWTResourceManager.getFont("Comic Sans MS", 20, SWT.BOLD));
         _eventNextPage.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN));
         _eventNextPage.setAlignment(SWT.CENTER);
         _eventNextPage.setBounds(274, 500, 84, 36);
+        
+        updateArrowNavigation();
 
         _eventListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
         _eventListUI.setEnabled(false);
@@ -263,6 +259,7 @@ public class MinaGuiUI extends MinaView {
                         _userInputTextField.setText(EMPTY_STRING);
                         displayOutput();
                         updateLists();
+                        updateArrowNavigation();
                         break;
                     case SWT.ARROW_UP:
                     	if (_commandHistory.size()!=0){
@@ -347,6 +344,47 @@ public class MinaGuiUI extends MinaView {
                         _backgroundBox.setBounds(718, 0, 362, 540);
                     }
                 }
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_RIGHT){
+                	if (_currentTab==0){
+                		int maxNumberOfEventPages = _taskView.maxEventPage();
+                		if (_eventPage<maxNumberOfEventPages){
+                			_eventPage++;
+                        	updateLists();
+                		}
+                	} else if (_currentTab==1){
+                		int maxNumberOfDeadlinePages = _taskView.maxDeadlinePage();
+                		if (_deadlinePage<maxNumberOfDeadlinePages){
+                			_deadlinePage++;
+                        	updateLists();
+                		}
+                	} else {
+                		int maxNumberOfTodoPages = _taskView.maxTodoPage();
+                		if (_todoPage<maxNumberOfTodoPages){
+                			_todoPage++;
+                        	updateLists();
+                		}
+                	}
+                	updateArrowNavigation();
+                }
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_LEFT){
+                	if (_currentTab==0){
+                		if (_eventPage>1){
+                			_eventPage--;
+                        	updateLists();
+                		}
+                	} else if (_currentTab==1){
+                		if (_deadlinePage>1){
+                			_deadlinePage--;
+                        	updateLists();
+                		}
+                	} else {
+                		if (_todoPage>1){
+                			_todoPage--;
+                        	updateLists();
+                		}
+                	}
+                	updateArrowNavigation();
+                }
                 if (event.stateMask != SWT.CTRL && ((event.keyCode>31 && event.keyCode<127)||(event.keyCode==SWT.ARROW_UP||
                 		event.keyCode==SWT.ARROW_DOWN||event.keyCode==SWT.ARROW_LEFT||event.keyCode==SWT.ARROW_RIGHT))) {
                     _userInputTextField.forceFocus();
@@ -425,6 +463,40 @@ public class MinaGuiUI extends MinaView {
             if (!_display.readAndDispatch()) {
                 _display.sleep();
             }
+        }
+    }
+    
+    public void updateArrowNavigation(){
+        if (_eventPage>=_taskView.maxEventPage()){
+        	_eventNextPage.setText("");
+        } else {
+            _eventNextPage.setText(RIGHT_ARROW);
+        }
+        logger.log(Level.INFO, "max Event page: "+_taskView.maxEventPage());
+        if (_eventPage==1){
+        	_eventPrevPage.setText("");
+        } else {
+            _eventPrevPage.setText(LEFT_ARROW);
+        }
+        if (_deadlinePage>=_taskView.maxDeadlinePage()){
+        	_deadlineNextPage.setText("");
+        } else {
+            _deadlineNextPage.setText(RIGHT_ARROW);
+        }
+        if (_deadlinePage==1){
+        	_deadlinePrevPage.setText("");
+        } else {
+            _deadlinePrevPage.setText(LEFT_ARROW);
+        }
+        if (_todoPage>=_taskView.maxTodoPage()){
+        	_todoNextPage.setText("");
+        } else {
+            _todoNextPage.setText(RIGHT_ARROW);
+        }
+        if (_todoPage==1){
+        	_todoPrevPage.setText("");
+        } else {
+            _todoPrevPage.setText(LEFT_ARROW);
         }
     }
 }

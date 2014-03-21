@@ -19,7 +19,7 @@ public class TaskView {
     HashMap<TaskType, ArrayList<Task<?>>> _tasksOutput;
     String _status;
 
-    private static final int EVERYTHING = -1;
+    private static final int EVERYTHING = Integer.MAX_VALUE;
     private static final int PAGE_ONE = 0;
     public static final int ITEMS_PER_PAGE = 5;
     
@@ -56,6 +56,22 @@ public class TaskView {
     
     public String getStatus(){
         return _status;
+    }
+    
+    public int pageSize(){
+    	return ITEMS_PER_PAGE;
+    }
+    
+    public int maxTodoPage(){
+    	return (getTodos().size()+pageSize()-1)/pageSize();
+    }
+    
+    public int maxDeadlinePage(){
+    	return (getDeadlines().size()+pageSize()-1)/pageSize();
+    }
+    
+    public int maxEventPage(){
+    	return (getEvents().size()+pageSize()-1)/pageSize();
     }
     
     public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{
