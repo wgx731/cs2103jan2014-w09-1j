@@ -262,6 +262,18 @@ public class MinaGuiUI extends MinaView {
                         displayOutput();
                         updateLists();
                         updateArrowNavigation();
+                        if (_taskView.hasOnlyOneType(TaskType.EVENT)){
+                        	_currentTab = 0;
+                        	expand();
+                        } else if (_taskView.hasOnlyOneType(TaskType.DEADLINE)){
+                        	_currentTab = 1;
+                        	expand();
+                        } else if (_taskView.hasOnlyOneType(TaskType.TODO)){
+                        	_currentTab = 2;
+                        	expand();
+                        } else {
+                        	resetPanel();
+                        }
                         break;
                     case SWT.ARROW_UP:
                     	if (_commandHistory.size()!=0){
@@ -297,6 +309,12 @@ public class MinaGuiUI extends MinaView {
                     		}
                     		_historyUp = false;
                     	}
+                    	break;
+                    case SWT.ESC:
+                    	_taskView = _commandController
+                        .processUserInput("display", _eventPage, _deadlinePage, _todoPage);
+                    	resetPanel();
+                    	updateLists();
                     	break;
                     default:
                         break;
@@ -348,19 +366,19 @@ public class MinaGuiUI extends MinaView {
                 		int maxNumberOfEventPages = _taskView.maxEventPage();
                 		if (_eventPage<maxNumberOfEventPages){
                 			_eventPage++;
-                        	updateLists();
+                        	updateEventList();
                 		}
                 	} else if (_currentTab==1){
                 		int maxNumberOfDeadlinePages = _taskView.maxDeadlinePage();
                 		if (_deadlinePage<maxNumberOfDeadlinePages){
                 			_deadlinePage++;
-                        	updateLists();
+                        	updateDeadlineList();
                 		}
                 	} else {
                 		int maxNumberOfTodoPages = _taskView.maxTodoPage();
                 		if (_todoPage<maxNumberOfTodoPages){
                 			_todoPage++;
-                        	updateLists();
+                        	updateTodoList();
                 		}
                 	}
                 	updateArrowNavigation();
@@ -369,17 +387,17 @@ public class MinaGuiUI extends MinaView {
                 	if (_currentTab==0){
                 		if (_eventPage>1){
                 			_eventPage--;
-                        	updateLists();
+                        	updateEventList();
                 		}
                 	} else if (_currentTab==1){
                 		if (_deadlinePage>1){
                 			_deadlinePage--;
-                        	updateLists();
+                        	updateDeadlineList();
                 		}
                 	} else {
                 		if (_todoPage>1){
                 			_todoPage--;
-                        	updateLists();
+                        	updateTodoList();
                 		}
                 	}
                 	updateArrowNavigation();
@@ -388,13 +406,7 @@ public class MinaGuiUI extends MinaView {
                 	if (_isExpanded){
                 		resetPanel();
                 	} else {
-                		if (_currentTab==0){
-                			expandEvent();
-                		} else if (_currentTab==1){
-                			expandDeadline();
-                		} else {
-                			expandTodo();
-                		}
+                		expand();
                 	}
                 }
                 if (event.stateMask != SWT.CTRL && ((event.keyCode>31 && event.keyCode<127)||(event.keyCode==SWT.ARROW_UP||
@@ -403,6 +415,12 @@ public class MinaGuiUI extends MinaView {
                     if (event.keyCode>31&&event.keyCode<127) {
                     	_userInputTextField.append(String.valueOf((char)event.keyCode));
                     }
+                }
+                if (event.keyCode == SWT.ESC){
+                	_taskView = _commandController
+                            .processUserInput("display", _eventPage, _deadlinePage, _todoPage);
+                	resetPanel();
+                	updateLists();
                 }
             }});
         
@@ -451,6 +469,15 @@ public class MinaGuiUI extends MinaView {
     	updateDeadlineList();
     	updateTodoList();
 
+    }
+    
+    public void loop() {
+    	logger.log(Level.INFO, "shell running loop");
+        while (!_shell.isDisposed()) {
+            if (!_display.readAndDispatch()) {
+                _display.sleep();
+            }
+        }
     }
     
     private void updateEventList(){
@@ -576,14 +603,15 @@ public class MinaGuiUI extends MinaView {
     		initialCursorPosition+=todoString.length();
     	}
     }
-
-    public void loop() {
-    	logger.log(Level.INFO, "shell running loop");
-        while (!_shell.isDisposed()) {
-            if (!_display.readAndDispatch()) {
-                _display.sleep();
-            }
-        }
+    
+    private void expand(){
+    	if (_currentTab==0){
+			expandEvent();
+		} else if (_currentTab==1){
+			expandDeadline();
+		} else {
+			expandTodo();
+		}
     }
     
     private void updateArrowNavigation(){
@@ -592,7 +620,6 @@ public class MinaGuiUI extends MinaView {
         } else {
             _eventNextPage.setText(RIGHT_ARROW);
         }
-        logger.log(Level.INFO, "max Event page: "+_taskView.maxEventPage());
         if (_eventPage==1){
         	_eventPrevPage.setText("");
         } else {

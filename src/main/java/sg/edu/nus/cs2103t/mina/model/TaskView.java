@@ -34,6 +34,11 @@ public class TaskView {
         _status = status;        
     }
     
+    public boolean hasOnlyOneType(TaskType type){
+    	return _tasksOutput.containsKey(type)
+    		&&_tasksOutput.size()==1;
+    }
+    
     public boolean hasTasks(TaskType type) {
         return _tasksOutput.containsKey(type);
     }
