@@ -76,6 +76,7 @@ public class FilterParameter {
 		} else if (hasStartFilter){
 			_filters.remove(FilterType.START);
 		}
+		_hasTime = true;
 	}
 
 	public Date getEnd() {
@@ -92,6 +93,7 @@ public class FilterParameter {
 		} else if (hasEndFilter){
 			_filters.remove(FilterType.END);
 		}
+		_hasTime = true;
 	}
 	
    public boolean hasTime() {
