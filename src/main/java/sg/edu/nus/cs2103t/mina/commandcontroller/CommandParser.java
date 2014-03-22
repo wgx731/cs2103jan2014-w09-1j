@@ -1,14 +1,21 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller;
 
+import hirondelle.date4j.DateTime;
+
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+
 public class CommandParser {
 
+    private static final String END = "end";
     private static final int ACTION_INDEX = 0;
     private static final String SPACE = " ";
     private static final String ACTION = "action";
@@ -45,7 +52,7 @@ public class CommandParser {
 
     public String convertCommand(String userInput) throws NullPointerException,
             ParseException {
-
+        
         if (userInput == null) {
             throw new NullPointerException();
         }
@@ -94,13 +101,23 @@ public class CommandParser {
                 }
             }
 
-            if (tokens[i].equalsIgnoreCase("-priority")) {
+            if (tokens[i].equalsIgnoreCase("-priority") && !hasValue(PRIORITY)) {
                 int nextIndex = i + 1;
                 if (nextIndex < tokens.length && 
                         tryAddPriority(tokens[i + 1])) {
                     i++;
                     continue;
                 }
+            }
+            
+            if (tokens[i].equalsIgnoreCase("-end") && !hasValue(END)) {
+                int nextIndex = i + 1;
+                if (nextIndex < tokens.length && 
+                        isValidDate(tokens[i + 1])) {
+                    addEnd(tokens[i + 1]);
+                    i++;
+                    continue;
+                }                
             }
             
             if (tokens[i].equalsIgnoreCase("urgent") && isWrapped) {
@@ -124,6 +141,43 @@ public class CommandParser {
         return result.toString().trim();
     }
     
+    private boolean isValidDate(String dateTime){
+        String format = DateUtil.determineDateFormat(dateTime);
+        
+        if(format==null){
+            return false;
+        } else {
+            return true;
+        }
+        
+    }
+
+    private void addEnd(String dateTime) throws ParseException{
+        
+        StringBuilder dateBuilder = new StringBuilder();
+        
+        String format = DateUtil.determineDateFormat(dateTime);
+        Date rawDate = DateUtil.parse(dateTime);
+        
+        logger.info("Adding end date: " + dateTime + "\n" +
+                    "Fomat: " + format + "\n" +
+                    "Date: " + rawDate.toString());
+        
+        if(!format.contains("HH")){
+            logger.info("No time");
+            int sec = 1000;
+            int min = sec*60;
+            int hour = min*60;
+            rawDate.setTime(rawDate.getTime() + hour*23 + min*59 + sec*59);
+        }
+        
+        Calendar endDate = DateUtil.toCalendar(rawDate);
+        SimpleDateFormat standard = new SimpleDateFormat("ddMMyyyyHHmmss");
+        String standardDate = standard.format(rawDate);
+        logger.info("Time formatted: " + standardDate);
+        _arguments.put(END, standardDate);
+    }
+
     public boolean tryAddPriority(String key) {
         
         boolean isValid = false;
@@ -150,12 +204,19 @@ public class CommandParser {
         result.append(getFormattedValue(ACTION));
         result.append(getFormattedValue(DESCRIPTION));
         if(hasValue(PRIORITY)) {
-            result.append("-priority ");
+            result.append(getFormattedKey(PRIORITY));
             result.append(getFormattedValue(PRIORITY));
+        }
+        if(hasValue(END)){
+            result.append(getFormattedKey(END));
+            result.append(getFormattedValue(END));
         }
         return result;
     }
-
+    
+    public String getFormattedKey(String key){
+        return "-" + key + " ";
+    }
     public String getFormattedValue(String key) {
         return _arguments.get(key) + SPACE;
     }
@@ -167,6 +228,7 @@ public class CommandParser {
         _arguments.put(ACTION, null);
         _arguments.put(PRIORITY, null);
         _arguments.put(DESCRIPTION, null);
+        _arguments.put(END, null);
 
     }
 

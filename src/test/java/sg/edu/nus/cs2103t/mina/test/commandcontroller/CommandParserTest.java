@@ -28,11 +28,19 @@ public class CommandParserTest {
     public static final String TODO_THREE = "CPT_todo3";
     public static final String TODO_FOUR = "CPT_todo4";
     
+    public static final String DEADLINE_DESCRIPTION = "Submit assignment";
+    private static final int HAS_SECS = 0;
+    private static final int HAS_NO_SECS = 1;
+    
     private static String addTodoControlLow, 
-                            addTodoControlMed,
-                            addTodoControlHigh,
+                          addTodoControlMed,
+                          addTodoControlHigh,
                             addTodoControlNone,
-                            addDeadlineControl,
+                            addDeadlineControlMonthDaySecs,
+                            addDeadlineControlMonthDaySame,
+                            addDeadlineControlNoDate,
+                            addDeadlineControlNoDateMorning,
+                            addDeadlineControlMonthTimeNoSecs,
                             addEventControlADay,
                             addEventControlDays,
                             addEventControlMonths,
@@ -52,6 +60,17 @@ public class CommandParserTest {
         addTodoControlMed = "add CPT_todo2 -priority M";
         addTodoControlHigh = "add CPT_todo3 -priority H";
         addTodoControlNone = "add CPT_todo4";
+
+        //Today, only time.
+        addDeadlineControlNoDate = "add Submit assignment -end 235900";
+        //Today, morning
+        addDeadlineControlNoDateMorning = "add Submit assignment -end 090000";
+        //26th of April 2013, time, no seconds.
+        addDeadlineControlMonthTimeNoSecs = "add Submit assignment -end 26042013235900";
+        //26th of April 2013, 11:59:23pm
+        addDeadlineControlMonthDaySecs = "add Submit assignment -end 26042013235923";
+        //4th of July 2013, 2359
+        addDeadlineControlMonthDaySame = "add Submit assignment -end 04072013235900";
         
     }
     
@@ -267,8 +286,67 @@ public class CommandParserTest {
     }
     
     @Test
-    public void testAddEvent() throws Exception{
+    public void testAddDeadlinesControl() throws Exception{
+        //assertEquals(addDeadlineControlNoDate,
+                        //parser.convertCommand(addDeadlineControlNoDate));
+        //assertEquals(addDeadlineControlNoDateMorning,
+                       //parser.convertCommand(addDeadlineControlNoDateMorning));
+        assertEquals(addDeadlineControlMonthDaySecs,
+                    parser.convertCommand(addDeadlineControlMonthDaySecs));
+        assertEquals(addDeadlineControlMonthTimeNoSecs,
+                parser.convertCommand(addDeadlineControlMonthTimeNoSecs));
+        assertEquals(addDeadlineControlMonthDaySame,
+                parser.convertCommand(addDeadlineControlMonthDaySame));
+
+    }
+    
+    /**
+     * Test reorder of keywords
+     * @throws Exception
+     */
+    @Test
+    public void testAddDeadlineReorder() throws Exception{
         
+        variationBuild.append("add ");
+        variationBuild.append(getTestTime(HAS_SECS));
+        variationBuild.append(DEADLINE_DESCRIPTION);
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthDaySecs, result);
+        
+        //No time
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(getTestTime(HAS_NO_SECS));
+        variationBuild.append(DEADLINE_DESCRIPTION);
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result);
+        
+        
+    }
+    
+    @Ignore
+    @Test
+    public void testAddDeadlines() throws Exception{
+        
+    }
+    
+    @Ignore
+    @Test
+    public void testAddDeadlinesDateFormat() throws Exception{
+        
+    }
+    
+    private String getTestTime(int type){
+        switch(type){
+            case HAS_SECS :
+                return "-end 26042013235923 ";
+            case HAS_NO_SECS :
+                return "-end 260420132359 ";
+            default:
+                return "";
+        }
     }
     
     private String wrapDescription(String descript) {
