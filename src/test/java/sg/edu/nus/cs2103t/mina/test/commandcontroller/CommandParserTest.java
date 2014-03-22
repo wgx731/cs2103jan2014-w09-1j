@@ -87,7 +87,7 @@ public class CommandParserTest {
      * Testing for the different add command for todos.
      */
     @Test
-    public void testReorderTodoLow() throws Exception{
+    public void testReorderTodo() throws Exception{
         
         //Reordering of flags
         variationBuild.append("add ");
@@ -96,31 +96,93 @@ public class CommandParserTest {
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlLow, result);
-    }
-    
-    @Test
-    public void testReorderTodoMed() throws Exception{   
+        
+        setUp();
         variationBuild.append("add ");
         variationBuild.append("-priority M ");
         variationBuild.append(TODO_TWO);
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlMed, result);
-    }
-    
-    @Test
-    public void testReorderTodoHigh() throws Exception{   
+        
+        setUp();
         variationBuild.append("add ");
         variationBuild.append("-priority H ");
         variationBuild.append(TODO_THREE);
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        assertEquals(addTodoControlHigh, result);
+        assertEquals(addTodoControlHigh, result);       
     }
     
     @Test
-    public void testDelimitTodoLow() throws Exception{
+    public void testDelimitTodo() throws Exception{
         //With delimiter of adding todos with low priority:
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_ONE));
+        variationBuild.append(" priority l");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlLow, result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_TWO));
+        variationBuild.append(" priority m");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlMed, result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_THREE));
+        variationBuild.append(" priority h");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlHigh, result);
+        
+    }
+    
+    @Test
+    public void testAddKeywords() throws Exception{
+        
+       variationBuild.append("make ");
+       variationBuild.append(TODO_FOUR);
+       variation = variationBuild.toString();
+       logger.info(variation);
+       result = parser.convertCommand(variation);
+       assertEquals(addTodoControlNone, result); 
+       
+       setUp();
+       variationBuild.append("create ");
+       variationBuild.append(TODO_FOUR);
+       variation = variationBuild.toString();
+       logger.info(variation);
+       result = parser.convertCommand(variation);
+       assertEquals(addTodoControlNone, result); 
+       
+       setUp();
+       variationBuild.append("new ");
+       variationBuild.append(TODO_FOUR);
+       variation = variationBuild.toString();
+       logger.info(variation);
+       result = parser.convertCommand(variation);
+       assertEquals(addTodoControlNone, result); 
+       
+       setUp();
+       variationBuild.append("+ ");
+       variationBuild.append(TODO_FOUR);
+       variation = variationBuild.toString();
+       logger.info(variation);
+       result = parser.convertCommand(variation);
+       assertEquals(addTodoControlNone, result);        
+    }
+    
+    @Test
+    public void testPriorityKeywords() throws Exception{
+        
         variationBuild.append("add ");
         variationBuild.append(wrapDescription(TODO_ONE));
         variationBuild.append(" low priority");
@@ -131,33 +193,87 @@ public class CommandParserTest {
         
         setUp();
         variationBuild.append("add ");
-        variationBuild.append(wrapDescription(TODO_TWO));
-        variationBuild.append(" medium priority");
+        variationBuild.append(wrapDescription(TODO_ONE));
+        variationBuild.append(" priority low");
         variation = variationBuild.toString();
         logger.info(variation);
         result = parser.convertCommand(variation);
-        assertEquals(addTodoControlLow, result);       
-    }
-    
-    @Test
-    public void testDelimitTodoMed() throws Exception{
-        //With delimiter of adding todos with low priority:
+        assertEquals(addTodoControlLow, result);
+        
+        setUp();
         variationBuild.append("add ");
         variationBuild.append(wrapDescription(TODO_TWO));
         variationBuild.append(" med priority");
         variation = variationBuild.toString();
         logger.info(variation);
         result = parser.convertCommand(variation);
-        assertEquals(addTodoControlLow, result);
+        assertEquals(addTodoControlMed, result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_TWO));
+        variationBuild.append(" medium priority");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlMed, result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_THREE));
+        variationBuild.append(" high priority");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlHigh, result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_THREE));
+        variationBuild.append(" urgent priority");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlHigh, result);  
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(TODO_THREE));
+        variationBuild.append(" urgent");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals(addTodoControlHigh, result);  
     }
-
+    
+    @Test
+    public void breakAddTodo() throws Exception{
+        
+        variationBuild.append("add ");
+        variationBuild.append(" urgent request from D");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals("add urgent request from D", result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription("urgent request from D"));
+        variationBuild.append(" URGENT");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals("add urgent request from D -priority H", result);
+    }
+    
+    @Test
+    public void testAddEvent() throws Exception{
+        
+    }
+    
     private String wrapDescription(String descript) {
         return "'" + descript + "'";
     }
     
-    @Ignore
-    @Test
-    public void breakAddTodo() throws Exception{
-        
-    }
+
 }

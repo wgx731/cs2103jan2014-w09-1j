@@ -9,11 +9,15 @@ import org.apache.logging.log4j.Logger;
 
 public class CommandParser {
 
+    private static final int ACTION_INDEX = 0;
     private static final String SPACE = " ";
     private static final String ACTION = "action";
     private static final String PRIORITY = "priority";
     private static final String DESCRIPTION = "description";
-
+    
+    private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
+    private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
+    
     private CommandProcessor _cmdProcess;
     private HashMap<String, String> _arguments;
     private static Logger logger = LogManager.getLogger(CommandParser.class
@@ -22,6 +26,21 @@ public class CommandParser {
     public CommandParser(CommandProcessor cmdProcess) {
         _cmdProcess = cmdProcess;
         initArgMap();
+        
+        ACTIONS_KEYWORDS.put("add", "add");
+        ACTIONS_KEYWORDS.put("make", "add");
+        ACTIONS_KEYWORDS.put("create", "add");
+        ACTIONS_KEYWORDS.put("new", "add");
+        ACTIONS_KEYWORDS.put("+", "add");
+        
+        PRIORITY_VALUES.put("low", "L");
+        PRIORITY_VALUES.put("l", "L");
+        PRIORITY_VALUES.put("medium", "M");
+        PRIORITY_VALUES.put("m", "M");
+        PRIORITY_VALUES.put("med", "M");
+        PRIORITY_VALUES.put("h", "H");
+        PRIORITY_VALUES.put("high", "H");
+        PRIORITY_VALUES.put("urgent", "H");
     }
 
     public String convertCommand(String userInput) throws NullPointerException,
@@ -40,19 +59,26 @@ public class CommandParser {
 
         // helpers
         StringBuilder result = new StringBuilder();
-
+        boolean isWrapped = false;
+        
         int first = originalString.indexOf(" '");
         int last = originalString.lastIndexOf("' ");
-
         if (first != -1 && last > first) {
             String descript = originalString.substring(first + 2, last);
             _arguments.put(DESCRIPTION, descript.trim());
             originalString.delete(first+1, last + 2);
+            isWrapped = true;
             logger.info("KAH" + originalString);
         }
 
         String[] tokens = originalString.toString().split(SPACE);
-        _arguments.put(ACTION, tokens[0]);
+        
+        String action = tokens[ACTION_INDEX].toLowerCase();
+        if (ACTIONS_KEYWORDS.containsKey(action)) {
+            _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
+        } else {
+            throw new ParseException("No such action", 0);
+        }
 
         StringBuilder description = new StringBuilder();
         for (int i = 1; i < tokens.length; i++) {
@@ -76,6 +102,12 @@ public class CommandParser {
                     continue;
                 }
             }
+            
+            if (tokens[i].equalsIgnoreCase("urgent") && isWrapped) {
+                tryAddPriority(tokens[i]);
+                continue;
+            }
+            
             if (!hasValue(DESCRIPTION)) {
                 description.append(tokens[i]);
                 description.append(SPACE);
@@ -92,19 +124,18 @@ public class CommandParser {
         return result.toString().trim();
     }
     
-    public boolean tryAddPriority(String value) {
+    public boolean tryAddPriority(String key) {
+        
         boolean isValid = false;
-        if (value.equalsIgnoreCase("low") || value.equalsIgnoreCase("l")) {
-            value = "L";
+        String value = null;
+        key = key.toLowerCase();
+        
+        if(PRIORITY_VALUES.containsKey(key)){
+            value = PRIORITY_VALUES.get(key);
             isValid = true;
-        } else if (value.equalsIgnoreCase("med") || value.equalsIgnoreCase("m")) {
-            value = "M";
-            isValid = true;
-        } else if (value.equalsIgnoreCase("high") || value.equalsIgnoreCase("h")) {
-            value = "H";
-            isValid = true;           
         }
-        if (isValid) {
+        
+        if (isValid && value!=null) {
             _arguments.put(PRIORITY, value);
         }
         return isValid;
