@@ -8,11 +8,8 @@ import java.io.IOException;
 import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
-import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
-import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
-import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.utils.JsonHelper;
 
 /**
@@ -57,14 +54,13 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     @Override
     public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) throws IOException {
-        String json = JsonHelper.taskSetToJson(taskSet);
+        String json = JsonHelper.taskSetToJson(taskSet, taskType);
         BufferedWriter writer = getOutputWriter(_fileOperationHelper
                 .getFileLocation(taskType, isCompleted));
         writer.write(json);
         writer.close();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException {
@@ -75,25 +71,11 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         while ((line = reader.readLine()) != null) {
             sb.append(line);
         }
-        SortedSet<? extends Task<?>> loadObject = JsonHelper.jsonToTaskSet(sb
-                .toString());
+        SortedSet<? extends Task<?>> loadObject = JsonHelper.jsonToTaskSet(
+                sb.toString(), taskType);
         if (loadObject == null) {
             throw new IOException();
         }
-        // SortedSet<? extends Task<?>> taskSet = null;
-        // switch (taskType) {
-        // case TODO:
-        // taskSet = (SortedSet<TodoTask>) loadObject;
-        // break;
-        // case DEADLINE:
-        // taskSet = (SortedSet<DeadlineTask>) loadObject;
-        // break;
-        // case EVENT:
-        // taskSet = (SortedSet<EventTask>) loadObject;
-        // break;
-        // default:
-        // break;
-        // }
         return loadObject;
     }
 

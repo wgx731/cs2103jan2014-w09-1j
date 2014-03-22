@@ -14,7 +14,6 @@ import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
-import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.UIType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
@@ -54,8 +53,8 @@ public class MinaDriver {
                 ConfigHelper.getProperty(TaskType.EVENT.getType()));
         fileMap.put(TaskType.DEADLINE,
                 ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
-        taskDao = new ObjectFileTaskDaoImpl();
-        // taskDao = new JsonFileTaskDaoImpl();
+        // taskDao = new ObjectFileTaskDaoImpl();
+        taskDao = new JsonFileTaskDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao);
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));

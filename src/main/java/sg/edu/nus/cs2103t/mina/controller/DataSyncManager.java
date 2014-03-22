@@ -95,7 +95,8 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
 
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException {
-        return _storage.loadTaskSet(taskType, isCompleted);
+        return (SortedSet<? extends Task<?>>) _storage.loadTaskSet(taskType,
+                isCompleted);
     }
 
 }
