@@ -1,11 +1,9 @@
 package sg.edu.nus.cs2103t.mina.view;
 
-import hirondelle.date4j.DateTime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.TimeZone;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +28,6 @@ import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
-
 import sg.edu.nus.cs2103t.mina.model.TaskView;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
@@ -71,7 +68,7 @@ public class MinaGuiUI extends MinaView {
 
     private final String RIGHT_ARROW = "\u2192";
     private final String LEFT_ARROW = "\u2190";
-
+    
     private LinkedList<String> _commandHistory;
     private int _commandPosition;
     private boolean _historyUp;
@@ -98,7 +95,7 @@ public class MinaGuiUI extends MinaView {
      */
     public Shell open() {
         logger.log(Level.INFO, "shell open");
-        Monitor primary = _display.getPrimaryMonitor();
+        Monitor primary = _display.getPrimaryMonitor();        
         Rectangle bounds = primary.getBounds();
         Rectangle rect = _shell.getBounds();
         int x = bounds.x + (bounds.width - rect.width) / 2;
@@ -466,8 +463,7 @@ public class MinaGuiUI extends MinaView {
                     updateLists();
                 }
             }
-        });
-
+        });       
     }
 
     @Override
