@@ -1,11 +1,15 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.SortedSet;
 
-import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import sg.edu.nus.cs2103t.mina.controller.CommandController;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -21,17 +25,18 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandProcessor {
 
-    private static final String DISPLAYING_SEARCHES = "Displaying searches!";
+	private static final String DISPLAYING_SEARCHES = "Displaying searches!";
     private static final String RESULTS_DISPLAYED = "Results displayed";
     private static String[] _inputString;
-    protected static final int MAX_INPUT_ARRAY_SIZE = 2;
+    private static final int MAX_INPUT_ARRAY_SIZE = 2;
     private static final int COMMAND_POSITION = 0;
     private static final int PARAMETER_POSITION = 1;
     private static final int FISRT_ARRAY_INDEX = 0;
 
+    private static final String WELCOME_MESSAGE = "welcome to MINA!";
     private static final String INVALID_COMMAND = "command given is invalid.";
     private static final String EMPTY_STRING = "";
-    protected static final String SPACE = " ";
+    private static final String SPACE = " ";
     private static final String ADDED_MESSAGE = "%1$s task %2$s has been added.";
     private static final String ADD_ERROR_MESSAGE = "Error occured whe system try to add new task.";
     private static final String DELETED_MESSAGE = "%1$s task %2$s has been deleted.";
@@ -41,29 +46,38 @@ public class CommandProcessor {
     private static final String COMPLETED_MESSAGE = "%1$s task %2$s has been makred as completed.";
     private static final String COMPLETE_ERROR_MESSAGE = "Error occured whe system try to mark task as completed.";
     private static final String SEARCH_NOT_FOUND = "Search cannot find any result.";
+    private static final String UNDO_MESSAGE = "undo completed.";
+    private static final String UNDO_ERROR_MESSAGE = "Error occured whe system try to undo.";
+    private static final String REDO_MESSAGE = "redo completed.";
+    private static final String REDO_ERROR_MESSAGE = "Error occured whe system try to redo.";
     private static final String TO_BE_DONE = "to be done.";
 
+    private int _currentEventPage;
+    private int _currentDeadlinePage;
+    private int _currentTodoPage;
+
+    private TaskView _taskView;
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
+    private CommandHistory _commandHistory;
+    
+    private boolean _isUndoNow = true;
+    private boolean _isRedoNow = false;
+    
+    private static Logger logger = LogManager.getLogger(CommandController.class
+            .getName());
 
-    // private AppWindow _appWindow;
-
-    protected enum CommandType {
-        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, EXIT, INVALID
+    enum CommandType {
+        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, REDO, EXIT, INVALID
     };
 
     // Constructor
-    public CommandProcessor() {
-        _taskDataManager = new TaskDataManager();
-        _taskFilterManager = new TaskFilterManager(_taskDataManager);
-        // _appWindow = new AppWindow();
-    }
-
     public CommandProcessor(TaskDataManager taskDataManager,
             TaskFilterManager taskFilterManager) {
-        super();
         _taskDataManager = taskDataManager;
         _taskFilterManager = taskFilterManager;
+        initializeTaskView();
+        _commandHistory = new CommandHistory();
     }
 
     public TaskDataManager getTaskDataManager() {
@@ -74,12 +88,29 @@ public class CommandProcessor {
         return _taskFilterManager;
     }
 
+    public TaskView getTaskView() {
+        return _taskView;
+    }
+    
+    public CommandHistory getCommandHistory(){
+    	return _commandHistory;
+    }
+
+    public void initializeTaskView() {
+        _taskView = new TaskView(WELCOME_MESSAGE,
+                _taskFilterManager.filterTask(new FilterParameter()));
+    }
+
     // This operation is used to get input from the user and execute it till
     // exit
-    public TaskView processUserInput(String userInput) {
+    public TaskView processUserInput(String userInput, int eventPage,
+            int deadlinePage, int todoPage) {
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
             return new TaskView(INVALID_COMMAND);
         }
+        _currentEventPage = eventPage;
+        _currentDeadlinePage = deadlinePage;
+        _currentTodoPage = todoPage;
         // TODO: fix this bad design
         _inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
         if (_inputString.length == 1) {
@@ -88,15 +119,17 @@ public class CommandProcessor {
         CommandType command;
         command = determineCommand();
         try {
-            return processUserCommand(command);
+            processUserCommand(command);
+            return _taskView;
         } catch (Exception e) {
-            return processUserCommand(CommandType.INVALID);
+            processUserCommand(CommandType.INVALID);
+            return _taskView;
         }
     }
 
     // This operation is used to get the user input and extract the command from
     // inputString
-    protected CommandType determineCommand() {
+    private CommandType determineCommand() {
         String userCommand = _inputString[COMMAND_POSITION];
         try {
             return CommandType.valueOf(userCommand.trim().toUpperCase());
@@ -107,47 +140,59 @@ public class CommandProcessor {
 
     // This operation is used to process the extracted command and call the
     // respective functions
-    private TaskView processUserCommand(CommandType command) {
+    private void processUserCommand(CommandType command) {
         switch (command) {
             case ADD: {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
                 if (addParameter == null) {
-                    return new TaskView(INVALID_COMMAND);
+                    _taskView = errorCommandReturn(CommandType.INVALID);
                 }
                 Task<?> task = _taskDataManager.addTask(addParameter);
                 if (task == null) {
-                    return new TaskView(ADD_ERROR_MESSAGE);
+                    _taskView = errorCommandReturn(CommandType.ADD);
                 } else {
                     // UIprocess();
                     String output = String.format(ADDED_MESSAGE,
                             task.getType(), task.getDescription());
-                    return new TaskView(output);
+                    _taskView = updatedTaskView(output);
+                    DataParameter undoParam = processUndoAddParameter(task);
+                    _commandHistory.addUndo(CommandType.DELETE, undoParam);
+                    _commandHistory.clearRedo();
                 }
+                break;
             }
             case DELETE: {
                 DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager.deleteTask(deleteParameter);
                 if (task == null) {
-                    return new TaskView(DELETE_ERROR_MESSAGE);
+                    _taskView = errorCommandReturn(CommandType.DELETE);
                 } else {
                     String output = String.format(DELETED_MESSAGE,
                             task.getType(), task.getDescription());
-                    return new TaskView(output);
+                    _taskView = updatedTaskView(output);
+                    DataParameter undoParam = processUndoDeleteParameter(deleteParameter);
+                    _commandHistory.addUndo(CommandType.ADD, undoParam);
+                    _commandHistory.clearRedo();
                 }
+                break;
             }
             case MODIFY: {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
                 if (modifyParameter == null) {
-                    return new TaskView(INVALID_COMMAND);
+                    _taskView = errorCommandReturn(CommandType.INVALID);
                 }
                 Task<?> task = _taskDataManager.modifyTask(modifyParameter);
                 if (task == null) {
-                    return new TaskView(MODIFY_ERROR_MESSAGE);
+                    _taskView = errorCommandReturn(CommandType.MODIFY);
                 } else {
                     String output = String.format(MODIFIED_MESSAGE,
                             task.getType(), task.getDescription());
-                    return new TaskView(output);
+                    _taskView = updatedTaskView(output);
+                    DataParameter undoParam = processUndoModifyParameter(task, modifyParameter);
+                    _commandHistory.addUndo(CommandType.MODIFY, undoParam);
+                    _commandHistory.clearRedo();
                 }
+                break;
             }
             case DISPLAY: {
                 String filterParameterString = _inputString[PARAMETER_POSITION];
@@ -159,7 +204,8 @@ public class CommandProcessor {
                 }
                 HashMap<TaskType, ArrayList<Task<?>>> filterResult;
                 filterResult = _taskFilterManager.filterTask(filterParam);
-                return new TaskView(RESULTS_DISPLAYED, filterResult);
+                _taskView = new TaskView(RESULTS_DISPLAYED, filterResult);
+                break;
             }
             case SEARCH: {
 
@@ -175,22 +221,49 @@ public class CommandProcessor {
                 } else {
                     output = DISPLAYING_SEARCHES;
                 }
-                return new TaskView(output, searchResult);
+                _taskView = new TaskView(output, searchResult);
+                break;
             }
             case COMPLETE: {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager
                         .markCompleted(completeParameter);
                 if (task == null) {
-                    return new TaskView(COMPLETE_ERROR_MESSAGE);
+                    _taskView = errorCommandReturn(CommandType.COMPLETE);
                 } else {
                     String output = String.format(COMPLETED_MESSAGE,
                             task.getType(), task.getDescription());
-                    return new TaskView(output);
+                    _taskView = updatedTaskView(output);
                 }
+                break;
             }
             case UNDO: {
-                return new TaskView(TO_BE_DONE);
+                if (_commandHistory.isEmptyUndo()){
+                	_taskView = errorCommandReturn(CommandType.UNDO);
+                } else {
+                	CommandType undoCmd = _commandHistory.getUndoCommand();
+                	DataParameter undoParam = _commandHistory.getUndoParam();
+                	if (_isRedoNow){
+                		_isRedoNow = false;
+                		_isUndoNow = true;
+                	}
+                	performUndoRedo(undoCmd, undoParam);
+                }
+                break;
+            }
+            case REDO:{
+            	if (_commandHistory.isEmptyRedo()){
+                	_taskView = errorCommandReturn(CommandType.REDO);
+                } else {
+                	CommandType redoCmd = _commandHistory.getRedoCommand();
+                	DataParameter redoParam = _commandHistory.getRedoParam();
+                	if (_isUndoNow){
+                		_isUndoNow = false;
+                		_isRedoNow = true;
+                	}
+                	performUndoRedo(redoCmd, redoParam);
+                }
+            	break;
             }
             case EXIT: {
                 _taskDataManager.saveAllTasks();
@@ -198,13 +271,110 @@ public class CommandProcessor {
                 break;
             }
             case INVALID: {
-                return new TaskView(INVALID_COMMAND);
+                _taskView = errorCommandReturn(CommandType.INVALID);
+                break;
             }
             default: {
-                return new TaskView(INVALID_COMMAND);
+                _taskView = errorCommandReturn(CommandType.INVALID);
+                break;
             }
         }
-        return new TaskView(INVALID_COMMAND);
+    }
+    
+    private void performUndoRedo(CommandType cmd, DataParameter param){
+    	switch(cmd){
+    	case ADD:
+    		Task<?> addedTask = _taskDataManager.addTask(param);
+    		if (addedTask == null){
+    			processUserCommand(CommandType.INVALID);
+    		} else {
+    			DataParameter undoParam = processUndoAddParameter(addedTask);
+    			updateHistory(CommandType.DELETE, undoParam);
+    			if (_isUndoNow){
+    				String output = UNDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			} else {
+    				String output = REDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			}
+    		}
+    		break;
+    	case DELETE:
+    		Task<?> deletedTask = _taskDataManager.deleteTask(param);
+    		if (deletedTask == null){
+    			processUserCommand(CommandType.INVALID);
+    		} else {
+    			DataParameter undoParam = processUndoDeleteParameter(param);
+    			updateHistory(CommandType.ADD, undoParam);
+    			if (_isUndoNow){
+    				String output = UNDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			} else {
+    				String output = REDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			}
+    		}
+    		break;
+    	case MODIFY:
+    		Task<?> modifiedTask = _taskDataManager.modifyTask(param);
+    		if (modifiedTask == null){
+    			processUserCommand(CommandType.INVALID);
+    		} else {
+    			DataParameter undoParam = processUndoModifyParameter(modifiedTask, param);
+    			updateHistory(CommandType.MODIFY, undoParam);
+    			if (_isUndoNow){
+    				String output = UNDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			} else {
+    				String output = REDO_MESSAGE;
+    				_taskView = updatedTaskView(output);
+    			}
+    		}
+    	default:
+    		break;
+    	}
+    }
+    
+    private void updateHistory(CommandType cmd, DataParameter param){
+    	if (_isUndoNow){
+    		_commandHistory.addRedo(cmd, param);
+    	} else {
+    		_commandHistory.addUndo(cmd, param);
+    	}
+    }
+
+    private TaskView updatedTaskView(String statusMessage) {
+        return new TaskView(statusMessage,
+                _taskFilterManager.filterTask(new FilterParameter()));
+    }
+
+    private TaskView errorCommandReturn(CommandType type) {
+        switch (type) {
+            case ADD:
+                return new TaskView(ADD_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case DELETE:
+                return new TaskView(DELETE_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case MODIFY:
+                return new TaskView(MODIFY_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case COMPLETE:
+                return new TaskView(COMPLETE_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case UNDO:
+            	return new TaskView(UNDO_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case REDO:
+            	return new TaskView(REDO_ERROR_MESSAGE,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            case INVALID:
+                return new TaskView(INVALID_COMMAND,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+            default:
+                return new TaskView(INVALID_COMMAND,
+                        _taskFilterManager.filterTask(new FilterParameter()));
+        }
     }
 
     // Legacy method, retainign it just in case
@@ -263,8 +433,8 @@ public class CommandProcessor {
                     addParam = null;
                     return addParam;
                 }
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
             }
         } else if (parameters.contains("-end")) {
             addParam.setNewTaskType(TaskType.DEADLINE);
@@ -276,8 +446,8 @@ public class CommandProcessor {
             try {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 addParam.setEndDate(endDate);
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
             }
         } else {
             addParam.setNewTaskType(TaskType.TODO);
@@ -325,7 +495,31 @@ public class CommandProcessor {
         for (String word : parameterString.split(SPACE)) {
             parameters.add(word);
         }
+        Date startDate = null;
+        Date endDate = null;
+        if (parameters.contains("-end")) {
+            int indexOfEndDate = parameters.indexOf("-end") + 1;
+            try {
+                endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+                parameters.remove(indexOfEndDate);
+                parameters.remove(indexOfEndDate - 1);
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        if (parameters.contains("-start")) {
+            int indexOfStartDate = parameters.indexOf("-start") + 1;
+            try {
+                startDate = DateUtil.parse(parameters.get(indexOfStartDate));
+                parameters.remove(indexOfStartDate);
+                parameters.remove(indexOfStartDate - 1);
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
         FilterParameter filterParam = new FilterParameter(parameters);
+        filterParam.setStart(startDate);
+        filterParam.setEnd(endDate);
         return filterParam;
     }
 
@@ -344,8 +538,23 @@ public class CommandProcessor {
         TaskType original = processTaskTypeFromString(parameters
                 .get(FISRT_ARRAY_INDEX));
         modifyParam.setOriginalTaskType(original);
-        modifyParam.setTaskID(Integer.parseInt(parameters
-                .get(FISRT_ARRAY_INDEX + 1)));
+        int userfriendlyTaskID = Integer.parseInt(parameters
+                .get(FISRT_ARRAY_INDEX + 1));
+        int pageNum;
+        if (original == TaskType.EVENT) {
+            pageNum = _currentEventPage;
+        } else if (original == TaskType.DEADLINE) {
+            pageNum = _currentDeadlinePage;
+        } else if (original == TaskType.TODO) {
+            pageNum = _currentTodoPage;
+        } else {
+            pageNum = 0;
+        }
+        ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original,
+                pageNum);
+        Task<?> markDeleteTask = pageOfModifyObject.get(userfriendlyTaskID - 1);
+        modifyParam.setTaskObject(markDeleteTask);
+        modifyParam.setTaskID(userfriendlyTaskID);
         if (parameters.contains("-totype")) {
             int indexOfNewTaskType = parameters.indexOf("-totype") + 1;
             TaskType newType = processTaskTypeFromString(parameters
@@ -364,8 +573,8 @@ public class CommandProcessor {
             try {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 modifyParam.setEndDate(endDate);
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
             }
         }
         // NOTE: this can only detect error when user want to modify both start
@@ -383,8 +592,8 @@ public class CommandProcessor {
                         return modifyParam;
                     }
                 }
-            } catch (Exception e) {
-
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
             }
         }
         if (parameters.contains("-description")) {
@@ -417,8 +626,25 @@ public class CommandProcessor {
         TaskType original = processTaskTypeFromString(parameters
                 .get(FISRT_ARRAY_INDEX));
         markDeleteParam.setOriginalTaskType(original);
-        markDeleteParam.setTaskID(Integer.parseInt(parameters
-                .get(FISRT_ARRAY_INDEX + 1)));
+        int userfriendlyTaskID = Integer.parseInt(parameters
+                .get(FISRT_ARRAY_INDEX + 1));
+        int pageNum;
+        if (original == TaskType.EVENT) {
+            pageNum = _currentEventPage;
+        } else if (original == TaskType.DEADLINE) {
+            pageNum = _currentDeadlinePage;
+        } else if (original == TaskType.TODO) {
+            pageNum = _currentTodoPage;
+        } else {
+            pageNum = 0;
+        }
+        ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original,
+                pageNum);
+        Task<?> markDeleteTask = pageOfMarkDeleteObject
+                .get(userfriendlyTaskID - 1);
+        markDeleteParam.setTaskObject(markDeleteTask);
+        markDeleteParam.setTaskID(userfriendlyTaskID);
+
         return markDeleteParam;
     }
 
@@ -438,6 +664,49 @@ public class CommandProcessor {
         } else {
             return TaskType.UNKOWN;
         }
+    }
+    
+    public DataParameter processUndoAddParameter(Task<?> task){
+    	DataParameter undoAddParameter = new DataParameter();
+    	undoAddParameter.setOriginalTaskType(task.getType());
+    	undoAddParameter.setTaskObject(task);
+    	return undoAddParameter;
+    }
+    
+    public DataParameter processUndoDeleteParameter(DataParameter deleteParam){
+    	Task<?> deletedTask = deleteParam.getTaskObject();
+    	DataParameter undoDeleteParameter = new DataParameter();
+    	undoDeleteParameter.setDescription(deletedTask.getDescription());
+    	undoDeleteParameter.setNewTaskType(deletedTask.getType());
+    	undoDeleteParameter.setPriority(deletedTask.getPriority());
+    	if (deletedTask.getType()==TaskType.EVENT){
+    		EventTask deletedEventTask = (EventTask) deletedTask;
+    		undoDeleteParameter.setStartDate(deletedEventTask.getStartTime());
+    		undoDeleteParameter.setEndDate(deletedEventTask.getEndTime());
+    	} else if (deletedTask.getType()==TaskType.DEADLINE){
+    		DeadlineTask deletedDeadlineTask = (DeadlineTask) deletedTask;
+    		undoDeleteParameter.setEndDate(deletedDeadlineTask.getEndTime());
+    	}
+    	return undoDeleteParameter;
+    }
+    
+    public DataParameter processUndoModifyParameter(Task<?> newTask, DataParameter modifyParam){
+    	Task<?> oldTask = modifyParam.getTaskObject();
+    	DataParameter undoModifyParameter = new DataParameter();
+    	undoModifyParameter.setDescription(oldTask.getDescription());
+    	undoModifyParameter.setOriginalTaskType(newTask.getType());
+    	undoModifyParameter.setNewTaskType(oldTask.getType());
+    	undoModifyParameter.setPriority(oldTask.getPriority());
+    	undoModifyParameter.setTaskObject(newTask);
+    	if (oldTask.getType()==TaskType.EVENT){
+    		EventTask oldEventTask = (EventTask) oldTask;
+    		undoModifyParameter.setStartDate(oldEventTask.getStartTime());
+    		undoModifyParameter.setEndDate(oldEventTask.getEndTime());
+    	} else if (oldTask.getType()==TaskType.DEADLINE){
+    		DeadlineTask oldDeadlineTask = (DeadlineTask) oldTask;
+    		undoModifyParameter.setEndDate(oldDeadlineTask.getEndTime());
+    	}
+    	return undoModifyParameter;
     }
 
     public ArrayList<String> getTodoTask() {
