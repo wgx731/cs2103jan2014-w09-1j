@@ -28,9 +28,12 @@ public class CommandParserTest {
     public static final String TODO_THREE = "CPT_todo3";
     public static final String TODO_FOUR = "CPT_todo4";
     
-    public static final String DEADLINE_DESCRIPTION = "Submit assignment";
+    public static final String DEADLINE_DESCRIPTION = "Submit assignment ";
     private static final int HAS_SECS = 0;
     private static final int HAS_NO_SECS = 1;
+    private static final int DEAFULT_END = 0;
+    private static final int DUE_END = 1;
+    private static final int DUE_BY = 2;
     
     private static String addTodoControlLow, 
                           addTodoControlMed,
@@ -266,7 +269,7 @@ public class CommandParserTest {
     }
     
     @Test
-    public void breakAddTodo() throws Exception{
+    public void exploratoryTest() throws Exception{
         
         variationBuild.append("add ");
         variationBuild.append(" urgent request from D");
@@ -283,6 +286,19 @@ public class CommandParserTest {
         logger.info(variation);
         result = parser.convertCommand(variation);
         assertEquals("add urgent request from D -priority H", result);
+    
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append("do priority low queue assignment ");
+        variationBuild.append(" -priority high");
+        variation = variationBuild.toString();
+        logger.info(variation);
+        result = parser.convertCommand(variation);
+        assertEquals("add do priority low queue assignment -priority H", result);
+        
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append("submit homework -due 12/3/2013 12:45 ");
     }
     
     @Test
@@ -312,24 +328,72 @@ public class CommandParserTest {
         variationBuild.append(DEADLINE_DESCRIPTION);
         variation = variationBuild.toString();
         result =  parser.convertCommand(variation);
+        logger.info(variation);
         assertEquals(addDeadlineControlMonthDaySecs, result);
         
-        //No time
         setUp();
         variationBuild.append("add ");
         variationBuild.append(getTestTime(HAS_NO_SECS));
         variationBuild.append(DEADLINE_DESCRIPTION);
         variation = variationBuild.toString();
         result =  parser.convertCommand(variation);
+        logger.info(variation);
         assertEquals(addDeadlineControlMonthTimeNoSecs, result);
         
         
     }
     
-    @Ignore
+    /**
+     * Testing for different -end words. Check for reorder, quotes and no quotes
+     * @throws Exception
+     */
     @Test
-    public void testAddDeadlines() throws Exception{
+    public void testAddDeadlinesEndWords() throws Exception{
         
+        //-end as control
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(DEADLINE_DESCRIPTION));
+        variationBuild.append(getTestTime(HAS_NO_SECS, DEAFULT_END, false));
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result);   
+        
+        //due no dash
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(DEADLINE_DESCRIPTION));
+        variationBuild.append(getTestTime(HAS_NO_SECS, DUE_END, false));
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result);
+        
+        //-due
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(DEADLINE_DESCRIPTION);
+        variationBuild.append(getTestTime(HAS_NO_SECS, DUE_END, true));
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result);
+        
+        //by no dash
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(wrapDescription(DEADLINE_DESCRIPTION));
+        variationBuild.append(getTestTime(HAS_NO_SECS, DUE_BY, false));
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result); 
+        
+        //-by
+        setUp();
+        variationBuild.append("add ");
+        variationBuild.append(DEADLINE_DESCRIPTION);
+        variationBuild.append(getTestTime(HAS_NO_SECS, DUE_BY, true));
+        variation = variationBuild.toString();
+        result =  parser.convertCommand(variation);
+        logger.info(variation);
+        assertEquals(addDeadlineControlMonthTimeNoSecs, result);     
     }
     
     @Ignore
@@ -338,19 +402,46 @@ public class CommandParserTest {
         
     }
     
-    private String getTestTime(int type){
+    private String getTestTime(int type, int keywordType, boolean hasDash){
+        
+        String endType = getEndType(keywordType, hasDash);
+        
         switch(type){
             case HAS_SECS :
-                return "-end 26042013235923 ";
+                return  endType + " 26042013235923 ";
             case HAS_NO_SECS :
-                return "-end 260420132359 ";
+                return endType + " 260420132359 ";
             default:
+                return "";
+        }        
+    }
+    
+    private String getEndType(int keywordType, boolean hasDash) {
+        
+        String endType = "";
+        
+        if(hasDash){
+            endType+="-";
+        }
+        
+        switch (keywordType) {
+            case DEAFULT_END :
+                return endType + "end";
+            case DUE_END:
+                return endType + "due";
+            case DUE_BY :
+                return endType + "by";
+            default :
                 return "";
         }
     }
+
+    private String getTestTime(int type){
+        return getTestTime(type, DEAFULT_END, true);
+    }
     
     private String wrapDescription(String descript) {
-        return "'" + descript + "'";
+        return "'" + descript + "' ";
     }
     
 

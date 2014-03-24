@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +27,8 @@ public class CommandParser {
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
     
+    private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
+    
     private CommandProcessor _cmdProcess;
     private HashMap<String, String> _arguments;
     private static Logger logger = LogManager.getLogger(CommandParser.class
@@ -39,6 +43,13 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("create", "add");
         ACTIONS_KEYWORDS.put("new", "add");
         ACTIONS_KEYWORDS.put("+", "add");
+        
+        END_KEYWORDS.put("end", false);
+        END_KEYWORDS.put("due", false);
+        END_KEYWORDS.put("by", false);
+        END_KEYWORDS.put("-end", true);
+        END_KEYWORDS.put("-due", true);
+        END_KEYWORDS.put("-by", true);
         
         PRIORITY_VALUES.put("low", "L");
         PRIORITY_VALUES.put("l", "L");
@@ -90,7 +101,7 @@ public class CommandParser {
         StringBuilder description = new StringBuilder();
         for (int i = 1; i < tokens.length; i++) {
 
-            if (tokens[i].equalsIgnoreCase(PRIORITY) && !hasValue(PRIORITY)) {
+            if (tokens[i].equalsIgnoreCase(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
                 int prevIndex = i - 1;
                 if ( tryAddPriority(tokens[prevIndex]) ) {
                     continue;
@@ -110,7 +121,9 @@ public class CommandParser {
                 }
             }
             
-            if (tokens[i].equalsIgnoreCase("-end") && !hasValue(END)) {
+            //If no dash, but description is wrapped
+            if (END_KEYWORDS.containsKey(tokens[i]) && !hasValue(END) &&
+                    (END_KEYWORDS.get(tokens[i]) || isWrapped)) {
                 int nextIndex = i + 1;
                 if (nextIndex < tokens.length && 
                         isValidDate(tokens[i + 1])) {
@@ -200,7 +213,8 @@ public class CommandParser {
         logger.info("Building proper commands\n" + 
                     "Action: " + getFormattedValue(ACTION) + "\n" + 
                     "Description: " + getFormattedValue(DESCRIPTION) + "\n" + 
-                    "Priority: " + getFormattedValue(PRIORITY));
+                    "Priority: " + getFormattedValue(PRIORITY) + "\n" +
+                    "End: " + getFormattedValue(END));
         result.append(getFormattedValue(ACTION));
         result.append(getFormattedValue(DESCRIPTION));
         if(hasValue(PRIORITY)) {
