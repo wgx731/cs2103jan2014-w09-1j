@@ -1,7 +1,5 @@
 package sg.edu.nus.cs2103t.mina;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,8 +12,6 @@ import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
-import sg.edu.nus.cs2103t.mina.model.TaskType;
-import sg.edu.nus.cs2103t.mina.model.UIType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
@@ -36,25 +32,18 @@ public class MinaDriver {
 
     private static final String SYNC_INTERVAL_KEY = "synctime";
     private static final String VIEW_TYPE_KEY = "viewtype";
+    private static final String GUI = "gui";
+    private static final String CONSOLE = "console";
     private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
     private static CommandController commandController;
     private static TaskDataManager taskDataManager;
     private static TaskFilterManager taskFilterManager;
-    private static TaskDao taskDao;
     private static MinaView uiView;
     private static DataSyncManager dataSyncManager;
 
     static void initDao() {
-        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
-        fileMap.put(TaskType.TODO,
-                ConfigHelper.getProperty(TaskType.TODO.getType()));
-        fileMap.put(TaskType.EVENT,
-                ConfigHelper.getProperty(TaskType.EVENT.getType()));
-        fileMap.put(TaskType.DEADLINE,
-                ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
-        // taskDao = new ObjectFileTaskDaoImpl();
-        taskDao = new JsonFileTaskDaoImpl();
+        TaskDao taskDao = new JsonFileTaskDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao);
         new Timer().schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
@@ -74,14 +63,7 @@ public class MinaDriver {
     }
 
     static void initView() {
-        UIType viewType;
-        try {
-            viewType = UIType.valueOf(ConfigHelper.getProperty(VIEW_TYPE_KEY)
-                    .toUpperCase());
-        } catch (IllegalArgumentException e) {
-            viewType = UIType.CONSOLE;
-        }
-        switch (viewType) {
+        switch (ConfigHelper.getProperty(VIEW_TYPE_KEY)) {
             case GUI:
                 MinaGuiUI gui = new MinaGuiUI(commandController);
                 gui.open();
