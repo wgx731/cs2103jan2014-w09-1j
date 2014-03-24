@@ -19,7 +19,7 @@ public class DataParameter {
 	private int _taskID;
 
 	/* for recurring and block tasks */
-	private String _tag;
+	private String _tag; //either 'RECUR' or 'BLOCK'
 	private long _freqInMilliSec; // lower bound: every hour (i.e. 60*60*1000ms)
 	private List<TimePair> _timeSlots;
 	private boolean _modifyAll;
