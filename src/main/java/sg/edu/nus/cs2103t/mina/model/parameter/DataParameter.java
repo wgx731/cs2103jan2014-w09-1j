@@ -83,56 +83,9 @@ public class DataParameter {
 		if (taskObj.getType() == TaskType.EVENT) {
 			EventTask eventTaskObj = (EventTask) taskObj;
 
-<<<<<<< local
 			setEndDate(eventTaskObj.getEndTime());
 			setStartDate(eventTaskObj.getStartTime());
 		}
-=======
-    /**
-     * For the modify function. Call this function after you call
-     * loadOldTask(Task taskToModify).Takes in the values that user wants to
-     * modify, and adds it onto existing values.
-     */
-    public void loadNewParameters(DataParameter modifyParam) {
-        if (modifyParam.getDescription() != null) {
-            setDescription(modifyParam.getDescription());
-        }
-        
-        setPriority(modifyParam.getPriority());
-        
-        if (modifyParam.getStartDate() != null) {
-            setStartDate(modifyParam.getStartDate());
-        }
-        if (modifyParam.getEndDate() != null) {
-            setEndDate(modifyParam.getEndDate());
-        }
-        if (modifyParam.getOriginalTaskType() != null) {
-            setOriginalTaskType(modifyParam.getOriginalTaskType());
-        } else {
-            // there is an error, do something!!
-        }
-        if (modifyParam.getNewTaskType() != null) {
-            setNewTaskType(modifyParam.getNewTaskType());
-        } else {
-            // there is an error, do something!!
-        }
-        if (modifyParam.getTaskId() != -1) {
-            setTaskID(modifyParam.getTaskId());
-        }
-        
-        if (_originalTaskType != _newTaskType) {
-            if (_originalTaskType == TaskType.DEADLINE && _newTaskType == TaskType.TODO) {
-                _description += (" by " + _end);
-                _end = null;
-            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.TODO) {
-                _description += ( " from " + _start + " to " + _end);
-                _start = null;
-                _end = null;
-            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.DEADLINE) {
-                _end = _start;
-                _start = null;
-            }
->>>>>>> other
 
 		setTag(null);
 		setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
