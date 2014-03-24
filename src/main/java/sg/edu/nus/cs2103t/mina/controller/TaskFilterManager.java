@@ -89,8 +89,8 @@ public class TaskFilterManager {
 			
 		} else {
 			
-			if(filters.isEmpty()) {
-				filters = fillEmptyFilter();
+			if(filters.hasNoTaskTypes()) {
+				filters = fillNoTasksFilter(filters);
 			}
 			
 			result = filterUncompletedTasks(filters);
@@ -125,8 +125,8 @@ public class TaskFilterManager {
         HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		ArrayList<Task<?>> neededTasks;
 		
-		if(filters.isEmpty()) {
-			filters = fillEmptyFilter();
+		if(filters.hasNoTaskTypes()) {
+			filters = fillNoTasksFilter(filters);
 		}
 		
 		if (filters.contains(FilterType.DEADLINE)) {
@@ -206,6 +206,7 @@ public class TaskFilterManager {
 	    Date end = filters.getEnd();
 	    boolean hasTime = filters.hasTime();
 	    
+	    logger.info("Date has Time? " + hasTime);
         if (!hasTime) {
             logger.info("Writing date to appropriate format for START: " + start + "and END: " + end);
             start = sanitiseDate(start, IS_START);
@@ -216,7 +217,7 @@ public class TaskFilterManager {
         //Only EventTask / DeadlineTask will be checked
 	    for (Task<?> task: result) {
 	        assert(!(task instanceof TodoTask));
-	        logger.info("START: " + start + "END: " + end);
+	        logger.info("START: " + start + " END: " + end);
 	        logger.info(task);
 	        if(isInDateRange(task, start, end, hasTime)) {
 	            logger.info("Within range");
@@ -313,8 +314,8 @@ public class TaskFilterManager {
         HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 		ArrayList<Task<?>> neededTasks;
 		
-		if(filters.isEmpty()) {
-			filters = fillEmptyFilter();
+		if(filters.hasNoTaskTypes()) {
+			filters = fillNoTasksFilter(filters);
 		}
 		
         if (filters.contains(FilterType.DEADLINE)) {
@@ -374,17 +375,17 @@ public class TaskFilterManager {
 	 * @return
 	 * 				a few filter that contains every tasktype filters
 	 */
-	private FilterParameter fillEmptyFilter() {
+	private FilterParameter fillNoTasksFilter(FilterParameter existingFilter) {
 		
-	    logger.info("Default filters: uncompleted deadlines, events and todos");
+	    logger.info("Add default filter types: deadlines, events and todos");
 	    
-		ArrayList<String> newFilters = new ArrayList<String>();
+		ArrayList<FilterType> newFilters = existingFilter.getFilters();
 		
-		newFilters.add(FilterType.DEADLINE.getType());
-		newFilters.add(FilterType.EVENT.getType());
-		newFilters.add(FilterType.TODO.getType());
+		newFilters.add(FilterType.DEADLINE);
+		newFilters.add(FilterType.EVENT);
+		newFilters.add(FilterType.TODO);
 		
-		return new FilterParameter(newFilters);
+		return existingFilter;
 	}
 
 	
@@ -412,7 +413,7 @@ public class TaskFilterManager {
 		
 		logger.info("Getting task set");
 		
-		FilterParameter allTypes = fillEmptyFilter();
+		FilterParameter allTypes = fillNoTasksFilter(new FilterParameter());
 		HashMap<TaskType, ArrayList<Task<?>>> uncompletedTasks;
 		uncompletedTasks = filterUncompletedTasks(allTypes);
 		

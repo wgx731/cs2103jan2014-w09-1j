@@ -106,7 +106,9 @@ public class FilterParameter {
 	    return _filters.remove(type);
 	}
 	
-	public boolean isEmpty() {
-	    return _filters.isEmpty();
+	public boolean hasNoTaskTypes() {
+	    return !(_filters.contains(FilterType.EVENT) ||
+	            _filters.contains(FilterType.DEADLINE) ||
+	            _filters.contains(FilterType.TODO));
 	}
 }
