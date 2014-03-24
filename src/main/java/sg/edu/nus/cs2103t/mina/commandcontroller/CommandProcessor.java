@@ -72,6 +72,13 @@ public class CommandProcessor {
     };
 
     // Constructor
+    public CommandProcessor(){
+    	_taskDataManager = new TaskDataManager();
+    	_taskFilterManager = new TaskFilterManager(_taskDataManager);
+        initializeTaskView();
+        _commandHistory = new CommandHistory();
+    }
+    
     public CommandProcessor(TaskDataManager taskDataManager,
             TaskFilterManager taskFilterManager) {
         _taskDataManager = taskDataManager;
