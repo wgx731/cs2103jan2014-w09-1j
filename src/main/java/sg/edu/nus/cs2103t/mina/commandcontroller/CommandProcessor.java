@@ -9,7 +9,7 @@ import java.util.SortedSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -64,7 +64,7 @@ public class CommandProcessor {
     private boolean _isUndoNow = true;
     private boolean _isRedoNow = false;
     
-    private static Logger logger = LogManager.getLogger(CommandController.class
+    private static Logger logger = LogManager.getLogger(CommandManager.class
             .getName());
 
     enum CommandType {

@@ -2,7 +2,7 @@ package sg.edu.nus.cs2103t.mina.view;
 
 import java.util.ArrayList;
 
-import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
 
 /**
@@ -16,9 +16,9 @@ import sg.edu.nus.cs2103t.mina.model.TaskView;
  */
 public abstract class MinaView {
     
-    protected CommandController _commandController;
+    protected CommandManager _commandController;
     
-    public MinaView(CommandController commandController) {
+    public MinaView(CommandManager commandController) {
         _commandController = commandController;
     }
 

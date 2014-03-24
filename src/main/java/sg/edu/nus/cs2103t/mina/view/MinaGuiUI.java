@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -85,7 +85,7 @@ public class MinaGuiUI extends MinaView {
     private static Logger logger = LogManager.getLogger(MinaGuiUI.class
             .getName());
 
-    public MinaGuiUI(CommandController commandController) {
+    public MinaGuiUI(CommandManager commandController) {
         super(commandController);
         createContents();
     }

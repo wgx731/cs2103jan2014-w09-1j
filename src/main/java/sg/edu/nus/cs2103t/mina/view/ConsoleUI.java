@@ -13,7 +13,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
 
@@ -43,7 +43,7 @@ public class ConsoleUI extends MinaView {
     private TaskView _taskView;
 
     public ConsoleUI(InputStream input, OutputStream output,
-            CommandController commandController) {
+            CommandManager commandController) {
         super(commandController);
         _input = input;
         _output = output;

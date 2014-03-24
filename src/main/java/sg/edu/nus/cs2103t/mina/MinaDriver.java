@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Shell;
 
-import sg.edu.nus.cs2103t.mina.controller.CommandController;
+import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
@@ -36,7 +36,7 @@ public class MinaDriver {
     private static final String CONSOLE = "console";
     private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
-    private static CommandController commandController;
+    private static CommandManager commandController;
     private static TaskDataManager taskDataManager;
     private static TaskFilterManager taskFilterManager;
     private static MinaView uiView;
@@ -58,7 +58,7 @@ public class MinaDriver {
     }
 
     static void initCC() {
-        commandController = new CommandController(taskDataManager,
+        commandController = new CommandManager(taskDataManager,
                 taskFilterManager);
     }
 
