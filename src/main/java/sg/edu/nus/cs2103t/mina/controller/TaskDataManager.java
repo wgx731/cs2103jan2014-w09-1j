@@ -91,33 +91,53 @@ public class TaskDataManager {
 		_observers = new ArrayList<MemoryDataObserver>();
 		_observers.add((MemoryDataObserver) syncManager);
 
-		// TODO: load HashMap as well
+		// TODO: add HashMap to observer as well
 
 		try {
 			tempTasks = _syncManager.loadTaskSet(TaskType.TODO, false);
 			_uncompletedTodoTasks = (SortedSet<TodoTask>) tempTasks;
-
-			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, false);
-			_uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
-
-			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, false);
-			_uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
-
-			tempTasks = _syncManager.loadTaskSet(TaskType.TODO, true);
-			_completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
-
-			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, true);
-			_completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
-
-			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, true);
-			_completedEventTasks = (SortedSet<EventTask>) tempTasks;
-
+			
 		} catch (IOException e) {
 			_uncompletedTodoTasks = new TreeSet<TodoTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, false);
+			_uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		} catch (IOException e) {
 			_uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, false);
+			_uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
+		} catch (IOException e) {
 			_uncompletedEventTasks = new TreeSet<EventTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.TODO, true);
+			_completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
+		} catch (IOException e) {
 			_completedTodoTasks = new TreeSet<TodoTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, true);
+			_completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		} catch (IOException e) {
 			_completedDeadlineTasks = new TreeSet<DeadlineTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, true);
+			_completedEventTasks = (SortedSet<EventTask>) tempTasks;
+		} catch (IOException e) {
 			_completedEventTasks = new TreeSet<EventTask>();
 			logger.error(e, e);
 		}
@@ -162,8 +182,8 @@ public class TaskDataManager {
 		// else if
 		// TODO: check if _blockTasks has been modified
 		updateBlockTaskMap(); // iterates through Event Tasks only
-
-		// else return
+		
+		// else load old HashMaps, return
 	}
 
 	private void updateTasksMaps() {
