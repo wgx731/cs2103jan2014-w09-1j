@@ -1,6 +1,3 @@
-/**
- * 
- */
 package sg.edu.nus.cs2103t.mina.dao.impl;
 
 import java.io.File;

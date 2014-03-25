@@ -4,32 +4,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
-import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
-import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
+import sg.edu.nus.cs2103t.mina.stub.FileTaskSetDaoStub;
 
 public class TaskDataManagerTest {
-    
-    private static final String currDir = "D:\\eclipse_workspace\\cs2103jan2014-w09-1j\\testStorage\\";
 
     @Test
     public void testAddTask() {
-        Map<TaskType, String> fileMap = new HashMap<TaskType, String>();
-        fileMap.put(TaskType.TODO, currDir + "test_mina_todo.compl");
-        fileMap.put(TaskType.DEADLINE, currDir + "test_mina_deadline.compl");
-        fileMap.put(TaskType.EVENT, currDir + "test_mina_event.compl");
 
         TaskDataManager tdmTest = new TaskDataManager(new DataSyncManager(
-                new ObjectFileTaskDaoImpl()));
+                new FileTaskSetDaoStub()));
 
         Long currDateMilliSec = System.currentTimeMillis();
 
