@@ -130,6 +130,7 @@ public class CommandProcessor {
             return _taskView;
         } catch (Exception e) {
             processUserCommand(CommandType.INVALID);
+            logger.error(e, e);
             return _taskView;
         }
     }

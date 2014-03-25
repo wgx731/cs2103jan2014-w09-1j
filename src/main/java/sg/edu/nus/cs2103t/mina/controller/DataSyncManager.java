@@ -71,10 +71,6 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
                 _storage.saveTaskSet(data.getTaskSet(), data.getTaskType(),
                         data.isCompleted());
                 logger.info("saved data: " + data);
-            } catch (IllegalArgumentException e) {
-                logger.error("wrong saving parameter passed.");
-                logger.error(e, e);
-                return false;
             } catch (IOException e) {
                 logger.error("save operation failed.");
                 logger.error(e, e);

@@ -100,7 +100,9 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
             TaskType taskType, boolean isCompleted) throws IOException {
         assert taskType != TaskType.UNKOWN;
         assert taskSet != null;
-        assert taskSet.first().getType() == taskType;
+        if (!taskSet.isEmpty()) {
+            assert taskSet.first().getType() == taskType;
+        }
         String fileLocation = _fileOperationHelper.getFileLocation(taskType,
                 isCompleted);
         ObjectOutput output = getOutputWriter(fileLocation);

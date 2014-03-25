@@ -46,6 +46,8 @@ public class JsonHelper {
     private static final SimpleDateFormat formatter = new SimpleDateFormat(
             DATE_FORMAT);
 
+    private static final String EMPTY_STRING = "";
+
     private static class EventTaskDeserializer implements
             JsonDeserializer<EventTask> {
 
@@ -205,10 +207,19 @@ public class JsonHelper {
         }
         switch (taskType) {
             case TODO :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<TodoTask>();
+                }
                 return gson.fromJson(json, TODO_TREESET_TYPE);
             case DEADLINE :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<DeadlineTask>();
+                }
                 return gson.fromJson(json, DEADLINE_TREESET_TYPE);
             case EVENT :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<EventTask>();
+                }
                 return gson.fromJson(json, EVENT_TREESET_TYPE);
             default :
                 return null;
