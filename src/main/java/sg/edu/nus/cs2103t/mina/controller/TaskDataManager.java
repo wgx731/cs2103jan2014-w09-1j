@@ -2,6 +2,8 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,15 +32,16 @@ import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
  * @author joannemah
  */
 public class TaskDataManager {
-    private static Logger logger = LogManager.getLogger(TaskDataManager.class
-            .getName());
+	private static Logger logger = LogManager.getLogger(TaskDataManager.class
+			.getName());
 
-    // error messages
-    public static final int ERROR_MISSING_TASK_DESCRIPTION = -2;
+	// error messages
+	public static final int ERROR_MISSING_TASK_DESCRIPTION = -2;
 
-    // parameters of String after trimming
+	// parameters of String after trimming
 	public static final int PARAM_TASK_DESCRIPTION = 0;
 
+	// Sets for completed and uncompleted tasks
 	private SortedSet<TodoTask> _uncompletedTodoTasks;
 	private SortedSet<DeadlineTask> _uncompletedDeadlineTasks;
 	private SortedSet<EventTask> _uncompletedEventTasks;
@@ -47,340 +50,541 @@ public class TaskDataManager {
 	private SortedSet<EventTask> _completedEventTasks;
 	private SortedSet<DeadlineTask> _completedDeadlineTasks;
 
+	// HashMaps for recurring and block tasks
+	private HashMap<String, ArrayList<Task<?>>> _recurringTasks;
+	private HashMap<String, ArrayList<EventTask>> _blockTasks;
+	private int maxRecurTagInt = 0;
+	private int maxBlockTagInt = 0;
+
+	private static final int TAG_INT_POS = 1;
+
+	// Sync tools
 	private final List<SyncDataParameter> allDataList = new ArrayList<SyncDataParameter>(
 			6);
-	
+
 	private List<MemoryDataObserver> _observers;
 	private DataSyncManager _syncManager;
 
 	public TaskDataManager() {
 		initiateVariables();
-    }
+	}
 
-    private void initiateVariables() {
-        _uncompletedTodoTasks = new TreeSet<TodoTask>();
-        _uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
-        _uncompletedEventTasks = new TreeSet<EventTask>();
-        _completedTodoTasks = new TreeSet<TodoTask>();
-        _completedDeadlineTasks = new TreeSet<DeadlineTask>();
-        _completedEventTasks = new TreeSet<EventTask>();
-        _syncManager = null;
-        _observers = new ArrayList<MemoryDataObserver>();
-    }
+	private void initiateVariables() {
+		_uncompletedTodoTasks = new TreeSet<TodoTask>();
+		_uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
+		_uncompletedEventTasks = new TreeSet<EventTask>();
+		_completedTodoTasks = new TreeSet<TodoTask>();
+		_completedDeadlineTasks = new TreeSet<DeadlineTask>();
+		_completedEventTasks = new TreeSet<EventTask>();
 
-    @SuppressWarnings("unchecked")
-    public TaskDataManager(DataSyncManager syncManager) {
-        SortedSet<? extends Task<?>> tempTasks = null;
-        _syncManager = syncManager;
-        _observers = new ArrayList<MemoryDataObserver>();
-        _observers.add((MemoryDataObserver) syncManager);
-        try {
-            tempTasks = _syncManager.loadTaskSet(TaskType.TODO, false);
-            _uncompletedTodoTasks = (SortedSet<TodoTask>) tempTasks;
+		_recurringTasks = new HashMap<String, ArrayList<Task<?>>>();
+		_blockTasks = new HashMap<String, ArrayList<EventTask>>();
 
-            tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, false);
-            _uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		_observers = new ArrayList<MemoryDataObserver>();
+		_syncManager = null;
+	}
 
-            tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, false);
-            _uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
+	@SuppressWarnings("unchecked")
+	public TaskDataManager(DataSyncManager syncManager) {
+		SortedSet<? extends Task<?>> tempTasks = null;
+		_syncManager = syncManager;
+		_observers = new ArrayList<MemoryDataObserver>();
+		_observers.add((MemoryDataObserver) syncManager);
 
-            tempTasks = _syncManager.loadTaskSet(TaskType.TODO, true);
-            _completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
+		// TODO: add HashMap to observer as well
 
-            tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, true);
-            _completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.TODO, false);
+			_uncompletedTodoTasks = (SortedSet<TodoTask>) tempTasks;
+			
+		} catch (IOException e) {
+			_uncompletedTodoTasks = new TreeSet<TodoTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, false);
+			_uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		} catch (IOException e) {
+			_uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, false);
+			_uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
+		} catch (IOException e) {
+			_uncompletedEventTasks = new TreeSet<EventTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.TODO, true);
+			_completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
+		} catch (IOException e) {
+			_completedTodoTasks = new TreeSet<TodoTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.DEADLINE, true);
+			_completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
+		} catch (IOException e) {
+			_completedDeadlineTasks = new TreeSet<DeadlineTask>();
+			logger.error(e, e);
+		}
+		
+		try {
+			tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, true);
+			_completedEventTasks = (SortedSet<EventTask>) tempTasks;
+		} catch (IOException e) {
+			_completedEventTasks = new TreeSet<EventTask>();
+			logger.error(e, e);
+		}
 
-            tempTasks = _syncManager.loadTaskSet(TaskType.EVENT, true);
-            _completedEventTasks = (SortedSet<EventTask>) tempTasks;
+		updateHashMaps();
+	}
 
-        } catch (IOException e) {
-            _uncompletedTodoTasks = new TreeSet<TodoTask>();
-            _uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
-            _uncompletedEventTasks = new TreeSet<EventTask>();
-            _completedTodoTasks = new TreeSet<TodoTask>();
-            _completedDeadlineTasks = new TreeSet<DeadlineTask>();
-            _completedEventTasks = new TreeSet<EventTask>();
-            logger.error(e, e);
-        }
-    }
+	/* load methods: uncompleted tasks */
+	public SortedSet<TodoTask> getUncompletedTodoTasks() {
+		return _uncompletedTodoTasks;
+	}
 
-    /* load methods: uncompleted tasks */
-    public SortedSet<TodoTask> getUncompletedTodoTasks() {
-        return _uncompletedTodoTasks;
-    }
+	public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
+		return _uncompletedDeadlineTasks;
+	}
 
-    public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
-        return _uncompletedDeadlineTasks;
-    }
+	public SortedSet<EventTask> getUncompletedEventTasks() {
+		return _uncompletedEventTasks;
+	}
 
-    public SortedSet<EventTask> getUncompletedEventTasks() {
-        return _uncompletedEventTasks;
-    }
+	/* load methods: completed tasks */
+	public SortedSet<TodoTask> getCompletedTodoTasks() {
+		return _completedTodoTasks;
+	}
 
-    /* load methods: completed tasks */
-    public SortedSet<TodoTask> getCompletedTodoTasks() {
-        return _completedTodoTasks;
-    }
+	public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
+		return _completedDeadlineTasks;
+	}
 
-    public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
-        return _completedDeadlineTasks;
-    }
+	public SortedSet<EventTask> getCompletedEventTasks() {
+		return _completedEventTasks;
+	}
 
-    public SortedSet<EventTask> getCompletedEventTasks() {
-        return _completedEventTasks;
-    }
+	/**
+	 * Updates HashMaps if user has modified their JSON files.
+	 */
+	private void updateHashMaps() {
+		// if
+		// TODO: check if _recurringTasks has been modified
+		updateTasksMaps(); // iterates through both Event and Deadline Tasks
 
-    /**
-     * Creates a Task depending on its type and parameters. If changes are
-     * successfully saved by DAO, it returns a Task object to the method which
-     * called it.
-     * 
-     * @param DataParameter addParameters
-     * @return added Task
-     */
-    public Task<?> addTask(DataParameter addParameter) {
-        switch (addParameter.getNewTaskType()) {
-            case TODO:
-                TodoTask newTodoTask = createTodoTask(addParameter);
-                if (_uncompletedTodoTasks.add(newTodoTask)) {
-                    syncUncompletedTasks(TaskType.TODO);
+		// else if
+		// TODO: check if _blockTasks has been modified
+		updateBlockTaskMap(); // iterates through Event Tasks only
+		
+		// else load old HashMaps, return
+	}
 
-                    return newTodoTask;
-                }
-                return null;
+	private void updateTasksMaps() {
 
-            case DEADLINE:
-                DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
-                if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
-                    syncUncompletedTasks(TaskType.DEADLINE);
+		// loop through deadlines
+		Iterator<DeadlineTask> deadlineTaskIterator = _uncompletedDeadlineTasks
+				.iterator();
 
-                    return newDeadlineTask;
-                }
-                return null;
+		DeadlineTask currDeadlineTask = deadlineTaskIterator.next();
+		while (deadlineTaskIterator.hasNext()) {
+			checkRecur(currDeadlineTask);
 
-            case EVENT:
-                EventTask newEventTask = createEventTask(addParameter);
-                if (_uncompletedEventTasks.add(newEventTask)) {
-                    syncUncompletedTasks(TaskType.EVENT);
+			currDeadlineTask = deadlineTaskIterator.next();
+		}
 
-                    return newEventTask;
-                }
-                return null;
+		// loop through events
+		Iterator<EventTask> eventTaskIterator = _uncompletedEventTasks
+				.iterator();
 
-            default:
-                return null;
-        }
-    }
+		EventTask currEventTask = eventTaskIterator.next();
+		while (eventTaskIterator.hasNext()) {
+			checkRecur(currEventTask);
+			checkBlock(currEventTask);
 
-    private TodoTask createTodoTask(DataParameter addParameters) {
-        return new TodoTask(addParameters.getDescription(),
-                addParameters.getPriority());
-    }
+			currEventTask = eventTaskIterator.next();
+		}
+	}
 
-    private DeadlineTask createDeadlineTask(DataParameter addParameters) {
-        return new DeadlineTask(addParameters.getDescription(),
-                addParameters.getEndDate(), addParameters.getPriority());
-    }
+	private void updateBlockTaskMap() {
+		// loop through events
+		Iterator<EventTask> eventTaskIterator = _uncompletedEventTasks
+				.iterator();
 
-    private EventTask createEventTask(DataParameter addParameters) {
-        return new EventTask(addParameters.getDescription(),
-                addParameters.getStartDate(), addParameters.getEndDate(),
-                addParameters.getPriority());
-    }
+		EventTask currEventTask = eventTaskIterator.next();
+		while (eventTaskIterator.hasNext()) {
+			checkBlock(currEventTask);
 
-    /**
-     * Deletes a specific task by identifying the Task with its type and id
-     * number. If changes are successfully saved by DAO, it returns a Task
-     * object to the method which called it.
-     * 
-     * @param DataParameter deleteParameters
-     * @return Task<?> (if successful), null otherwise
-     */
-    public Task<?> deleteTask(DataParameter deleteParameters) {
-        
-        switch (deleteParameters.getTaskObject().getType()) {
-            case TODO:
-                if (_uncompletedTodoTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.TODO);
+			currEventTask = eventTaskIterator.next();
+		}
+	}
 
-                    return deleteParameters.getTaskObject();
-                } else {
-                    return null;
-                }
-            case DEADLINE:
-                if (_uncompletedDeadlineTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.DEADLINE);
+	private void checkRecur(Task<?> currTask) {
+		if (currTask.getTags().size() <= 0) {
+			return;
+			
+		} else {
+			for (int i = 0; i < currTask.getTags().size(); i++) {
+				if (currTask.getTags().get(i).contains("RECUR")) {
+					includeInRecurMap(currTask, currTask.getTags().get(i));
+				}
+			}
+			return;
+		}
+	}
 
-                    return deleteParameters.getTaskObject();
-                } else {
-                    return null;
-                }
-            case EVENT:
-                if (_uncompletedEventTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.EVENT);
+	private void checkBlock(EventTask currTask) {
+		if (currTask.getTags().size() <= 0) {
+			return;
+			
+		} else {
+			for (int i = 0; i < currTask.getTags().size(); i++) {
+				if (currTask.getTags().get(i).contains("BLOCK")) {
+					includeInBlockMap(currTask, currTask.getTags().get(i));
+				}
+			}
 
-                    return deleteParameters.getTaskObject();
-                } else {
-                    return null;
-                }
-            default:
-                // System.out.println("Unable to determine Task Type.");
-                return null;
-        }
-    }
+			return;
+		}
 
-    /**
-     * Checks what Task the user wants to modify, calls the command of DAO to
-     * make the amendments, then returns the modified task.
-     * 
-     * @param DataParameter modifyParameters
-     * @return task modified
-     */
-    public Task<?> modifyTask(DataParameter modifyParameters) {
-        DataParameter newSetOfParameters = new DataParameter();
-        
-        newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
-        newSetOfParameters.loadNewParameters(modifyParameters);
+	}
+	
+	private void includeInRecurMap(Task<?> taskToInclude, String recurTag) {
+		if(!isValidRecurTag(recurTag)) {
+			return;
+		}
+		
+		if (_recurringTasks.containsKey(recurTag)) {
+			ArrayList<Task<?>> taskList = _recurringTasks.remove(recurTag);
+			taskList.add(taskToInclude);
+			
+			_recurringTasks.put(recurTag, taskList);
+		} else {
+			ArrayList<Task<?>> taskList = new ArrayList<Task<?>>();
+			taskList.add(taskToInclude);
+			
+			_recurringTasks.put(recurTag,taskList);
+		}
+	}
 
-        return addTask(newSetOfParameters);
-    }
+	private void includeInBlockMap(EventTask taskToInclude, String blockTag) {
+		if(!isValidBlockTag(blockTag)) {
+			return;
+		}
+		
+		if (_blockTasks.containsKey(blockTag)) {
+			ArrayList<EventTask> taskList = _blockTasks.remove(blockTag);
+			taskList.add(taskToInclude);
+			
+			_blockTasks.put(blockTag, taskList);
+		} else {
+			ArrayList<EventTask> taskList = new ArrayList<EventTask>();
+			taskList.add(taskToInclude);
+			
+			_blockTasks.put(blockTag,taskList);
+		}
+	}
+	
+	private boolean isValidRecurTag(String tag) {
+		int recurTagInt = -1;
+		
+		if (!tag.contains("_")) {
+			return false;
+		} else {
+			String[] tagTokens = tag.split("_", 2);
+			
+			try {
+				recurTagInt = Integer.parseInt(tagTokens[TAG_INT_POS]);
+			} catch (NumberFormatException e) {
+				// task is not added to HashMap, it is not treated as a recurring task anymore
+				return false;
+			}
+			
+			maxRecurTagInt = recurTagInt > maxRecurTagInt ?  recurTagInt : maxRecurTagInt;
+			
+			return true;
+		}
+	}
+	
+	private boolean isValidBlockTag(String tag) {
+		int blockTagInt = -1;
+		
+		if (!tag.contains("_")) {
+			return false;
+		} else {
+			String[] tagTokens = tag.split("_", 2);
+			
+			try {
+				blockTagInt = Integer.parseInt(tagTokens[TAG_INT_POS]);
+			} catch (NumberFormatException e) {
+				// task is not added to HashMap, it is not treated as a recurring task anymore
+				return false;
+			}
+			
+			maxBlockTagInt = blockTagInt > maxBlockTagInt ?  blockTagInt : maxBlockTagInt;
+			
+			return true;
+		}
+	}
 
-    public Task<?> markCompleted(DataParameter completeParameters) {
-        switch (completeParameters.getTaskObject().getType()) {
-            case TODO:
-                if (_uncompletedTodoTasks.remove(completeParameters
-                        .getTaskObject())) {
-                    TodoTask finTodoTask = (TodoTask) completeParameters
-                            .getTaskObject();
+	/**
+	 * Creates a Task depending on its type and parameters. If changes are
+	 * successfully saved by DAO, it returns a Task object to the method which
+	 * called it.
+	 * 
+	 * @param DataParameter
+	 *            addParameters
+	 * @return added Task
+	 */
+	public Task<?> addTask(DataParameter addParameter) {
+		switch (addParameter.getNewTaskType()) {
+		case TODO:
+			TodoTask newTodoTask = createTodoTask(addParameter);
+			if (_uncompletedTodoTasks.add(newTodoTask)) {
+				syncUncompletedTasks(TaskType.TODO);
 
-                    finTodoTask.setCompleted(true);
-                    _completedTodoTasks.add(finTodoTask);
+				return newTodoTask;
+			}
+			return null;
 
-                    syncCompletedTasks(TaskType.TODO);
-                    syncUncompletedTasks(TaskType.TODO);
+		case DEADLINE:
+			DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
+			if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
+				syncUncompletedTasks(TaskType.DEADLINE);
 
-                    return finTodoTask;
-                } else {
-                    return null;
-                }
-            case DEADLINE:
-                if (_uncompletedDeadlineTasks.remove(completeParameters
-                        .getTaskObject())) {
-                    DeadlineTask finDeadlineTask = (DeadlineTask) completeParameters
-                            .getTaskObject();
+				return newDeadlineTask;
+			}
+			return null;
 
-                    finDeadlineTask.setCompleted(true);
-                    _completedDeadlineTasks.add(finDeadlineTask);
+		case EVENT:
+			EventTask newEventTask = createEventTask(addParameter);
+			if (_uncompletedEventTasks.add(newEventTask)) {
+				syncUncompletedTasks(TaskType.EVENT);
 
-                    syncCompletedTasks(TaskType.DEADLINE);
-                    syncUncompletedTasks(TaskType.DEADLINE);
+				return newEventTask;
+			}
+			return null;
 
-                    return finDeadlineTask;
-                } else {
-                    return null;
-                }
-            case EVENT:
-                if (_uncompletedEventTasks.remove(completeParameters
-                        .getTaskObject())) {
-                    EventTask finEventTask = (EventTask) completeParameters
-                            .getTaskObject();
+		default:
+			return null;
+		}
+	}
 
-                    finEventTask.setCompleted(true);
-                    _completedEventTasks.add(finEventTask);
+	private TodoTask createTodoTask(DataParameter addParameters) {
+		return new TodoTask(addParameters.getDescription(),
+				addParameters.getPriority());
+	}
 
-                    syncCompletedTasks(TaskType.EVENT);
-                    syncUncompletedTasks(TaskType.EVENT);
+	private DeadlineTask createDeadlineTask(DataParameter addParameters) {
+		return new DeadlineTask(addParameters.getDescription(),
+				addParameters.getEndDate(), addParameters.getPriority());
+	}
 
-                    return finEventTask;
-                } else {
-                    return null;
-                }
-            default:
-                System.out.println("Unable to determine Task Type.");
-                return null;
-        }
+	private EventTask createEventTask(DataParameter addParameters) {
+		return new EventTask(addParameters.getDescription(),
+				addParameters.getStartDate(), addParameters.getEndDate(),
+				addParameters.getPriority());
+	}
 
-    }
+	/**
+	 * Deletes a specific task by identifying the Task with its type and id
+	 * number. If changes are successfully saved by DAO, it returns a Task
+	 * object to the method which called it.
+	 * 
+	 * @param DataParameter
+	 *            deleteParameters
+	 * @return Task<?> (if successful), null otherwise
+	 */
+	public Task<?> deleteTask(DataParameter deleteParameters) {
 
-    /* Sync Methods */
-    private void syncUncompletedTasks(TaskType taskType) {
-        for (MemoryDataObserver observer : _observers) {
-            switch (taskType) {
-                case TODO:
-                    observer.updateChange(new SyncDataParameter(
-                            _uncompletedTodoTasks, taskType, false));
-                    break;
-                case DEADLINE:
-                    observer.updateChange(new SyncDataParameter(
-                            _uncompletedDeadlineTasks, taskType, false));
-                    break;
-                case EVENT:
-                    observer.updateChange(new SyncDataParameter(
-                            _uncompletedEventTasks, taskType, false));
-                    break;
-                default:
-                    System.out.println("Unable to determine task type.");
-                    return;
-            }
-        }
-    }
+		switch (deleteParameters.getTaskObject().getType()) {
+		case TODO:
+			if (_uncompletedTodoTasks.remove(deleteParameters.getTaskObject())) {
+				syncUncompletedTasks(TaskType.TODO);
 
-    private void syncCompletedTasks(TaskType taskType) {
-        for (MemoryDataObserver observer : _observers) {
-            switch (taskType) {
-                case TODO:
-                    observer.updateChange(new SyncDataParameter(
-                            _completedTodoTasks, taskType, true));
-                    break;
-                case DEADLINE:
-                    observer.updateChange(new SyncDataParameter(
-                            _completedDeadlineTasks, taskType, true));
-                    break;
-                case EVENT:
-                    observer.updateChange(new SyncDataParameter(
-                            _completedEventTasks, taskType, true));
-                    break;
-                default:
-                    System.out.println("Unable to determine task type.");
-                    return;
-            }
-        }
-    }
+				return deleteParameters.getTaskObject();
+			} else {
+				return null;
+			}
+		case DEADLINE:
+			if (_uncompletedDeadlineTasks.remove(deleteParameters
+					.getTaskObject())) {
+				syncUncompletedTasks(TaskType.DEADLINE);
 
-    /**
-     * Saves all tasks into storage by calling all the sync methods
-     */
-    public void saveAllTasks() { 
-        allDataList.add(new SyncDataParameter(_completedEventTasks,
-                TaskType.EVENT, true));
-        allDataList.add(new SyncDataParameter(_uncompletedEventTasks,
-                TaskType.EVENT, false));
-        allDataList.add(new SyncDataParameter(_completedDeadlineTasks,
-                TaskType.DEADLINE, true));
-        allDataList.add(new SyncDataParameter(_uncompletedDeadlineTasks,
-                TaskType.DEADLINE, false));
-        allDataList.add(new SyncDataParameter(_completedTodoTasks,
-                TaskType.TODO, true));
-        allDataList.add(new SyncDataParameter(_uncompletedTodoTasks,
-                TaskType.TODO, false));
-        _syncManager.saveAll(allDataList);
-    }
+				return deleteParameters.getTaskObject();
+			} else {
+				return null;
+			}
+		case EVENT:
+			if (_uncompletedEventTasks.remove(deleteParameters.getTaskObject())) {
+				syncUncompletedTasks(TaskType.EVENT);
 
-    /**
-     * only to be used for testing
-     */
-    public void resetTrees() {
-        _completedTodoTasks.clear();
-        _completedDeadlineTasks.clear();
-        _completedEventTasks.clear();
+				return deleteParameters.getTaskObject();
+			} else {
+				return null;
+			}
+		default:
+			// System.out.println("Unable to determine Task Type.");
+			return null;
+		}
+	}
 
-        _uncompletedTodoTasks.clear();
-        _uncompletedDeadlineTasks.clear();
-        _uncompletedEventTasks.clear();
+	/**
+	 * Checks what Task the user wants to modify, calls the command of DAO to
+	 * make the amendments, then returns the modified task.
+	 * 
+	 * @param DataParameter
+	 *            modifyParameters
+	 * @return task modified
+	 */
+	public Task<?> modifyTask(DataParameter modifyParameters) {
+		DataParameter newSetOfParameters = new DataParameter();
 
-        saveAllTasks();
-    }
+		newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
+		newSetOfParameters.loadNewParameters(modifyParameters);
+
+		return addTask(newSetOfParameters);
+	}
+
+	public Task<?> markCompleted(DataParameter completeParameters) {
+		switch (completeParameters.getTaskObject().getType()) {
+		case TODO:
+			if (_uncompletedTodoTasks
+					.remove(completeParameters.getTaskObject())) {
+				TodoTask finTodoTask = (TodoTask) completeParameters
+						.getTaskObject();
+
+				finTodoTask.setCompleted(true);
+				_completedTodoTasks.add(finTodoTask);
+
+				syncCompletedTasks(TaskType.TODO);
+				syncUncompletedTasks(TaskType.TODO);
+
+				return finTodoTask;
+			} else {
+				return null;
+			}
+		case DEADLINE:
+			if (_uncompletedDeadlineTasks.remove(completeParameters
+					.getTaskObject())) {
+				DeadlineTask finDeadlineTask = (DeadlineTask) completeParameters
+						.getTaskObject();
+
+				finDeadlineTask.setCompleted(true);
+				_completedDeadlineTasks.add(finDeadlineTask);
+
+				syncCompletedTasks(TaskType.DEADLINE);
+				syncUncompletedTasks(TaskType.DEADLINE);
+
+				return finDeadlineTask;
+			} else {
+				return null;
+			}
+		case EVENT:
+			if (_uncompletedEventTasks.remove(completeParameters
+					.getTaskObject())) {
+				EventTask finEventTask = (EventTask) completeParameters
+						.getTaskObject();
+
+				finEventTask.setCompleted(true);
+				_completedEventTasks.add(finEventTask);
+
+				syncCompletedTasks(TaskType.EVENT);
+				syncUncompletedTasks(TaskType.EVENT);
+
+				return finEventTask;
+			} else {
+				return null;
+			}
+		default:
+			System.out.println("Unable to determine Task Type.");
+			return null;
+		}
+
+	}
+
+	/* Sync Methods */
+	private void syncUncompletedTasks(TaskType taskType) {
+		for (MemoryDataObserver observer : _observers) {
+			switch (taskType) {
+			case TODO:
+				observer.updateChange(new SyncDataParameter(
+						_uncompletedTodoTasks, taskType, false));
+				break;
+			case DEADLINE:
+				observer.updateChange(new SyncDataParameter(
+						_uncompletedDeadlineTasks, taskType, false));
+				break;
+			case EVENT:
+				observer.updateChange(new SyncDataParameter(
+						_uncompletedEventTasks, taskType, false));
+				break;
+			default:
+				System.out.println("Unable to determine task type.");
+				return;
+			}
+		}
+	}
+
+	private void syncCompletedTasks(TaskType taskType) {
+		for (MemoryDataObserver observer : _observers) {
+			switch (taskType) {
+			case TODO:
+				observer.updateChange(new SyncDataParameter(
+						_completedTodoTasks, taskType, true));
+				break;
+			case DEADLINE:
+				observer.updateChange(new SyncDataParameter(
+						_completedDeadlineTasks, taskType, true));
+				break;
+			case EVENT:
+				observer.updateChange(new SyncDataParameter(
+						_completedEventTasks, taskType, true));
+				break;
+			default:
+				System.out.println("Unable to determine task type.");
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Saves all tasks into storage by calling all the sync methods
+	 */
+	public void saveAllTasks() {
+		allDataList.add(new SyncDataParameter(_completedEventTasks,
+				TaskType.EVENT, true));
+		allDataList.add(new SyncDataParameter(_uncompletedEventTasks,
+				TaskType.EVENT, false));
+		allDataList.add(new SyncDataParameter(_completedDeadlineTasks,
+				TaskType.DEADLINE, true));
+		allDataList.add(new SyncDataParameter(_uncompletedDeadlineTasks,
+				TaskType.DEADLINE, false));
+		allDataList.add(new SyncDataParameter(_completedTodoTasks,
+				TaskType.TODO, true));
+		allDataList.add(new SyncDataParameter(_uncompletedTodoTasks,
+				TaskType.TODO, false));
+		_syncManager.saveAll(allDataList);
+	}
+
+	/**
+	 * only to be used for testing
+	 */
+	public void resetTrees() {
+		_completedTodoTasks.clear();
+		_completedDeadlineTasks.clear();
+		_completedEventTasks.clear();
+
+		_uncompletedTodoTasks.clear();
+		_uncompletedDeadlineTasks.clear();
+		_uncompletedEventTasks.clear();
+
+		saveAllTasks();
+	}
 }

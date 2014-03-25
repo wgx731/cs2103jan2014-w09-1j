@@ -10,6 +10,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TimePair;
 
 public class DataParameter {
+	/* for all tasks */
 	private String _description;
 	private char _priority;
 	private Date _start;
@@ -19,7 +20,7 @@ public class DataParameter {
 	private int _taskID;
 
 	/* for recurring and block tasks */
-	private String _tag;
+	private String _tag; //either 'RECUR' or 'BLOCK'
 	private long _freqInMilliSec; // lower bound: every hour (i.e. 60*60*1000ms)
 	private List<TimePair> _timeSlots;
 	private boolean _modifyAll;
@@ -273,12 +274,12 @@ public class DataParameter {
 		if (modifyParam.getOriginalTaskType() != null) {
 			setOriginalTaskType(modifyParam.getOriginalTaskType());
 		} else {
-			// there is an error, do something!!
+			assert(false); // shouldn't be null
 		}
 		if (modifyParam.getNewTaskType() != null) {
 			setNewTaskType(modifyParam.getNewTaskType());
 		} else {
-			// there is an error, do something!!
+			assert(false); // shouldn't be null
 		}
 		if (modifyParam.getTaskId() != -1) {
 			setTaskID(modifyParam.getTaskId());
@@ -287,17 +288,17 @@ public class DataParameter {
 		if (_originalTaskType != _newTaskType) {
 			if (_originalTaskType == TaskType.DEADLINE
 					&& _newTaskType == TaskType.TODO) {
-				_description += (" by " + _end);
-				_end = null;
+				//_description += (" by " + _end);
+				//_end = null;
 			} else if (_originalTaskType == TaskType.EVENT
 					&& _newTaskType == TaskType.TODO) {
-				_description += (" from " + _start + " to " + _end);
-				_start = null;
-				_end = null;
+				//_description += (" from " + _start + " to " + _end);
+				//_start = null;
+				//_end = null;
 			} else if (_originalTaskType == TaskType.EVENT
 					&& _newTaskType == TaskType.DEADLINE) {
-				_end = _start;
-				_start = null;
+				//_end = _start;
+				//_start = null;
 			}
 
 			_originalTaskType = _newTaskType;
