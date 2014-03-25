@@ -48,6 +48,18 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _isCompleted = false;
         _tags = new ArrayList<String>();
     }
+    
+    public Task(TaskType type, String description, String id, char priority,
+            Date createdTime, boolean isCompleted) {
+        _type = (TaskType) type;
+        _description = description;
+        _id = id;
+        _priority = priority;
+        _createdTime = createdTime;
+        _lastEditedTime = new Date();
+        _isCompleted = isCompleted;
+        _tags = new ArrayList<String>();
+    }
 
     public Task(TaskType type, String description, String id, char priority,
             Date createdTime, Date lastEditedTime, boolean isCompleted) {
@@ -149,6 +161,8 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_priority);
         sb.append(") done? (");
         sb.append(_isCompleted ? "yes)" : "no)");
+        sb.append(" last modified: ");
+        sb.append(_lastEditedTime);
         return sb.toString();
     }
 

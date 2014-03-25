@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -457,8 +458,11 @@ public class TaskDataManager {
 
             newSetOfParameters.loadOldTask(prevTask);
             newSetOfParameters.loadNewParameters(modifyParameters);
+            
+            Task<?> newTask = addTask(newSetOfParameters);
+            newTask.setLastEditedTime(new Date());
 
-            return addTask(newSetOfParameters);
+            return newTask;
         }
     }
 
@@ -471,6 +475,8 @@ public class TaskDataManager {
                             .getTaskObject();
 
                     finTodoTask.setCompleted(true);
+                    finTodoTask.setLastEditedTime(new Date());
+                    
                     _completedTodoTasks.add(finTodoTask);
 
                     syncCompletedTasks(TaskType.TODO);
@@ -487,6 +493,8 @@ public class TaskDataManager {
                             .getTaskObject();
 
                     finDeadlineTask.setCompleted(true);
+                    finDeadlineTask.setLastEditedTime(new Date());
+                    
                     _completedDeadlineTasks.add(finDeadlineTask);
 
                     syncCompletedTasks(TaskType.DEADLINE);
@@ -503,6 +511,8 @@ public class TaskDataManager {
                             .getTaskObject();
 
                     finEventTask.setCompleted(true);
+                    finEventTask.setLastEditedTime(new Date());
+                    
                     _completedEventTasks.add(finEventTask);
 
                     syncCompletedTasks(TaskType.EVENT);
