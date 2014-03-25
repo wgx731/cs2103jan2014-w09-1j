@@ -26,6 +26,13 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandParser {
 
     
+    private static final String UNDO = "undo";
+    private static final String EXIT = "exit";
+    private static final String COMPLETE = "complete";
+    private static final String DISPLAY = "display";
+    private static final String DELETE = "delete";
+    private static final String ADD = "add";
+    private static final String TASKID = "taskid";
     private static final String MODIFY = "modify";
     private static final String VALIDITY = "v";
     private static final String IS_VALID = "valid";
@@ -38,16 +45,21 @@ public class CommandParser {
     private static final int ONE_DAY = 1;
     
     private static final int ACTION_INDEX = 0;
+    
+    //Specifying argument keys
     private static final String SPACE = " ";
     private static final String ACTION = "action";
     private static final String PRIORITY = "priority";
     private static final String DESCRIPTION = "description";
     private static final String END = "end";
     private static final String START = "start";
+    private static final String TO_TASK_TYPE = "totype";
     
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
+    private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
     private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> START_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> TO_TASK_TYPE_KEYWORDS = new HashMap<String, Boolean>();
     
     private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
@@ -65,39 +77,65 @@ public class CommandParser {
     private static final int END_CONTINUE_FLAG = 2;
     private static final int DESCRIPTION_FLAG = 3;
     private static final int START_FLAG = 4;
-    private static final Integer START_CONTINUE_FLAG = 5;
+    private static final int START_CONTINUE_FLAG = 5;
+    private static final int TO_TASK_TYPE_FLAG = 6;
+    
     
     private HashMap<String, String> _arguments;
+    
+    private enum ActionsTaskID{
+        MODIFY(CommandParser.MODIFY),
+        DELETE(CommandParser.DELETE),
+        COMPLETE(CommandParser.COMPLETE);
+        
+        private String _action;
+        
+        private ActionsTaskID(String value){
+            _action = value;
+        }
+        private String getValue(){
+            return _action;
+        }
+    }
+    
     private static Logger logger = LogManager.getLogger(CommandParser.class
             .getName());
 
     public CommandParser() {
         initArgMap();
         
-        ACTIONS_KEYWORDS.put("add", "add");
-        ACTIONS_KEYWORDS.put("make", "add");
-        ACTIONS_KEYWORDS.put("create", "add");
-        ACTIONS_KEYWORDS.put("new", "add");
-        ACTIONS_KEYWORDS.put("+", "add");
+        ACTIONS_KEYWORDS.put(ADD, ADD);
+        ACTIONS_KEYWORDS.put("make", ADD);
+        ACTIONS_KEYWORDS.put("create", ADD);
+        ACTIONS_KEYWORDS.put("new", ADD);
+        ACTIONS_KEYWORDS.put("+", ADD);
         
         ACTIONS_KEYWORDS.put(MODIFY, MODIFY);
         ACTIONS_KEYWORDS.put("change", MODIFY);
         ACTIONS_KEYWORDS.put("edit", MODIFY);
         
-        ACTIONS_KEYWORDS.put("remove", "delete");
-        ACTIONS_KEYWORDS.put("delete", "delete");
+        ACTIONS_KEYWORDS.put("remove", DELETE);
+        ACTIONS_KEYWORDS.put(DELETE, DELETE);
         
         ACTIONS_KEYWORDS.put("search", "search");
         ACTIONS_KEYWORDS.put("find", "search");
         
-        ACTIONS_KEYWORDS.put("display", "display");
-        ACTIONS_KEYWORDS.put("filter", "display");
-        ACTIONS_KEYWORDS.put("show", "display");
+        ACTIONS_KEYWORDS.put(DISPLAY, DISPLAY);
+        ACTIONS_KEYWORDS.put("filter", DISPLAY);
+        ACTIONS_KEYWORDS.put("show", DISPLAY);
         
-        ACTIONS_KEYWORDS.put("complete", "complete");
-        ACTIONS_KEYWORDS.put("finish", "complete");
+        ACTIONS_KEYWORDS.put(COMPLETE, COMPLETE);
+        ACTIONS_KEYWORDS.put("finish", COMPLETE);
         
-        ACTIONS_KEYWORDS.put("exit", "exit");
+        SINGLE_ACTION_KEYWORD.put(EXIT, EXIT);
+        SINGLE_ACTION_KEYWORD.put(UNDO, UNDO);
+        
+        TO_TASK_TYPE_KEYWORDS.put("totype", false);
+        TO_TASK_TYPE_KEYWORDS.put("-totype", true);
+        TO_TASK_TYPE_KEYWORDS.put("changeto", false);
+        TO_TASK_TYPE_KEYWORDS.put("-changeto", true);
+        TO_TASK_TYPE_KEYWORDS.put("totask", false);
+        TO_TASK_TYPE_KEYWORDS.put("-totask", true);
         
         END_KEYWORDS.put("end", false);
         END_KEYWORDS.put("due", false);
@@ -105,12 +143,13 @@ public class CommandParser {
         END_KEYWORDS.put("before", false);
         END_KEYWORDS.put("on", false);
         END_KEYWORDS.put("to", false);
+        
         END_KEYWORDS.put("-end", true);
         END_KEYWORDS.put("-due", true);
         END_KEYWORDS.put("-by", true);
         END_KEYWORDS.put("-before", true);
         END_KEYWORDS.put("-on", true);
-        END_KEYWORDS.put("-to", false);
+        END_KEYWORDS.put("-to", true);
         
         START_KEYWORDS.put("start", false);
         START_KEYWORDS.put("-start", true);
@@ -153,6 +192,10 @@ public class CommandParser {
             throw new ParseException("Empty String!", 0);
         }
         
+        if(SINGLE_ACTION_KEYWORD.containsKey(userInput.trim())) {
+            return userInput;
+        }
+        
         userInput+=" ";
         
         initArgMap();
@@ -181,19 +224,15 @@ public class CommandParser {
         ArrayList<String> dTokens = new ArrayList<String>();
         Collections.addAll(dTokens, tokens);
         
-        String action = tokens[ACTION_INDEX].toLowerCase();
+        String action = dTokens.get(ACTION_INDEX).toLowerCase();
         if (ACTIONS_KEYWORDS.containsKey(action)) {
             
-//            if(!ACTIONS_KEYWORDS.get(action).equalsIgnoreCase("add"))
-//                return userInput;
-            
             _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
-            if(isModify()){
-                
+            dTokens.remove(ACTION_INDEX);
+            if(isRequiredTaskId()) {
+                dTokens = updateTaskID(dTokens);
             }
             
-            
-            dTokens.remove(ACTION_INDEX);
         } else {
             throw new ParseException("No such action", 0);
         }
@@ -311,10 +350,16 @@ public class CommandParser {
                 }
             }
             
+            if(keyFlags.get(TO_TASK_TYPE_FLAG)){
+                keyFlags.put(TO_TASK_TYPE_FLAG, false);
+                addToType(keyword);
+                continue;
+            }
+            
             //Checking for flags
             if (keyword.equals(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
                 int prevIndex = i - 1;
-                if ( isValidPriorityValue(dTokens.get(prevIndex)) ) {
+                if (prevIndex>0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
                     addPriority(dTokens.get(prevIndex));
                     continue;
                 } else {
@@ -346,6 +391,15 @@ public class CommandParser {
                 
             }
             
+            if(isModify() && 
+                    TO_TASK_TYPE_KEYWORDS.containsKey(keyword) &&
+                    !hasValue(TO_TASK_TYPE) && 
+                    (TO_TASK_TYPE_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Setting totype flag as true");
+                keyFlags.put(TO_TASK_TYPE_FLAG, true);
+                continue;                
+            }
+            
             if ((keyword.equalsIgnoreCase("urgent") && isWrapped) ||
                    (keyword.equalsIgnoreCase("-urgent") && !isWrapped) ) {
                 addPriority(keyword);
@@ -354,13 +408,19 @@ public class CommandParser {
             
             
             if (!hasValue(DESCRIPTION)) {
-                description.append(dTokens.get(i));
-                description.append(SPACE);
+                String word = dTokens.get(i).trim();
+                if(!word.equals(EMPTY)){
+                    description.append(dTokens.get(i));
+                    description.append(SPACE);
+                }
             }
         }
         
         if (!hasValue(DESCRIPTION)) {
-            _arguments.put(DESCRIPTION, description.toString().trim());
+            String descript =  description.toString().trim();
+            if(!descript.equals(EMPTY)){
+                _arguments.put(DESCRIPTION, descript);
+            }
         }
         
         result = getProperCommands();
@@ -368,7 +428,79 @@ public class CommandParser {
         logger.info(result);
         return result.toString().trim();
     }
-    
+
+    private void addToType(String keyword) {
+        if(keyword.equals("e")) {
+            keyword = "event";
+        } else if(keyword.equals("td")) {
+            keyword = "todo";
+        } else if (keyword.equals("d")) {
+            keyword = "deadline";
+        }
+        _arguments.put(TO_TASK_TYPE, keyword);
+        
+    }
+
+    private ArrayList<String> updateTaskID(ArrayList<String> dTokens) throws ParseException{
+        
+        assert(dTokens!=null);
+        
+        if( dTokens.size()<1 ){
+            throw new ParseException("String is too small for modify!", 0);
+        }
+        
+        Pattern patternTaskId = Pattern.compile("(event|todo|deadline){1}\\s\\d+", Pattern.CASE_INSENSITIVE);
+        Pattern patternShortenId = Pattern.compile("(e|td|d){1}\\d+", Pattern.CASE_INSENSITIVE);
+        Matcher matcherTaskId;
+        String taskId = "noid";
+        
+        //check to see whether there is shortcut id
+        String shortenId = dTokens.get(0);
+        matcherTaskId = patternShortenId.matcher(shortenId);
+        logger.info("TASK ID PATTERN: " + patternShortenId + "\n" +
+                "taskId: " + shortenId);
+        if(matcherTaskId.find()) {
+            logger.info("Found");
+            String tasktype = "notype";
+            
+            if(shortenId.startsWith("e") || shortenId.startsWith("d")){
+                taskId = shortenId.substring(1);
+            } 
+            
+            if(shortenId.startsWith("e")) {
+                tasktype = "event";
+            } else if(shortenId.startsWith("d")) {
+                tasktype = "deadline";
+            } else {
+                tasktype = "todo";
+                taskId = shortenId.substring(2);
+            }
+            
+            taskId = tasktype + SPACE + taskId;
+            
+            dTokens.remove(0);
+            _arguments.put(TASKID, taskId);
+            return dTokens;
+        }
+        
+        taskId = dTokens.get(0) + SPACE + dTokens.get(1);
+        taskId = taskId.trim();
+        
+        matcherTaskId = patternTaskId.matcher(taskId);
+        logger.info("TASK ID PATTERN: " + patternTaskId + "\n" +
+                    "taskId: " + taskId);
+        
+        if(matcherTaskId.find()){
+            dTokens.remove(0);
+            dTokens.remove(0);
+            _arguments.put(TASKID, taskId);
+        } else {
+            throw new ParseException("Malformed task id!", 0);
+        }
+        
+        return dTokens;
+    }
+
     private void initKeyFlags() {
         keyFlags.put(PRIORITY_FLAG, false);
         keyFlags.put(END_FLAG, false);
@@ -376,6 +508,7 @@ public class CommandParser {
         keyFlags.put(START_FLAG, false);
         keyFlags.put(START_CONTINUE_FLAG, false);
         keyFlags.put(DESCRIPTION_FLAG, false);
+        keyFlags.put(TO_TASK_TYPE_FLAG, false);
     }
 
     private boolean isNeedSecondDate(boolean continueFlag) {
@@ -603,12 +736,22 @@ public class CommandParser {
         
         result.append(getFormattedValue(ACTION));
         
-        if(isModify()) {
+        if(isRequiredTaskId()) {
+            result.append(getFormattedValue(TASKID));
+        }
+        
+        if(isModify() && hasValue(TO_TASK_TYPE)) {
+            result.append(getFormattedKey(TO_TASK_TYPE));
+            result.append(getFormattedValue(TO_TASK_TYPE));            
+        }
+        
+        if(isModify() && hasValue(DESCRIPTION)) {
             result.append(getFormattedKey(DESCRIPTION));
             result.append(getFormattedValue(DESCRIPTION));
-        } else {
+        } else if(hasValue(DESCRIPTION)){
             result.append(getFormattedValue(DESCRIPTION));
         }
+        
         if(hasValue(PRIORITY)) {
             result.append(getFormattedKey(PRIORITY));
             result.append(getFormattedValue(PRIORITY));
@@ -624,6 +767,16 @@ public class CommandParser {
         return result;
     }
     
+    private boolean isRequiredTaskId() {
+        String action = _arguments.get(ACTION);
+        for(ActionsTaskID actionType: ActionsTaskID.values()) {
+            if(actionType.getValue().equals(action)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isModify() {
         return _arguments.get(ACTION).equalsIgnoreCase(MODIFY);
     }
@@ -644,6 +797,8 @@ public class CommandParser {
         _arguments.put(DESCRIPTION, null);
         _arguments.put(END, null);
         _arguments.put(START, null);
+        _arguments.put(TASKID, null);
+        _arguments.put(TO_TASK_TYPE, null);
 
     }
     
