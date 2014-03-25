@@ -235,6 +235,10 @@ public class DataParameter {
 	 * parameters. Caution: overrides any existing data if they existed.
 	 */
 	public void loadOldTask(Task<?> taskToLoad) {
+	    if (taskToLoad == null) {
+	        return;
+	    }
+	    
 		setDescription(taskToLoad.getDescription());
 		setPriority(taskToLoad.getPriority());
 		// setTaskID(taskToLoad.getId());

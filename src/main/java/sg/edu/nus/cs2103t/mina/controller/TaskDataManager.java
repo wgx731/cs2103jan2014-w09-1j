@@ -347,6 +347,8 @@ public class TaskDataManager {
      * @return added Task
      */
     public Task<?> addTask(DataParameter addParameter) {
+        assert (addParameter.getNewTaskType() != null);
+
         switch (addParameter.getNewTaskType()) {
             case TODO :
                 TodoTask newTodoTask = createTodoTask(addParameter);
@@ -405,7 +407,6 @@ public class TaskDataManager {
      * @return Task<?> (if successful), null otherwise
      */
     public Task<?> deleteTask(DataParameter deleteParameters) {
-
         switch (deleteParameters.getTaskObject().getType()) {
             case TODO :
                 if (_uncompletedTodoTasks.remove(deleteParameters
@@ -448,12 +449,17 @@ public class TaskDataManager {
      * @return task modified
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
-        DataParameter newSetOfParameters = new DataParameter();
+        Task<?> prevTask = deleteTask(modifyParameters);
+        if (prevTask == null) {
+            return null;
+        } else {
+            DataParameter newSetOfParameters = new DataParameter();
 
-        newSetOfParameters.loadOldTask(deleteTask(modifyParameters));
-        newSetOfParameters.loadNewParameters(modifyParameters);
+            newSetOfParameters.loadOldTask(prevTask);
+            newSetOfParameters.loadNewParameters(modifyParameters);
 
-        return addTask(newSetOfParameters);
+            return addTask(newSetOfParameters);
+        }
     }
 
     public Task<?> markCompleted(DataParameter completeParameters) {
