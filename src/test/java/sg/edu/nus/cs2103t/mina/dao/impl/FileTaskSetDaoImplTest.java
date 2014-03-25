@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -76,4 +77,7 @@ public abstract class FileTaskSetDaoImplTest {
         sampleEventTaskSet = null;
         sampleDeadlineTaskSet = null;
     }
+    
+    @Test
+    public abstract void testLoadEmptyFile();
 }

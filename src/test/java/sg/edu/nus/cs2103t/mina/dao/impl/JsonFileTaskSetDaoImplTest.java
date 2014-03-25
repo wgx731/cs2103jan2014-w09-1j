@@ -172,4 +172,27 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         checkLoadedSet(loadTaskSet(TaskType.DEADLINE, true), TaskType.DEADLINE);
     }
 
+    /* This is a boundary case for the ‘empty file’ partition */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void testLoadEmptyFile() {
+        SortedSet<DeadlineTask> deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(
+                TaskType.DEADLINE, false);
+        assertTrue(deadlineSet.isEmpty());
+        deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.DEADLINE,
+                true);
+        assertTrue(deadlineSet.isEmpty());
+        SortedSet<DeadlineTask> eventSet = (SortedSet<DeadlineTask>) loadTaskSet(
+                TaskType.EVENT, false);
+        assertTrue(eventSet.isEmpty());
+        eventSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.EVENT, true);
+        assertTrue(eventSet.isEmpty());
+        SortedSet<TodoTask> todoSet = (SortedSet<TodoTask>) loadTaskSet(
+                TaskType.TODO, false);
+        assertTrue(todoSet.isEmpty());
+        todoSet = (SortedSet<TodoTask>) loadTaskSet(TaskType.TODO, true);
+        assertTrue(todoSet.isEmpty());
+
+    }
+
 }
