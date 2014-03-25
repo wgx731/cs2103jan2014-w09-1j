@@ -1,4 +1,4 @@
-package sg.edu.nus.cs2103t.mina.test.commandcontroller;
+package sg.edu.nus.cs2103t.mina.stub;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandProcessor;
 import sg.edu.nus.cs2103t.mina.model.TaskView;

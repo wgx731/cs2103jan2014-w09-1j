@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
+import sg.edu.nus.cs2103t.mina.stub.CommandProcessorStub;
 
 public class CommandParserTest {
     
