@@ -10,6 +10,9 @@ import org.jbehave.core.annotations.AfterStories;
 import org.jbehave.core.annotations.BeforeStories;
 
 import sg.edu.nus.cs2103t.mina.MinaDriver;
+import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
+import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
+import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 
 public abstract class StepSkeleton {
 
@@ -74,6 +77,14 @@ public abstract class StepSkeleton {
                 appShell.close();
             }
         });
+        FileOperationHelper jsonFileOperationHelper = new FileOperationHelper(
+                JsonFileTaskDaoImpl.getCompletedSuffix(),
+                JsonFileTaskDaoImpl.getFileExtension());
+        FileOperationHelper objectFileOperationHelper = new FileOperationHelper(
+                ObjectFileTaskDaoImpl.getCompletedSuffix(),
+                ObjectFileTaskDaoImpl.getFileExtension());
+        jsonFileOperationHelper.cleanUp();
+        objectFileOperationHelper.cleanUp();
     }
 
     /**

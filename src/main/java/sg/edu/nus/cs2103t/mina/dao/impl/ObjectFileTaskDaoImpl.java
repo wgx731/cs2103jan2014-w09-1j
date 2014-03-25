@@ -43,11 +43,11 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
     private static final String COMPLETED_SUFFIX = "-compl";
     private static final String FILE_EXTENSION = ".ser";
 
-    static String getCompletedSuffix() {
+    public static String getCompletedSuffix() {
         return COMPLETED_SUFFIX;
     }
 
-    static String getFileExtension() {
+    public static String getFileExtension() {
         return FILE_EXTENSION;
     }
 

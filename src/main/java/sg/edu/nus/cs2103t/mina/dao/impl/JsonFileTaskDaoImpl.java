@@ -29,11 +29,11 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     private static final String FILE_EXTENSION = ".json";
     private static final String EMPTY_FILE_ERROR = "can't load storage file content.";
 
-    static String getCompletedSuffix() {
+    public static String getCompletedSuffix() {
         return COMPLETED_SUFFIX;
     }
 
-    static String getFileExtension() {
+    public static String getFileExtension() {
         return FILE_EXTENSION;
     }
 

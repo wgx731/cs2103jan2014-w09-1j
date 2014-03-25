@@ -30,7 +30,7 @@ public class FileOperationHelper {
     private String _completedSuffix;
     private String _fileExtension;
 
-    FileOperationHelper(String completedSuffix, String fileExtension) {
+    public FileOperationHelper(String completedSuffix, String fileExtension) {
         _fileLocationMap = new HashMap<TaskType, String>();
         _fileLocationMap.put(TaskType.TODO,
                 ConfigHelper.getProperty(TaskType.TODO.getType()));
@@ -47,6 +47,15 @@ public class FileOperationHelper {
         _fileLocationMap = fileLocationMap;
         _completedSuffix = completedSuffix;
         _fileExtension = fileExtension;
+    }
+
+    public void cleanUp() {
+        new File(getFileLocation(TaskType.TODO, false)).delete();
+        new File(getFileLocation(TaskType.TODO, true)).delete();
+        new File(getFileLocation(TaskType.EVENT, false)).delete();
+        new File(getFileLocation(TaskType.EVENT, true)).delete();
+        new File(getFileLocation(TaskType.DEADLINE, false)).delete();
+        new File(getFileLocation(TaskType.DEADLINE, true)).delete();
     }
 
     boolean createFileStorage() {
