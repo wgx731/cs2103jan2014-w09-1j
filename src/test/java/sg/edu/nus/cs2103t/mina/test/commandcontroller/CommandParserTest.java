@@ -31,7 +31,7 @@ public class CommandParserTest {
     private static final boolean IS_REORDER = true;
     private static final boolean IS_WRAPPED = true;
     private CommandProcessorStub cpStub = new CommandProcessorStub();
-    private CommandParser parser = new CommandParser(cpStub);
+    private CommandParser parser = new CommandParser();
 
     private StringBuilder variationBuild;
     private String variation;

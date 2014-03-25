@@ -1,6 +1,7 @@
 package sg.edu.nus.cs2103t.mina.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -45,6 +46,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = new Date();
         _lastEditedTime = new Date();
         _isCompleted = false;
+        _tags = new ArrayList<String>();
     }
 
     public Task(TaskType type, String description, String id, char priority,
@@ -56,6 +58,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = lastEditedTime;
         _isCompleted = isCompleted;
+        _tags = new ArrayList<String>();
     }
 
     protected int compareTo(Task<?> otherTask) {

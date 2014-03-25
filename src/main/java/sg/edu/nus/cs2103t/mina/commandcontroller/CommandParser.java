@@ -66,13 +66,11 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final Integer START_CONTINUE_FLAG = 5;
     
-    private CommandProcessor _cmdProcess;
     private HashMap<String, String> _arguments;
     private static Logger logger = LogManager.getLogger(CommandParser.class
             .getName());
 
-    public CommandParser(CommandProcessor cmdProcess) {
-        _cmdProcess = cmdProcess;
+    public CommandParser() {
         initArgMap();
         
         ACTIONS_KEYWORDS.put("add", "add");
@@ -97,6 +95,8 @@ public class CommandParser {
         
         ACTIONS_KEYWORDS.put("complete", "complete");
         ACTIONS_KEYWORDS.put("finish", "complete");
+        
+        ACTIONS_KEYWORDS.put("exit", "exit");
         
         END_KEYWORDS.put("end", false);
         END_KEYWORDS.put("due", false);
@@ -181,6 +181,10 @@ public class CommandParser {
         
         String action = tokens[ACTION_INDEX].toLowerCase();
         if (ACTIONS_KEYWORDS.containsKey(action)) {
+            
+            if(!ACTIONS_KEYWORDS.get(action).equalsIgnoreCase("add"))
+                return userInput;
+            
             _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
             originalString.delete(0, ACTIONS_KEYWORDS.get(action).length());
             
@@ -190,6 +194,7 @@ public class CommandParser {
         } else {
             throw new ParseException("No such action", 0);
         }
+        
         
         initKeyFlags();
         
