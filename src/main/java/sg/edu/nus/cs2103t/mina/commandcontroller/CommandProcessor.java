@@ -25,7 +25,7 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandProcessor {
 
-	private static final String DISPLAYING_SEARCHES = "Displaying searches!";
+    private static final String DISPLAYING_SEARCHES = "Displaying searches!";
     private static final String RESULTS_DISPLAYED = "Results displayed";
     private static String[] _inputString;
     private static final int MAX_INPUT_ARRAY_SIZE = 2;
@@ -60,10 +60,10 @@ public class CommandProcessor {
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
     private CommandHistory _commandHistory;
-    
+
     private boolean _isUndoNow = true;
     private boolean _isRedoNow = false;
-    
+
     private static Logger logger = LogManager.getLogger(CommandManager.class
             .getName());
 
@@ -72,13 +72,13 @@ public class CommandProcessor {
     };
 
     // Constructor
-    public CommandProcessor(){
-    	_taskDataManager = new TaskDataManager();
-    	_taskFilterManager = new TaskFilterManager(_taskDataManager);
+    public CommandProcessor() {
+        _taskDataManager = new TaskDataManager();
+        _taskFilterManager = new TaskFilterManager(_taskDataManager);
         initializeTaskView();
         _commandHistory = new CommandHistory();
     }
-    
+
     public CommandProcessor(TaskDataManager taskDataManager,
             TaskFilterManager taskFilterManager) {
         _taskDataManager = taskDataManager;
@@ -98,9 +98,9 @@ public class CommandProcessor {
     public TaskView getTaskView() {
         return _taskView;
     }
-    
-    public CommandHistory getCommandHistory(){
-    	return _commandHistory;
+
+    public CommandHistory getCommandHistory() {
+        return _commandHistory;
     }
 
     public void initializeTaskView() {
@@ -149,7 +149,7 @@ public class CommandProcessor {
     // respective functions
     private void processUserCommand(CommandType command) {
         switch (command) {
-            case ADD: {
+            case ADD : {
                 DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
                 if (addParameter == null) {
                     _taskView = errorCommandReturn(CommandType.INVALID);
@@ -168,7 +168,7 @@ public class CommandProcessor {
                 }
                 break;
             }
-            case DELETE: {
+            case DELETE : {
                 DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager.deleteTask(deleteParameter);
                 if (task == null) {
@@ -183,7 +183,7 @@ public class CommandProcessor {
                 }
                 break;
             }
-            case MODIFY: {
+            case MODIFY : {
                 DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
                 if (modifyParameter == null) {
                     _taskView = errorCommandReturn(CommandType.INVALID);
@@ -195,13 +195,14 @@ public class CommandProcessor {
                     String output = String.format(MODIFIED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
-                    DataParameter undoParam = processUndoModifyParameter(task, modifyParameter);
+                    DataParameter undoParam = processUndoModifyParameter(task,
+                            modifyParameter);
                     _commandHistory.addUndo(CommandType.MODIFY, undoParam);
                     _commandHistory.clearRedo();
                 }
                 break;
             }
-            case DISPLAY: {
+            case DISPLAY : {
                 String filterParameterString = _inputString[PARAMETER_POSITION];
                 FilterParameter filterParam;
                 if (!filterParameterString.isEmpty()) {
@@ -214,7 +215,7 @@ public class CommandProcessor {
                 _taskView = new TaskView(RESULTS_DISPLAYED, filterResult);
                 break;
             }
-            case SEARCH: {
+            case SEARCH : {
 
                 SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
 
@@ -231,7 +232,7 @@ public class CommandProcessor {
                 _taskView = new TaskView(output, searchResult);
                 break;
             }
-            case COMPLETE: {
+            case COMPLETE : {
                 DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
                 Task<?> task = _taskDataManager
                         .markCompleted(completeParameter);
@@ -244,110 +245,111 @@ public class CommandProcessor {
                 }
                 break;
             }
-            case UNDO: {
-                if (_commandHistory.isEmptyUndo()){
-                	_taskView = errorCommandReturn(CommandType.UNDO);
+            case UNDO : {
+                if (_commandHistory.isEmptyUndo()) {
+                    _taskView = errorCommandReturn(CommandType.UNDO);
                 } else {
-                	CommandType undoCmd = _commandHistory.getUndoCommand();
-                	DataParameter undoParam = _commandHistory.getUndoParam();
-                	if (_isRedoNow){
-                		_isRedoNow = false;
-                		_isUndoNow = true;
-                	}
-                	performUndoRedo(undoCmd, undoParam);
+                    CommandType undoCmd = _commandHistory.getUndoCommand();
+                    DataParameter undoParam = _commandHistory.getUndoParam();
+                    if (_isRedoNow) {
+                        _isRedoNow = false;
+                        _isUndoNow = true;
+                    }
+                    performUndoRedo(undoCmd, undoParam);
                 }
                 break;
             }
-            case REDO:{
-            	if (_commandHistory.isEmptyRedo()){
-                	_taskView = errorCommandReturn(CommandType.REDO);
+            case REDO : {
+                if (_commandHistory.isEmptyRedo()) {
+                    _taskView = errorCommandReturn(CommandType.REDO);
                 } else {
-                	CommandType redoCmd = _commandHistory.getRedoCommand();
-                	DataParameter redoParam = _commandHistory.getRedoParam();
-                	if (_isUndoNow){
-                		_isUndoNow = false;
-                		_isRedoNow = true;
-                	}
-                	performUndoRedo(redoCmd, redoParam);
+                    CommandType redoCmd = _commandHistory.getRedoCommand();
+                    DataParameter redoParam = _commandHistory.getRedoParam();
+                    if (_isUndoNow) {
+                        _isUndoNow = false;
+                        _isRedoNow = true;
+                    }
+                    performUndoRedo(redoCmd, redoParam);
                 }
-            	break;
+                break;
             }
-            case EXIT: {
+            case EXIT : {
                 _taskDataManager.saveAllTasks();
                 System.exit(0);
                 break;
             }
-            case INVALID: {
+            case INVALID : {
                 _taskView = errorCommandReturn(CommandType.INVALID);
                 break;
             }
-            default: {
+            default : {
                 _taskView = errorCommandReturn(CommandType.INVALID);
                 break;
             }
         }
     }
-    
-    private void performUndoRedo(CommandType cmd, DataParameter param){
-    	switch(cmd){
-    	case ADD:
-    		Task<?> addedTask = _taskDataManager.addTask(param);
-    		if (addedTask == null){
-    			processUserCommand(CommandType.INVALID);
-    		} else {
-    			DataParameter undoParam = processUndoAddParameter(addedTask);
-    			updateHistory(CommandType.DELETE, undoParam);
-    			if (_isUndoNow){
-    				String output = UNDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			} else {
-    				String output = REDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			}
-    		}
-    		break;
-    	case DELETE:
-    		Task<?> deletedTask = _taskDataManager.deleteTask(param);
-    		if (deletedTask == null){
-    			processUserCommand(CommandType.INVALID);
-    		} else {
-    			DataParameter undoParam = processUndoDeleteParameter(param);
-    			updateHistory(CommandType.ADD, undoParam);
-    			if (_isUndoNow){
-    				String output = UNDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			} else {
-    				String output = REDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			}
-    		}
-    		break;
-    	case MODIFY:
-    		Task<?> modifiedTask = _taskDataManager.modifyTask(param);
-    		if (modifiedTask == null){
-    			processUserCommand(CommandType.INVALID);
-    		} else {
-    			DataParameter undoParam = processUndoModifyParameter(modifiedTask, param);
-    			updateHistory(CommandType.MODIFY, undoParam);
-    			if (_isUndoNow){
-    				String output = UNDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			} else {
-    				String output = REDO_MESSAGE;
-    				_taskView = updatedTaskView(output);
-    			}
-    		}
-    	default:
-    		break;
-    	}
+
+    private void performUndoRedo(CommandType cmd, DataParameter param) {
+        switch (cmd) {
+            case ADD :
+                Task<?> addedTask = _taskDataManager.addTask(param);
+                if (addedTask == null) {
+                    processUserCommand(CommandType.INVALID);
+                } else {
+                    DataParameter undoParam = processUndoAddParameter(addedTask);
+                    updateHistory(CommandType.DELETE, undoParam);
+                    if (_isUndoNow) {
+                        String output = UNDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    } else {
+                        String output = REDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    }
+                }
+                break;
+            case DELETE :
+                Task<?> deletedTask = _taskDataManager.deleteTask(param);
+                if (deletedTask == null) {
+                    processUserCommand(CommandType.INVALID);
+                } else {
+                    DataParameter undoParam = processUndoDeleteParameter(param);
+                    updateHistory(CommandType.ADD, undoParam);
+                    if (_isUndoNow) {
+                        String output = UNDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    } else {
+                        String output = REDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    }
+                }
+                break;
+            case MODIFY :
+                Task<?> modifiedTask = _taskDataManager.modifyTask(param);
+                if (modifiedTask == null) {
+                    processUserCommand(CommandType.INVALID);
+                } else {
+                    DataParameter undoParam = processUndoModifyParameter(
+                            modifiedTask, param);
+                    updateHistory(CommandType.MODIFY, undoParam);
+                    if (_isUndoNow) {
+                        String output = UNDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    } else {
+                        String output = REDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    }
+                }
+            default :
+                break;
+        }
     }
-    
-    private void updateHistory(CommandType cmd, DataParameter param){
-    	if (_isUndoNow){
-    		_commandHistory.addRedo(cmd, param);
-    	} else {
-    		_commandHistory.addUndo(cmd, param);
-    	}
+
+    private void updateHistory(CommandType cmd, DataParameter param) {
+        if (_isUndoNow) {
+            _commandHistory.addRedo(cmd, param);
+        } else {
+            _commandHistory.addUndo(cmd, param);
+        }
     }
 
     private TaskView updatedTaskView(String statusMessage) {
@@ -357,28 +359,28 @@ public class CommandProcessor {
 
     private TaskView errorCommandReturn(CommandType type) {
         switch (type) {
-            case ADD:
+            case ADD :
                 return new TaskView(ADD_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case DELETE:
+            case DELETE :
                 return new TaskView(DELETE_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case MODIFY:
+            case MODIFY :
                 return new TaskView(MODIFY_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case COMPLETE:
+            case COMPLETE :
                 return new TaskView(COMPLETE_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case UNDO:
-            	return new TaskView(UNDO_ERROR_MESSAGE,
+            case UNDO :
+                return new TaskView(UNDO_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case REDO:
-            	return new TaskView(REDO_ERROR_MESSAGE,
+            case REDO :
+                return new TaskView(REDO_ERROR_MESSAGE,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            case INVALID:
+            case INVALID :
                 return new TaskView(INVALID_COMMAND,
                         _taskFilterManager.filterTask(new FilterParameter()));
-            default:
+            default :
                 return new TaskView(INVALID_COMMAND,
                         _taskFilterManager.filterTask(new FilterParameter()));
         }
@@ -672,48 +674,49 @@ public class CommandProcessor {
             return TaskType.UNKOWN;
         }
     }
-    
-    public DataParameter processUndoAddParameter(Task<?> task){
-    	DataParameter undoAddParameter = new DataParameter();
-    	undoAddParameter.setOriginalTaskType(task.getType());
-    	undoAddParameter.setTaskObject(task);
-    	return undoAddParameter;
+
+    public DataParameter processUndoAddParameter(Task<?> task) {
+        DataParameter undoAddParameter = new DataParameter();
+        undoAddParameter.setOriginalTaskType(task.getType());
+        undoAddParameter.setTaskObject(task);
+        return undoAddParameter;
     }
-    
-    public DataParameter processUndoDeleteParameter(DataParameter deleteParam){
-    	Task<?> deletedTask = deleteParam.getTaskObject();
-    	DataParameter undoDeleteParameter = new DataParameter();
-    	undoDeleteParameter.setDescription(deletedTask.getDescription());
-    	undoDeleteParameter.setNewTaskType(deletedTask.getType());
-    	undoDeleteParameter.setPriority(deletedTask.getPriority());
-    	if (deletedTask.getType()==TaskType.EVENT){
-    		EventTask deletedEventTask = (EventTask) deletedTask;
-    		undoDeleteParameter.setStartDate(deletedEventTask.getStartTime());
-    		undoDeleteParameter.setEndDate(deletedEventTask.getEndTime());
-    	} else if (deletedTask.getType()==TaskType.DEADLINE){
-    		DeadlineTask deletedDeadlineTask = (DeadlineTask) deletedTask;
-    		undoDeleteParameter.setEndDate(deletedDeadlineTask.getEndTime());
-    	}
-    	return undoDeleteParameter;
+
+    public DataParameter processUndoDeleteParameter(DataParameter deleteParam) {
+        Task<?> deletedTask = deleteParam.getTaskObject();
+        DataParameter undoDeleteParameter = new DataParameter();
+        undoDeleteParameter.setDescription(deletedTask.getDescription());
+        undoDeleteParameter.setNewTaskType(deletedTask.getType());
+        undoDeleteParameter.setPriority(deletedTask.getPriority());
+        if (deletedTask.getType() == TaskType.EVENT) {
+            EventTask deletedEventTask = (EventTask) deletedTask;
+            undoDeleteParameter.setStartDate(deletedEventTask.getStartTime());
+            undoDeleteParameter.setEndDate(deletedEventTask.getEndTime());
+        } else if (deletedTask.getType() == TaskType.DEADLINE) {
+            DeadlineTask deletedDeadlineTask = (DeadlineTask) deletedTask;
+            undoDeleteParameter.setEndDate(deletedDeadlineTask.getEndTime());
+        }
+        return undoDeleteParameter;
     }
-    
-    public DataParameter processUndoModifyParameter(Task<?> newTask, DataParameter modifyParam){
-    	Task<?> oldTask = modifyParam.getTaskObject();
-    	DataParameter undoModifyParameter = new DataParameter();
-    	undoModifyParameter.setDescription(oldTask.getDescription());
-    	undoModifyParameter.setOriginalTaskType(newTask.getType());
-    	undoModifyParameter.setNewTaskType(oldTask.getType());
-    	undoModifyParameter.setPriority(oldTask.getPriority());
-    	undoModifyParameter.setTaskObject(newTask);
-    	if (oldTask.getType()==TaskType.EVENT){
-    		EventTask oldEventTask = (EventTask) oldTask;
-    		undoModifyParameter.setStartDate(oldEventTask.getStartTime());
-    		undoModifyParameter.setEndDate(oldEventTask.getEndTime());
-    	} else if (oldTask.getType()==TaskType.DEADLINE){
-    		DeadlineTask oldDeadlineTask = (DeadlineTask) oldTask;
-    		undoModifyParameter.setEndDate(oldDeadlineTask.getEndTime());
-    	}
-    	return undoModifyParameter;
+
+    public DataParameter processUndoModifyParameter(Task<?> newTask,
+            DataParameter modifyParam) {
+        Task<?> oldTask = modifyParam.getTaskObject();
+        DataParameter undoModifyParameter = new DataParameter();
+        undoModifyParameter.setDescription(oldTask.getDescription());
+        undoModifyParameter.setOriginalTaskType(newTask.getType());
+        undoModifyParameter.setNewTaskType(oldTask.getType());
+        undoModifyParameter.setPriority(oldTask.getPriority());
+        undoModifyParameter.setTaskObject(newTask);
+        if (oldTask.getType() == TaskType.EVENT) {
+            EventTask oldEventTask = (EventTask) oldTask;
+            undoModifyParameter.setStartDate(oldEventTask.getStartTime());
+            undoModifyParameter.setEndDate(oldEventTask.getEndTime());
+        } else if (oldTask.getType() == TaskType.DEADLINE) {
+            DeadlineTask oldDeadlineTask = (DeadlineTask) oldTask;
+            undoModifyParameter.setEndDate(oldDeadlineTask.getEndTime());
+        }
+        return undoModifyParameter;
     }
 
     public ArrayList<String> getTodoTask() {
@@ -733,9 +736,10 @@ public class CommandProcessor {
                 deadline);
         ArrayList<String> deadlineString = new ArrayList<String>();
         for (int i = 0; i < deadlineList.size(); i++) {
-            deadlineString.add((i + 1) + ". "
-                    + deadlineList.get(i).getDescription() + " by "
-                    + deadlineList.get(i).getEndTime());
+            deadlineString.add((i + 1) + ". " +
+                    deadlineList.get(i).getDescription() +
+                    " by " +
+                    deadlineList.get(i).getEndTime());
         }
         return deadlineString;
     }
@@ -746,9 +750,12 @@ public class CommandProcessor {
         ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
         ArrayList<String> eventString = new ArrayList<String>();
         for (int i = 0; i < eventList.size(); i++) {
-            eventString.add((i + 1) + ". " + eventList.get(i).getDescription()
-                    + " from " + eventList.get(i).getStartTime() + " to "
-                    + eventList.get(i).getEndTime());
+            eventString.add((i + 1) + ". " +
+                    eventList.get(i).getDescription() +
+                    " from " +
+                    eventList.get(i).getStartTime() +
+                    " to " +
+                    eventList.get(i).getEndTime());
         }
         return eventString;
     }

@@ -22,17 +22,18 @@ public class DeadlineTask extends Task<DeadlineTask> implements
         _endTime = end;
     }
 
-    public DeadlineTask(TaskType type, String description, String id,
-            char priority, Date createdTime, Date lastEditedTime,
-            boolean isCompleted) {
-        super(type, description, id, priority, createdTime, lastEditedTime,
-                isCompleted);
-    }
-
     public DeadlineTask(String description, Date end, char priority) {
         super(TaskType.DEADLINE, description);
         _endTime = end;
         _priority = priority;
+    }
+
+    public DeadlineTask(TaskType type, String description, String id,
+            char priority, Date createdTime, Date lastEditedTime,
+            boolean isCompleted, Date end) {
+        super(type, description, id, priority, createdTime, lastEditedTime,
+                isCompleted);
+        _endTime = end;
     }
 
     public int compareTo(DeadlineTask otherTask) {

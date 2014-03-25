@@ -24,6 +24,10 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final char[] PRIORITIES = { H, M, L };
 
+    public static boolean isValidPriority(char priority) {
+        return priority == L || priority == M || priority == H;
+    }
+
     protected String _id;
     protected TaskType _type;
     protected String _description;
@@ -148,11 +152,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Task<?>) {
-            Task<?> otherTask = (Task<?>) other;
-            if (!_id.equals(otherTask._id)) {
-                return false;
-            }
-            return this.compareTo(otherTask) == 0;
+            return this.compareTo((Task<?>) other) == 0;
         } else {
             return false;
         }

@@ -1,7 +1,9 @@
 package sg.edu.nus.cs2103t.mina.utils;
 
 import java.lang.reflect.Type;
-import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -17,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
@@ -30,14 +33,125 @@ import com.google.gson.reflect.TypeToken;
  */
 public class JsonHelper {
 
-    private static class TaskDeserializer implements JsonDeserializer<Task<?>> {
-        @Override
-        public Task<?> deserialize(JsonElement arg0, Type arg1,
-                JsonDeserializationContext arg2) throws JsonParseException {
-            // TODO: force to use full constructor
-            return null;
-        }
+    private static final String KEY_ID = "_id";
+    private static final String KEY_DESCRIPTION = "_description";
+    private static final String KEY_PRIORITY = "_priority";
+    private static final String KEY_COMPLETED = "_isCompleted";
+    private static final String KEY_CREATED_TIME = "_createdTime";
+    private static final String KEY_LAST_EDITED_TIME = "_lastEditedTime";
+    private static final String KEY_START_TIME = "_startTime";
+    private static final String KEY_END_TIME = "_endTime";
 
+    private static final String DATE_FORMAT = "EEEE, dd/MM/yyyy/hh:mm:ss.SSS";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat(
+            DATE_FORMAT);
+
+    private static class EventTaskDeserializer implements
+            JsonDeserializer<EventTask> {
+
+        @Override
+        public EventTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.EVENT;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null, start = null, end = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+                start = formatter.parse(jsonObject.get(KEY_START_TIME)
+                        .getAsString());
+                end = formatter.parse(jsonObject.get(KEY_END_TIME)
+                        .getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new EventTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted, start, end);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class DeadlineTaskDeserializer implements
+            JsonDeserializer<DeadlineTask> {
+
+        @Override
+        public DeadlineTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.DEADLINE;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null, end = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+                end = formatter.parse(jsonObject.get(KEY_END_TIME)
+                        .getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new DeadlineTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted, end);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class TodoTaskDeserializer implements
+            JsonDeserializer<TodoTask> {
+
+        @Override
+        public TodoTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.TODO;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new TodoTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted);
+            } else {
+                return null;
+            }
+        }
     }
 
     private static Gson gson = null;
@@ -50,14 +164,20 @@ public class JsonHelper {
     }.getType();
 
     private static Gson setUp() {
-        return new GsonBuilder().enableComplexMapKeySerialization()
+        return new GsonBuilder()
+                .enableComplexMapKeySerialization()
                 .serializeNulls()
-                .registerTypeAdapter(Task.class, new TaskDeserializer())
-                .setDateFormat(DateFormat.FULL, DateFormat.FULL)
-                .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .registerTypeAdapter(EventTask.class,
+                        new EventTaskDeserializer())
+                .registerTypeAdapter(DeadlineTask.class,
+                        new DeadlineTaskDeserializer())
+                .registerTypeAdapter(TodoTask.class, new TodoTaskDeserializer())
+                .setDateFormat(DATE_FORMAT)
+                .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
                 .setPrettyPrinting().create();
     }
 
+    @SuppressWarnings("unchecked")
     public static String taskSetToJson(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType) {
         if (gson == null) {
@@ -65,11 +185,14 @@ public class JsonHelper {
         }
         switch (taskType) {
             case TODO :
-                return gson.toJson(taskSet, TODO_TREESET_TYPE);
+                return gson.toJson((SortedSet<TodoTask>) taskSet,
+                        TODO_TREESET_TYPE);
             case DEADLINE :
-                return gson.toJson(taskSet, DEADLINE_TREESET_TYPE);
+                return gson.toJson((SortedSet<DeadlineTask>) taskSet,
+                        DEADLINE_TREESET_TYPE);
             case EVENT :
-                return gson.toJson(taskSet, EVENT_TREESET_TYPE);
+                return gson.toJson((SortedSet<EventTask>) taskSet,
+                        EVENT_TREESET_TYPE);
             default :
                 return null;
         }
