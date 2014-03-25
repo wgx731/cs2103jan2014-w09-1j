@@ -26,6 +26,7 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandParser {
 
     
+    private static final String MODIFY = "modify";
     private static final String VALIDITY = "v";
     private static final String IS_VALID = "valid";
     private static final String PM = "pm";
@@ -79,9 +80,9 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("new", "add");
         ACTIONS_KEYWORDS.put("+", "add");
         
-        ACTIONS_KEYWORDS.put("modify", "modify");
-        ACTIONS_KEYWORDS.put("change", "modify");
-        ACTIONS_KEYWORDS.put("edit", "modify");
+        ACTIONS_KEYWORDS.put(MODIFY, MODIFY);
+        ACTIONS_KEYWORDS.put("change", MODIFY);
+        ACTIONS_KEYWORDS.put("edit", MODIFY);
         
         ACTIONS_KEYWORDS.put("remove", "delete");
         ACTIONS_KEYWORDS.put("delete", "delete");
@@ -127,6 +128,7 @@ public class CommandParser {
         PRIORITY_VALUES.put("high", "H");
         PRIORITY_VALUES.put("urgent", "H");
         PRIORITY_VALUES.put("-urgent", "H");
+        
         
         initEndValues();
         
@@ -182,12 +184,13 @@ public class CommandParser {
         String action = tokens[ACTION_INDEX].toLowerCase();
         if (ACTIONS_KEYWORDS.containsKey(action)) {
             
-            if(!ACTIONS_KEYWORDS.get(action).equalsIgnoreCase("add"))
-                return userInput;
+//            if(!ACTIONS_KEYWORDS.get(action).equalsIgnoreCase("add"))
+//                return userInput;
             
             _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
-            originalString.delete(0, ACTIONS_KEYWORDS.get(action).length());
-            
+            if(isModify()){
+                
+            }
             
             
             dTokens.remove(ACTION_INDEX);
@@ -622,7 +625,7 @@ public class CommandParser {
     }
     
     private boolean isModify() {
-        return _arguments.get(ACTION).equalsIgnoreCase("modify");
+        return _arguments.get(ACTION).equalsIgnoreCase(MODIFY);
     }
 
     public String getFormattedKey(String key){
