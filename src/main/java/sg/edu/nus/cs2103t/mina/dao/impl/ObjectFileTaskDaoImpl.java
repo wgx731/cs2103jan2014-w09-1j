@@ -14,13 +14,17 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 /**
  * 
@@ -116,12 +120,9 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
         assert taskType != TaskType.UNKOWN;
         String fileLocation = _fileOperationHelper.getFileLocation(taskType,
                 isCompleted);
-        ObjectInput input = getInputReader(fileLocation);
         try {
+            ObjectInput input = getInputReader(fileLocation);
             Object object = input.readObject();
-            if (object == null) {
-                throw new IOException(NULL_TASK_SET_ERROR);
-            }
             @SuppressWarnings("unchecked")
             SortedSet<? extends Task<?>> content = (SortedSet<? extends Task<?>>) object;
             input.close();
@@ -130,6 +131,19 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
             logger.error("task class not found.");
             logger.error(e, e);
             throw new IOException(CLASS_NOT_FOUND_ERROR);
+        } catch (IOException e) {
+            logger.error("empty file.");
+            logger.error(e, e);
+            switch (taskType) {
+                case TODO :
+                    return new TreeSet<TodoTask>();
+                case EVENT :
+                    return new TreeSet<EventTask>();
+                case DEADLINE :
+                    return new TreeSet<DeadlineTask>();
+                default :
+                    throw new IOException(NULL_TASK_SET_ERROR);
+            }
         }
     }
 
