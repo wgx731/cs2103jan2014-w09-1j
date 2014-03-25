@@ -44,6 +44,7 @@
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<failsafe.and.surefire.version>2.17</failsafe.and.surefire.version>
 		<cobertura.maven.plugin.version>2.6</cobertura.maven.plugin.version>
+		<findbugs.maven.plugin.version>2.5.3</findbugs.maven.plugin.version>
 
 		<!-- 3rd party -->
 		<log4j.version>2.0-rc1</log4j.version>
@@ -273,6 +274,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven.project.info.reports.plugin.version}</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -310,10 +314,21 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${cobertura.maven.plugin.version}</version>
 				<configuration>
+					<ignores>
+						<ignore>org.eclipse.wb.swt.*</ignore>
+					</ignores>
 					<formats>
 						<format>html</format>
 						<format>xml</format>
 					</formats>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>${findbugs.maven.plugin.version}</version>
+				<configuration>
+					<onlyAnalyze>sg.edu.nus.cs2103t.mina.*</onlyAnalyze>
 				</configuration>
 			</plugin>
 		</plugins>
