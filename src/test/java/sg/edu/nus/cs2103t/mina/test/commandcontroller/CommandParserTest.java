@@ -470,6 +470,8 @@ public class CommandParserTest {
         end = resultDate + "200000";
         assertEquals("display deadline complete -start 12052007 -end " + end, result);
         
+        
+        
         //search
         variation = "search haha hehe";
         result = parser.convertCommand(variation);  
