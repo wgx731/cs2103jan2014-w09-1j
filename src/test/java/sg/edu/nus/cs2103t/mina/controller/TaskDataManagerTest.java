@@ -252,55 +252,60 @@ public class TaskDataManagerTest {
         tdmTest.resetTrees();
 
         /* modify a task that does not exist */
-        Task<?> testModifyTaskType7 = new TodoTask("Event task becomes TodoTask.",
-                'M');
+        Task<?> testModifyTaskType7 = new TodoTask(
+                "Event task becomes TodoTask.", 'M');
         assertNull("Modifying a task that does not exist.",
                 tdmTest.modifyTask(new DataParameter(null, 'M', null, null,
                         TaskType.EVENT, TaskType.DEADLINE, 1,
                         testModifyTaskType7)));
+        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
 
     }
-    // @Test
-    // public void markCompleted() {
-    // TaskDataManager tdmTest = new TaskDataManager();
-    // Long currDateMilliSec = System.currentTimeMillis();
-    //
-    // tdmTest.addTask(new DataParameter("Mark this TodoTask complete", 'M',
-    // null, null, null, TaskType.TODO, 123));
-    //
-    // TodoTask expectedTodo = new TodoTask("Mark this TodoTask complete", 'M');
-    // expectedTodo.setCompleted(true);
-    // assertEquals("Mark Todo completed", expectedTodo,
-    // tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-    // TaskType.TODO, null, 1)));
-    // assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
-    // assertEquals(1, tdmTest.getCompletedTodoTasks().size());
-    //
-    // tdmTest.addTask(new DataParameter("Mark this DeadlineTask complete", 'M',
-    // null, new Date(currDateMilliSec), null, TaskType.DEADLINE, 123));
-    //
-    // DeadlineTask expectedDeadline = new DeadlineTask(
-    // "Mark this DeadlineTask complete", new Date(currDateMilliSec),
-    // 'M');
-    // expectedDeadline.setCompleted(true);
-    // assertEquals("Mark Deadline completed", expectedDeadline,
-    // tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-    // TaskType.DEADLINE, null, 1)));
-    // assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
-    // assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
-    //
-    // tdmTest.addTask(new DataParameter("Mark this EventTask complete", 'M',
-    // new Date(currDateMilliSec), new Date(currDateMilliSec), null,
-    // TaskType.EVENT, 123));
-    //
-    // EventTask expectedEvent = new EventTask("Mark this EventTask complete",
-    // new Date(currDateMilliSec), new Date(currDateMilliSec), 'M');
-    // expectedEvent.setCompleted(true);
-    // assertEquals("Mark Event completed", expectedEvent,
-    // tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-    // TaskType.EVENT, null, 1)));
-    // assertEquals(0, tdmTest.getUncompletedEventTasks().size());
-    // assertEquals(1, tdmTest.getCompletedEventTasks().size());
-    // }
+
+    @Test
+    public void markCompleted() {
+        TaskDataManager tdmTest = new TaskDataManager();
+        Long currDateMilliSec = System.currentTimeMillis();
+
+        Task<?> testMarkTodo1 = tdmTest.addTask(new DataParameter(
+                "Mark this TodoTask complete", 'M', null, null, null,
+                TaskType.TODO, 1));
+
+        TodoTask expectedTodo = new TodoTask("Mark this TodoTask complete", 'M');
+        expectedTodo.setCompleted(true);
+        assertEquals("Mark Todo completed", expectedTodo,
+                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                        TaskType.TODO, null, 1, testMarkTodo1)));
+        assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
+        assertEquals(1, tdmTest.getCompletedTodoTasks().size());
+
+        Task<?> testMarkDeadline1 = tdmTest.addTask(new DataParameter(
+                "Mark this DeadlineTask complete", 'M', null, new Date(
+                        currDateMilliSec), null, TaskType.DEADLINE, 123));
+
+        DeadlineTask expectedDeadline = new DeadlineTask(
+                "Mark this DeadlineTask complete", new Date(currDateMilliSec),
+                'M');
+        expectedDeadline.setCompleted(true);
+        assertEquals("Mark Deadline completed", expectedDeadline,
+                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                        TaskType.DEADLINE, null, 1, testMarkDeadline1)));
+        assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
+        assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
+
+        Task<?> testMarkEvent1 = tdmTest.addTask(new DataParameter(
+                "Mark this EventTask complete", 'M',
+                new Date(currDateMilliSec), new Date(currDateMilliSec), null,
+                TaskType.EVENT, 123));
+
+        EventTask expectedEvent = new EventTask("Mark this EventTask complete",
+                new Date(currDateMilliSec), new Date(currDateMilliSec), 'M');
+        expectedEvent.setCompleted(true);
+        assertEquals("Mark Event completed", expectedEvent,
+                tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                        TaskType.EVENT, null, 1, testMarkEvent1)));
+        assertEquals(0, tdmTest.getUncompletedEventTasks().size());
+        assertEquals(1, tdmTest.getCompletedEventTasks().size());
+    }
 
 }

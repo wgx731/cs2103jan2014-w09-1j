@@ -50,7 +50,7 @@ public class CommandProcessor {
     private static final String UNDO_ERROR_MESSAGE = "Error occured whe system try to undo.";
     private static final String REDO_MESSAGE = "redo completed.";
     private static final String REDO_ERROR_MESSAGE = "Error occured whe system try to redo.";
-    private static final String TO_BE_DONE = "to be done.";
+//    private static final String TO_BE_DONE = "to be done.";
 
     private int _currentEventPage;
     private int _currentDeadlinePage;
@@ -396,7 +396,7 @@ public class CommandProcessor {
     // case TODO:
     // task = (TodoTask) task;
     // break;
-    // case EVENT:
+    // case EVENT:    @Test
     // task = (EventTask) task;
     // break;
     // case DEADLINE:
