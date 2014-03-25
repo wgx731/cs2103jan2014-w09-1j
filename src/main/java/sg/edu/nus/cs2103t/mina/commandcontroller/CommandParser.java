@@ -25,6 +25,9 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandParser {
 
+    
+    private static final String VALIDITY = "v";
+    private static final String IS_VALID = "valid";
     private static final String PM = "pm";
     private static final String AM = "am";
     private static final String EMPTY = "";
@@ -32,19 +35,23 @@ public class CommandParser {
     private static final String DATE_KEY = "date";
     private static final int NEXT = 1;
     private static final int ONE_DAY = 1;
-    private static final String END = "end";
+    
     private static final int ACTION_INDEX = 0;
     private static final String SPACE = " ";
     private static final String ACTION = "action";
     private static final String PRIORITY = "priority";
     private static final String DESCRIPTION = "description";
-    
+    private static final String END = "end";
+    private static final String START = "start";
     
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
     private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> START_KEYWORDS = new HashMap<String, Boolean>();
     
     private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
+    
+    private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
     
     private static final LinkedHashSet<String> TIME = new LinkedHashSet<String>();
     private static final int DATETIME_VALUE_KEYWORD = 0;
@@ -56,6 +63,8 @@ public class CommandParser {
     private static final int END_FLAG = 1;
     private static final int END_CONTINUE_FLAG = 2;
     private static final int DESCRIPTION_FLAG = 3;
+    private static final int START_FLAG = 4;
+    private static final Integer START_CONTINUE_FLAG = 5;
     
     private CommandProcessor _cmdProcess;
     private HashMap<String, String> _arguments;
@@ -72,14 +81,42 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("new", "add");
         ACTIONS_KEYWORDS.put("+", "add");
         
+        ACTIONS_KEYWORDS.put("modify", "modify");
+        ACTIONS_KEYWORDS.put("change", "modify");
+        ACTIONS_KEYWORDS.put("edit", "modify");
+        
+        ACTIONS_KEYWORDS.put("remove", "delete");
+        ACTIONS_KEYWORDS.put("delete", "delete");
+        
+        ACTIONS_KEYWORDS.put("search", "search");
+        ACTIONS_KEYWORDS.put("find", "search");
+        
+        ACTIONS_KEYWORDS.put("display", "display");
+        ACTIONS_KEYWORDS.put("filter", "display");
+        ACTIONS_KEYWORDS.put("show", "display");
+        
+        ACTIONS_KEYWORDS.put("complete", "complete");
+        ACTIONS_KEYWORDS.put("finish", "complete");
+        
         END_KEYWORDS.put("end", false);
         END_KEYWORDS.put("due", false);
         END_KEYWORDS.put("by", false);
         END_KEYWORDS.put("before", false);
+        END_KEYWORDS.put("on", false);
+        END_KEYWORDS.put("to", false);
         END_KEYWORDS.put("-end", true);
         END_KEYWORDS.put("-due", true);
         END_KEYWORDS.put("-by", true);
         END_KEYWORDS.put("-before", true);
+        END_KEYWORDS.put("-on", true);
+        END_KEYWORDS.put("-to", false);
+        
+        START_KEYWORDS.put("start", false);
+        START_KEYWORDS.put("-start", true);
+        START_KEYWORDS.put("starting", false);
+        START_KEYWORDS.put("-starting", true);
+        START_KEYWORDS.put("from", false);
+        START_KEYWORDS.put("-from", true);
         
         PRIORITY_VALUES.put("low", "L");
         PRIORITY_VALUES.put("l", "L");
@@ -146,16 +183,15 @@ public class CommandParser {
         if (ACTIONS_KEYWORDS.containsKey(action)) {
             _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
             originalString.delete(0, ACTIONS_KEYWORDS.get(action).length());
+            
+            
+            
             dTokens.remove(ACTION_INDEX);
         } else {
             throw new ParseException("No such action", 0);
         }
         
-        HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
-        keyFlags.put(PRIORITY_FLAG, false);
-        keyFlags.put(END_FLAG, false);
-        keyFlags.put(END_CONTINUE_FLAG, false);
-        keyFlags.put(DESCRIPTION_FLAG, false);
+        initKeyFlags();
         
         logger.info("Original: " + userInput);
         StringBuilder description = new StringBuilder();
@@ -173,59 +209,98 @@ public class CommandParser {
                 throw new ParseException("Invalid priority", 0);
             }
             
-            //Flagging for End
+            //Flagging for End || start
             if (keyFlags.get(END_FLAG) || keyFlags.get(END_CONTINUE_FLAG)) {
+                
                 logger.info("Extracting END: ");
-                logger.info("Setting end flag to false ");
+                logger.info("Setting end flag to false ");  
+                logger.info("End continue flag: " + keyFlags.get(END_CONTINUE_FLAG));
+                
                 keyFlags.put(END_FLAG, false);
                 boolean isValid = true;
+                boolean isReset = false;
                 
-                switch(getDateValueType(keyword)) {
-                    case DATE_VALUE:
-                        //FALLTHROUGH
-                    case DATETIME_VALUE_KEYWORD :
-                        logger.info("Getting date: " + keyword);
-                        endDate = (endDate.equals(EMPTY)) ? keyword : endDate;
-                        break;
-                    case TIME_VALUE:
-                        logger.info("Getting time: " + keyword);
-                        if (hasAmPm(keyword)) {
-                            logger.info("Convering endTime");
-                            endTime = convertToMilitaryTime(keyword);
-                        }
-                        endTime = (endTime.equals(EMPTY)) ? keyword : endTime;
-                        break;
-                    default:
-                        isValid = false;
-                        logger.info("Invalid datetime");
-                        break;
+                HashMap<String, String> dateAndTime = new HashMap<String, String>();
+                dateAndTime.put(DATE_KEY, endDate);
+                dateAndTime.put(TIME_KEY, endTime);
+                dateAndTime.put(IS_VALID, VALIDITY);
+                
+                dateAndTime = updateDateTimeArg(dateAndTime, keyword);
+                
+                endDate = dateAndTime.get(DATE_KEY);
+                endTime = dateAndTime.get(TIME_KEY);
+                if(dateAndTime.get(IS_VALID)==null) {
+                    isValid = false;
                 }
                 
-                //Really need a more elegant way to do this
-                //END_CONTINUE_FLAG is true iff first date/time is true
-                if(!isValid && !keyFlags.get(END_CONTINUE_FLAG)){
+                if(!isFirstDateInvalid(isValid, keyFlags.get(END_CONTINUE_FLAG))){
                     throw new ParseException("Invalid end date",0);
-                } else if(isValid && !keyFlags.get(END_CONTINUE_FLAG)) {
+                } else if(isNeedSecondDate(keyFlags.get(END_CONTINUE_FLAG))) {
                     logger.info("Found first valid datetime");
-                    keyFlags.put(END_CONTINUE_FLAG, true);
-                    //if the second keyword is valid, it will still override
-                    addEnd(endDate + " " + endTime);
-                    continue;
+                    keyFlags.put(END_CONTINUE_FLAG, true);                   
                 } else {
                     logger.info("Ending second datetime");
                     keyFlags.put(END_CONTINUE_FLAG, false);
-                }
-               
-                if (!keyFlags.get(END_CONTINUE_FLAG)) {
-                    logger.info("Ending endate and endtime: " + 
-                                endDate + " " + endTime);
-                    addEnd(endDate + " " + endTime);
-                    if(isValid) {
-                        logger.info("Moving on");
-                        continue;
-                    }
+                    isReset = true;
                 }
                 
+                addEnd(endDate + " " + endTime);
+                
+                if(isReset) {
+                    endDate = EMPTY;
+                    endTime = EMPTY;
+                }
+                
+                if(isValid){
+                    continue;
+                }
+            }
+
+            //Flagging for End || start
+            if (keyFlags.get(START_FLAG) || keyFlags.get(START_CONTINUE_FLAG)) {
+                
+                logger.info("Extracting start: ");
+                logger.info("Setting start flag to false ");
+                logger.info("Start continue flag: " + keyFlags.get(START_CONTINUE_FLAG));
+                
+                keyFlags.put(START_FLAG, false);
+                boolean isValid = true;
+                boolean isReset = false;
+                
+                HashMap<String, String> dateAndTime = new HashMap<String, String>();
+                dateAndTime.put(DATE_KEY, endDate);
+                dateAndTime.put(TIME_KEY, endTime);
+                dateAndTime.put(IS_VALID, VALIDITY);
+                
+                dateAndTime = updateDateTimeArg(dateAndTime, keyword);
+                
+                endDate = dateAndTime.get(DATE_KEY);
+                endTime = dateAndTime.get(TIME_KEY);
+                if(dateAndTime.get(IS_VALID)==null) {
+                    isValid = false;
+                }
+                
+                if(!isFirstDateInvalid(isValid, keyFlags.get(START_CONTINUE_FLAG))){
+                    throw new ParseException("Invalid end date",0);
+                } else if(isNeedSecondDate(keyFlags.get(START_CONTINUE_FLAG))) {
+                    logger.info("Found first valid datetime");
+                    keyFlags.put(START_CONTINUE_FLAG, true);                   
+                } else {
+                    logger.info("Ending second datetime");
+                    keyFlags.put(START_CONTINUE_FLAG, false); 
+                    isReset = true;
+                }
+                
+                addStart(endDate + " " + endTime);
+                
+                if(isReset) {
+                    endDate = EMPTY;
+                    endTime = EMPTY;
+                }
+                
+                if(isValid){
+                    continue;
+                }
             }
             
             //Checking for flags
@@ -254,6 +329,15 @@ public class CommandParser {
                 
             }
             
+            //If no dash, but description is wrapped or has dash
+            if (START_KEYWORDS.containsKey(keyword) && !hasValue(START) &&
+                    (START_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Setting Start flag as true");
+                keyFlags.put(START_FLAG, true);
+                continue;
+                
+            }
+            
             if ((keyword.equalsIgnoreCase("urgent") && isWrapped) ||
                    (keyword.equalsIgnoreCase("-urgent") && !isWrapped) ) {
                 addPriority(keyword);
@@ -275,6 +359,55 @@ public class CommandParser {
 
         logger.info(result);
         return result.toString().trim();
+    }
+    
+    private void initKeyFlags() {
+        keyFlags.put(PRIORITY_FLAG, false);
+        keyFlags.put(END_FLAG, false);
+        keyFlags.put(END_CONTINUE_FLAG, false);
+        keyFlags.put(START_FLAG, false);
+        keyFlags.put(START_CONTINUE_FLAG, false);
+        keyFlags.put(DESCRIPTION_FLAG, false);
+    }
+
+    private boolean isNeedSecondDate(boolean continueFlag) {
+        return !continueFlag;
+    }
+
+    private boolean isFirstDateInvalid(boolean isValid, Boolean continueFlag) {
+        return isValid || continueFlag;
+    }
+
+    private HashMap<String, String> updateDateTimeArg(HashMap<String, String> dateAndTime, 
+                                                        String keyword) throws ParseException{
+        String endDate = dateAndTime.get(DATE_KEY);
+        String endTime = dateAndTime.get(TIME_KEY);
+        
+        switch(getDateValueType(keyword)) {
+            case DATE_VALUE:
+                //FALLTHROUGH
+            case DATETIME_VALUE_KEYWORD :
+                logger.info("Getting date: " + keyword);
+                endDate = (endDate.equals(EMPTY)) ? keyword : endDate;
+                break;
+            case TIME_VALUE:
+                logger.info("Getting time: " + keyword);
+                if (hasAmPm(keyword)) {
+                    logger.info("Convering endTime");
+                    endTime = convertToMilitaryTime(keyword);
+                }
+                endTime = (endTime.equals(EMPTY)) ? keyword : endTime;
+                break;
+            default:
+                logger.info("Invalid datetime");
+                dateAndTime.put(IS_VALID, null);
+                return dateAndTime;
+        }        
+        
+        dateAndTime.put(DATE_KEY, endDate);
+        dateAndTime.put(TIME_KEY, endTime);
+        return dateAndTime;
+        
     }
     
     private int getDateValueType(String dateTime) throws ParseException{
@@ -372,9 +505,8 @@ public class CommandParser {
     private boolean hasAmPm(String dateTime) {
         return dateTime.toLowerCase().contains(AM) || dateTime.toLowerCase().contains(PM);
     }
-
-    private void addEnd(String dateTime) throws ParseException{
-        
+    
+    private void addTime(String timeArg, String dateTime)  throws ParseException{
         dateTime = dateTime.trim();
         dateTime = translateDateTime(dateTime);
         
@@ -397,7 +529,15 @@ public class CommandParser {
         SimpleDateFormat standard = new SimpleDateFormat("ddMMyyyyHHmmss");
         String standardDate = standard.format(rawDate);
         logger.info("Time formatted: " + standardDate);
-        _arguments.put(END, standardDate);
+        _arguments.put(timeArg, standardDate);        
+    }
+    
+    private void addEnd(String dateTime) throws ParseException{
+        addTime(END, dateTime);
+    }
+    
+    private void addStart(String dateTime) throws ParseException{
+        addTime(START, dateTime);
     }
 
     private String translateDateTime(String dateTime) throws ParseException{
@@ -421,7 +561,7 @@ public class CommandParser {
         initEndValues();
         
         if(!END_VALUES.containsKey(dateTimeTokens[0])) {
-            throw new ParseException("No such date",0);
+            throw new ParseException("No such date: " + dateTimeTokens[0],0);
         }
         
         DateTime currDate = END_VALUES.get(dateTimeTokens[0]);
@@ -450,12 +590,24 @@ public class CommandParser {
                     "Action: " + getFormattedValue(ACTION) + "\n" + 
                     "Description: " + getFormattedValue(DESCRIPTION) + "\n" + 
                     "Priority: " + getFormattedValue(PRIORITY) + "\n" +
+                    "Start: " + getFormattedValue(START)+ "\n" +
                     "End: " + getFormattedValue(END));
+        
         result.append(getFormattedValue(ACTION));
-        result.append(getFormattedValue(DESCRIPTION));
+        
+        if(isModify()) {
+            result.append(getFormattedKey(DESCRIPTION));
+            result.append(getFormattedValue(DESCRIPTION));
+        } else {
+            result.append(getFormattedValue(DESCRIPTION));
+        }
         if(hasValue(PRIORITY)) {
             result.append(getFormattedKey(PRIORITY));
             result.append(getFormattedValue(PRIORITY));
+        }
+        if(hasValue(START)){
+            result.append(getFormattedKey(START));
+            result.append(getFormattedValue(START));
         }
         if(hasValue(END)){
             result.append(getFormattedKey(END));
@@ -464,6 +616,10 @@ public class CommandParser {
         return result;
     }
     
+    private boolean isModify() {
+        return _arguments.get(ACTION).equalsIgnoreCase("modify");
+    }
+
     public String getFormattedKey(String key){
         return "-" + key + " ";
     }
@@ -479,6 +635,7 @@ public class CommandParser {
         _arguments.put(PRIORITY, null);
         _arguments.put(DESCRIPTION, null);
         _arguments.put(END, null);
+        _arguments.put(START, null);
 
     }
     
