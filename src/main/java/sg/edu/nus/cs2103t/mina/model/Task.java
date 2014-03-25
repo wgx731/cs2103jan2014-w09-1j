@@ -43,6 +43,17 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _isCompleted = false;
     }
 
+    public Task(TaskType type, String description, String id, char priority,
+            Date createdTime, Date lastEditedTime, boolean isCompleted) {
+        _type = (TaskType) type;
+        _description = description;
+        _id = id;
+        _priority = priority;
+        _createdTime = createdTime;
+        _lastEditedTime = lastEditedTime;
+        _isCompleted = isCompleted;
+    }
+
     protected int compareTo(Task<?> otherTask) {
         int priorityComparedResult = comparePriority(_priority,
                 otherTask._priority);
@@ -133,15 +144,18 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_isCompleted ? "yes)" : "no)");
         return sb.toString();
     }
-    
+
     @Override
     public boolean equals(Object other) {
-    	if(other instanceof Task<?>) {
-    		Task<?> otherTask = (Task<?>) other;
-    		return this.compareTo(otherTask)==0;
-    	} else {
-    		return false;
-    	}
+        if (other instanceof Task<?>) {
+            Task<?> otherTask = (Task<?>) other;
+            if (!_id.equals(otherTask._id)) {
+                return false;
+            }
+            return this.compareTo(otherTask) == 0;
+        } else {
+            return false;
+        }
     }
-     
+
 }

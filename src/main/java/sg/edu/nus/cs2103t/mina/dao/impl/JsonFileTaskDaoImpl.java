@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.SortedSet;
 
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
@@ -21,13 +22,19 @@ import sg.edu.nus.cs2103t.mina.utils.JsonHelper;
  * @author duzhiyuan
  * @author joannemah
  */
+// @author A0105853H
 public class JsonFileTaskDaoImpl implements TaskDao {
 
     private static final String COMPLETED_SUFFIX = "-compl";
     private static final String FILE_EXTENSION = ".json";
+    private static final String EMPTY_FILE_ERROR = "can't load storage file content.";
 
     static String getCompletedSuffix() {
         return COMPLETED_SUFFIX;
+    }
+
+    static String getFileExtension() {
+        return FILE_EXTENSION;
     }
 
     private FileOperationHelper _fileOperationHelper;
@@ -38,6 +45,12 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     public JsonFileTaskDaoImpl() {
         _fileOperationHelper = new FileOperationHelper(COMPLETED_SUFFIX,
                 FILE_EXTENSION);
+        _fileOperationHelper.createFileStorage();
+    }
+
+    JsonFileTaskDaoImpl(Map<TaskType, String> storageMap) {
+        _fileOperationHelper = new FileOperationHelper(COMPLETED_SUFFIX,
+                FILE_EXTENSION, storageMap);
         _fileOperationHelper.createFileStorage();
     }
 
@@ -54,6 +67,9 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     @Override
     public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) throws IOException {
+        assert taskType != TaskType.UNKOWN;
+        assert taskSet != null;
+        assert taskSet.first().getType() == taskType;
         String json = JsonHelper.taskSetToJson(taskSet, taskType);
         BufferedWriter writer = getOutputWriter(_fileOperationHelper
                 .getFileLocation(taskType, isCompleted));
@@ -64,6 +80,7 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     @Override
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException {
+        assert taskType != TaskType.UNKOWN;
         BufferedReader reader = getInputReader(_fileOperationHelper
                 .getFileLocation(taskType, isCompleted));
         StringBuffer sb = new StringBuffer();
@@ -71,12 +88,12 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         while ((line = reader.readLine()) != null) {
             sb.append(line);
         }
-        SortedSet<? extends Task<?>> loadObject = JsonHelper.jsonToTaskSet(
+        SortedSet<? extends Task<?>> taskSet = JsonHelper.jsonToTaskSet(
                 sb.toString(), taskType);
-        if (loadObject == null) {
-            throw new IOException();
+        if (taskSet == null) {
+            throw new IOException(EMPTY_FILE_ERROR);
         }
-        return loadObject;
+        return taskSet;
     }
 
 }

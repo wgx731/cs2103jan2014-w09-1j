@@ -19,17 +19,17 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
-public class ObjectFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
+public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
 
     private static Logger logger = LogManager
-            .getLogger(ObjectFileTaskSetDaoImplTest.class.getName());
+            .getLogger(JsonFileTaskSetDaoImplTest.class.getName());
 
-    private ObjectFileTaskDaoImpl storage;
+    private JsonFileTaskDaoImpl storage;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        storage = new ObjectFileTaskDaoImpl(storageMap);
+        storage = new JsonFileTaskDaoImpl(storageMap);
     }
 
     @Override
@@ -62,11 +62,10 @@ public class ObjectFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         }
         String fileFullName = testFolder.getRoot() + "/";
         if (isCompleted) {
-            fileFullName += fileName + ObjectFileTaskDaoImpl
-                    .getCompletedSuffix() +
-                    ObjectFileTaskDaoImpl.getFileExtension();
+            fileFullName += fileName + JsonFileTaskDaoImpl.getCompletedSuffix() +
+                    JsonFileTaskDaoImpl.getFileExtension();
         } else {
-            fileFullName += fileName + ObjectFileTaskDaoImpl.getFileExtension();
+            fileFullName += fileName + JsonFileTaskDaoImpl.getFileExtension();
         }
         return new File(fileFullName);
     }

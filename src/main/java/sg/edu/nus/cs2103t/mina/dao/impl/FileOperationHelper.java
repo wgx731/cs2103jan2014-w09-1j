@@ -58,7 +58,7 @@ public class FileOperationHelper {
             createFileIfNotExist(getFileLocation(TaskType.DEADLINE, false));
             createFileIfNotExist(getFileLocation(TaskType.DEADLINE, true));
         } catch (IOException e) {
-            logger.error("failed to create file.");
+            logger.error("failed to create storage files.");
             logger.error(e, e);
             return false;
         }

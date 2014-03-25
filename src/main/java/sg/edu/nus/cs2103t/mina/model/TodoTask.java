@@ -1,5 +1,7 @@
 package sg.edu.nus.cs2103t.mina.model;
 
+import java.util.Date;
+
 /**
  * Task without restriction
  * 
@@ -21,6 +23,13 @@ public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
         _priority = priority;
     }
 
+    public TodoTask(TaskType type, String description, String id,
+            char priority, Date createdTime, Date lastEditedTime,
+            boolean isCompleted) {
+        super(type, description, id, priority, createdTime, lastEditedTime,
+                isCompleted);
+    }
+
     public int compareTo(TodoTask otherTask) {
         return super.compareTo((Task<?>) otherTask);
     }
@@ -29,6 +38,5 @@ public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
     public String toString() {
         return super.toString();
     }
-    
-    
+
 }

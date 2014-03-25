@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.SortedSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +47,10 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
         return COMPLETED_SUFFIX;
     }
 
+    static String getFileExtension() {
+        return FILE_EXTENSION;
+    }
+
     private FileOperationHelper _fileOperationHelper;
 
     /**
@@ -57,6 +62,12 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
         _fileOperationHelper.createFileStorage();
     }
 
+    ObjectFileTaskDaoImpl(Map<TaskType, String> fileLocationMap) {
+        _fileOperationHelper = new FileOperationHelper(COMPLETED_SUFFIX,
+                FILE_EXTENSION, fileLocationMap);
+        _fileOperationHelper.createFileStorage();
+    }
+
     private ObjectOutput getOutputWriter(String fileName) throws IOException {
         OutputStream file;
         try {
@@ -64,7 +75,7 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
             OutputStream buffer = new BufferedOutputStream(file);
             return new ObjectOutputStream(buffer);
         } catch (FileNotFoundException e) {
-            logger.error("file is not created.");
+            logger.error("storage file is not created.");
             logger.error(e, e);
             throw new IOException(String.format(FILE_NOT_FOUND_ERROR, fileName));
         }
@@ -74,10 +85,11 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
         InputStream file;
         try {
             file = new FileInputStream(fileName);
+
             InputStream buffer = new BufferedInputStream(file);
             return new ObjectInputStream(buffer);
         } catch (FileNotFoundException e) {
-            logger.error("file is not created.");
+            logger.error("storage file is not created.");
             logger.error(e, e);
             throw new IOException(String.format(FILE_NOT_FOUND_ERROR, fileName));
         }
@@ -86,8 +98,9 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
     @Override
     public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) throws IOException {
-        assert taskType != TaskType.UNKOWN : taskType;
-        assert taskSet != null : taskSet;
+        assert taskType != TaskType.UNKOWN;
+        assert taskSet != null;
+        assert taskSet.first().getType() == taskType;
         String fileLocation = _fileOperationHelper.getFileLocation(taskType,
                 isCompleted);
         ObjectOutput output = getOutputWriter(fileLocation);
@@ -98,7 +111,7 @@ public class ObjectFileTaskDaoImpl implements TaskDao {
     @Override
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException {
-        assert taskType != TaskType.UNKOWN : taskType;
+        assert taskType != TaskType.UNKOWN;
         String fileLocation = _fileOperationHelper.getFileLocation(taskType,
                 isCompleted);
         ObjectInput input = getInputReader(fileLocation);

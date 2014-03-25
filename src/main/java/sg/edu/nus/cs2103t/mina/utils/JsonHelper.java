@@ -14,6 +14,10 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -26,6 +30,16 @@ import com.google.gson.reflect.TypeToken;
  */
 public class JsonHelper {
 
+    private static class TaskDeserializer implements JsonDeserializer<Task<?>> {
+        @Override
+        public Task<?> deserialize(JsonElement arg0, Type arg1,
+                JsonDeserializationContext arg2) throws JsonParseException {
+            // TODO: force to use full constructor
+            return null;
+        }
+
+    }
+
     private static Gson gson = null;
 
     private static final Type TODO_TREESET_TYPE = new TypeToken<TreeSet<TodoTask>>() {
@@ -37,7 +51,9 @@ public class JsonHelper {
 
     private static Gson setUp() {
         return new GsonBuilder().enableComplexMapKeySerialization()
-                .serializeNulls().setDateFormat(DateFormat.LONG)
+                .serializeNulls()
+                .registerTypeAdapter(Task.class, new TaskDeserializer())
+                .setDateFormat(DateFormat.FULL, DateFormat.FULL)
                 .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                 .setPrettyPrinting().create();
     }
@@ -48,13 +64,13 @@ public class JsonHelper {
             gson = setUp();
         }
         switch (taskType) {
-            case TODO:
+            case TODO :
                 return gson.toJson(taskSet, TODO_TREESET_TYPE);
-            case DEADLINE:
+            case DEADLINE :
                 return gson.toJson(taskSet, DEADLINE_TREESET_TYPE);
-            case EVENT:
+            case EVENT :
                 return gson.toJson(taskSet, EVENT_TREESET_TYPE);
-            default:
+            default :
                 return null;
         }
     }
@@ -65,13 +81,13 @@ public class JsonHelper {
             gson = setUp();
         }
         switch (taskType) {
-            case TODO:
+            case TODO :
                 return gson.fromJson(json, TODO_TREESET_TYPE);
-            case DEADLINE:
+            case DEADLINE :
                 return gson.fromJson(json, DEADLINE_TREESET_TYPE);
-            case EVENT:
+            case EVENT :
                 return gson.fromJson(json, EVENT_TREESET_TYPE);
-            default:
+            default :
                 return null;
         }
     }

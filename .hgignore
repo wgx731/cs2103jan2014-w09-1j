@@ -67,3 +67,4 @@ release.properties
 ## Mina.hgignore
 ###################################################
 mina-*
+test-*
