@@ -266,7 +266,7 @@ public class DataParameter {
 		if (modifyParam.getDescription() != null) {
 			setDescription(modifyParam.getDescription());
 		}
-		if (modifyParam.getPriority() != 'M') {
+		if (modifyParam.getPriority() != _priority) {
 			setPriority(modifyParam.getPriority());
 		}
 		if (modifyParam.getStartDate() != null) {
