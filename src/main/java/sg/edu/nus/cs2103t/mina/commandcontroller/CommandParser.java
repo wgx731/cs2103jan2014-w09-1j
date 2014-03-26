@@ -26,6 +26,7 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandParser {
 
     
+    private static final String SEARCH = "search";
     private static final String UNDO = "undo";
     private static final String EXIT = "exit";
     private static final String COMPLETE = "complete";
@@ -70,6 +71,7 @@ public class CommandParser {
     private static final int DATETIME_VALUE_KEYWORD = 0;
     private static final int DATE_VALUE = 1;
     private static final int TIME_VALUE = 2;
+    private static final int PROPER_DATE_TIME = 3;
     private static final int INVALID_VALUE = -1;
     
     private static final int PRIORITY_FLAG = 0;
@@ -79,6 +81,7 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
+    
     
     
     private HashMap<String, String> _arguments;
@@ -117,8 +120,8 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("remove", DELETE);
         ACTIONS_KEYWORDS.put(DELETE, DELETE);
         
-        ACTIONS_KEYWORDS.put("search", "search");
-        ACTIONS_KEYWORDS.put("find", "search");
+        ACTIONS_KEYWORDS.put(SEARCH, SEARCH);
+        ACTIONS_KEYWORDS.put("find", SEARCH);
         
         ACTIONS_KEYWORDS.put(DISPLAY, DISPLAY);
         ACTIONS_KEYWORDS.put("filter", DISPLAY);
@@ -231,6 +234,10 @@ public class CommandParser {
             dTokens.remove(ACTION_INDEX);
             if(isRequiredTaskId()) {
                 dTokens = updateTaskID(dTokens);
+            }
+            
+            if(_arguments.get(ACTION).equals(SEARCH)){
+                return userInput.trim();
             }
             
         } else {
@@ -391,7 +398,7 @@ public class CommandParser {
                 
             }
             
-            if(isModify() && 
+            if(isModifyAction() && 
                     TO_TASK_TYPE_KEYWORDS.containsKey(keyword) &&
                     !hasValue(TO_TASK_TYPE) && 
                     (TO_TASK_TYPE_KEYWORDS.get(keyword) || isWrapped)) {
@@ -529,8 +536,11 @@ public class CommandParser {
                 //FALLTHROUGH
             case DATETIME_VALUE_KEYWORD :
                 logger.info("Getting date: " + keyword);
-                endDate = (endDate.equals(EMPTY)) ? keyword : endDate;
+                endDate = (endDate.equals(EMPTY)) ? converToMilitaryDate(keyword) : endDate;
                 break;
+            case PROPER_DATE_TIME :
+                endDate = (endDate.equals(EMPTY)) ? keyword : endDate;
+                break;                
             case TIME_VALUE:
                 logger.info("Getting time: " + keyword);
                 if (hasAmPm(keyword)) {
@@ -551,6 +561,24 @@ public class CommandParser {
         
     }
     
+    private String converToMilitaryDate(String date) throws ParseException{
+        
+        initEndValues();
+        
+        String converted;
+        
+        if(END_VALUES.containsKey(date)) {
+            DateTime currDate = END_VALUES.get(date);
+            converted = currDate.format("DDMMYYYY");
+        } else {
+            SimpleDateFormat milDateFormat = new SimpleDateFormat("ddMMyyyy");
+            Date convertedDate = DateUtil.parse(date);
+            converted = milDateFormat.format(convertedDate);
+        }
+        
+        return converted;
+    }
+
     private int getDateValueType(String dateTime) throws ParseException{
         
         //Check keyword
@@ -561,9 +589,12 @@ public class CommandParser {
         //check actual date
         String format = DateUtil.determineDateFormat(dateTime);
         
-        if(format!=null){
+        if(format!=null && (format.equals("ddMMyyyyHHmm") || 
+                            format.equals("ddMMyyyyHHmmss"))){
+            return PROPER_DATE_TIME;
+        } else if(format!=null) {
             return DATE_VALUE;
-        } 
+        }
         
         //check time
         if(isTimeFormat(dateTime)) {
@@ -659,7 +690,7 @@ public class CommandParser {
                     "Fomat: " + format + "\n" +
                     "Date: " + rawDate.toString());
         
-        if(!format.contains("HH")){
+        if(!format.contains("HH") && !isFilterAction()){
             logger.info("No time");
             int sec = 1000;
             int min = sec*60;
@@ -667,12 +698,21 @@ public class CommandParser {
             rawDate.setTime(rawDate.getTime() + hour*23 + min*59 + sec*59);
         }
         
-        SimpleDateFormat standard = new SimpleDateFormat("ddMMyyyyHHmmss");
+        SimpleDateFormat standard;
+        if(!format.contains("HH") && isFilterAction()) {
+            standard = new SimpleDateFormat("ddMMyyyy");
+        } else {
+            standard = new SimpleDateFormat("ddMMyyyyHHmmss");
+        }
         String standardDate = standard.format(rawDate);
         logger.info("Time formatted: " + standardDate);
         _arguments.put(timeArg, standardDate);        
     }
     
+    private boolean isFilterAction() {
+        return _arguments.get(ACTION).equalsIgnoreCase(DISPLAY);
+    }
+
     private void addEnd(String dateTime) throws ParseException{
         addTime(END, dateTime);
     }
@@ -740,12 +780,12 @@ public class CommandParser {
             result.append(getFormattedValue(TASKID));
         }
         
-        if(isModify() && hasValue(TO_TASK_TYPE)) {
+        if(isModifyAction() && hasValue(TO_TASK_TYPE)) {
             result.append(getFormattedKey(TO_TASK_TYPE));
             result.append(getFormattedValue(TO_TASK_TYPE));            
         }
         
-        if(isModify() && hasValue(DESCRIPTION)) {
+        if(isModifyAction() && hasValue(DESCRIPTION)) {
             result.append(getFormattedKey(DESCRIPTION));
             result.append(getFormattedValue(DESCRIPTION));
         } else if(hasValue(DESCRIPTION)){
@@ -777,7 +817,7 @@ public class CommandParser {
         return false;
     }
 
-    private boolean isModify() {
+    private boolean isModifyAction() {
         return _arguments.get(ACTION).equalsIgnoreCase(MODIFY);
     }
 

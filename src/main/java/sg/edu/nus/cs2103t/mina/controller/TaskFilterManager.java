@@ -204,22 +204,27 @@ public class TaskFilterManager {
 	    ArrayList<Task<?>> filteredResult = new ArrayList<Task<?>>();
 	    Date start = filters.getStart();
 	    Date end = filters.getEnd();
-	    boolean hasTime = filters.hasTime();
+	    boolean hasStartTime = filters.hasStartTime();
+	    boolean hasEndTime = filters.hasEndTime();
 	    
-	    logger.info("Date has Time? " + hasTime);
-        if (!hasTime) {
-            logger.info("Writing date to appropriate format for START: " + start + "and END: " + end);
-            start = sanitiseDate(start, IS_START);
-            end = sanitiseDate(end, IS_END);
-            logger.info("Date returned START: " + start + "and END: " + end);
-        }
+	    if (!hasStartTime) {
+	        logger.info("Writing date to appropriate format for START: " + start );
+            start = sanitiseDate(start, IS_START);	        
+	    }
+	    
+	    if (!hasEndTime) {
+	        logger.info("Writing date to appropriate format for END: " + end);
+	        end = sanitiseDate(end, IS_END);
+	    }
+	    logger.info("Date returned START: " + start + "and END: " + end);
+	    
         
         //Only EventTask / DeadlineTask will be checked
 	    for (Task<?> task: result) {
 	        assert(!(task instanceof TodoTask));
 	        logger.info("START: " + start + " END: " + end);
 	        logger.info(task);
-	        if(isInDateRange(task, start, end, hasTime)) {
+	        if(isInDateRange(task, start, end)) {
 	            logger.info("Within range");
 	            filteredResult.add(task);
 	        } else {
@@ -239,8 +244,7 @@ public class TaskFilterManager {
 	 * @return
 	 */
     private boolean isInDateRange(Task<?> task, 
-                                 Date start, Date end, 
-                                 boolean hasTime) {
+                                 Date start, Date end) {
         
         //Guard clause
         assert(task instanceof EventTask || 

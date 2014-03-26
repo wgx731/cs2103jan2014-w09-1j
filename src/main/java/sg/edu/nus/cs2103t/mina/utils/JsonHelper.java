@@ -42,7 +42,7 @@ public class JsonHelper {
     private static final String KEY_START_TIME = "_startTime";
     private static final String KEY_END_TIME = "_endTime";
 
-    private static final String DATE_FORMAT = "EEEE, dd/MM/yyyy/hh:mm:ss.SSS";
+    private static final String DATE_FORMAT = "EEEE, dd/MM/yyyy/HH:mm:ss.SSS";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(
             DATE_FORMAT);
 

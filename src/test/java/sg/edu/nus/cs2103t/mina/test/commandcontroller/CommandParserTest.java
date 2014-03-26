@@ -442,9 +442,46 @@ public class CommandParserTest {
         assertEquals("complete event 9999", result);   
         
         //filter no special
-        variation = "filter deadline complete -start 12/3/2007";
+        variation = "filter deadline complete";
         result = parser.convertCommand(variation);  
         assertEquals("display deadline complete", result);
+        
+        //filter start date
+        variation = "filter -start 12/3/2007 deadline complete";
+        result = parser.convertCommand(variation);  
+        assertEquals("display deadline complete -start 12032007", result);
+        
+        /* XXX Boundary Value analysis, intersecting date format,
+         * dd/MM/yyyy (another EP) with informal time (one EP) */
+        //filter start date with time
+        variation = "filter -start 12/3/2007 9am deadline complete";
+        result = parser.convertCommand(variation);  
+        assertEquals("display deadline complete -start 12032007090000", result);
+        
+        //filter end date with time
+        variation = "filter deadline -by today 2000 complete";
+        result = parser.convertCommand(variation);  
+        resultDate = today.format("DDMMYYYY");
+        end = resultDate + "200000";
+        assertEquals("display deadline complete -end " + end, result);
+
+        //filter start date and end date with time
+        variation = "filter -from 12/5/2007 deadline -by today 2000 complete";
+        result = parser.convertCommand(variation);  
+        resultDate = today.format("DDMMYYYY");
+        end = resultDate + "200000";
+        assertEquals("display deadline complete -start 12052007 -end " + end, result);
+        
+        //search
+        variation = "search haha hehe";
+        result = parser.convertCommand(variation);  
+        assertEquals("search haha hehe", result);
+        
+        //search with phrases
+        variation = "search haha 'hohoh' hehe";
+        result = parser.convertCommand(variation);  
+        assertEquals("search haha 'hohoh' hehe", result);        
+        
     }
 
     @Test

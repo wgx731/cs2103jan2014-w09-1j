@@ -514,10 +514,14 @@ public class CommandProcessor {
         }
         Date startDate = null;
         Date endDate = null;
+        boolean hasStartTime = false; 
+        boolean hasEndTime = false;
+        
         if (parameters.contains("-end")) {
             int indexOfEndDate = parameters.indexOf("-end") + 1;
             try {
                 endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+                hasEndTime = hasTime(parameters.get(indexOfEndDate));
                 parameters.remove(indexOfEndDate);
                 parameters.remove(indexOfEndDate - 1);
             } catch (ParseException e) {
@@ -528,6 +532,7 @@ public class CommandProcessor {
             int indexOfStartDate = parameters.indexOf("-start") + 1;
             try {
                 startDate = DateUtil.parse(parameters.get(indexOfStartDate));
+                hasStartTime = hasTime(parameters.get(indexOfStartDate));
                 parameters.remove(indexOfStartDate);
                 parameters.remove(indexOfStartDate - 1);
             } catch (ParseException e) {
@@ -537,6 +542,8 @@ public class CommandProcessor {
         FilterParameter filterParam = new FilterParameter(parameters);
         filterParam.setStart(startDate);
         filterParam.setEnd(endDate);
+        filterParam.setStartTime(hasStartTime);
+        filterParam.setEndTime(hasEndTime);
         return filterParam;
     }
 
@@ -545,6 +552,11 @@ public class CommandProcessor {
     // string contains parameter data
     // @return modifyParam
     // DataParameter instance contains parameter for modify method
+
+    private boolean hasTime(String date) {
+        String format = DateUtil.determineDateFormat(date);
+        return format.contains("HH");
+    }
 
     public DataParameter processModifyParameter(String parameterString) {
         DataParameter modifyParam = new DataParameter();
