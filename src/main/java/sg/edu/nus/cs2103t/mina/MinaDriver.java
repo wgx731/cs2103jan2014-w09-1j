@@ -41,11 +41,13 @@ public class MinaDriver {
     private static TaskFilterManager taskFilterManager;
     private static MinaView uiView;
     private static DataSyncManager dataSyncManager;
+    private static Timer dataSyncTimer;
 
     static void initDao() {
         TaskDao taskDao = new JsonFileTaskDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao);
-        new Timer().schedule(dataSyncManager, 0,
+        dataSyncTimer = new Timer();
+        dataSyncTimer.schedule(dataSyncManager, 0,
                 Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
@@ -64,15 +66,15 @@ public class MinaDriver {
 
     static void initView() {
         switch (ConfigHelper.getProperty(VIEW_TYPE_KEY)) {
-            case GUI:
+            case GUI :
                 MinaGuiUI gui = new MinaGuiUI(commandController);
                 gui.open();
                 uiView = gui;
                 break;
-            case CONSOLE:
+            case CONSOLE :
                 uiView = new ConsoleUI(System.in, System.out, commandController);
                 break;
-            default:
+            default :
                 throw new Error(UNKOWN_TYPE_ERROR);
         }
         uiView.updateLists();
@@ -94,6 +96,14 @@ public class MinaDriver {
         MinaGuiUI gui = new MinaGuiUI(commandController);
         gui.updateLists();
         return gui.open();
+    }
+
+    public void cleanUp() {
+        taskDataManager.resetTrees();
+    }
+
+    public void stopSync() {
+        dataSyncTimer.cancel();
     }
 
     public void processLoop() {

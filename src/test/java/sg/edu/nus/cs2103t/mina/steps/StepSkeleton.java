@@ -3,11 +3,18 @@ package sg.edu.nus.cs2103t.mina.steps;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.jbehave.core.annotations.AfterStories;
+import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStories;
+import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.Named;
+import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
+import org.junit.Assert;
 
 import sg.edu.nus.cs2103t.mina.MinaDriver;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
@@ -19,14 +26,21 @@ public abstract class StepSkeleton {
     protected static final int INPUT_TEXT_INDEX = 0;
     protected static final int FEEDBACK_LABEL_INDEX = 0;
     protected static final int UNKOWN_INDEX = -1;
-    protected static final int EVENT_LABEL_INDEX = 0;
-    protected static final int DEADLINE_LABEL_INDEX = 1;
-    protected static final int TODO_LABEL_INDEX = 2;
+    protected static final int EVENT_LIST_INDEX = 0;
+    protected static final int DEADLINE_LIST_INDEX = 1;
+    protected static final int TODO_LIST_INDEX = 2;
 
     protected static final String EMPTY_COMMAND = "";
 
     protected static SWTBot bot;
     protected static MinaDriver driver;
+
+    private static FileOperationHelper jsonFileOperationHelper = new FileOperationHelper(
+            JsonFileTaskDaoImpl.getCompletedSuffix(),
+            JsonFileTaskDaoImpl.getFileExtension());
+    private static FileOperationHelper objectFileOperationHelper = new FileOperationHelper(
+            ObjectFileTaskDaoImpl.getCompletedSuffix(),
+            ObjectFileTaskDaoImpl.getFileExtension());
 
     private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
     private static Thread uiThread;
@@ -66,25 +80,27 @@ public abstract class StepSkeleton {
     }
 
     @BeforeStories
-    public void setUp() throws InterruptedException, BrokenBarrierException {
+    public void beforeStories() throws InterruptedException,
+            BrokenBarrierException {
         swtBarrier.await();
     }
 
     @AfterStories
-    public void tearDown() throws InterruptedException {
+    public void afterStories() throws InterruptedException {
         Display.getDefault().syncExec(new Runnable() {
             public void run() {
                 appShell.close();
             }
         });
-        FileOperationHelper jsonFileOperationHelper = new FileOperationHelper(
-                JsonFileTaskDaoImpl.getCompletedSuffix(),
-                JsonFileTaskDaoImpl.getFileExtension());
-        FileOperationHelper objectFileOperationHelper = new FileOperationHelper(
-                ObjectFileTaskDaoImpl.getCompletedSuffix(),
-                ObjectFileTaskDaoImpl.getFileExtension());
+        driver.cleanUp();
+        driver.stopSync();
         jsonFileOperationHelper.cleanUp();
         objectFileOperationHelper.cleanUp();
+    }
+
+    @BeforeScenario
+    public void beforeScenario() {
+        driver.cleanUp();
     }
 
     /**
@@ -94,4 +110,5 @@ public abstract class StepSkeleton {
      * at this point, this class will close the {@link Shell} automatically.
      */
     protected abstract Shell createShell();
+
 }
