@@ -269,11 +269,12 @@ public class MinaGuiUI extends MinaView {
                     case SWT.CR:
                         String command = _userInputTextField.getText();
                         if (_commandHistory.size() < 5) {
-                            _commandHistory.offer(command);
+                            _commandHistory.push(command);
                         } else {
-                            _commandHistory.poll();
-                            _commandHistory.offer(command);
+                            _commandHistory.removeLast();
+                            _commandHistory.push(command);
                         }
+                        _commandPosition = 0;
                         _taskView = _commandController.processUserInput(
                                 command, _eventPage, _deadlinePage, _todoPage);
                         _userInputTextField.setText(EMPTY_STRING);

@@ -432,6 +432,10 @@ public class CommandProcessor {
             addParam.setDescription(description);
             int indexOfStartDate = parameters.indexOf("-start") + 1;
             int indexOfEndDate = parameters.indexOf("-end") + 1;
+            if (indexOfEndDate == 0){
+            	addParam = null;
+            	return addParam;
+            }
             try {
                 Date startDate = DateUtil.parse(parameters
                         .get(indexOfStartDate));
@@ -475,6 +479,9 @@ public class CommandProcessor {
             int indexOfPriority = parameters.indexOf("-priority") + 1;
             char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
             addParam.setPriority(priority);
+        }
+        if (addParam.getDescription().equals("")){
+        	addParam = null;
         }
         return addParam;
     }
@@ -629,6 +636,66 @@ public class CommandProcessor {
             }
             modifyParam.setDescription(newDescription);
         }
+        if (modifyParam.getOriginalTaskType()==TaskType.TODO
+        		&&modifyParam.getNewTaskType()==TaskType.DEADLINE
+        		&&modifyParam.getEndDate()==null){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        if (modifyParam.getOriginalTaskType()==TaskType.TODO
+        		&&modifyParam.getNewTaskType()==TaskType.EVENT
+        		&&(modifyParam.getEndDate()==null||modifyParam.getStartDate()==null)){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        if (modifyParam.getOriginalTaskType()==TaskType.DEADLINE
+        		&&modifyParam.getNewTaskType()==TaskType.EVENT
+        		&&modifyParam.getStartDate()==null){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        if (modifyParam.getOriginalTaskType()==TaskType.TODO
+        		&&modifyParam.getNewTaskType()==TaskType.TODO
+        		&&(modifyParam.getStartDate()!=null
+        		||modifyParam.getEndDate()!=null)){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        if (modifyParam.getOriginalTaskType()==TaskType.DEADLINE
+        		&&modifyParam.getNewTaskType()==TaskType.DEADLINE
+        		&&modifyParam.getStartDate()!=null){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        if (modifyParam.getStartDate()!=null||modifyParam.getEndDate()!=null){
+        	if (modifyParam.getStartDate()!=null&&modifyParam.getEndDate()!=null){
+        		if (modifyParam.getStartDate().after(modifyParam.getEndDate())){
+        			modifyParam = null;
+        			return modifyParam;
+        		}
+        	} else if (modifyParam.getStartDate()!=null){
+        		Task<?> toModifyTask = modifyParam.getTaskObject();
+        		if (toModifyTask.getType()==TaskType.EVENT){
+        			if (modifyParam.getStartDate().after(((EventTask)toModifyTask).getEndTime())){
+        				modifyParam = null;
+        				return modifyParam;
+        			}
+        		} else if (toModifyTask.getType()==TaskType.DEADLINE){
+        			if (modifyParam.getStartDate().after(((DeadlineTask)toModifyTask).getEndTime())){
+        				modifyParam = null;
+        				return modifyParam;
+        			}
+        		}
+        	} else if (modifyParam.getEndDate()!=null){
+        		Task<?> toModifyTask = modifyParam.getTaskObject();
+        		if (toModifyTask.getType()==TaskType.EVENT){
+        			if (modifyParam.getEndDate().before(((EventTask)toModifyTask).getStartTime())){
+        				modifyParam = null;
+        				return modifyParam;
+        			}
+        		}
+        	}
+        }
         return modifyParam;
     }
 
@@ -660,13 +727,29 @@ public class CommandProcessor {
         } else {
             pageNum = 0;
         }
+        /*
+        if (markDeleteParam.getOriginalTaskType()==null||markDeleteParam.getOriginalTaskType()==TaskType.UNKOWN){
+        	markDeleteParam = null;
+        	return markDeleteParam;
+        }
+        if (markDeleteParam.getTaskId() == -1){
+        	markDeleteParam = null;
+        	return markDeleteParam;
+        }
+        */
         ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original,
                 pageNum);
+        /*
+        if (markDeleteParam.getTaskId()>=pageOfMarkDeleteObject.size()){
+            markDeleteParam = null;
+            return markDeleteParam;
+        }
+        */
         Task<?> markDeleteTask = pageOfMarkDeleteObject
                 .get(userfriendlyTaskID - 1);
         markDeleteParam.setTaskObject(markDeleteTask);
         markDeleteParam.setTaskID(userfriendlyTaskID);
-
+        
         return markDeleteParam;
     }
 
@@ -730,46 +813,5 @@ public class CommandProcessor {
             undoModifyParameter.setEndDate(oldDeadlineTask.getEndTime());
         }
         return undoModifyParameter;
-    }
-
-    public ArrayList<String> getTodoTask() {
-        SortedSet<TodoTask> todo = _taskDataManager.getUncompletedTodoTasks();
-        ArrayList<TodoTask> todoList = new ArrayList<TodoTask>(todo);
-        ArrayList<String> todoString = new ArrayList<String>();
-        for (int i = 0; i < todoList.size(); i++) {
-            todoString.add((i + 1) + ". " + todoList.get(i).getDescription());
-        }
-        return todoString;
-    }
-
-    public ArrayList<String> getDeadlineTask() {
-        SortedSet<DeadlineTask> deadline = _taskDataManager
-                .getUncompletedDeadlineTasks();
-        ArrayList<DeadlineTask> deadlineList = new ArrayList<DeadlineTask>(
-                deadline);
-        ArrayList<String> deadlineString = new ArrayList<String>();
-        for (int i = 0; i < deadlineList.size(); i++) {
-            deadlineString.add((i + 1) + ". " +
-                    deadlineList.get(i).getDescription() +
-                    " by " +
-                    deadlineList.get(i).getEndTime());
-        }
-        return deadlineString;
-    }
-
-    public ArrayList<String> getEventTask() {
-        SortedSet<EventTask> event = _taskDataManager
-                .getUncompletedEventTasks();
-        ArrayList<EventTask> eventList = new ArrayList<EventTask>(event);
-        ArrayList<String> eventString = new ArrayList<String>();
-        for (int i = 0; i < eventList.size(); i++) {
-            eventString.add((i + 1) + ". " +
-                    eventList.get(i).getDescription() +
-                    " from " +
-                    eventList.get(i).getStartTime() +
-                    " to " +
-                    eventList.get(i).getEndTime());
-        }
-        return eventString;
     }
 }
