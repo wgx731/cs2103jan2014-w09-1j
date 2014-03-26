@@ -227,7 +227,7 @@ public class DataParameter {
 			return TaskType.TODO;
 		}
 
-		return TaskType.UNKOWN;
+		return TaskType.UNKNOWN;
 	}
 
 	/**

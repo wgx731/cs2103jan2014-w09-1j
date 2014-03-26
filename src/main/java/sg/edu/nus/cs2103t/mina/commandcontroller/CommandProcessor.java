@@ -767,7 +767,7 @@ public class CommandProcessor {
         } else if (taskTypeString.equals("event")) {
             return TaskType.EVENT;
         } else {
-            return TaskType.UNKOWN;
+            return TaskType.UNKNOWN;
         }
     }
 

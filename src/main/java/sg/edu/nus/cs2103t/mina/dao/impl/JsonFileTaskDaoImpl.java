@@ -67,7 +67,7 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     @Override
     public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) throws IOException {
-        assert taskType != TaskType.UNKOWN;
+        assert taskType != TaskType.UNKNOWN;
         assert taskSet != null;
         if (!taskSet.isEmpty()) {
             assert taskSet.first().getType() == taskType;
@@ -82,7 +82,7 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     @Override
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException {
-        assert taskType != TaskType.UNKOWN;
+        assert taskType != TaskType.UNKNOWN;
         BufferedReader reader = getInputReader(_fileOperationHelper
                 .getFileLocation(taskType, isCompleted));
         StringBuffer sb = new StringBuffer();
