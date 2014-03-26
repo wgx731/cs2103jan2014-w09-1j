@@ -136,6 +136,7 @@ public class TaskFilterManagerFilterTest {
     @Test
     public void testEventsOnly() {
         
+        /*XXX EP: Either uncompleted event only or not at all*/
         ArrayList<Task<?>> test = getResult(FilterType.EVENT);
         SortedSet<EventTask> events = tdmStub.getUncompletedEventTasks();
         int numOfEvents = events.size();
@@ -187,7 +188,11 @@ public class TaskFilterManagerFilterTest {
      */
     @Test
     public void testFilterCombination() {
-
+        
+        /* XXX Testing for EP: UNCOMPLETE DEADLINE UNCOMPLETE EVENT */
+        /* XXX Testing for EP: in fact, this test tries to cover all possible EP
+         *      P({UNCOMPLETE, COMPLETE} X {EVENT, DEADLINE, TODO}) */
+        
         // With deadlines and events
         FilterType[] filters = { FilterType.DEADLINE, FilterType.EVENT };
         

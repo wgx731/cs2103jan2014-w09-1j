@@ -451,6 +451,8 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);  
         assertEquals("display deadline complete -start 12032007", result);
         
+        /* XXX Boundary Value analysis, intersecting date format,
+         * dd/MM/yyyy (another EP) with informal time (one EP) */
         //filter start date with time
         variation = "filter -start 12/3/2007 9am deadline complete";
         result = parser.convertCommand(variation);  
@@ -469,8 +471,6 @@ public class CommandParserTest {
         resultDate = today.format("DDMMYYYY");
         end = resultDate + "200000";
         assertEquals("display deadline complete -start 12052007 -end " + end, result);
-        
-        
         
         //search
         variation = "search haha hehe";
