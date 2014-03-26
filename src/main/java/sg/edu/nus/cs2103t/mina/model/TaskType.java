@@ -11,7 +11,7 @@ package sg.edu.nus.cs2103t.mina.model;
 
 public enum TaskType {
 
-    TODO("todo"), EVENT("event"), DEADLINE("deadline"), UNKOWN("unknown");
+    TODO("todo"), EVENT("event"), DEADLINE("deadline"), UNKNOWN("unknown");
 
     private String _type;
 
