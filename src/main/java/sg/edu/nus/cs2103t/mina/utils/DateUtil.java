@@ -223,6 +223,7 @@ public final class DateUtil {
      */
     public static String displayDateOnly(Calendar date){
     	Calendar todayCalendar = Calendar.getInstance(TimeZone.getDefault());
+    	DateTime todayDateTime = DateTime.today(TimeZone.getDefault());
     	DateTime dateToDisplay = new DateTime(date.get(Calendar.YEAR)+"-"+
     			String.format("%02d" ,(date.get(Calendar.MONTH)+1))+"-"+String.format("%02d" ,date.get(Calendar.DAY_OF_MONTH))+" "+
     			String.format("%02d" ,date.get(Calendar.HOUR_OF_DAY))+":"+String.format("%02d" ,date.get(Calendar.MINUTE))+":"+
@@ -236,7 +237,13 @@ public final class DateUtil {
     	} else if (thisSun.numDaysFrom(dateToDisplay)>=1&&dateToDisplay.numDaysFrom(nextSun)>=0){
     		return "Next ".concat(dateToDisplay.format("WWWW", Locale.US));
     	} else if (lastSun.numDaysFrom(dateToDisplay)>=1&&dateToDisplay.numDaysFrom(thisSun)>=0){
-    		return dateToDisplay.format("WWWW", Locale.US);
+    		if (todayDateTime.numDaysFrom(dateToDisplay)==0){
+    			return "Today";
+    		} else if (todayDateTime.numDaysFrom(dateToDisplay)==1){
+    			return "Tomorrow";
+    		} else {
+    			return dateToDisplay.format("WWWW", Locale.US);
+    		}
     	} else {
     		return "Last ".concat(dateToDisplay.format("WWWW", Locale.US));
     	}
@@ -263,10 +270,12 @@ public final class DateUtil {
     private static DateTime getThisSunday(Calendar currentDate){
     	Calendar thisSun = Calendar.getInstance();
     	thisSun.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-    	return new DateTime(thisSun.get(Calendar.YEAR)+"-"+
+    	DateTime thisSunday = new DateTime(thisSun.get(Calendar.YEAR)+"-"+
     			String.format("%02d" ,(thisSun.get(Calendar.MONTH)+1))+"-"+String.format("%02d" ,thisSun.get(Calendar.DAY_OF_MONTH))+" "+
     			String.format("%02d" ,thisSun.get(Calendar.HOUR_OF_DAY))+":"+String.format("%02d" ,thisSun.get(Calendar.MINUTE))+":"+
     			String.format("%02d" ,thisSun.get(Calendar.SECOND)));
+    	thisSunday = thisSunday.plusDays(7);
+    	return thisSunday;
     }
     
     
