@@ -421,7 +421,8 @@ public class CommandParser {
             }
             
             
-            if (!hasValue(DESCRIPTION)) {
+            if (!hasValue(DESCRIPTION) && 
+                    !(isModifyAction() && keyword.equals("-description"))) {
                 String word = dTokens.get(i).trim();
                 if(!word.equals(EMPTY)){
                     description.append(dTokens.get(i));
