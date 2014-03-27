@@ -531,9 +531,7 @@ public class MinaGuiUI extends MinaView {
 				if (currentDate.before(_today)
 						&& !DateUtil.isSameDateCalendar(_today, currentDate)) {
 					eventStyle.start = initialCursorPosition;
-					currentDateString = currentDate.get(Calendar.DATE) + "/"
-							+ (currentDate.get(Calendar.MONTH) + 1) + "/"
-							+ currentDate.get(Calendar.YEAR) + "\n";
+					currentDateString = DateUtil.displayDateOnly(currentDate)+"\n";
 					eventStyle.length = currentDateString.length();
 					eventStyle.foreground = SWTResourceManager
 							.getColor(SWT.COLOR_GRAY);
@@ -560,9 +558,7 @@ public class MinaGuiUI extends MinaView {
 					initialCursorPosition += currentDateString.length();
 				} else {
 					eventStyle.start = initialCursorPosition;
-					currentDateString = currentDate.get(Calendar.DATE) + "/"
-							+ (currentDate.get(Calendar.MONTH) + 1) + "/"
-							+ currentDate.get(Calendar.YEAR) + "\n";
+					currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
 					eventStyle.length = currentDateString.length();
 					eventStyle.foreground = SWTResourceManager.getColor(155,
 							187, 89);
@@ -574,31 +570,11 @@ public class MinaGuiUI extends MinaView {
 			String eventStringIndex = "\t" + (i + 1) + ".\t";
 			String eventDescription = event.getDescription() + "\n";
 			String eventTime = "\t\t"
-					+ ((itemStartDate.get(Calendar.AM_PM) == 1 && itemStartDate
-							.get(Calendar.HOUR) == 0) ? (itemStartDate
-							.get(Calendar.HOUR) + 12) : itemStartDate
-							.get(Calendar.HOUR))
-					+ ":"
-					+ String.format("%02d", itemStartDate.get(Calendar.MINUTE))
-					+ " "
-					+ (itemStartDate.get(Calendar.AM_PM) == 0 ? "am" : "pm")
+					+ DateUtil.displayTimeOnly(itemStartDate)
 					+ " - "
-					+ (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? ""
-							: String.format("%02d",
-									itemEndDate.get(Calendar.DATE))
-									+ "/"
-									+ String.format("%02d",
-											itemEndDate.get(Calendar.MONTH) + 1)
-									+ "/"
-									+ itemEndDate.get(Calendar.YEAR)
-									+ " ")
-					+ ((itemEndDate.get(Calendar.AM_PM) == 1 && itemEndDate
-							.get(Calendar.HOUR) == 0) ? (itemEndDate
-							.get(Calendar.HOUR) + 12) : itemEndDate
-							.get(Calendar.HOUR)) + ":"
-					+ String.format("%02d", itemEndDate.get(Calendar.MINUTE))
-					+ " "
-					+ (itemEndDate.get(Calendar.AM_PM) == 0 ? "am" : "pm")
+					+ (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? 
+							DateUtil.displayDateOnly(itemEndDate)
+							: DateUtil.displayDateTime(itemEndDate))
 					+ "\n";
 			String eventCompleted = (event.isCompleted() ? "\t\tdone\n" : "");
 			_eventListUI.append(eventStringIndex);
@@ -643,9 +619,7 @@ public class MinaGuiUI extends MinaView {
 				if (currentDate.before(_today)
 						&& !DateUtil.isSameDateCalendar(_today, currentDate)) {
 					deadlineStyle.start = initialCursorPosition;
-					currentDateString = currentDate.get(Calendar.DATE) + "/"
-							+ (currentDate.get(Calendar.MONTH) + 1) + "/"
-							+ currentDate.get(Calendar.YEAR) + "\n";
+					currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
 					deadlineStyle.length = currentDateString.length();
 					deadlineStyle.foreground = SWTResourceManager
 							.getColor(SWT.COLOR_GRAY);
@@ -672,9 +646,7 @@ public class MinaGuiUI extends MinaView {
 					initialCursorPosition += currentDateString.length();
 				} else {
 					deadlineStyle.start = initialCursorPosition;
-					currentDateString = currentDate.get(Calendar.DATE) + "/"
-							+ (currentDate.get(Calendar.MONTH) + 1) + "/"
-							+ currentDate.get(Calendar.YEAR) + "\n";
+					currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
 					deadlineStyle.length = currentDateString.length();
 					deadlineStyle.foreground = SWTResourceManager.getColor(155,
 							187, 89);
@@ -686,12 +658,7 @@ public class MinaGuiUI extends MinaView {
 			String deadlineStringIndex = "\t" + (i + 1) + ". ";
 			String deadlineDescription = deadline.getDescription();
 			String deadlineTime = " by "
-					+ ((itemDate.get(Calendar.AM_PM) == 1 && itemDate
-							.get(Calendar.HOUR) == 0) ? (itemDate
-							.get(Calendar.HOUR) + 12) : itemDate
-							.get(Calendar.HOUR)) + ":"
-					+ String.format("%02d", itemDate.get(Calendar.MINUTE))
-					+ " " + (itemDate.get(Calendar.AM_PM) == 0 ? "am" : "pm")
+					+ DateUtil.displayTimeOnly(itemDate)
 					+ "\n";
 			String deadlineCompleted = (deadline.isCompleted() ? "\t\tdone\n"
 					: "");
