@@ -26,6 +26,7 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandParser {
 
     
+    private static final String REDO = "redo";
     private static final String SEARCH = "search";
     private static final String UNDO = "undo";
     private static final String EXIT = "exit";
@@ -81,6 +82,10 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
+    private static final int FIRST = 0;
+    private static final int SECOND = 1;
+    private static final int ONE_TOKEN = 1;
+    private static final int TWO_TOKEN = 2;
     
     
     
@@ -132,6 +137,7 @@ public class CommandParser {
         
         SINGLE_ACTION_KEYWORD.put(EXIT, EXIT);
         SINGLE_ACTION_KEYWORD.put(UNDO, UNDO);
+        SINGLE_ACTION_KEYWORD.put(REDO, REDO);
         
         TO_TASK_TYPE_KEYWORDS.put("totype", false);
         TO_TASK_TYPE_KEYWORDS.put("-totype", true);
@@ -233,6 +239,7 @@ public class CommandParser {
             _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
             dTokens.remove(ACTION_INDEX);
             if(isRequiredTaskId()) {
+                logger.info("Updating task id: " + dTokens);
                 dTokens = updateTaskID(dTokens);
             }
             
@@ -437,6 +444,12 @@ public class CommandParser {
     }
 
     private void addToType(String keyword) {
+        keyword = getTaskType(keyword);
+        _arguments.put(TO_TASK_TYPE, keyword);
+        
+    }
+    
+    private String getTaskType(String keyword){
         if(keyword.equals("e")) {
             keyword = "event";
         } else if(keyword.equals("td")) {
@@ -444,70 +457,91 @@ public class CommandParser {
         } else if (keyword.equals("d")) {
             keyword = "deadline";
         }
-        _arguments.put(TO_TASK_TYPE, keyword);
-        
+        return keyword;
     }
-
+    
     private ArrayList<String> updateTaskID(ArrayList<String> dTokens) throws ParseException{
         
         assert(dTokens!=null);
         
-        if( dTokens.size()<1 ){
+        if( dTokens.isEmpty() ){
             throw new ParseException("String is too small for modify!", 0);
         }
         
-        Pattern patternTaskId = Pattern.compile("(event|todo|deadline){1}\\s\\d+", Pattern.CASE_INSENSITIVE);
-        Pattern patternShortenId = Pattern.compile("(e|td|d){1}\\d+", Pattern.CASE_INSENSITIVE);
-        Matcher matcherTaskId;
-        String taskId = "noid";
-        
-        //check to see whether there is shortcut id
-        String shortenId = dTokens.get(0);
-        matcherTaskId = patternShortenId.matcher(shortenId);
-        logger.info("TASK ID PATTERN: " + patternShortenId + "\n" +
-                "taskId: " + shortenId);
-        if(matcherTaskId.find()) {
-            logger.info("Found");
-            String tasktype = "notype";
-            
-            if(shortenId.startsWith("e") || shortenId.startsWith("d")){
-                taskId = shortenId.substring(1);
-            } 
-            
-            if(shortenId.startsWith("e")) {
-                tasktype = "event";
-            } else if(shortenId.startsWith("d")) {
-                tasktype = "deadline";
-            } else {
-                tasktype = "todo";
-                taskId = shortenId.substring(2);
+        for (int tokenCount=1; tokenCount<3; tokenCount++) {
+            String taskId = extractTaskID(dTokens, tokenCount);
+            taskId = getProperTaskId(taskId);
+            if(taskId!=null) {
+                dTokens = removeTaskIdFromTokens(dTokens, tokenCount);
+                _arguments.put(TASKID, taskId);
+                logger.info(dTokens);
+                return dTokens;  
             }
-            
-            taskId = tasktype + SPACE + taskId;
-            
-            dTokens.remove(0);
-            _arguments.put(TASKID, taskId);
-            return dTokens;
         }
         
-        taskId = dTokens.get(0) + SPACE + dTokens.get(1);
-        taskId = taskId.trim();
+        throw new ParseException("Malformed task id", 0); 
+    }
+
+    private String extractTaskID(ArrayList<String> dTokens, int numOfToken) {
         
-        matcherTaskId = patternTaskId.matcher(taskId);
-        logger.info("TASK ID PATTERN: " + patternTaskId + "\n" +
-                    "taskId: " + taskId);
-        
-        if(matcherTaskId.find()){
-            dTokens.remove(0);
-            dTokens.remove(0);
-            _arguments.put(TASKID, taskId);
-        } else {
-            throw new ParseException("Malformed task id!", 0);
+        String taskExtract = "";
+ 
+        for (int i=0; i<numOfToken && i < dTokens.size(); i++) {
+            taskExtract += dTokens.get(i);
         }
+
+        return taskExtract;
+    }
+    
+    private ArrayList<String> removeTaskIdFromTokens(ArrayList<String> dTokens, int numOfToken) {
         
+        assert(numOfToken<=2);
+        
+        for (int i=0; i<numOfToken; i++) {
+            dTokens.remove(FIRST);
+        }
         return dTokens;
     }
 
+    /**
+     * Extract out the proper task id
+     * 
+     * @param taskId
+     * @return the task id. If it's invalid, return null.
+     */
+    private String getProperTaskId(String taskId) {
+        
+        logger.info("FINDING TASK ID FOR: " + taskId);
+        
+        Pattern patternId = Pattern.compile("\\d+$");
+        Matcher matcherId = patternId.matcher(taskId);
+        
+        Pattern patternTask = Pattern.compile("^(event|todo|deadline|e|td|d)(\\s)?");
+        Matcher matcherTaskType = patternTask.matcher(taskId);
+        
+        boolean hasMatchId = matcherId.find();
+        boolean hasMatchTask = matcherTaskType.find();
+        
+        if (hasMatchId && hasMatchTask) {
+           
+           String id = matcherId.group();
+           String taskType = matcherTaskType.group();
+           
+           logger.info("Found match for " + taskId + "\n" +
+                       "Task type: " + taskType + "\n" + 
+                       "ID: " +  id);
+           
+           taskType = getTaskType(taskType);
+           return taskType + SPACE + id;
+           
+        } else {
+           logger.info("Returning null for: " + taskId + "\n" +
+                       "Mismatch type: " + hasMatchId + "\n" + 
+                       "Mismatch id: " + hasMatchTask);
+           return null;
+        }
+    }
+    
     private void initKeyFlags() {
         keyFlags.put(PRIORITY_FLAG, false);
         keyFlags.put(END_FLAG, false);
