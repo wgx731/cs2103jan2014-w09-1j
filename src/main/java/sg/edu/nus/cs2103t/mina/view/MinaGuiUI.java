@@ -582,7 +582,7 @@ public class MinaGuiUI extends MinaView {
                 }
             }
             String eventStringIndex = "\t" + (i+1) +".\t";
-            String eventDescription = event.getDescription()+".\n";
+            String eventDescription = event.getDescription()+"\n";
             String eventTime = "\t\t"+itemStartDate.get(Calendar.HOUR) + ":"
                     + String.format("%02d", itemStartDate.get(Calendar.MINUTE))
                     + " "
@@ -602,6 +602,7 @@ public class MinaGuiUI extends MinaView {
                     + " "
                     + (itemEndDate.get(Calendar.AM_PM) == 0 ? "am" : "pm")
                     + "\n";
+            String eventCompleted = (event.isCompleted()?"\t\tdone\n":"");
             _eventListUI.append(eventStringIndex);
             initialCursorPosition += eventStringIndex.length();
             
@@ -615,6 +616,14 @@ public class MinaGuiUI extends MinaView {
             
             _eventListUI.append(eventTime);
             initialCursorPosition += eventTime.length();
+            
+            	_eventListUI.append(eventCompleted);
+            	StyleRange completedStyle = new StyleRange();
+            	completedStyle.start = initialCursorPosition;
+            	completedStyle.length = eventCompleted.length();
+            	completedStyle.fontStyle = SWT.ITALIC;
+            	_eventListUI.setStyleRange(completedStyle);
+            	initialCursorPosition += eventCompleted.length();
         }
     }
 
@@ -683,6 +692,7 @@ public class MinaGuiUI extends MinaView {
                     + " "
                     + (itemDate.get(Calendar.AM_PM) == 0 ? "am" : "pm")
                     + "\n";
+            String deadlineCompleted = (deadline.isCompleted()?"\t\tdone\n":"");
             _deadlineListUI.append(deadlineStringIndex);
             initialCursorPosition += deadlineStringIndex.length();
             
@@ -696,6 +706,14 @@ public class MinaGuiUI extends MinaView {
             
             _deadlineListUI.append(deadlineTime);
             initialCursorPosition += deadlineTime.length();
+            
+            	_deadlineListUI.append(deadlineCompleted);
+            	StyleRange completedStyle = new StyleRange();
+            	completedStyle.start = initialCursorPosition;
+            	completedStyle.length = deadlineCompleted.length();
+            	completedStyle.fontStyle = SWT.ITALIC;
+            	_deadlineListUI.setStyleRange(completedStyle);
+            	initialCursorPosition += deadlineCompleted.length();
         }
     }
 
@@ -706,7 +724,7 @@ public class MinaGuiUI extends MinaView {
         int initialCursorPosition = 0;
         for (int i = 0; i < todoList.size(); i++) {
             TodoTask todo = (TodoTask) todoList.get(i);
-            String todoString = (i + 1) + ". " + todo.getDescription() + "\n";
+            String todoString = (i + 1) + ". " + todo.getDescription() +"\n";
             _todoListUI.append(todoString);
             StyleRange todoStyle = new StyleRange();
             todoStyle.start = initialCursorPosition;
@@ -723,7 +741,18 @@ public class MinaGuiUI extends MinaView {
             }
             _todoListUI.setStyleRange(todoStyle);
             initialCursorPosition += todoString.length();
+            
+            String todoCompleted = (todo.isCompleted()?"\t\tdone\n":"");
+            
+               	_todoListUI.append(todoCompleted);
+            	StyleRange completedStyle = new StyleRange();
+            	completedStyle.start = initialCursorPosition;
+            	completedStyle.length = todoCompleted.length();
+            	completedStyle.fontStyle = SWT.ITALIC;
+            	_todoListUI.setStyleRange(completedStyle);
+            	initialCursorPosition += todoCompleted.length();
         }
+
     }
 
     private void expand() {
