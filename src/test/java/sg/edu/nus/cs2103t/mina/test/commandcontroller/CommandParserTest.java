@@ -4,9 +4,7 @@ import static org.junit.Assert.*;
 import hirondelle.date4j.DateTime;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+
 import java.util.TimeZone;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,8 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
-import sg.edu.nus.cs2103t.mina.model.TaskView;
-import sg.edu.nus.cs2103t.mina.stub.CommandProcessorStub;
+
 
 public class CommandParserTest {
 
@@ -30,7 +27,7 @@ public class CommandParserTest {
     private static final boolean HAS_DASH = true;
     private static final boolean IS_REORDER = true;
     private static final boolean IS_WRAPPED = true;
-    private CommandProcessorStub cpStub = new CommandProcessorStub();
+
     private CommandParser parser = new CommandParser();
 
     private StringBuilder variationBuild;
@@ -77,7 +74,7 @@ public class CommandParserTest {
             addDeadlineControlTodayNoTime, addDeadlineControlMonthTimeNoSecs,
             addEventControlADay, addEventControlDays, addEventControlMonths,
             addEventControlYears;
-
+                           
     private static DateTime today;
     private static Logger logger;
 
@@ -121,7 +118,8 @@ public class CommandParserTest {
         addEventControlMonths = "add meet friends -start 24082014090000 -end 24092014120000";
         // start: 24th of August 2014 0900 - 24th of September 2017 1200
         addEventControlYears = "add meet friends -start 24082014090000 -end 24092017120000";
-        ;
+        
+        
     }
 
     @Before
@@ -320,7 +318,8 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlHigh, result);
     }
-
+    
+    //XXX Exploratory testing 
     @Test
     public void exploratoryTest() throws Exception {
 
@@ -381,6 +380,10 @@ public class CommandParserTest {
         resultDate = tmr.format("DDMMYYYY");
         assertEquals("add push harder -end " + resultDate + "093000", result);
     
+        variation = "add -description what";
+        result = parser.convertCommand(variation);
+        assertEquals("add -description what", result);
+        
         //For modify
         variation = "modify todo 1 'whahaha' priority high";
         result = parser.convertCommand(variation);
@@ -415,12 +418,7 @@ public class CommandParserTest {
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
         assertEquals("modify deadline 5 -totype event -start " + start, result);
-        
-        //delete
-        variation = "delete todo 1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);
-        
+
         //delete with shorten id
         variation = "delete td1";
         result = parser.convertCommand(variation);  
@@ -756,6 +754,89 @@ public class CommandParserTest {
                     result);
         
     }
+    
+    @Test
+    public void testModifyControl() throws ParseException{
+        //checking individual flags
+        variation = "modify todo 2 -description change me!";
+        result = parser.convertCommand(variation);
+        assertEquals("modify todo 2 -description change me!",
+                result);        
+    }
+    
+    @Ignore
+    @Test
+    public void testModify() throws ParseException{
+        
+    }
+    
+    //XXX test for functions
+    
+    /*EP: updateTaskId()
+     *     1) [action] size = 0 /invalid
+     *     2) [action] [invalid] size = 1 /invalid
+     *     3) [action] [task id] size = 1 /parse with a regex
+     *     4) [action] [task] [id] size = 2 /parse with another regex
+     *          4.1) [action] [invalid] [id] 
+     *          4.2) [action] [task] [invalid]
+     *     5) [action] [task] [id] [the rest] size > 2
+     *     4,5 can be combined.
+     */
+    
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdSizeZero() throws ParseException{
+        variation = "delete ";
+        result =  parser.convertCommand(variation);      
+    }
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdSizeOneInv() throws ParseException{
+        variation = "delete 1";
+        result =  parser.convertCommand(variation);      
+    }
+    
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdInvalidId() throws ParseException{
+        variation = "delete event opop";
+        result =  parser.convertCommand(variation); 
+    }
+    
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdInvalidTask() throws ParseException{
+        variation = "delete blahs 1";
+        result =  parser.convertCommand(variation); 
+    }
+ 
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdInvalidTaskAndId() throws ParseException{
+        variation = "delete blahs lll";
+        result =  parser.convertCommand(variation); 
+    }
+    
+    @Test(expected=ParseException.class)
+    public void testUpdateTaskIdInvalidTaskAndIdTogether() throws ParseException{
+        variation = "delete sdsd3";
+        result =  parser.convertCommand(variation); 
+    }
+    
+    @Test
+    public void testUpdateTaskId() throws ParseException{
+
+        //(2)
+        variation = "delete todo1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);
+        
+        variation = "delete td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);    
+        
+        //(3)
+        variation = "delete todo 3";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 3", result);
+    }
+
+    
     private String getEventAddCmd(String description, String start, String end,
             int reorderType, boolean isWrapped) {
         
