@@ -595,11 +595,11 @@ public class MinaGuiUI extends MinaView {
 			}
 			String eventStringIndex = "\t" + (i + 1) + ".\t";
 			String eventDescription = event.getDescription() + "\n";
-			String eventTime = "\t\t"
+			String eventTime = "\tstart: "
 					+ DateUtil.displayTimeOnly(itemStartDate)
-					+ " - "
+					+ "\n\tend: "
 					+ (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? 
-							DateUtil.displayDateOnly(itemEndDate)
+							DateUtil.displayTimeOnly(itemEndDate)
 							: DateUtil.displayDateTime(itemEndDate))
 					+ "\n";
 			String eventCompleted = (event.isCompleted() ? "\t\tdone\n" : "");

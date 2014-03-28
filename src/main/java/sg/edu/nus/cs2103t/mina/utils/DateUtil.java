@@ -259,7 +259,7 @@ public final class DateUtil {
     			String.format("%02d" ,(date.get(Calendar.MONTH)+1))+"-"+String.format("%02d" ,date.get(Calendar.DAY_OF_MONTH))+" "+
     			String.format("%02d" ,date.get(Calendar.HOUR_OF_DAY))+":"+String.format("%02d" ,date.get(Calendar.MINUTE))+":"+
     			String.format("%02d" ,date.get(Calendar.SECOND)));
-    	return dateToDisplay.format("hh12:mm a", Locale.US).toLowerCase();
+    	return dateToDisplay.format("h12:mm a", Locale.US).toLowerCase();
     }
     
     /**
