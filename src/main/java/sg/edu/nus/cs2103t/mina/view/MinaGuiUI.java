@@ -39,6 +39,8 @@ public class MinaGuiUI extends MinaView {
 
 	private Calendar _today;
 	private Calendar _tomorrow;
+	
+	private AutoCompleteDB _autoComplete;
 
 	private Shell _shell;
 	private Display _display;
@@ -113,6 +115,8 @@ public class MinaGuiUI extends MinaView {
 	protected void createContents() {
 		logger.log(Level.INFO, "shell create contents");
 		_display = Display.getDefault();
+		
+		_autoComplete = new AutoCompleteDB();
 
 		_commandHistory = new LinkedList<String>();
 		_commandPosition = 0;
@@ -370,7 +374,20 @@ public class MinaGuiUI extends MinaView {
 		_backgroundBox.setEditable(false);
 
 		resetPanel();
-
+		
+		_userInputTextField.addListener(SWT.KeyUp, new Listener(){
+			public void handleEvent(Event event){
+				if (event.keyCode > 31 && event.keyCode < 127){
+					String curText = _userInputTextField.getText();
+					String suggestText = _autoComplete.firstMatch(curText);
+					if (suggestText.length()>0){
+						_userInputTextField.setText(suggestText);
+						_userInputTextField.setSelection(curText.length(), suggestText.length());
+					}
+				}
+			}
+		});
+		
 		_shell.addListener(SWT.KeyDown, new Listener() {
 			public void handleEvent(Event event) {
 				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.TAB) {
@@ -447,6 +464,12 @@ public class MinaGuiUI extends MinaView {
 					if (event.keyCode > 31 && event.keyCode < 127) {
 						_userInputTextField.append(String
 								.valueOf((char) event.keyCode));
+					}
+					String curText = _userInputTextField.getText();
+					String suggestText = _autoComplete.firstMatch(curText);
+					if (suggestText.length()>0){
+						_userInputTextField.setText(suggestText);
+						_userInputTextField.setSelection(curText.length(), suggestText.length());
 					}
 				}
 				if (event.keyCode == SWT.ESC) {
