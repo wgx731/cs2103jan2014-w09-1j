@@ -468,17 +468,7 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);  
         resultDate = today.format("DDMMYYYY");
         end = resultDate + "200000";
-        assertEquals("display deadline complete -start 12052007 -end " + end, result);
-        
-        //search
-        variation = "search haha hehe";
-        result = parser.convertCommand(variation);  
-        assertEquals("search haha hehe", result);
-        
-        //search with phrases
-        variation = "search haha 'hohoh' hehe";
-        result = parser.convertCommand(variation);  
-        assertEquals("search haha 'hohoh' hehe", result);        
+        assertEquals("display deadline complete -start 12052007 -end " + end, result);       
         
     }
 
@@ -768,6 +758,45 @@ public class CommandParserTest {
     @Test
     public void testModify() throws ParseException{
      
+    }
+    
+    @Test
+    public void testSearch() throws ParseException {
+        
+        variation = "search doors wide open";
+        result = parser.convertCommand(variation);
+        assertEquals("search doors//wide//open",
+                result);           
+        
+        variation = "find doors 'wide open' help me please";
+        result = parser.convertCommand(variation);
+        assertEquals("search wide open//doors//help//me//please",
+                result);
+        
+        variation = "find 'wide open' help 'me please'";
+        result = parser.convertCommand(variation);
+        assertEquals("search wide open//me please//help",
+                result);       
+        
+        variation = "search haha hehe";
+        result = parser.convertCommand(variation);  
+        assertEquals("search haha//hehe", result);
+        
+        variation = "search 'haha hohoh' hehe";
+        result = parser.convertCommand(variation);  
+        assertEquals("search haha hohoh//hehe", result); 
+ 
+        variation = "search don't don't 'blah don't blah don't'";
+        result = parser.convertCommand(variation);
+        assertEquals("search blah don't blah don't//don't//don't", result);  
+        
+        variation = "search 'hohoho hohoho ' 'sasads dfdf' ' vvvvv '";
+        result = parser.convertCommand(variation);  
+        assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
+        
+        variation = "search booop ''what is going on?' he says' ' woooaaahh what ' boop";
+        result = parser.convertCommand(variation);  
+        
     }
     
     //XXX test for functions

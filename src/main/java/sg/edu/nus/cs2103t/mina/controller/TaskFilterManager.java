@@ -290,7 +290,7 @@ public class TaskFilterManager {
      * Sanitise the date based on its start or end.
      *
      * @param date 
-     * The date in questionexit
+     * The date in question
      * @param isStart 
      * Is it a start date or end
      * @return 

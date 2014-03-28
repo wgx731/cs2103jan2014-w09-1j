@@ -5,6 +5,7 @@ import hirondelle.date4j.DateTime;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -14,6 +15,7 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +28,9 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 public class CommandParser {
 
     
+    private static final String SEARCH_DELIMIT = "//";
+    private static final String SEGMENT_END_DELIMIT = "' ";
+    private static final String SEGMENT_START_DELIMIT = " '";
     private static final String REDO = "redo";
     private static final String SEARCH = "search";
     private static final String UNDO = "undo";
@@ -82,10 +87,14 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
+    
     private static final int FIRST = 0;
     private static final int SECOND = 1;
     private static final int ONE_TOKEN = 1;
     private static final int TWO_TOKEN = 2;
+    private static final int ARG_INDEX = 1;
+    private static final int LAST = 1;
+    private static final boolean IS_WHOLE_SEGMENT = true;
     
     
     
@@ -201,12 +210,6 @@ public class CommandParser {
             throw new ParseException("Empty String!", 0);
         }
         
-        if(SINGLE_ACTION_KEYWORD.containsKey(userInput.trim())) {
-            return userInput;
-        }
-        
-        userInput+=" ";
-        
         initArgMap();
 
         StringBuilder originalString = new StringBuilder(userInput);
@@ -218,8 +221,43 @@ public class CommandParser {
         String endTime = EMPTY;
         String endDate = EMPTY;
         
-        int first = originalString.indexOf(" '");
-        int last = originalString.lastIndexOf("' ");
+        
+        String[] rawTokens = userInput.trim().split(SPACE,2);
+        logger.info("Distinguishing action: " + Arrays.toString(rawTokens));
+        
+        //get action
+        String action = rawTokens[ACTION_INDEX].toLowerCase();
+        
+        //short circuit, if the action needs no argument
+        if(SINGLE_ACTION_KEYWORD.containsKey(action)) {
+            return userInput;
+        }
+        
+        if (ACTIONS_KEYWORDS.containsKey(action)) {
+            _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));            
+        } else {
+            throw new ParseException("No such action", 0);
+        }
+        
+        //process the rest of arguments
+        //guard clause
+        if(rawTokens.length<2) {
+            throw new ParseException("No such action", 0);
+        }
+        
+        //Grant exceptions to certain actions that require special
+        //processing.
+        if(_arguments.get(ACTION).equalsIgnoreCase(SEARCH)){
+            return convertToSearch(rawTokens[ARG_INDEX]);
+        }
+        
+        //TODO get description
+        originalString = new StringBuilder(rawTokens[ARG_INDEX]);
+        originalString = originalString.insert(0, SPACE);
+        originalString = originalString.append(SPACE);
+        
+        int first = originalString.indexOf(SEGMENT_START_DELIMIT);
+        int last = originalString.lastIndexOf(SEGMENT_END_DELIMIT);
         if (first != -1 && last > first) {
             String descript = originalString.substring(first + 2, last);
             _arguments.put(DESCRIPTION, descript.trim());
@@ -227,30 +265,17 @@ public class CommandParser {
             isWrapped = true;
             logger.info("Original Parse: " + originalString);
         }
-
-        String[] tokens = originalString.toString().trim().split(SPACE);
         
+        //tokenize the whole thing
+        String[] tokens = tokenizeString(originalString);
         ArrayList<String> dTokens = new ArrayList<String>();
         Collections.addAll(dTokens, tokens);
         
-        String action = dTokens.get(ACTION_INDEX).toLowerCase();
-        if (ACTIONS_KEYWORDS.containsKey(action)) {
-            
-            _arguments.put(ACTION, ACTIONS_KEYWORDS.get(action));
-            dTokens.remove(ACTION_INDEX);
-            if(isRequiredTaskId()) {
-                logger.info("Updating task id: " + dTokens);
-                dTokens = updateTaskID(dTokens);
-            }
-            
-            if(_arguments.get(ACTION).equals(SEARCH)){
-                return userInput.trim();
-            }
-            
-        } else {
-            throw new ParseException("No such action", 0);
+        //logger.info("Type of action: " + _arguments.get(ACTION));
+        if(isRequiredTaskId()) {
+            logger.info("Updating task id: " + dTokens);
+            dTokens = updateTaskID(dTokens);
         }
-        
         
         initKeyFlags();
         
@@ -262,7 +287,6 @@ public class CommandParser {
             
             //Flagging for priority
             if (keyFlags.get(PRIORITY_FLAG) && isValidPriorityValue(keyword)) {
-                
                 keyFlags.put(PRIORITY_FLAG, false);
                 addPriority(keyword);
                 continue;
@@ -373,7 +397,7 @@ public class CommandParser {
             //Checking for flags
             if (keyword.equals(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
                 int prevIndex = i - 1;
-                if (prevIndex>0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
+                if (prevIndex>=0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
                     addPriority(dTokens.get(prevIndex));
                     continue;
                 } else {
@@ -442,6 +466,100 @@ public class CommandParser {
 
         logger.info(result);
         return result.toString().trim();
+    }
+
+    private String convertToSearch(String rawTokens) {
+        
+        //extract all ' ' out first
+        rawTokens = SPACE + rawTokens + SPACE;
+        StringBuilder rawSearchArg = new StringBuilder(rawTokens);
+        StringBuilder searchArg = new StringBuilder();
+        
+        
+        Pattern phrasePattern = Pattern.compile("\\s'.*?'\\s");
+
+        Matcher phraseMatcher = phrasePattern.matcher(rawTokens);
+//        if(phraseMatcher.find()) {
+//            int matchIndex;
+//            do {
+//                String match = phraseMatcher.group();
+//                searchArg.append(match.trim());
+//                searchArg.append(SEARCH_DELIMIT);
+//                matchIndex = rawSearchArg.indexOf(match);
+//                rawSearchArg.delete(matchIndex + 1, matchIndex + match.length());
+//            } while(phraseMatcher.find(phraseMatcher.start(1)));
+//        }
+        
+        ArrayList<String> phrases = new ArrayList<String>();
+        logger.info("Match count: " + phraseMatcher.groupCount());
+        while(phraseMatcher.find()){
+            String match = phraseMatcher.group();
+            phrases.add(match);
+            logger.info(match);
+            int matchIndex = rawSearchArg.indexOf(match);
+            rawSearchArg.delete(matchIndex + 1, matchIndex + match.length());
+            rawSearchArg.insert(0, SPACE);
+            phraseMatcher.reset(rawSearchArg);
+        }
+        
+        for(String phrase: phrases){
+            phrase = phrase.trim();
+            int first = phrase.indexOf("'");
+            int last = phrase.lastIndexOf("'");
+            phrase = phrase.substring(first+1, last);
+            searchArg.append(phrase);
+            searchArg.append(SEARCH_DELIMIT);   
+        }
+        
+        String words[] = tokenizeString(rawSearchArg);
+        for (int i=0; i<words.length; i++) {
+            String word = words[i].trim();
+            if(!word.equals(EMPTY)){
+                searchArg.append(word);
+                searchArg.append(SEARCH_DELIMIT);                
+            }
+        }
+        
+        int lastDelimiter = searchArg.lastIndexOf(SEARCH_DELIMIT);
+        String result = SEARCH + SPACE + searchArg.toString().substring(0, lastDelimiter);
+        logger.info(result);
+        return result;
+        
+    }
+
+    private String[] tokenizeString(StringBuilder rawString) {
+        return rawString.toString().trim().split(SPACE);
+    }
+
+    private int[] getSegmentIndex(StringBuilder argument, boolean isWholeSegment) {
+        
+        int first = argument.indexOf(SEGMENT_START_DELIMIT);
+        int last;
+        if (isWholeSegment) {
+            last = argument.lastIndexOf(SEGMENT_END_DELIMIT);
+        } else {
+            last = argument.indexOf(SEGMENT_END_DELIMIT, first + 1);
+        }
+        
+        return new int[]{first, last};
+    }
+
+    private String extractSegment(StringBuilder argument, int[] substringIndexes, boolean isWholeSegment) {
+        
+        int[] indexes = getSegmentIndex(argument, isWholeSegment);
+        int first = indexes[FIRST];
+        int last = indexes[LAST];
+        
+        if (hasStringSegments(argument)) {
+            return argument.substring(first + 2, last);
+        }
+        
+        return null;
+    }
+
+    private boolean hasStringSegments(StringBuilder argument) {
+        int[] indexes = getSegmentIndex(argument, IS_WHOLE_SEGMENT);
+        return indexes[FIRST] != -1 && indexes[LAST] > indexes[FIRST];
     }
 
     private void addToType(String keyword) {
@@ -792,7 +910,7 @@ public class CommandParser {
 
     public boolean isValidPriorityValue(String key) {
         
-        key = key.toLowerCase();
+        key = key.toLowerCase().trim();
         return PRIORITY_VALUES.containsKey(key);
     }
     
