@@ -770,12 +770,12 @@ public class CommandParserTest {
         
         variation = "find doors 'wide open' help me please";
         result = parser.convertCommand(variation);
-        assertEquals("search 'wide open'//doors//help//me//please",
+        assertEquals("search wide open//doors//help//me//please",
                 result);
         
         variation = "find 'wide open' help 'me please'";
         result = parser.convertCommand(variation);
-        assertEquals("search 'wide open'//'me please'//help",
+        assertEquals("search wide open//me please//help",
                 result);       
         
         variation = "search haha hehe";
@@ -784,17 +784,17 @@ public class CommandParserTest {
         
         variation = "search 'haha hohoh' hehe";
         result = parser.convertCommand(variation);  
-        assertEquals("search 'haha hohoh'//hehe", result); 
+        assertEquals("search haha hohoh//hehe", result); 
  
         variation = "search don't don't 'blah don't blah don't'";
         result = parser.convertCommand(variation);
-        assertEquals("search 'blah don't blah don't'//don't//don't", result);  
+        assertEquals("search blah don't blah don't//don't//don't", result);  
         
         variation = "search 'hohoho hohoho ' 'sasads dfdf' ' vvvvv '";
         result = parser.convertCommand(variation);  
-        assertEquals("search 'hohoho hohoho '//'sasads dfdf'//' vvvvv '", result);        
+        assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
         
-        variation = "search booop ' 'what is going on?' he says ' ' woooaaahh what ' boop";
+        variation = "search booop ''what is going on?' he says' ' woooaaahh what ' boop";
         result = parser.convertCommand(variation);  
         
     }

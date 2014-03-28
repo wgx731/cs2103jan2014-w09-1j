@@ -490,16 +490,25 @@ public class CommandParser {
 //            } while(phraseMatcher.find(phraseMatcher.start(1)));
 //        }
         
+        ArrayList<String> phrases = new ArrayList<String>();
         logger.info("Match count: " + phraseMatcher.groupCount());
         while(phraseMatcher.find()){
             String match = phraseMatcher.group();
+            phrases.add(match);
             logger.info(match);
-            searchArg.append(match.trim());
-            searchArg.append(SEARCH_DELIMIT);
             int matchIndex = rawSearchArg.indexOf(match);
             rawSearchArg.delete(matchIndex + 1, matchIndex + match.length());
             rawSearchArg.insert(0, SPACE);
             phraseMatcher.reset(rawSearchArg);
+        }
+        
+        for(String phrase: phrases){
+            phrase = phrase.trim();
+            int first = phrase.indexOf("'");
+            int last = phrase.lastIndexOf("'");
+            phrase = phrase.substring(first+1, last);
+            searchArg.append(phrase);
+            searchArg.append(SEARCH_DELIMIT);   
         }
         
         String words[] = tokenizeString(rawSearchArg);
