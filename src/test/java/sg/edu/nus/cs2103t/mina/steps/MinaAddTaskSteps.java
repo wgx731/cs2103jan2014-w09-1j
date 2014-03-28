@@ -22,7 +22,7 @@ public class MinaAddTaskSteps extends StepSkeleton {
 
     @Given("command input field is empty")
     public void givenEmptyCommand() {
-        bot.text(INPUT_TEXT_INDEX).typeText(EMPTY_COMMAND);
+        Assert.assertEquals(EMPTY_COMMAND, bot.text(INPUT_TEXT_INDEX).getText());
     }
 
     @When("I enter <command>")
