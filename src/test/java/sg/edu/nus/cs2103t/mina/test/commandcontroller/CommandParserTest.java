@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import hirondelle.date4j.DateTime;
 
 import java.text.ParseException;
-
 import java.util.TimeZone;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 
 
 public class CommandParserTest {
@@ -65,8 +65,6 @@ public class CommandParserTest {
     private static final int FROM_START = 5;
     private static final int STARTING_START = 6;
     
-    
-
     private static String addTodoControlLow, addTodoControlMed,
             addTodoControlHigh, addTodoControlNone,
             addDeadlineControlMonthDaySecs, addDeadlineControlMonthDaySame,
@@ -74,7 +72,9 @@ public class CommandParserTest {
             addDeadlineControlTodayNoTime, addDeadlineControlMonthTimeNoSecs,
             addEventControlADay, addEventControlDays, addEventControlMonths,
             addEventControlYears;
-                           
+    
+    private static String displayControlType;
+    
     private static DateTime today;
     private static Logger logger;
 
@@ -119,7 +119,16 @@ public class CommandParserTest {
         // start: 24th of August 2014 0900 - 24th of September 2017 1200
         addEventControlYears = "add meet friends -start 24082014090000 -end 24092017120000";
         
+        //Basic type
+        displayControlType = "display";
         
+        for (FilterType filter: FilterType.values()){
+            if(!(filter.equals(FilterType.START) || 
+                    filter.equals(FilterType.END) || 
+                    filter.equals(FilterType.PRIORITY))) {
+                displayControlType+= " " + filter.getType();
+            }
+        }
     }
 
     @Before
@@ -799,6 +808,52 @@ public class CommandParserTest {
         
     }
     
+    @Test
+    public void testDisplayControl() throws ParseException {
+        
+        result = parser.convertCommand("display");  
+        assertEquals("display", result);  
+        
+        result = parser.convertCommand(displayControlType);  
+        assertEquals(displayControlType, result);          
+    }
+    
+    @Test
+    public void testDisplayBasicKeywords() throws ParseException{
+        
+        variation = "show deadlines todos events complete +complete";
+        result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+        
+        variation = "filter d td e completed +complete";
+        result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+        
+        variation = "filter d td e completed all";
+        result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+    }
+    
+    @Test
+    public void testDisplayCompositeKeywords() throws ParseException{
+        
+        String todayDate = today.format("DDMMYYYY");
+        
+        variation = "display deadlines -agendaof today";
+        result = parser.convertCommand(variation);  
+        assertEquals("display deadline -start " + todayDate + "000000" + " -end " + todayDate + "235959",
+                     result);
+        
+        variation = "display deadlines -agendaof tmr";
+        result = parser.convertCommand(variation);
+        DateTime tmr = today.plusDays(1);
+        String tmrDate = tmr.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
+                     result);     
+        
+    }
+    
     //XXX test for functions
     
     /*EP: updateTaskId()
@@ -812,11 +867,6 @@ public class CommandParserTest {
      *     4,5 can be combined.
      */
     
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdSizeZero() throws ParseException{
-        variation = "delete ";
-        result =  parser.convertCommand(variation);      
-    }
     @Test(expected=ParseException.class)
     public void testUpdateTaskIdSizeOneInv() throws ParseException{
         variation = "delete 1";
