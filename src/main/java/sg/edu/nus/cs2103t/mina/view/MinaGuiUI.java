@@ -81,6 +81,8 @@ public class MinaGuiUI extends MinaView {
 	private int _currentTab;
 	// private boolean _highlightOn;
 	
+	private boolean _isAutoComplete;
+	
 	private Robot _bot;
 
 	private static final String ERROR = "Operation failed. Please try again.";
@@ -138,6 +140,8 @@ public class MinaGuiUI extends MinaView {
 		_tomorrow.add(Calendar.DAY_OF_YEAR, 1);
 
 		_taskView = _commandController.getTaskView();
+		
+		_isAutoComplete = false;
 		
 		try {
 			_bot = new Robot();
@@ -388,16 +392,16 @@ public class MinaGuiUI extends MinaView {
 		_userInputTextField.addListener(SWT.KeyUp, new Listener(){
 			public void handleEvent(Event event){
 				if (event.keyCode > 31 && event.keyCode < 127){
-					String curText = _userInputTextField.getText();
-					String suggestText = _autoComplete.firstMatch(curText);
-					if (suggestText.length()>0){
-						_userInputTextField.setText(suggestText);
-						_userInputTextField.setSelection(curText.length(), suggestText.length());
+					if (_isAutoComplete){
+						autoComplete();
 					}
+				}
+				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS){
+					_isAutoComplete ^= true;
 				}
 			}
 		});
-		
+				
 		_shell.addListener(SWT.KeyDown, new Listener() {
 			public void handleEvent(Event event) {
 				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.TAB) {
@@ -492,18 +496,15 @@ public class MinaGuiUI extends MinaView {
 				}
 				if (event.stateMask != SWT.CTRL
 						&& ((event.keyCode > 31 && event.keyCode < 127) || (event.keyCode == SWT.ARROW_UP
-								|| event.keyCode == SWT.ARROW_DOWN
-								|| event.keyCode == SWT.ARROW_LEFT || event.keyCode == SWT.ARROW_RIGHT))) {
+						|| event.keyCode == SWT.ARROW_DOWN
+						|| event.keyCode == SWT.ARROW_LEFT || event.keyCode == SWT.ARROW_RIGHT))) {
 					_userInputTextField.forceFocus();
 					if (event.keyCode > 31 && event.keyCode < 127) {
 						_userInputTextField.append(String
 								.valueOf((char) event.keyCode));
 					}
-					String curText = _userInputTextField.getText();
-					String suggestText = _autoComplete.firstMatch(curText);
-					if (suggestText.length()>0){
-						_userInputTextField.setText(suggestText);
-						_userInputTextField.setSelection(curText.length(), suggestText.length());
+					if (_isAutoComplete){
+						autoComplete();
 					}
 				}
 				if (event.keyCode == SWT.ESC) {
@@ -519,6 +520,15 @@ public class MinaGuiUI extends MinaView {
 				_bot.keyRelease(key);
 			}
 		});
+	}
+	
+	private void autoComplete() {
+		String curText = _userInputTextField.getText();
+		String suggestText = _autoComplete.firstMatch(curText);
+		if (suggestText.length()>0){
+			_userInputTextField.setText(suggestText);
+			_userInputTextField.setSelection(curText.length(), suggestText.length());
+		}
 	}
 
 	@Override
