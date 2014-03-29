@@ -7,8 +7,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.jbehave.core.annotations.AfterStories;
-import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
@@ -21,7 +21,7 @@ import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.ObjectFileTaskDaoImpl;
 
-public abstract class StepSkeleton {
+public abstract class MinaStepSkeleton {
 
     protected static final int INPUT_TEXT_INDEX = 0;
     protected static final int FEEDBACK_LABEL_INDEX = 0;
@@ -46,7 +46,7 @@ public abstract class StepSkeleton {
     private static Thread uiThread;
     private static Shell appShell;
 
-    public StepSkeleton() {
+    public MinaStepSkeleton() {
         if (driver == null) {
             driver = new MinaDriver();
         }
@@ -98,11 +98,6 @@ public abstract class StepSkeleton {
         objectFileOperationHelper.cleanUp();
     }
 
-    @BeforeScenario
-    public void beforeScenario() {
-        driver.cleanUp();
-    }
-
     /**
      * This method must be overridden by users. It should return the
      * {@link Shell} to be tested, after being opened and laid out. This class
@@ -110,5 +105,62 @@ public abstract class StepSkeleton {
      * at this point, this class will close the {@link Shell} automatically.
      */
     protected abstract Shell createShell();
+
+    @Given("empty command input field")
+    public void givenEmptyCommand() {
+        Assert.assertEquals(EMPTY_COMMAND, bot.text(INPUT_TEXT_INDEX).getText());
+    }
+
+    @When("I enter <command>")
+    public void enterCommand(@Named("command") String command) {
+        bot.text(INPUT_TEXT_INDEX).typeText(command + SWT.CR);
+    }
+
+    @Then("the status bar should show <feedback>")
+    public void statusBarShow(@Named("feedback") String feedback) {
+        Assert.assertEquals(feedback, bot.label(FEEDBACK_LABEL_INDEX).getText());
+    }
+
+    @Then("the <type> list should contains <task>")
+    public void listContains(@Named("type") String type,
+            @Named("task") String task) {
+        // NOTE: replace new line and tab
+        task = task.replace("\\n", System.getProperty("line.separator"));
+        task = task.replace("\\t", "\t");
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Assert.assertTrue(list.getText().contains(task));
+    }
+
+    @Then("the <type> list should not contains <task>")
+    public void listNotContains(@Named("type") String type,
+            @Named("task") String task) {
+        // NOTE: replace new line and tab
+        task = task.replace("\\n", System.getProperty("line.separator"));
+        task = task.replace("\\t", "\t");
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Assert.assertFalse(list.getText().contains(task));
+    }
+
+    private SWTBotStyledText getList(String type) {
+        int listIndex = UNKOWN_INDEX;
+        switch (type) {
+            case "todo" :
+                listIndex = TODO_LIST_INDEX;
+                break;
+            case "event" :
+                listIndex = EVENT_LIST_INDEX;
+                break;
+            case "deadline" :
+                listIndex = DEADLINE_LIST_INDEX;
+                break;
+            default :
+                listIndex = UNKOWN_INDEX;
+                break;
+        }
+        Assert.assertNotEquals(UNKOWN_INDEX, listIndex);
+        return bot.styledText(listIndex);
+    }
 
 }

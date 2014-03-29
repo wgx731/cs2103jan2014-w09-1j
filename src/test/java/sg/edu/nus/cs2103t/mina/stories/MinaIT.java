@@ -15,19 +15,30 @@ import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
-import org.jbehave.core.steps.ParameterControls;
 
 import sg.edu.nus.cs2103t.mina.steps.MinaAddTaskSteps;
 
-public class MinaAddTaskIT extends JUnitStories {
+public class MinaIT extends JUnitStories {
+
+    private static final String TEST_RESOURCE_ROOT = "src/test/resources";
+    private static final String STORIES_PATH_PATTEN = "sg/edu/nus/cs2103t/mina/stories/*.story";
+    private static final int THREAD_NUM = 1;
+    private static final int TIME_OUT_IN_SECONDS = 60;
+
+    public MinaIT() {
+        configuredEmbedder().embedderControls()
+                .doGenerateViewAfterStories(true)
+                .doIgnoreFailureInStories(false).doIgnoreFailureInView(false)
+                .useThreads(THREAD_NUM)
+                .useStoryTimeoutInSecs(TIME_OUT_IN_SECONDS);
+    }
 
     @Override
     public Configuration configuration() {
-        return new MostUsefulConfiguration().useParameterControls(
-                new ParameterControls().useDelimiterNamedParameters(true))
-                .useStoryReporterBuilder(
-                        new StoryReporterBuilder().withDefaultFormats()
-                                .withFormats(CONSOLE, TXT, IDE_CONSOLE, HTML));
+        return new MostUsefulConfiguration()
+                .useStoryReporterBuilder(new StoryReporterBuilder()
+                        .withDefaultFormats().withFormats(CONSOLE, TXT,
+                                IDE_CONSOLE, HTML));
     }
 
     @Override
@@ -38,8 +49,7 @@ public class MinaAddTaskIT extends JUnitStories {
     @Override
     protected List<String> storyPaths() {
         return new StoryFinder().findPaths(
-                CodeLocations.codeLocationFromPath("src/test/resources"),
-                "sg/edu/nus/cs2103t/mina/stories/*.story", "");
+                CodeLocations.codeLocationFromPath(TEST_RESOURCE_ROOT),
+                STORIES_PATH_PATTEN, "");
     }
-
 }

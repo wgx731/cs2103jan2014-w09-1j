@@ -58,7 +58,6 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
     @Override
     public void run() {
         if (_syncList.isEmpty()) {
-            logger.info("no memory data change.");
             return;
         }
         saveChangedData(_syncList);
@@ -70,7 +69,6 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
             try {
                 _storage.saveTaskSet(data.getTaskSet(), data.getTaskType(),
                         data.isCompleted());
-                logger.info("saved data: " + data);
             } catch (IOException e) {
                 logger.error("save operation failed.");
                 logger.error(e, e);
@@ -83,7 +81,6 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
     public void updateChange(SyncDataParameter syncData) {
         assert syncData != null : syncData;
         if (_syncList.contains(syncData)) {
-            logger.info("duplicate sync data: " + syncData.toString());
             return;
         }
         _syncList.add(syncData);

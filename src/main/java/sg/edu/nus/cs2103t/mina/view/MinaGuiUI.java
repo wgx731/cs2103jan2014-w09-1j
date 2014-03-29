@@ -593,7 +593,7 @@ public class MinaGuiUI extends MinaView {
 					initialCursorPosition += currentDateString.length();
 				}
 			}
-			String eventStringIndex = "\t" + (i + 1) + ".\t";
+			String eventStringIndex = "\t" + (i + 1) + ". ";
 			String eventDescription = event.getDescription() + "\n";
 			String eventTime = "\tstart: "
 					+ DateUtil.displayTimeOnly(itemStartDate)
