@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 public class AutoCompleteDB {
-    TreeSet<String> proposals = new TreeSet<String>();
+    TreeSet<String> proposals;
 
     public AutoCompleteDB() {
-	TreeSet<String> proposals = new TreeSet<String>();
+    	proposals = new TreeSet<String>();
 		proposals.add("add");
 		proposals.add("delete");
 		proposals.add("modify");
