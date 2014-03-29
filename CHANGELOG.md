@@ -1,5 +1,24 @@
 # MINA CHANGE LOG #
 
+## 0.2 MINA-small (2014-03-25) ##
+
+#### Features: ####
+
+* Search & filter in GUI
+* GUI follow user manual format 
+* Basic flexicommand
+* Better unit test cases
+* Basic integration test
+
+
+#### Known issues: ####
+
+* Bugs listed in Google Code Issues
+* Recurring and blocking tasks
+* Full integration test
+* Refactor code to production quality
+
+
 ## 0.1 MINA-min (2014-03-15) ##
 
 #### Features: ####
