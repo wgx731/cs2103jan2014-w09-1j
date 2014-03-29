@@ -8,7 +8,6 @@ public class AutoCompleteDB {
 
     public AutoCompleteDB() {
 	TreeSet<String> proposals = new TreeSet<String>();
-	public AutoCompleteDB(){
 		proposals.add("add");
 		proposals.add("delete");
 		proposals.add("modify");
@@ -42,16 +41,4 @@ public class AutoCompleteDB {
         }
         return "";
     }
-	}
-	
-	public String firstMatch(String input){
-		Iterator<String> iter = proposals.iterator();
-		while (iter.hasNext()){
-			String str = iter.next();
-			if (str.length()>input.length()&&str.substring(0, input.length()).equals(input)){
-				return str;
-			}
-		}
-		return "";
-	}
 }
