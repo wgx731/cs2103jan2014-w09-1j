@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TimeZone;
@@ -23,6 +24,8 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.model.FilterType;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandParser {
@@ -70,6 +73,9 @@ public class CommandParser {
     
     private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
+    private static final HashMap<String, String> DISPLAY_VALUES = new HashMap<String, String>();
+    
+    private static final HashMap<String, String> TASKTYPE_ALIAS = new HashMap<String, String>();
     
     private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
     
@@ -87,6 +93,7 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
+    private static final int AGENDAOF_FLAG = 7;
     
     private static final int FIRST = 0;
     private static final int SECOND = 1;
@@ -95,6 +102,7 @@ public class CommandParser {
     private static final int ARG_INDEX = 1;
     private static final int LAST = 1;
     private static final boolean IS_WHOLE_SEGMENT = true;
+    
     
     
     
@@ -189,6 +197,29 @@ public class CommandParser {
         
         initEndValues();
         
+        TASKTYPE_ALIAS.put(TaskType.EVENT.getType(), TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("e", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("events", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appointment", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appt", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appts", TaskType.EVENT.getType());
+        
+        TASKTYPE_ALIAS.put(TaskType.TODO.getType(), TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("td", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("to-do", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("todos", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("task", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("tasks", TaskType.TODO.getType());
+        
+        TASKTYPE_ALIAS.put(TaskType.DEADLINE.getType(), TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("d", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("deadlines", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("cutoff", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("cutoffs", TaskType.DEADLINE.getType());
+        
+        DISPLAY_VALUES.put("completed", FilterType.COMPLETE.getType());
+        DISPLAY_VALUES.put("all", FilterType.COMPLETE_PLUS.getType());
+        
     }
 
     private void initEndValues() {
@@ -242,12 +273,12 @@ public class CommandParser {
         //process the rest of arguments
         //guard clause
         if(rawTokens.length<2) {
-            throw new ParseException("No such action", 0);
+           return userInput;
         }
         
         //Grant exceptions to certain actions that require special
         //processing.
-        if(_arguments.get(ACTION).equalsIgnoreCase(SEARCH)){
+        if(_arguments.get(ACTION).equalsIgnoreCase(SEARCH)) {
             return convertToSearch(rawTokens[ARG_INDEX]);
         }
         
@@ -394,6 +425,16 @@ public class CommandParser {
                 continue;
             }
             
+            if (keyFlags.get(AGENDAOF_FLAG)) {
+                keyFlags.put(AGENDAOF_FLAG, false);
+                String currDate = converToMilitaryDate(keyword);
+                String newStart = currDate + "000000";
+                String newEnd = currDate + "235959";
+                List<String> newArguments = Arrays.asList("-start", newStart, "-end", newEnd);
+                dTokens.remove(i);
+                dTokens.addAll(i, newArguments);
+            }
+            
             //Checking for flags
             if (keyword.equals(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
                 int prevIndex = i - 1;
@@ -444,6 +485,19 @@ public class CommandParser {
                 continue;
             }
             
+            
+            if(isFilterAction() && TASKTYPE_ALIAS.containsKey(keyword)){
+                dTokens.set(i, getTaskType(keyword));
+            }
+            
+            if(isFilterAction() && DISPLAY_VALUES.containsKey(keyword)) {
+                dTokens.set(i, DISPLAY_VALUES.get(keyword));
+            }
+            
+            if(isFilterAction() && keyword.equalsIgnoreCase("-agendaof")) {
+                keyFlags.put(AGENDAOF_FLAG, true);
+                continue;
+            }
             
             if (!hasValue(DESCRIPTION) && 
                     !(isModifyAction() && (keyword.equals("-description")))) {
@@ -568,15 +622,21 @@ public class CommandParser {
         
     }
     
+    /**
+     * 
+     * @param keyword
+     * @return
+     */
     private String getTaskType(String keyword){
-        if(keyword.equals("e")) {
-            keyword = "event";
-        } else if(keyword.equals("td")) {
-            keyword = "todo";
-        } else if (keyword.equals("d")) {
-            keyword = "deadline";
+        
+        keyword = keyword.trim().toLowerCase();
+        
+        if(TASKTYPE_ALIAS.containsKey(keyword)) {
+            return TASKTYPE_ALIAS.get(keyword);
+        } else {
+            return keyword;
         }
-        return keyword;
+        
     }
     
     private ArrayList<String> updateTaskID(ArrayList<String> dTokens) throws ParseException{
@@ -635,7 +695,19 @@ public class CommandParser {
         Pattern patternId = Pattern.compile("\\d+$");
         Matcher matcherId = patternId.matcher(taskId);
         
-        Pattern patternTask = Pattern.compile("^(event|todo|deadline|e|td|d)(\\s)?");
+        String regex = "^(%1$s)(\\s)?";
+        StringBuilder taskTypeAlias = new StringBuilder();
+        
+        for (String key: TASKTYPE_ALIAS.keySet()) {
+            taskTypeAlias.append(key);
+            taskTypeAlias.append("|");
+        }
+        taskTypeAlias = taskTypeAlias.deleteCharAt(taskTypeAlias.length()-1);
+        regex = String.format(regex, taskTypeAlias.toString());
+        
+        logger.info("Task id pattern: " + regex);
+        
+        Pattern patternTask = Pattern.compile(regex);
         Matcher matcherTaskType = patternTask.matcher(taskId);
         
         boolean hasMatchId = matcherId.find();
@@ -669,6 +741,7 @@ public class CommandParser {
         keyFlags.put(START_CONTINUE_FLAG, false);
         keyFlags.put(DESCRIPTION_FLAG, false);
         keyFlags.put(TO_TASK_TYPE_FLAG, false);
+        keyFlags.put(AGENDAOF_FLAG, false);
     }
 
     private boolean isNeedSecondDate(boolean continueFlag) {

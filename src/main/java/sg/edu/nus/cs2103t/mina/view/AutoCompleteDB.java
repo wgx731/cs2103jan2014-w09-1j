@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 public class AutoCompleteDB {
+    TreeSet<String> proposals = new TreeSet<String>();
+
+    public AutoCompleteDB() {
 	TreeSet<String> proposals = new TreeSet<String>();
 	public AutoCompleteDB(){
 		proposals.add("add");
@@ -26,6 +29,19 @@ public class AutoCompleteDB {
 		proposals.add("display deadline");
 		proposals.add("display event");
 		proposals.add("display todo");
+    }
+
+    public String firstMatch(String input) {
+        Iterator<String> iter = proposals.iterator();
+        while (iter.hasNext()) {
+            String str = iter.next();
+            if (str.length() > input.length() && str.substring(0,
+                    input.length()).equals(input)) {
+                return str;
+            }
+        }
+        return "";
+    }
 	}
 	
 	public String firstMatch(String input){

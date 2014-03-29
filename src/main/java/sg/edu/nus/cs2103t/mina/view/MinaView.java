@@ -1,9 +1,6 @@
 package sg.edu.nus.cs2103t.mina.view;
 
-import java.util.ArrayList;
-
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
-import sg.edu.nus.cs2103t.mina.model.TaskView;
 
 /**
  * 
