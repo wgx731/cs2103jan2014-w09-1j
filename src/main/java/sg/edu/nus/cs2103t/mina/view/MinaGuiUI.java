@@ -397,7 +397,7 @@ public class MinaGuiUI extends MinaView {
 					}
 				}
 				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS){
-					_isAutoComplete ^= true;
+					setAutoComplete();
 				}
 			}
 		});
@@ -507,6 +507,9 @@ public class MinaGuiUI extends MinaView {
 						autoComplete();
 					}
 				}
+				if (event.stateMask == SWT.CTRL  && event.keyCode == SWT.BS){
+					setAutoComplete();
+				}
 				if (event.keyCode == SWT.ESC) {
 					_taskView = _commandController.processUserInput("display",
 							_eventPage, _deadlinePage, _todoPage);
@@ -520,6 +523,19 @@ public class MinaGuiUI extends MinaView {
 				_bot.keyRelease(key);
 			}
 		});
+	}
+	
+	private void setAutoComplete() {
+		_isAutoComplete ^= true;
+		if (_isAutoComplete){
+			_statusBar.setBackground(SWTResourceManager.getColor(155,
+					187, 89));
+			_statusBar.setText("\tAutoComplete Enabled");
+		} else {
+			_statusBar.setBackground(SWTResourceManager.getColor(247,
+					150, 70));
+			_statusBar.setText("\tAutoComplete Disabled");
+		}
 	}
 	
 	private void autoComplete() {
