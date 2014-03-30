@@ -696,18 +696,16 @@ public class CommandParserTest {
         logger.info(variation);
         assertEquals(addEventControlToday, result);        
         
-        start = "-start today 9:00";
-        end = "-end 21:33";
+        //Testing for partial format
+        String partialFormat = today.format("DD/MM");
+        //String fullFormat = today.format("DDMMYYYY");
+        start = "-start " + partialFormat + " 9:00";
+        end =  "-end " + partialFormat + " 21.33";
         variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
         result = parser.convertCommand(variation);
         logger.info(variation);
         assertEquals(addEventControlToday, result);   
         
-        //Testing implicit command.
-        //If start date is specified and end date is not specified, implicit
-        start = "-start tmr 8am";
-        end = "-end 9.33pm";
-        //addEventControlTomorrow
     }
 
     @Test

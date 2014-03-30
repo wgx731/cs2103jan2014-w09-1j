@@ -789,17 +789,47 @@ public class CommandParser {
         initEndValues();
         
         String converted;
+        SimpleDateFormat milDateFormat = new SimpleDateFormat("ddMMyyyy");
         
         if(END_VALUES.containsKey(date)) {
             DateTime currDate = END_VALUES.get(date);
             converted = currDate.format("DDMMYYYY");
-        } else {
-            SimpleDateFormat milDateFormat = new SimpleDateFormat("ddMMyyyy");
+        } else if( isPartialDate(date) ) {
+            String format = getFullDateFormat(date);
+            Date convertedDate = getFullDate(date, format);
+            converted = milDateFormat.format(convertedDate);
+        }else {
             Date convertedDate = DateUtil.parse(date);
             converted = milDateFormat.format(convertedDate);
         }
         
         return converted;
+    }
+
+    private Date getFullDate(String date, String format) throws ParseException{
+        
+        DateTime today = DateTime.today(TimeZone.getDefault());
+        int year = today.getYear();
+        Date convertedDate = DateUtil.parse(date + format +  year);
+        
+        return convertedDate;
+    }
+
+    private String getFullDateFormat(String date) {
+        
+        logger.info("Getting delimiter for " + date);
+        
+        LinkedHashMap<String, String> partialRegexes = new LinkedHashMap<String, String>();
+        partialRegexes.put("^\\d{1,2}-\\d{1,2}$", "-");
+        partialRegexes.put("^\\d{1,2}/\\d{1,2}$", "/");
+        
+        for (String regex: partialRegexes.keySet()) {
+            if(date.matches(regex)) {
+                logger.info("Found: " + partialRegexes.get(regex));
+                return partialRegexes.get(regex);
+            }
+        }
+        return null;
     }
 
     private int getDateValueType(String dateTime) throws ParseException{
@@ -822,6 +852,12 @@ public class CommandParser {
             return DATE_VALUE;
         }
         
+        //Check whether is it partial date
+        if(isPartialDate(dateTime)) {
+            logger.info(dateTime + " is partial date");
+            return DATE_VALUE;           
+        }
+        
         //check time
         if(isTimeFormat(dateTime)) {
             logger.info(dateTime + " is time");
@@ -830,6 +866,10 @@ public class CommandParser {
         
         logger.info(dateTime + " is invalid");
         return INVALID_VALUE;
+    }
+
+    private boolean isPartialDate(String dateTime) {
+        return getFullDateFormat(dateTime)!=null;
     }
 
     private boolean isTimeFormat(String dateTime) throws ParseException{
