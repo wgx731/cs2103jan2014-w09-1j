@@ -3,8 +3,8 @@ package sg.edu.nus.cs2103t.mina.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Calendar;
 import java.util.Date;
-
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
@@ -17,8 +17,8 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 
 public class TaskDataManagerTest {
-    //TODO: check if date modify changes.
-    //TODO: add test cases for delete completed
+    // TODO: check if date modify changes.
+    // TODO: add test cases for delete completed
 
     @Test
     public void testAddTask() {
@@ -27,27 +27,16 @@ public class TaskDataManagerTest {
 
         /* Basic add */
         // Partition: All parameters except _priority specified
-        // Partition: All parameters specified
         assertEquals("Adding To-do task.", new TodoTask("TodoTask1"),
                 tdmTest.addTask(new DataParameter("TodoTask1", 'M', null, null,
                         null, TaskType.TODO, 123)));
         assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
-        assertEquals("Adding To-do task.", new TodoTask("TodoTask2", 'H'),
-                tdmTest.addTask(new DataParameter("TodoTask2", 'H', null, null,
-                        null, TaskType.TODO, 123)));
-        assertEquals(2, tdmTest.getUncompletedTodoTasks().size());
 
         assertEquals("Adding Deadline task.", new DeadlineTask("DeadlineTask1",
                 new Date(currDateMilliSec)), tdmTest.addTask(new DataParameter(
                 "DeadlineTask1", 'M', null, new Date(currDateMilliSec), null,
                 TaskType.DEADLINE, 123)));
         assertEquals(1, tdmTest.getUncompletedDeadlineTasks().size());
-        assertEquals("Adding Deadline task.", new DeadlineTask("DeadlineTask2",
-                new Date(currDateMilliSec), 'M'),
-                tdmTest.addTask(new DataParameter("DeadlineTask2", 'M', null,
-                        new Date(currDateMilliSec), null, TaskType.DEADLINE,
-                        123)));
-        assertEquals(2, tdmTest.getUncompletedDeadlineTasks().size());
 
         assertEquals("Adding Event task.", new EventTask("EventTask1",
                 new Date(currDateMilliSec), new Date(currDateMilliSec)),
@@ -55,6 +44,20 @@ public class TaskDataManagerTest {
                         currDateMilliSec), new Date(currDateMilliSec), null,
                         TaskType.EVENT, 123)));
         assertEquals(1, tdmTest.getUncompletedEventTasks().size());
+
+        // Partition: All parameters specified
+        assertEquals("Adding To-do task.", new TodoTask("TodoTask2", 'H'),
+                tdmTest.addTask(new DataParameter("TodoTask2", 'H', null, null,
+                        null, TaskType.TODO, 123)));
+        assertEquals(2, tdmTest.getUncompletedTodoTasks().size());
+
+        assertEquals("Adding Deadline task.", new DeadlineTask("DeadlineTask2",
+                new Date(currDateMilliSec), 'M'),
+                tdmTest.addTask(new DataParameter("DeadlineTask2", 'M', null,
+                        new Date(currDateMilliSec), null, TaskType.DEADLINE,
+                        123)));
+        assertEquals(2, tdmTest.getUncompletedDeadlineTasks().size());
+
         assertEquals("Adding Event task.", new EventTask("EventTask2",
                 new Date(currDateMilliSec), new Date(currDateMilliSec), 'H'),
                 tdmTest.addTask(new DataParameter("EventTask2", 'H', new Date(
@@ -66,6 +69,41 @@ public class TaskDataManagerTest {
         // Partition: Task does not exist
         assertNull(tdmTest.addTask(new DataParameter("TodoTask2", 'H', null,
                 null, null, TaskType.TODO, 123)));
+
+        tdmTest.resetTrees();
+
+        /* Adding a recurring task */
+        // Partition: all parameters added correctly, recur every 2 weeks for 4
+        // months
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, 1, 1);
+        Date firstDeadline = calendar.getTime();
+
+        DeadlineTask expectedDeadlineTask = new DeadlineTask(
+                "RecurDeadlineTask every 2 weeks, for 4 months.",
+                firstDeadline, 'M');
+        expectedDeadlineTask.addTag("RECUR_0");
+
+        int currMth = calendar.get(Calendar.MONTH);
+        calendar.set(Calendar.MONTH, currMth + 4);
+
+        try {
+            assertEquals("Adding Deadline Task that reccurs every fortnight.",
+                    expectedDeadlineTask, tdmTest.addTask(new DataParameter(
+                            "RecurDeadlineTask every 2 weeks, for 4 months.",
+                            'M', null, firstDeadline, null, TaskType.DEADLINE,
+                            123, "RECUR", (1000 * 3600 * 24 * 14), calendar
+                                    .getTime(), null, false)));
+            assertEquals(9, tdmTest.getUncompletedDeadlineTasks().size());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Partition: all parameters added correctly, recur every month
+
+        /* Adding a block task */
+        // TODO: set a limit to how many block tasks can be added at one go
     }
 
     @Test

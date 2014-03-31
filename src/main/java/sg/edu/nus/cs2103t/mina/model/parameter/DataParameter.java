@@ -46,12 +46,12 @@ public class DataParameter {
 
         setTag(null);
         setModifyAll(false);
-        
+
         setTimeSlots(null);
-        
+
         setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
         setEndRecurOn(null);
-        
+
         setTaskObject(null);
 
     }
@@ -69,12 +69,12 @@ public class DataParameter {
 
         setTag(null);
         setModifyAll(false);
-        
+
         setTimeSlots(null);
-        
+
         setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
         setEndRecurOn(null);
-        
+
         setTaskObject(null);
     }
 
@@ -106,30 +106,56 @@ public class DataParameter {
 
         setTag(null);
         setModifyAll(false);
-        
+
         setTimeSlots(null);
-        
+
         setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
         setEndRecurOn(null);
-        
+
     }
 
-    // for adding or modifying recurring or block tasks
+    // for adding recurring or block tasks
+    public DataParameter(String des, char pri, Date start, Date end,
+            TaskType origType, TaskType newType, int id, String tag,
+            long freqInMilliSec, Date endRecurOn, List<TimePair> timeSlots,
+            boolean isModifyAll) throws Exception {
+        assert (!tag.equals(null));
+
+        if (tag.equals("BLOCK")) {
+            assert (newType.equals(TaskType.EVENT));
+            createAddBlockParameters(des, pri, start, end, origType, newType,
+                    id, tag, freqInMilliSec, timeSlots, isModifyAll);
+
+        } else if (tag.equals("RECUR")) {
+            assert (!newType.equals(TaskType.TODO));
+            createAddRecurParameters(des, pri, start, end, origType, newType,
+                    id, tag, freqInMilliSec, timeSlots, endRecurOn, isModifyAll);
+
+        } else {
+            throw new Exception("invalid tag used by CC");
+        }
+
+    }
+
+    // for modifying or deleting recurring or block tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
-            String tag, long freqInMilliSec, Date endRecurOn, List<TimePair> timeSlots,
-            boolean isModifyAll) throws Exception {
+            String tag, long freqInMilliSec, Date endRecurOn,
+            List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
+        assert (!tag.equals(null));
+
         if (tag.equals("BLOCK")) {
-            assert (origType.equals(TaskType.EVENT) || newType
-                    .equals(TaskType.EVENT));
+            assert (!origType.equals(null) && origType.equals(TaskType.EVENT) || !newType
+                    .equals(null) && newType.equals(TaskType.EVENT));
             createBlockParameters(des, pri, start, end, origType, newType, id,
                     taskObj, tag, freqInMilliSec, timeSlots, isModifyAll);
 
         } else if (tag.equals("RECUR")) {
-            assert (!origType.equals(TaskType.TODO) || !newType
-                    .equals(TaskType.TODO));
+            assert (!origType.equals(null) && !origType.equals(TaskType.TODO) || !newType
+                    .equals(null) && !newType.equals(TaskType.TODO));
             createRecurParameters(des, pri, start, end, origType, newType, id,
-                    taskObj, tag, freqInMilliSec, timeSlots, endRecurOn, isModifyAll);
+                    taskObj, tag, freqInMilliSec, timeSlots, endRecurOn,
+                    isModifyAll);
 
         } else {
             throw new Exception("invalid tag used by CC");
@@ -138,6 +164,24 @@ public class DataParameter {
     }
 
     // only for event TaskTypes
+    private void createAddBlockParameters(String des, char pri, Date start,
+            Date end, TaskType origType, TaskType newType, int id, String tag,
+            long freqInMilliSec, List<TimePair> timeSlots, boolean isModifyAll) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
+
+        setTag(tag);
+        setFreqInMilliSec(freqInMilliSec);
+        setTimeSlots(timeSlots);
+        setModifyAll(isModifyAll);
+
+    }
+
     private void createBlockParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id,
             Task<?> taskObj, String tag, long freqInMilliSec,
@@ -163,6 +207,27 @@ public class DataParameter {
     }
 
     // only for event and deadline TaskTypes
+    private void createAddRecurParameters(String des, char pri, Date start,
+            Date end, TaskType origType, TaskType newType, int id, String tag,
+            long freqInMilliSec, List<TimePair> timeSlots, Date endRecurOn,
+            boolean isModifyAll) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
+
+        setTag(tag);
+        setFreqInMilliSec(freqInMilliSec);
+        setTimeSlots(null);
+        setModifyAll(isModifyAll);
+
+        setEndRecurOn(endRecurOn);
+
+    }
+
     private void createRecurParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id,
             Task<?> taskObj, String tag, long freqInMilliSec,
@@ -192,9 +257,9 @@ public class DataParameter {
 
         setTag(tag);
         setFreqInMilliSec(freqInMilliSec);
-        setTimeSlots(timeSlots);
+        setTimeSlots(null);
         setModifyAll(isModifyAll);
-        
+
         setEndRecurOn(endRecurOn);
 
     }

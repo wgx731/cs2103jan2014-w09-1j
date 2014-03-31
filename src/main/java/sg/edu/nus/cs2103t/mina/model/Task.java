@@ -150,6 +150,11 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     public Date getCreatedTime() {
         return _createdTime;
     }
+    
+    public void addTag(String tag) {
+        assert(_tags != null);
+        _tags.add(tag);
+    }
 
     @Override
     public String toString() {

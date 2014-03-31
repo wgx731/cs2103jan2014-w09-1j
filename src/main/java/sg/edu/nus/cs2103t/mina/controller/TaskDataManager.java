@@ -831,7 +831,6 @@ public class TaskDataManager {
         _uncompletedTodoTasks.clear();
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
-
-        saveAllTasks();
+        
     }
 }
