@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,11 +89,11 @@ public class TaskDataManager {
     @SuppressWarnings("unchecked")
     public TaskDataManager(DataSyncManager syncManager) {
         SortedSet<? extends Task<?>> tempTasks = null;
+
         _syncManager = syncManager;
+
         _observers = new ArrayList<MemoryDataObserver>();
         _observers.add((MemoryDataObserver) syncManager);
-
-        // TODO: add HashMap to observer as well
 
         try {
             tempTasks = _syncManager.loadTaskSet(TaskType.TODO, false);
@@ -143,6 +144,10 @@ public class TaskDataManager {
             logger.error(e, e);
         }
 
+        // TODO: load from data sync manager, then add to observer
+        _recurringTasks = new HashMap<String, ArrayList<Task<?>>>();
+        _blockTasks = new HashMap<String, ArrayList<EventTask>>();
+
         updateHashMaps();
     }
 
@@ -172,6 +177,15 @@ public class TaskDataManager {
         return _completedEventTasks;
     }
 
+    /* load methods: HashMaps */
+    public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
+        return _recurringTasks;
+    }
+
+    public HashMap<String, ArrayList<EventTask>> getBlockTasks() {
+        return _blockTasks;
+    }
+
     /**
      * Updates HashMaps if user has modified their JSON files.
      */
@@ -188,7 +202,6 @@ public class TaskDataManager {
     }
 
     private void updateTasksMaps() {
-
         // loop through deadlines
         Iterator<DeadlineTask> deadlineTaskIterator = _uncompletedDeadlineTasks
                 .iterator();
@@ -281,6 +294,7 @@ public class TaskDataManager {
         }
 
         if (_blockTasks.containsKey(blockTag)) {
+            // TODO: check if description is the same
             ArrayList<EventTask> taskList = _blockTasks.remove(blockTag);
             taskList.add(taskToInclude);
 
@@ -347,40 +361,182 @@ public class TaskDataManager {
      * @param DataParameter addParameters
      * @return added Task
      */
-    public Task<?> addTask(DataParameter addParameter) {
-        assert (addParameter.getNewTaskType() != null);
+    public Task<?> addTask(DataParameter addParameters) {
+        assert (addParameters.getNewTaskType() != null);
 
-        switch (addParameter.getNewTaskType()) {
-            case TODO :
-                TodoTask newTodoTask = createTodoTask(addParameter);
-                if (_uncompletedTodoTasks.add(newTodoTask)) {
-                    syncUncompletedTasks(TaskType.TODO);
+        if (addParameters.getTag() != null && addParameters.getTag().equals(
+                "RECUR")) {
+            assert (addParameters.getNewTaskType().equals(TaskType.EVENT) || addParameters
+                    .getNewTaskType().equals(TaskType.DEADLINE));
 
-                    return newTodoTask;
-                }
-                return null;
+            return addRecurringTask(addParameters);
 
+        } else if (addParameters.getTag() != null && addParameters.getTag()
+                .equals("BLOCK")) {
+            assert (addParameters.getNewTaskType().equals(TaskType.EVENT));
+
+            return addBlockTask(addParameters);
+
+        } else {
+            return addRegTask(addParameters);
+        }
+    }
+
+    private Task<?> addRecurringTask(DataParameter addParameters) {
+        String recurTag = "RECUR_" + maxRecurTagInt++;
+
+        assert (!_recurringTasks.containsKey(recurTag));
+
+        Date endRecurOn = addParameters.getEndRecurOn() == null ? generateStartOfNextYear()
+                : addParameters.getEndRecurOn();
+
+        switch (addParameters.getNewTaskType()) {
             case DEADLINE :
-                DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
-                if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
-                    syncUncompletedTasks(TaskType.DEADLINE);
+                Date currDeadline = addParameters.getEndDate();
 
-                    return newDeadlineTask;
+                while (currDeadline.compareTo(endRecurOn) < 0) {
+                    includeInRecurMap(addDeadlineTask(addParameters), recurTag);
+
+                    currDeadline = updateDate(currDeadline,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
+
+                    addParameters.setEndDate(currDeadline);
                 }
-                return null;
+
+                return _recurringTasks.get(recurTag).get(0);
 
             case EVENT :
-                EventTask newEventTask = createEventTask(addParameter);
-                if (_uncompletedEventTasks.add(newEventTask)) {
-                    syncUncompletedTasks(TaskType.EVENT);
+                Date currStartDate = addParameters.getStartDate();
+                Date currEndDate = addParameters.getEndDate();
 
-                    return newEventTask;
+                while (currEndDate.compareTo(endRecurOn) < 0) {
+                    includeInRecurMap(addDeadlineTask(addParameters), recurTag);
+
+                    currStartDate = updateDate(currStartDate,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
+                    currEndDate = updateDate(currEndDate,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
+
+                    addParameters.setStartDate(currStartDate);
+                    addParameters.setEndDate(currEndDate);
+
                 }
-                return null;
+
+                return _recurringTasks.get(recurTag).get(0);
 
             default :
                 return null;
         }
+    }
+
+    private Date updateDate(Date currDate, String timeType, int freqOfTimeType) {
+        Calendar updateCal = Calendar.getInstance();
+        updateCal.setTime(currDate);
+
+        switch (timeType) {
+            case ("YEAR") :
+                updateCal.add(Calendar.YEAR, freqOfTimeType);
+                break;
+            case ("MONTH") :
+                updateCal.add(Calendar.MONTH, freqOfTimeType);
+                break;
+            case ("WEEK") :
+                updateCal.add(Calendar.WEEK_OF_YEAR, freqOfTimeType);
+                break;
+            case ("DAY") :
+                updateCal.add(Calendar.DAY_OF_MONTH, freqOfTimeType);
+                break;
+            case ("HOUR") :
+                updateCal.add(Calendar.HOUR_OF_DAY, freqOfTimeType);
+                break;
+            default :
+                return null;
+
+        }
+
+        return updateCal.getTime();
+    }
+
+    private Task<?> addBlockTask(DataParameter addParameters) {
+        String blockTag = "BLOCK_" + maxBlockTagInt++;
+
+        Date currStartDate = addParameters.getStartDate();
+        Date currEndDate = addParameters.getEndDate();
+
+        for (int i = 1; i <= addParameters.getTimeSlots().size(); i++) {
+            includeInBlockMap((EventTask) addEventTask(addParameters), blockTag);
+
+            currStartDate = addParameters.getTimeSlots().get(i).getStartDate();
+            currEndDate = addParameters.getTimeSlots().get(i).getEndDate();
+
+            addParameters.setStartDate(currStartDate);
+            addParameters.setEndDate(currEndDate);
+
+        }
+
+        return _recurringTasks.get(blockTag).get(0);
+    }
+
+    private Task<?> addRegTask(DataParameter addParameters) {
+        switch (addParameters.getNewTaskType()) {
+            case TODO :
+                return addTodoTask(addParameters);
+
+            case DEADLINE :
+                return addDeadlineTask(addParameters);
+
+            case EVENT :
+                return addEventTask(addParameters);
+
+            default :
+                return null;
+        }
+    }
+
+    private Date generateStartOfNextYear() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        int currYear = calendar.get(Calendar.YEAR);
+        calendar.set(currYear + 1, 0, 1);
+
+        Date startOfNextYear = calendar.getTime();
+        System.out.println("NewYear: " + startOfNextYear);
+
+        return startOfNextYear;
+    }
+
+    private Task<?> addEventTask(DataParameter addParameter) {
+        EventTask newEventTask = createEventTask(addParameter);
+        if (_uncompletedEventTasks.add(newEventTask)) {
+            syncUncompletedTasks(TaskType.EVENT);
+
+            return newEventTask;
+        }
+        return null;
+    }
+
+    private Task<?> addDeadlineTask(DataParameter addParameter) {
+        DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
+        if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
+            syncUncompletedTasks(TaskType.DEADLINE);
+
+            return newDeadlineTask;
+        }
+        return null;
+    }
+
+    private Task<?> addTodoTask(DataParameter addParameter) {
+        TodoTask newTodoTask = createTodoTask(addParameter);
+        if (_uncompletedTodoTasks.add(newTodoTask)) {
+            syncUncompletedTasks(TaskType.TODO);
+
+            return newTodoTask;
+        }
+        return null;
     }
 
     private TodoTask createTodoTask(DataParameter addParameters) {
@@ -410,31 +566,64 @@ public class TaskDataManager {
     public Task<?> deleteTask(DataParameter deleteParameters) {
         switch (deleteParameters.getTaskObject().getType()) {
             case TODO :
-                if (_uncompletedTodoTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.TODO);
+                if (!deleteParameters.getTaskObject().isCompleted()) {
+                    if (_uncompletedTodoTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.TODO);
 
-                    return deleteParameters.getTaskObject();
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    if (_completedTodoTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.TODO);
+
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 }
             case DEADLINE :
-                if (_uncompletedDeadlineTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.DEADLINE);
+                if (!deleteParameters.getTaskObject().isCompleted()) {
+                    if (_uncompletedDeadlineTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.DEADLINE);
 
-                    return deleteParameters.getTaskObject();
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    if (_completedDeadlineTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.DEADLINE);
+
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 }
             case EVENT :
-                if (_uncompletedEventTasks.remove(deleteParameters
-                        .getTaskObject())) {
-                    syncUncompletedTasks(TaskType.EVENT);
+                if (!deleteParameters.getTaskObject().isCompleted()) {
+                    if (_uncompletedEventTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.EVENT);
 
-                    return deleteParameters.getTaskObject();
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    if (_completedEventTasks.remove(deleteParameters
+                            .getTaskObject())) {
+                        syncUncompletedTasks(TaskType.EVENT);
+
+                        return deleteParameters.getTaskObject();
+                    } else {
+                        return null;
+                    }
                 }
             default :
                 // System.out.println("Unable to determine Task Type.");
@@ -534,7 +723,7 @@ public class TaskDataManager {
         }
 
     }
-    
+
     /**
      * Marks a given task as uncompleted by setting its completed tag to false.
      * <p>
@@ -682,6 +871,5 @@ public class TaskDataManager {
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
 
-        saveAllTasks();
     }
 }

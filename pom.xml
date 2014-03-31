@@ -55,6 +55,7 @@
 		<jdk.version>1.7</jdk.version>
 		<jbehave.version>3.9.1</jbehave.version>
 		<gson.version>2.2.4</gson.version>
+		<jkeymaster.version>1.1</jkeymaster.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -139,6 +140,11 @@
 		</profile>
 	</profiles>
 	<dependencies>
+		<dependency>
+			<groupId>com.github.tulskiy</groupId>
+			<artifactId>jkeymaster</artifactId>
+			<version>${jkeymaster.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>${swt-artifactId}</artifactId>
