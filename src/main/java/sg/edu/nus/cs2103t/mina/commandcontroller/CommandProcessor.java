@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -342,6 +343,7 @@ public class CommandProcessor {
                         _taskView = updatedTaskView(output);
                     }
                 }
+                break;
             case COMPLETE:
             	Task<?> completedTask = _taskDataManager.markCompleted(param);
             	if (completedTask == null){
@@ -358,6 +360,7 @@ public class CommandProcessor {
                         _taskView = updatedTaskView(output);
                     }
             	}
+            	break;
             case UNCOMPLETE:
             	Task<?> uncompletedTask = _taskDataManager.markUncompleted(param);
             	if (uncompletedTask == null){
@@ -374,6 +377,7 @@ public class CommandProcessor {
                         _taskView = updatedTaskView(output);
                     }
             	}
+            	break;
             default :
                 break;
         }
