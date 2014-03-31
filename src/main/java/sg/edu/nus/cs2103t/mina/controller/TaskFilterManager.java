@@ -46,6 +46,8 @@ public class TaskFilterManager {
     private static final int SEC = 0;
     private static final int START_TIME[] = {23, 59, 59};
     private static final int END_TIME[] = {0,0,0};
+    private static final int START = 0;
+    private static final int END = 1;
     
 	private TaskDataManager _taskStore;
 
@@ -251,20 +253,37 @@ public class TaskFilterManager {
                 task instanceof DeadlineTask);
         assert(start!=null || end!=null);
         
-        Date targetDate;
+        Date[] targetDate = new Date[2];
+        
         if (task instanceof EventTask) {
-            targetDate = ((EventTask) task).getStartTime();
+            targetDate[START] = ((EventTask) task).getStartTime();
+            targetDate[END] = ((EventTask) task).getEndTime();
         } else {
-            targetDate = ((DeadlineTask) task).getEndTime();
+             targetDate[START] = targetDate[END] = ((DeadlineTask) task).getEndTime();
         }
         
         if (start!=null && end!=null) {
-            return targetDate.after(start) && targetDate.before(end);
+            
+            logger.info("StartTargetDate: " + targetDate[START].getTime() + "\n" +
+                        "EndTargetDate: " + targetDate[END].getTime() + "\n" +
+                        "Start: " + start.getTime() + "\n" + 
+                        "End: " + end.getTime());
+            
+            return !(end.before(targetDate[START]) || start.after(targetDate[END]));
+            
         } else if(start!=null) {
-            return targetDate.after(start);
+            return isTargetAfterOrEqual(targetDate[END], start);
         } else {
-            return targetDate.before(end);
+            return isTargetBeforeOrEqual(targetDate[START], end);
         } 
+    }
+
+    private boolean isTargetBeforeOrEqual(Date targetDate,Date end) {
+        return targetDate.before(end) || targetDate.equals(end);
+    }
+
+    private boolean isTargetAfterOrEqual(Date targetDate, Date start){
+        return targetDate.after(start) || targetDate.equals(start);
     }
     
     /**

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -382,12 +383,23 @@ public class TaskFilterManagerFilterTest {
         while (eventsIter.hasNext()) {
             events.add(eventsIter.next());
         }
+        
+        Iterator<DeadlineTask> deadlinesIter = tdmStub.getUncompletedDeadlineTasks().iterator();
+        ArrayList<DeadlineTask> deadlines = new ArrayList<DeadlineTask>();
+        
+        while (deadlinesIter.hasNext()) {
+            deadlines.add(deadlinesIter.next());
+        }
+        
         logger.info(events);
+        logger.info(deadlines);
+        
         // Test dates only. No time (00:00)
         // A week from now.
         logger.info("Testing dates with only");
         Date[] dateRange = getRange(TODAY, new int[0], 
                                     WEEK, new int[0], NO_TIME);
+        logger.info("Date Range: " + Arrays.toString(dateRange));
         ArrayList<Task<?>> test = getResult(dateFilters, dateRange[START],
                                             dateRange[END], NO_TIME);
         
@@ -405,6 +417,7 @@ public class TaskFilterManagerFilterTest {
         dateRange = getRange(2, new int[]{12,0,0},
                              5, new int[]{9,0,0}, 
                              HAS_TIME);   
+        logger.info("Date Range: " + Arrays.toString(dateRange));
         test = getResult(dateFilters, dateRange[START],
                          dateRange[END], HAS_TIME);  
         
@@ -417,6 +430,7 @@ public class TaskFilterManagerFilterTest {
         //Test date with start only
         logger.info("Testing date with start only");
         dateRange = getRange(TODAY, new int[0], 0, new int[0], NO_TIME);
+        logger.info("Date Range: " + Arrays.toString(dateRange));
         test = getResult(dateFilters, dateRange[START],
                         null, HAS_TIME);  
         assertEquals(events, test);
@@ -425,6 +439,7 @@ public class TaskFilterManagerFilterTest {
         logger.info("Testing date with end only");
         dateRange = getRange(2, new int[]{12,00,0},
                              5, new int[]{9,0,0}, HAS_TIME);
+        logger.info("Date Range: " + Arrays.toString(dateRange));
         test = getResult(dateFilters, null,
                          dateRange[END], HAS_TIME);  
         
@@ -433,6 +448,75 @@ public class TaskFilterManagerFilterTest {
             expected.add(events.get(i));
         }      
         assertEquals(expected, test);
+        
+        logger.info("Testing for middle");
+        logger.info("Getting Date range");
+        dateRange = getRange(2, new int[]{12,00,0},
+                5, new int[]{9,0,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                    dateRange[END], HAS_TIME);  
+        
+        expected = new ArrayList<EventTask>();
+        for(int i=0; i<5; i++) {
+        expected.add(events.get(i));
+        }      
+        assertEquals(expected, test);        
+        
+        //Checking for overlaps
+        //Events only
+        logger.info("Testing overlaps: START < event.start but END > event.start ");
+        logger.info("Getting date range");
+        dateRange = getRange(TODAY, new int[]{0,0,0}, 
+                            1, new int[]{12,0,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                        dateRange[END], HAS_TIME);
+        expected = new ArrayList<EventTask>();
+        expected.add(events.get(0));
+        assertEquals(expected, test);
+        
+        logger.info("Testing overlaps: START < event.end but END > event.end ");
+        logger.info("Getting date range");
+        dateRange = getRange(1, new int[]{12,0,0}, 
+                            0, new int[]{20,0,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                        dateRange[END], HAS_TIME);
+        expected = new ArrayList<EventTask>();
+        expected.add(events.get(0));
+        assertEquals(expected, test);   
+
+        logger.info("Testing strict subset: START > event.start and END < event.end ");
+        logger.info("Getting date range");
+        dateRange = getRange(1, new int[]{12,0,0}, 
+                            0, new int[]{12,30,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                        dateRange[END], HAS_TIME);
+        expected = new ArrayList<EventTask>();
+        expected.add(events.get(0));
+        assertEquals(expected, test); 
+        
+        logger.info("Testing equality: START = event.start and END > event.end ");
+        logger.info("Getting date range");
+        dateRange = getRange(1, new int[]{11,15,0}, 
+                            0, new int[]{20,30,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                        dateRange[END], HAS_TIME);
+        expected = new ArrayList<EventTask>();
+        expected.add(events.get(0));
+        assertEquals(expected, test); 
+        
+        logger.info("Testing equality: START < event.start and END = event.end ");
+        logger.info("Getting date range");
+        dateRange = getRange(1, new int[]{10,15,0}, 
+                            0, new int[]{13,15,0}, HAS_TIME);
+        test = getResult(dateFilters, null,
+                        dateRange[END], HAS_TIME);
+        expected = new ArrayList<EventTask>();
+        expected.add(events.get(0));
+        assertEquals(expected, test); 
+        
+        //Deadlines only
+        
+        
         
         resetTdmTfm();
         
@@ -482,18 +566,20 @@ public class TaskFilterManagerFilterTest {
     /*
      * Test the date range
      */
-    
     /**
      * Get the range of date.
-     * 
-     * @param start 
-     * How many days from today
-     * @param end 
+     * @param startNumDay
+     * How many days from 'today'
+     * @param startMs
+     * Start time, an int array of size 3, hour/min/sec in that order
+     * @param range
      * How many days from 'start' parameter
-     * @param hasTime 
-     * If false, date will start from midnight, else it will be current time
+     * @param endMs
+     * End time, an int array of size 3, hour/min/sec in that order
+     * @param hasTime
+     * Does it have time?
      * @return
-     * A tuple with a start date and end date
+     * Date array of size 2. START and END in that order
      */
     private Date[] getRange(int startNumDay, int[] startMs, 
                             int range, int[] endMs, boolean hasTime) {

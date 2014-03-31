@@ -68,7 +68,7 @@ public class CommandProcessor {
             .getName());
 
     enum CommandType {
-        ADD, DELETE, MODIFY, COMPLETE, DISPLAY, SEARCH, UNDO, REDO, EXIT, INVALID
+        ADD, DELETE, MODIFY, COMPLETE, UNCOMPLETE, DISPLAY, SEARCH, UNDO, REDO, EXIT, INVALID
     };
 
     // Constructor
@@ -243,6 +243,10 @@ public class CommandProcessor {
                     String output = String.format(COMPLETED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    DataParameter undoParam = processUndoCompleteParameter(task,
+                            completeParameter);
+                    _commandHistory.addUndo(CommandType.UNCOMPLETE, undoParam);
+                    _commandHistory.clearRedo();
                 }
                 break;
             }
@@ -340,6 +344,38 @@ public class CommandProcessor {
                         _taskView = updatedTaskView(output);
                     }
                 }
+            case COMPLETE:
+            	Task<?> completedTask = _taskDataManager.markCompleted(param);
+            	if (completedTask == null){
+                    processUserCommand(CommandType.INVALID);
+            	} else {
+            		DataParameter undoParam = processUndoCompleteParameter(
+                            completedTask, param);
+                    updateHistory(CommandType.UNCOMPLETE, undoParam);
+                    if (_isUndoNow) {
+                        String output = UNDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    } else {
+                        String output = REDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    }
+            	}
+            case UNCOMPLETE:
+            	Task<?> uncompletedTask = _taskDataManager.markUncompleted(param);
+            	if (uncompletedTask == null){
+                    processUserCommand(CommandType.INVALID);
+            	} else {
+            		DataParameter undoParam = processUndoCompleteParameter(
+                            uncompletedTask, param);
+                    updateHistory(CommandType.COMPLETE, undoParam);
+                    if (_isUndoNow) {
+                        String output = UNDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    } else {
+                        String output = REDO_MESSAGE;
+                        _taskView = updatedTaskView(output);
+                    }
+            	}
             default :
                 break;
         }
@@ -544,6 +580,12 @@ public class CommandProcessor {
         filterParam.setEnd(endDate);
         filterParam.setStartTime(hasStartTime);
         filterParam.setEndTime(hasEndTime);
+        if (filterParam.getStart()!=null&&filterParam.getEnd()!=null){
+    		if (filterParam.getStart().after(filterParam.getEnd())){
+    			filterParam = null;
+    			return filterParam;
+    		}
+    	}
         return filterParam;
     }
 
@@ -813,5 +855,12 @@ public class CommandProcessor {
             undoModifyParameter.setEndDate(oldDeadlineTask.getEndTime());
         }
         return undoModifyParameter;
+    }
+    
+    public DataParameter processUndoCompleteParameter(Task<?> newTask, 
+    		DataParameter completeParameter){
+    	DataParameter undoCompleteParameter = new DataParameter();
+    	undoCompleteParameter.setTaskObject(newTask);
+    	return undoCompleteParameter;
     }
 }
