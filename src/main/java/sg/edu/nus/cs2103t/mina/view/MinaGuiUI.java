@@ -84,6 +84,9 @@ public class MinaGuiUI extends MinaView {
 	private boolean _isAutoComplete;
 	
 	private Robot _bot;
+	
+	private int SHELL_WIDTH;
+	private int SHELL_HEIGHT;
 
 	private static final String ERROR = "Operation failed. Please try again.";
 	private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
@@ -122,6 +125,14 @@ public class MinaGuiUI extends MinaView {
 		logger.log(Level.INFO, "shell create contents");
 		_display = Display.getDefault();
 		
+		if (_display.getBounds().width>1024){
+			SHELL_WIDTH = 1096;
+		} else {
+			SHELL_WIDTH = 976;
+		}
+		
+		SHELL_HEIGHT = 580;
+		logger.log(Level.INFO, "width"+SHELL_WIDTH);
 		_autoComplete = new AutoCompleteDB();
 
 		_commandHistory = new LinkedList<String>();
@@ -151,21 +162,19 @@ public class MinaGuiUI extends MinaView {
 
 		_shell = new Shell(_display, SWT.NO_TRIM);
 		_shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
-		_shell.setSize(1080, 580);
+		_shell.setSize(SHELL_WIDTH, SHELL_HEIGHT);
 		_shell.setText("MINA");
 
 		_statusBar = new Label(_shell, SWT.NONE);
 		_statusBar.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
 				SWT.NORMAL));
 		_statusBar.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		_statusBar.setBounds(722, 540, 354, 36);
 
 		_userInputTextField = new Text(_shell, SWT.NONE);
 		_userInputTextField
 				.setForeground(SWTResourceManager.getColor(0, 51, 0));
 		_userInputTextField.setFont(SWTResourceManager.getFont("Trebuchet MS",
 				15, SWT.NORMAL));
-		_userInputTextField.setBounds(4, 540, 714, 36);
 
 		_lblEvent = new Label(_shell, SWT.NONE);
 		_lblEvent.setAlignment(SWT.CENTER);
@@ -859,49 +868,49 @@ public class MinaGuiUI extends MinaView {
 	}
 
 	private void showEvent() {
-		_lblEvent.setBounds(4, 4, 354, 36);
+		_lblEvent.setBounds(4, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setEventPanelSize(4, 40, 354, 496);
+		setEventPanelSize(4, 40, (SHELL_WIDTH-16)/3, 496);
 	}
 
 	private void hideEvent() {
-		_lblEvent.setBounds(4, 4, 354, 32);
+		_lblEvent.setBounds(4, 4, (SHELL_WIDTH-16)/3, 32);
 		_lblEvent.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
-		setEventPanelSize(4, 40, 354, 0);
+		setEventPanelSize(4, 40, (SHELL_WIDTH-16)/3, 0);
 	}
 
 	private void showDeadline() {
-		_lblDeadline.setBounds(362, 4, 356, 36);
+		_lblDeadline.setBounds((SHELL_WIDTH-16)/3+8, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setDeadlinePanelSize(362, 40, 356, 496);
+		setDeadlinePanelSize((SHELL_WIDTH-16)/3+8, 40, (SHELL_WIDTH-16)/3, 496);
 	}
 
 	private void hideDeadline() {
-		_lblDeadline.setBounds(362, 4, 356, 32);
+		_lblDeadline.setBounds((SHELL_WIDTH-16)/3+8, 4, (SHELL_WIDTH-16)/3, 32);
 		_lblDeadline
 				.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
-		setDeadlinePanelSize(362, 40, 356, 0);
+		setDeadlinePanelSize((SHELL_WIDTH-16)/3+8, 40, (SHELL_WIDTH-16)/3, 0);
 	}
 
 	private void showTodo() {
-		_lblTodo.setBounds(722, 4, 354, 36);
+		_lblTodo.setBounds((SHELL_WIDTH-16)/3*2+12, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setTodoPanelSize(722, 40, 354, 496);
+		setTodoPanelSize((SHELL_WIDTH-16)/3*2+12, 40, (SHELL_WIDTH-16)/3, 496);
 	}
 
 	private void hideTodo() {
-		_lblTodo.setBounds(722, 4, 354, 32);
+		_lblTodo.setBounds((SHELL_WIDTH-16)/3*2+12, 4, (SHELL_WIDTH-16)/3, 32);
 		_lblTodo.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
-		setTodoPanelSize(722, 40, 354, 0);
+		setTodoPanelSize((SHELL_WIDTH-16)/3*2+12, 40, (SHELL_WIDTH-16)/3, 0);
 	}
 
 	private void positionBackgroundBox() {
 		if (_currentTab == 0) {
-			_backgroundBox.setBounds(0, 0, 362, 540);
+			_backgroundBox.setBounds(0, 0, (SHELL_WIDTH-16)/3+8, 540);
 		} else if (_currentTab == 1) {
-			_backgroundBox.setBounds(358, 0, 364, 540);
+			_backgroundBox.setBounds((SHELL_WIDTH-16)/3+4, 0, (SHELL_WIDTH-16)/3+8, 540);
 		} else {
-			_backgroundBox.setBounds(718, 0, 362, 540);
+			_backgroundBox.setBounds((SHELL_WIDTH-16)/3*2+8, 0, (SHELL_WIDTH-16)/3+8, 540);
 		}
 	}
 
@@ -917,9 +926,9 @@ public class MinaGuiUI extends MinaView {
 	private void expandEvent() {
 		hideDeadline();
 		hideTodo();
-		_lblEvent.setBounds(4, 4, 354, 36);
+		_lblEvent.setBounds(4, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setEventPanelSize(4, 40, 1072, 496);
+		setEventPanelSize(4, 40, SHELL_WIDTH-8, 496);
 		hideBackgroundBox();
 		_isExpanded = true;
 	}
@@ -927,9 +936,9 @@ public class MinaGuiUI extends MinaView {
 	private void expandDeadline() {
 		hideEvent();
 		hideTodo();
-		_lblDeadline.setBounds(362, 4, 356, 36);
+		_lblDeadline.setBounds((SHELL_WIDTH-16)/3+8, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setDeadlinePanelSize(4, 40, 1072, 496);
+		setDeadlinePanelSize(4, 40, SHELL_WIDTH-8, 496);
 		hideBackgroundBox();
 		_isExpanded = true;
 	}
@@ -937,9 +946,9 @@ public class MinaGuiUI extends MinaView {
 	private void expandTodo() {
 		hideDeadline();
 		hideEvent();
-		_lblTodo.setBounds(722, 4, 354, 36);
+		_lblTodo.setBounds((SHELL_WIDTH-16)/3*2+12, 4, (SHELL_WIDTH-16)/3, 36);
 		_lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
-		setTodoPanelSize(4, 40, 1072, 496);
+		setTodoPanelSize(4, 40, SHELL_WIDTH-8, 496);
 		hideBackgroundBox();
 		_isExpanded = true;
 	}
@@ -950,6 +959,8 @@ public class MinaGuiUI extends MinaView {
 		showEvent();
 		positionBackgroundBox();
 		showBackgroundBox();
+		_statusBar.setBounds((SHELL_WIDTH-16)/3*2+12, 540, (SHELL_WIDTH-16)/3, 36);
+		_userInputTextField.setBounds(4, 540, (SHELL_WIDTH-16)/3*2+4, 36);
 		_isExpanded = false;
 	}
 
