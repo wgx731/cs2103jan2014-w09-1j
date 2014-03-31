@@ -355,13 +355,13 @@ public class TaskDataManager {
     public Task<?> addTask(DataParameter addParameters) {
         assert (addParameters.getNewTaskType() != null);
 
-        if (addParameters.getTag().equals("RECUR")) {
+        if (addParameters.getTag() != null && addParameters.getTag().equals("RECUR")) {
             assert (addParameters.getNewTaskType().equals(TaskType.EVENT) || addParameters
                     .getNewTaskType().equals(TaskType.DEADLINE));
 
             return addRecurringTask(addParameters);
 
-        } else if (addParameters.getTag().equals("BLOCK")) {
+        } else if (addParameters.getTag() != null && addParameters.getTag().equals("BLOCK")) {
             assert (addParameters.getNewTaskType().equals(TaskType.EVENT));
 
             return addBlockTask(addParameters);
@@ -419,11 +419,11 @@ public class TaskDataManager {
 
     private Task<?> addBlockTask(DataParameter addParameters) {
         String blockTag = "BLOCK_" + maxBlockTagInt++;
-
+        
         Date currStartDate = addParameters.getStartDate();
         Date currEndDate = addParameters.getEndDate();
 
-        for (int i = 1; i <= addParameters.getTimeSlots().size(); i++) {
+        for (int i = 1; i<=addParameters.getTimeSlots().size(); i++) {
             includeInBlockMap((EventTask) addEventTask(addParameters), blockTag);
 
             currStartDate = addParameters.getTimeSlots().get(i).getStartDate();
@@ -433,7 +433,7 @@ public class TaskDataManager {
             addParameters.setEndDate(currEndDate);
 
         }
-
+            
         return _recurringTasks.get(blockTag).get(0);
     }
 
