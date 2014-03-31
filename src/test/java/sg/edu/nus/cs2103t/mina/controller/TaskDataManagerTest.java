@@ -17,6 +17,8 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 
 public class TaskDataManagerTest {
+    //TODO: check if date modify changes.
+    //TODO: add test cases for delete completed
 
     @Test
     public void testAddTask() {
@@ -24,6 +26,8 @@ public class TaskDataManagerTest {
         Long currDateMilliSec = System.currentTimeMillis();
 
         /* Basic add */
+        // Partition: All parameters except _priority specified
+        // Partition: All parameters specified
         assertEquals("Adding To-do task.", new TodoTask("TodoTask1"),
                 tdmTest.addTask(new DataParameter("TodoTask1", 'M', null, null,
                         null, TaskType.TODO, 123)));
@@ -59,6 +63,7 @@ public class TaskDataManagerTest {
         assertEquals(2, tdmTest.getUncompletedEventTasks().size());
 
         /* Task added is exactly the same as a task that already exists. */
+        // Partition: Task does not exist
         assertNull(tdmTest.addTask(new DataParameter("TodoTask2", 'H', null,
                 null, null, TaskType.TODO, 123)));
     }
@@ -94,6 +99,7 @@ public class TaskDataManagerTest {
                 TaskType.EVENT, 3));
 
         /* Basic Delete */
+        // Partition: Task exist in the file
         assertEquals("Todo tasks.", new TodoTask("Lie down", 'H'),
                 tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                         TaskType.TODO, null, 2, testDeleteTodo1)));
@@ -112,6 +118,7 @@ public class TaskDataManagerTest {
         assertEquals(2, tdmTest.getUncompletedEventTasks().size());
 
         /* deleting a task that does not exist */
+        // Partition: Delete Task non-existent
         assertNull("Deleting todo task that does not exist.",
                 tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                         TaskType.TODO, null, 2, testDeleteTodo1)));
@@ -129,7 +136,7 @@ public class TaskDataManagerTest {
                 new JsonFileTaskDaoImpl()));
         Long currDateMilliSec = System.currentTimeMillis();
 
-        /* modify all task parameters */
+        /* Partition: modify all task parameters but don't change the task type */
         Task<?> testModifyTodo1 = tdmTest
                 .addTask(new DataParameter("TodoTask I am slack.", 'L', null,
                         null, null, TaskType.TODO, 1));
@@ -169,9 +176,7 @@ public class TaskDataManagerTest {
 
         tdmTest.resetTrees();
 
-        /* modify task type and all parameters */
-
-        // basic modify
+        /* Partition: modify task type and all its parameters */
         Task<?> testModifyTaskType1 = tdmTest.addTask(new DataParameter(
                 "TodoTask becomes a DeadlineTask.", 'M', null, null, null,
                 TaskType.TODO, 123));

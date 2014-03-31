@@ -66,36 +66,6 @@ public class DataParameter {
 	}
 
 	// if task is not recurring or block, for deleting, modifying, marking tasks
-	// 1st alternative
-	public DataParameter(Task<?> taskObj) {
-		setDescription(taskObj.getDescription());
-		setPriority(taskObj.getPriority());
-		setOriginalTaskType(taskObj.getType());
-		setNewTaskType(taskObj.getType());
-		// setTaskID(taskObj.getId());
-		setTaskObject(taskObj);
-
-		if (taskObj.getType() == TaskType.DEADLINE) {
-			DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
-
-			setEndDate(deadlineTaskObj.getEndTime());
-		}
-
-		if (taskObj.getType() == TaskType.EVENT) {
-			EventTask eventTaskObj = (EventTask) taskObj;
-
-			setEndDate(eventTaskObj.getEndTime());
-			setStartDate(eventTaskObj.getStartTime());
-		}
-
-		setTag(null);
-		setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
-		setTimeSlots(null);
-		setModifyAll(false);
-	}
-
-	// if task is not recurring or block, for deleting, modifying, marking tasks
-	// 2nd alternative
 	public DataParameter(String des, char pri, Date start, Date end,
 			TaskType origType, TaskType newType, int id, Task<?> taskObj) {
 		setDescription(des);
