@@ -355,13 +355,15 @@ public class TaskDataManager {
     public Task<?> addTask(DataParameter addParameters) {
         assert (addParameters.getNewTaskType() != null);
 
-        if (addParameters.getTag() != null && addParameters.getTag().equals("RECUR")) {
+        if (addParameters.getTag() != null && addParameters.getTag().equals(
+                "RECUR")) {
             assert (addParameters.getNewTaskType().equals(TaskType.EVENT) || addParameters
                     .getNewTaskType().equals(TaskType.DEADLINE));
 
             return addRecurringTask(addParameters);
 
-        } else if (addParameters.getTag() != null && addParameters.getTag().equals("BLOCK")) {
+        } else if (addParameters.getTag() != null && addParameters.getTag()
+                .equals("BLOCK")) {
             assert (addParameters.getNewTaskType().equals(TaskType.EVENT));
 
             return addBlockTask(addParameters);
@@ -373,15 +375,17 @@ public class TaskDataManager {
 
     private Task<?> addRecurringTask(DataParameter addParameters) {
         String recurTag = "RECUR_" + maxRecurTagInt++;
+
         assert (!_recurringTasks.containsKey(recurTag));
 
-        Date startOfNextYear = generateStartOfNextYear();
+        Date endRecurOn = addParameters.getEndRecurOn() == null ? generateStartOfNextYear()
+                : addParameters.getEndRecurOn();
 
         switch (addParameters.getNewTaskType()) {
             case DEADLINE :
                 Date currDeadline = addParameters.getEndDate();
 
-                while (currDeadline.compareTo(startOfNextYear) < 0) {
+                while (currDeadline.compareTo(endRecurOn) < 0) {
                     includeInRecurMap(addDeadlineTask(addParameters), recurTag);
 
                     currDeadline = new Date(addParameters.getEndDate()
@@ -396,7 +400,7 @@ public class TaskDataManager {
                 Date currStartDate = addParameters.getStartDate();
                 Date currEndDate = addParameters.getEndDate();
 
-                while (currEndDate.compareTo(startOfNextYear) < 0) {
+                while (currEndDate.compareTo(endRecurOn) < 0) {
                     includeInRecurMap(addDeadlineTask(addParameters), recurTag);
 
                     currStartDate = new Date(addParameters.getEndDate()
@@ -419,11 +423,11 @@ public class TaskDataManager {
 
     private Task<?> addBlockTask(DataParameter addParameters) {
         String blockTag = "BLOCK_" + maxBlockTagInt++;
-        
+
         Date currStartDate = addParameters.getStartDate();
         Date currEndDate = addParameters.getEndDate();
 
-        for (int i = 1; i<=addParameters.getTimeSlots().size(); i++) {
+        for (int i = 1; i <= addParameters.getTimeSlots().size(); i++) {
             includeInBlockMap((EventTask) addEventTask(addParameters), blockTag);
 
             currStartDate = addParameters.getTimeSlots().get(i).getStartDate();
@@ -433,7 +437,7 @@ public class TaskDataManager {
             addParameters.setEndDate(currEndDate);
 
         }
-            
+
         return _recurringTasks.get(blockTag).get(0);
     }
 

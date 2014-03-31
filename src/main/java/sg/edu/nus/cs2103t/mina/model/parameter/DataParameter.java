@@ -10,406 +10,431 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TimePair;
 
 public class DataParameter {
-	/* for all tasks */
-	private String _description;
-	private char _priority;
-	private Date _start;
-	private Date _end;
-	private TaskType _originalTaskType;
-	private TaskType _newTaskType;
-	private int _taskID;
+    /* for all tasks */
+    private String _description;
+    private char _priority;
+    private Date _start;
+    private Date _end;
+    private TaskType _originalTaskType;
+    private TaskType _newTaskType;
+    private int _taskID;
 
-	/* for recurring and block tasks */
-	private String _tag; //either 'RECUR' or 'BLOCK'
-	private long _freqInMilliSec; // lower bound: every hour (i.e. 60*60*1000ms)
-	private List<TimePair> _timeSlots;
-	private boolean _modifyAll;
+    /* for recurring and block tasks */
+    private String _tag; // either 'RECUR' or 'BLOCK'
+    private boolean _modifyAll;
 
-	private Task<?> _taskObject;
+    /* for BLOCK tasks */
+    private List<TimePair> _timeSlots; // for BLOCK only
+    /* for RECURRING Tasks */
+    private long _freqInMilliSec; // lower bound: every hour (i.e. 60*60*1000ms)
+    private Date _endRecurOn;
 
-	/**
-	 * Constructors for DataParameter
-	 */
-	// default constructor
-	public DataParameter() {
-		setDescription(null);
-		setPriority('M');
-		setStartDate(null);
-		setEndDate(null);
-		setOriginalTaskType(null);
-		setNewTaskType(null);
-		setTaskID(-1);
-		setTaskObject(null);
+    private Task<?> _taskObject;
 
-		setTag(null);
-		setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
-		setTimeSlots(null);
-		setModifyAll(false);
+    /**
+     * Constructors for DataParameter
+     */
+    // default constructor
+    public DataParameter() {
+        setDescription(null);
+        setPriority('M');
+        setStartDate(null);
+        setEndDate(null);
+        setOriginalTaskType(null);
+        setNewTaskType(null);
+        setTaskID(-1);
 
-	}
+        setTag(null);
+        setModifyAll(false);
+        
+        setTimeSlots(null);
+        
+        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setEndRecurOn(null);
+        
+        setTaskObject(null);
 
-	// if task is not recurring or block, for adding task
-	public DataParameter(String des, char pri, Date start, Date end,
-			TaskType origType, TaskType newType, int id) {
-		setDescription(des);
-		setPriority(pri);
-		setStartDate(start);
-		setEndDate(end);
-		setOriginalTaskType(origType);
-		setNewTaskType(newType);
-		setTaskID(id);
+    }
 
-		setTag(null);
-		setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
-		setTimeSlots(null);
-		setModifyAll(false);
-	}
+    // if task is not recurring or block, for adding task
+    public DataParameter(String des, char pri, Date start, Date end,
+            TaskType origType, TaskType newType, int id) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
 
-	// if task is not recurring or block, for deleting, modifying, marking tasks
-	public DataParameter(String des, char pri, Date start, Date end,
-			TaskType origType, TaskType newType, int id, Task<?> taskObj) {
-		setDescription(des);
-		setPriority(pri);
-		setStartDate(start);
-		setEndDate(end);
-		setOriginalTaskType(origType);
-		setNewTaskType(newType);
-		setTaskID(id);
+        setTag(null);
+        setModifyAll(false);
+        
+        setTimeSlots(null);
+        
+        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setEndRecurOn(null);
+        
+        setTaskObject(null);
+    }
 
-		setTaskObject(taskObj);
+    // if task is not recurring or block, for deleting, modifying, marking tasks
+    public DataParameter(String des, char pri, Date start, Date end,
+            TaskType origType, TaskType newType, int id, Task<?> taskObj) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
 
-		if (taskObj.getType() == TaskType.DEADLINE) {
-			DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
+        setTaskObject(taskObj);
 
-			setEndDate(end == null ? deadlineTaskObj.getEndTime() : end);
-		}
+        if (taskObj.getType() == TaskType.DEADLINE) {
+            DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
 
-		if (taskObj.getType() == TaskType.EVENT) {
-			EventTask eventTaskObj = (EventTask) taskObj;
+            setEndDate(end == null ? deadlineTaskObj.getEndTime() : end);
+        }
 
-			setEndDate(end == null ? eventTaskObj.getEndTime() : end);
-			setStartDate(start == null ? eventTaskObj.getStartTime() : start);
-		}
+        if (taskObj.getType() == TaskType.EVENT) {
+            EventTask eventTaskObj = (EventTask) taskObj;
 
-		setTag(null);
-		setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
-		setTimeSlots(null);
-		setModifyAll(false);
-	}
+            setEndDate(end == null ? eventTaskObj.getEndTime() : end);
+            setStartDate(start == null ? eventTaskObj.getStartTime() : start);
+        }
 
-	// for adding or modifying recurring or block tasks
-	public DataParameter(String des, char pri, Date start, Date end,
-			TaskType origType, TaskType newType, int id, Task<?> taskObj,
-			String tag, long freqInMilliSec, List<TimePair> timeSlots,
-			boolean isModifyAll) throws Exception {
-		if (tag.equals("BLOCK")) {
-			assert(origType.equals(TaskType.EVENT) || newType.equals(TaskType.EVENT));
-			createBlockParameters(des, pri, start, end, origType, newType, id,
-					taskObj, tag, freqInMilliSec, timeSlots, isModifyAll);
+        setTag(null);
+        setModifyAll(false);
+        
+        setTimeSlots(null);
+        
+        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setEndRecurOn(null);
+        
+    }
 
-		} else if (tag.equals("RECUR")) {
-			assert(!origType.equals(TaskType.TODO) || !newType.equals(TaskType.TODO));
-			createRecurParameters(des, pri, start, end, origType, newType, id,
-					taskObj, tag, freqInMilliSec, timeSlots, isModifyAll);
+    // for adding or modifying recurring or block tasks
+    public DataParameter(String des, char pri, Date start, Date end,
+            TaskType origType, TaskType newType, int id, Task<?> taskObj,
+            String tag, long freqInMilliSec, Date endRecurOn, List<TimePair> timeSlots,
+            boolean isModifyAll) throws Exception {
+        if (tag.equals("BLOCK")) {
+            assert (origType.equals(TaskType.EVENT) || newType
+                    .equals(TaskType.EVENT));
+            createBlockParameters(des, pri, start, end, origType, newType, id,
+                    taskObj, tag, freqInMilliSec, timeSlots, isModifyAll);
 
-		} else {
-			throw new Exception("invalid tag used by CC");
-		}
+        } else if (tag.equals("RECUR")) {
+            assert (!origType.equals(TaskType.TODO) || !newType
+                    .equals(TaskType.TODO));
+            createRecurParameters(des, pri, start, end, origType, newType, id,
+                    taskObj, tag, freqInMilliSec, timeSlots, endRecurOn, isModifyAll);
 
-	}
+        } else {
+            throw new Exception("invalid tag used by CC");
+        }
 
-	// only for event TaskTypes
-	private void createBlockParameters(String des, char pri, Date start,
-			Date end, TaskType origType, TaskType newType, int id,
-			Task<?> taskObj, String tag, long freqInMilliSec,
-			List<TimePair> timeSlots, boolean isModifyAll) {
-		setDescription(des);
-		setPriority(pri);
-		setStartDate(start);
-		setEndDate(end);
-		setOriginalTaskType(origType);
-		setNewTaskType(newType);
-		setTaskID(id);
-		
-		// parameters specific to EventTask
-		EventTask eventTaskObj = (EventTask) taskObj;
-		setEndDate(end == null ? eventTaskObj.getEndTime() : end);
-		setStartDate(start == null ? eventTaskObj.getStartTime() : start);
+    }
 
-		setTag(tag);
-		setFreqInMilliSec(freqInMilliSec);
-		setTimeSlots(timeSlots);
-		setModifyAll(isModifyAll);
+    // only for event TaskTypes
+    private void createBlockParameters(String des, char pri, Date start,
+            Date end, TaskType origType, TaskType newType, int id,
+            Task<?> taskObj, String tag, long freqInMilliSec,
+            List<TimePair> timeSlots, boolean isModifyAll) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
 
-	}
+        // parameters specific to EventTask
+        EventTask eventTaskObj = (EventTask) taskObj;
+        setEndDate(end == null ? eventTaskObj.getEndTime() : end);
+        setStartDate(start == null ? eventTaskObj.getStartTime() : start);
 
-	// only for event and deadline TaskTypes
-	private void createRecurParameters(String des, char pri, Date start,
-			Date end, TaskType origType, TaskType newType, int id,
-			Task<?> taskObj, String tag, long freqInMilliSec,
-			List<TimePair> timeSlots, boolean isModifyAll) {
-		setDescription(des);
-		setPriority(pri);
-		setStartDate(start);
-		setEndDate(end);
-		setOriginalTaskType(origType);
-		setNewTaskType(newType);
-		setTaskID(id);
+        setTag(tag);
+        setFreqInMilliSec(freqInMilliSec);
+        setTimeSlots(timeSlots);
+        setModifyAll(isModifyAll);
 
-		setTaskObject(taskObj);
+    }
 
-		if (taskObj.getType() == TaskType.DEADLINE) {
-			DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
+    // only for event and deadline TaskTypes
+    private void createRecurParameters(String des, char pri, Date start,
+            Date end, TaskType origType, TaskType newType, int id,
+            Task<?> taskObj, String tag, long freqInMilliSec,
+            List<TimePair> timeSlots, Date endRecurOn, boolean isModifyAll) {
+        setDescription(des);
+        setPriority(pri);
+        setStartDate(start);
+        setEndDate(end);
+        setOriginalTaskType(origType);
+        setNewTaskType(newType);
+        setTaskID(id);
 
-			setEndDate(end == null ? deadlineTaskObj.getEndTime() : end);
-		}
+        setTaskObject(taskObj);
 
-		if (taskObj.getType() == TaskType.EVENT) {
-			EventTask eventTaskObj = (EventTask) taskObj;
+        if (taskObj.getType() == TaskType.DEADLINE) {
+            DeadlineTask deadlineTaskObj = (DeadlineTask) taskObj;
 
-			setEndDate(end == null ? eventTaskObj.getEndTime() : end);
-			setStartDate(start == null ? eventTaskObj.getStartTime() : start);
-		}
+            setEndDate(end == null ? deadlineTaskObj.getEndTime() : end);
+        }
 
-		setTag(tag);
-		setFreqInMilliSec(freqInMilliSec);
-		setTimeSlots(timeSlots);
-		setModifyAll(isModifyAll);
+        if (taskObj.getType() == TaskType.EVENT) {
+            EventTask eventTaskObj = (EventTask) taskObj;
 
-	}
+            setEndDate(end == null ? eventTaskObj.getEndTime() : end);
+            setStartDate(start == null ? eventTaskObj.getStartTime() : start);
+        }
 
-	/**
-	 * This method checks the existing parameters within DataParameter and
-	 * infers the possible TaskType that it can model after. If there are not
-	 * enough parameters, it returns and UNKNOWN type.
-	 * 
-	 * @return TaskType inferredTaskType.
-	 */
-	public TaskType determineTaskType() {
+        setTag(tag);
+        setFreqInMilliSec(freqInMilliSec);
+        setTimeSlots(timeSlots);
+        setModifyAll(isModifyAll);
+        
+        setEndRecurOn(endRecurOn);
 
-		if (_description != null) {
-			if (_end != null) {
-				if (_start != null) {
-					return TaskType.EVENT;
-				}
-				return TaskType.DEADLINE;
-			}
-			return TaskType.TODO;
-		}
+    }
 
-		return TaskType.UNKNOWN;
-	}
+    /**
+     * This method checks the existing parameters within DataParameter and
+     * infers the possible TaskType that it can model after. If there are not
+     * enough parameters, it returns and UNKNOWN type.
+     * 
+     * @return TaskType inferredTaskType.
+     */
+    public TaskType determineTaskType() {
 
-	/**
-	 * This method takes in an existing task, and loads all of its old
-	 * parameters. Caution: overrides any existing data if they existed.
-	 */
-	public void loadOldTask(Task<?> taskToLoad) {
-	    if (taskToLoad == null) {
-	        return;
-	    }
-	    
-		setDescription(taskToLoad.getDescription());
-		setPriority(taskToLoad.getPriority());
-		// setTaskID(taskToLoad.getId());
-		// TODO find a way to map the UUID for _id in task to a human readable
-		// ID value
-		setOriginalTaskType(taskToLoad.getType());
+        if (_description != null) {
+            if (_end != null) {
+                if (_start != null) {
+                    return TaskType.EVENT;
+                }
+                return TaskType.DEADLINE;
+            }
+            return TaskType.TODO;
+        }
 
-		if (taskToLoad.getType() == TaskType.DEADLINE) {
-			DeadlineTask taskToLoadDeadline = (DeadlineTask) taskToLoad;
-			setEndDate(taskToLoadDeadline.getEndTime());
-		}
-		if (taskToLoad.getType() == TaskType.EVENT) {
-			EventTask taskToLoadEvent = (EventTask) taskToLoad;
-			setEndDate(taskToLoadEvent.getEndTime());
-			setStartDate(taskToLoadEvent.getStartTime());
-		}
-	}
+        return TaskType.UNKNOWN;
+    }
 
-	/**
-	 * For the modify function. Call this function after you call
-	 * loadOldTask(Task taskToModify).Takes in the values that user wants to
-	 * modify, and adds it onto existing values.
-	 */
-	public void loadNewParameters(DataParameter modifyParam) {
-		if (modifyParam.getDescription() != null) {
-			setDescription(modifyParam.getDescription());
-		}
-		if (modifyParam.getPriority() != _priority) {
-			setPriority(modifyParam.getPriority());
-		}
-		if (modifyParam.getStartDate() != null) {
-			setStartDate(modifyParam.getStartDate());
-		}
-		if (modifyParam.getEndDate() != null) {
-			setEndDate(modifyParam.getEndDate());
-		}
-		if (modifyParam.getOriginalTaskType() != null) {
-			setOriginalTaskType(modifyParam.getOriginalTaskType());
-		} else {
-			assert(false); // shouldn't be null
-		}
-		if (modifyParam.getNewTaskType() != null) {
-			setNewTaskType(modifyParam.getNewTaskType());
-		} else {
-			assert(false); // shouldn't be null
-		}
-		if (modifyParam.getTaskId() != -1) {
-			setTaskID(modifyParam.getTaskId());
-		}
+    /**
+     * This method takes in an existing task, and loads all of its old
+     * parameters. Caution: overrides any existing data if they existed.
+     */
+    public void loadOldTask(Task<?> taskToLoad) {
+        if (taskToLoad == null) {
+            return;
+        }
 
-		if (_originalTaskType != _newTaskType) {
-			if (_originalTaskType == TaskType.DEADLINE
-					&& _newTaskType == TaskType.TODO) {
-				//_description += (" by " + _end);
-				//_end = null;
-			} else if (_originalTaskType == TaskType.EVENT
-					&& _newTaskType == TaskType.TODO) {
-				//_description += (" from " + _start + " to " + _end);
-				//_start = null;
-				//_end = null;
-			} else if (_originalTaskType == TaskType.EVENT
-					&& _newTaskType == TaskType.DEADLINE) {
-				//_end = _start;
-				//_start = null;
-			}
+        setDescription(taskToLoad.getDescription());
+        setPriority(taskToLoad.getPriority());
+        // setTaskID(taskToLoad.getId());
+        setOriginalTaskType(taskToLoad.getType());
 
-			_originalTaskType = _newTaskType;
-		}
-	}
+        if (taskToLoad.getType() == TaskType.DEADLINE) {
+            DeadlineTask taskToLoadDeadline = (DeadlineTask) taskToLoad;
+            setEndDate(taskToLoadDeadline.getEndTime());
+        }
+        if (taskToLoad.getType() == TaskType.EVENT) {
+            EventTask taskToLoadEvent = (EventTask) taskToLoad;
+            setEndDate(taskToLoadEvent.getEndTime());
+            setStartDate(taskToLoadEvent.getStartTime());
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DataParameter other = (DataParameter) obj;
-		if (_description == null) {
-			if (other._description != null)
-				return false;
-		} else if (!_description.equals(other._description))
-			return false;
-		if (_end == null) {
-			if (other._end != null)
-				return false;
-		} else if (!_end.equals(other._end))
-			return false;
-		if (_newTaskType != other._newTaskType)
-			return false;
-		if (_originalTaskType != other._originalTaskType)
-			return false;
-		if (_priority != other._priority)
-			return false;
-		if (_start == null) {
-			if (other._start != null)
-				return false;
-		} else if (!_start.equals(other._start))
-			return false;
-		if (_taskID != other._taskID)
-			return false;
-		return true;
-	}
+        }
+    }
 
-	/** get Methods */
-	public String getDescription() {
-		return _description;
-	}
+    /**
+     * For the modify function. Call this function after you call
+     * loadOldTask(Task taskToModify).Takes in the values that user wants to
+     * modify, and adds it onto existing values.
+     */
+    public void loadNewParameters(DataParameter modifyParam) {
+        if (modifyParam.getDescription() != null) {
+            setDescription(modifyParam.getDescription());
+        }
+        if (modifyParam.getPriority() != _priority) {
+            setPriority(modifyParam.getPriority());
+        }
+        if (modifyParam.getStartDate() != null) {
+            setStartDate(modifyParam.getStartDate());
+        }
+        if (modifyParam.getEndDate() != null) {
+            setEndDate(modifyParam.getEndDate());
+        }
+        if (modifyParam.getOriginalTaskType() != null) {
+            setOriginalTaskType(modifyParam.getOriginalTaskType());
+        } else {
+            assert (false); // shouldn't be null
+        }
+        if (modifyParam.getNewTaskType() != null) {
+            setNewTaskType(modifyParam.getNewTaskType());
+        } else {
+            assert (false); // shouldn't be null
+        }
+        if (modifyParam.getTaskId() != -1) {
+            setTaskID(modifyParam.getTaskId());
+        }
 
-	public char getPriority() {
-		return _priority;
-	}
+        if (_originalTaskType != _newTaskType) {
+            if (_originalTaskType == TaskType.DEADLINE && _newTaskType == TaskType.TODO) {
+                // _description += (" by " + _end);
+                // _end = null;
+            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.TODO) {
+                // _description += (" from " + _start + " to " + _end);
+                // _start = null;
+                // _end = null;
+            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.DEADLINE) {
+                // _end = _start;
+                // _start = null;
+            }
 
-	public Date getStartDate() {
-		return _start;
-	}
+            _originalTaskType = _newTaskType;
+        }
+    }
 
-	public Date getEndDate() {
-		return _end;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DataParameter other = (DataParameter) obj;
+        if (_description == null) {
+            if (other._description != null)
+                return false;
+        } else if (!_description.equals(other._description))
+            return false;
+        if (_end == null) {
+            if (other._end != null)
+                return false;
+        } else if (!_end.equals(other._end))
+            return false;
+        if (_newTaskType != other._newTaskType)
+            return false;
+        if (_originalTaskType != other._originalTaskType)
+            return false;
+        if (_priority != other._priority)
+            return false;
+        if (_start == null) {
+            if (other._start != null)
+                return false;
+        } else if (!_start.equals(other._start))
+            return false;
+        if (_taskID != other._taskID)
+            return false;
+        return true;
+    }
 
-	public TaskType getOriginalTaskType() {
-		return _originalTaskType;
-	}
+    /** get Methods */
+    public String getDescription() {
+        return _description;
+    }
 
-	public TaskType getNewTaskType() {
-		return _newTaskType;
-	}
+    public char getPriority() {
+        return _priority;
+    }
 
-	public int getTaskId() {
-		return _taskID;
-	}
+    public Date getStartDate() {
+        return _start;
+    }
 
-	public Task<?> getTaskObject() {
-		return _taskObject;
-	}
+    public Date getEndDate() {
+        return _end;
+    }
 
-	public String getTag() {
-		return _tag;
-	}
+    public TaskType getOriginalTaskType() {
+        return _originalTaskType;
+    }
 
-	public long getFreqInMilliSec() {
-		return _freqInMilliSec;
-	}
+    public TaskType getNewTaskType() {
+        return _newTaskType;
+    }
 
-	public boolean isModifyAll() {
-		return _modifyAll;
-	}
+    public int getTaskId() {
+        return _taskID;
+    }
 
-	public List<TimePair> getTimeSlots() {
-		return _timeSlots;
-	}
+    public Task<?> getTaskObject() {
+        return _taskObject;
+    }
 
-	/** set Methods */
-	public void setDescription(String description) {
-		_description = description;
-	}
+    public String getTag() {
+        return _tag;
+    }
 
-	public void setPriority(char priority) {
-		_priority = priority;
-	}
+    public long getFreqInMilliSec() {
+        return _freqInMilliSec;
+    }
 
-	public void setStartDate(Date start) {
-		_start = start;
-	}
+    public boolean isModifyAll() {
+        return _modifyAll;
+    }
 
-	public void setEndDate(Date end) {
-		_end = end;
-	}
+    public List<TimePair> getTimeSlots() {
+        return _timeSlots;
+    }
 
-	public void setOriginalTaskType(TaskType originalTaskType) {
-		_originalTaskType = originalTaskType;
-	}
+    public Date getEndRecurOn() {
+        return _endRecurOn;
+    }
 
-	public void setNewTaskType(TaskType newTaskType) {
-		_newTaskType = newTaskType;
-	}
+    /** set Methods */
+    public void setDescription(String description) {
+        _description = description;
+    }
 
-	public void setTaskID(int taskID) {
-		_taskID = taskID;
-	}
+    public void setPriority(char priority) {
+        _priority = priority;
+    }
 
-	public void setTaskObject(Task<?> taskObject) {
-		_taskObject = taskObject;
-	}
+    public void setStartDate(Date start) {
+        _start = start;
+    }
 
-	public void setTag(String tag) {
-		_tag = tag;
-	}
+    public void setEndDate(Date end) {
+        _end = end;
+    }
 
-	public void setFreqInMilliSec(long freqInMilliSec) {
-		_freqInMilliSec = freqInMilliSec;
-	}
+    public void setOriginalTaskType(TaskType originalTaskType) {
+        _originalTaskType = originalTaskType;
+    }
 
-	public void setModifyAll(boolean modifyAll) {
-		_modifyAll = modifyAll;
-	}
+    public void setNewTaskType(TaskType newTaskType) {
+        _newTaskType = newTaskType;
+    }
 
-	public void setTimeSlots(List<TimePair> timeSlots) {
-		_timeSlots = timeSlots;
-	}
+    public void setTaskID(int taskID) {
+        _taskID = taskID;
+    }
+
+    public void setTaskObject(Task<?> taskObject) {
+        _taskObject = taskObject;
+    }
+
+    public void setTag(String tag) {
+        _tag = tag;
+    }
+
+    public void setFreqInMilliSec(long freqInMilliSec) {
+        _freqInMilliSec = freqInMilliSec;
+    }
+
+    public void setModifyAll(boolean modifyAll) {
+        _modifyAll = modifyAll;
+    }
+
+    public void setTimeSlots(List<TimePair> timeSlots) {
+        _timeSlots = timeSlots;
+    }
+
+    public void setEndRecurOn(Date endRecurOn) {
+        _endRecurOn = endRecurOn;
+    }
 
 }
