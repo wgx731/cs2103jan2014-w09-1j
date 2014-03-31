@@ -18,6 +18,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 
 public class TaskDataManagerTest {
     //TODO: check if date modify changes.
+    //TODO: add test cases for delete completed
 
     @Test
     public void testAddTask() {
