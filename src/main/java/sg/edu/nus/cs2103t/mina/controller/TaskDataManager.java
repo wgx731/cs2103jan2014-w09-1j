@@ -507,7 +507,7 @@ public class TaskDataManager {
         EventTask newEventTask = createEventTask(addParameter);
         if (_uncompletedEventTasks.add(newEventTask)) {
             syncUncompletedTasks(TaskType.EVENT);
-
+            
             return newEventTask;
         }
         return null;
@@ -552,7 +552,7 @@ public class TaskDataManager {
             assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT) || deleteParameters
                     .getNewTaskType().equals(TaskType.DEADLINE));
             
-            return deleteRecurringTasks(deleteParameters.getTaskObject());
+            return deleteRecurringTasks(deleteParameters);
             
         } else if (deleteParameters.getTaskObject().getTag().contains("BLOCK")) {
             assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT));
@@ -565,8 +565,22 @@ public class TaskDataManager {
         }
     }
 
-    private Task<?> deleteRecurringTasks(Task<?> recurTaskToDelete) {
+    private Task<?> deleteRecurringTasks(DataParameter deleteParameters) {
+        Task<?> recurTaskToDelete = deleteParameters.getTaskObject();
+        
         if (_recurringTasks.containsKey(recurTaskToDelete.getTag())) {
+            List<Task<?>> listOfRecTasks = _recurringTasks.remove(recurTaskToDelete.getTag());
+            
+            if (deleteParameters.isModifyAll()) {
+                while (!listOfRecTasks.isEmpty()) {
+                    deleteParameters.setTaskObject(listOfRecTasks.remove(0));
+                    deleteRegTask(deleteParameters);
+                }
+            } else {
+                List<Task<?>> tempListOfRecTasks = _recurringTasks.remove(recurTaskToDelete.getTag());
+                tempListOfRecTasks.remove(deleteParameters.getTaskObject());
+                deleteRegTask(deleteParameters);
+            }            
             
             return recurTaskToDelete;
         } else {
