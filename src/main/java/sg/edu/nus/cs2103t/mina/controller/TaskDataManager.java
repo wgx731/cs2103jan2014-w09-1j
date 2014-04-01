@@ -20,6 +20,7 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 
 /**
@@ -55,8 +56,8 @@ public class TaskDataManager {
     // HashMaps for recurring and block tasks
     private HashMap<String, ArrayList<Task<?>>> _recurringTasks;
     private HashMap<String, ArrayList<EventTask>> _blockTasks;
-    private int maxRecurTagInt = 0;
-    private int maxBlockTagInt = 0;
+    private int _maxRecurTagInt = 0;
+    private int _maxBlockTagInt = 0;
 
     private static final int TAG_INT_POS = 1;
 
@@ -144,11 +145,21 @@ public class TaskDataManager {
             logger.error(e, e);
         }
 
-        // TODO: load from data sync manager, then add to observer
-        _recurringTasks = new HashMap<String, ArrayList<Task<?>>>();
-        _blockTasks = new HashMap<String, ArrayList<EventTask>>();
+        TaskMapDataParameter taskMapData = _syncManager.loadTaskMap();
+        if (taskMapData == null) {
+            // TODO: load from data sync manager, then add to observer
+            _recurringTasks = new HashMap<String, ArrayList<Task<?>>>();
+            _blockTasks = new HashMap<String, ArrayList<EventTask>>();
 
-        updateHashMaps();
+            updateHashMaps();
+        } else {
+            _recurringTasks = taskMapData.getRecurringTasks();
+            _blockTasks = taskMapData.getBlockTasks();
+
+            _maxRecurTagInt = taskMapData.getMaxRecurTagInt();
+            _maxBlockTagInt = taskMapData.getMaxBlockTagInt();
+        }
+
     }
 
     /* load methods: uncompleted tasks */
@@ -190,15 +201,9 @@ public class TaskDataManager {
      * Updates HashMaps if user has modified their JSON files.
      */
     private void updateHashMaps() {
-        // if
-        // TODO: check if _recurringTasks has been modified
-        updateTasksMaps(); // iterates through both Event and Deadline Tasks
-
-        // else if
-        // TODO: check if _blockTasks has been modified
+        updateTasksMaps();
         updateBlockTaskMap(); // iterates through Event Tasks only
 
-        // else load old HashMaps, return
     }
 
     private void updateTasksMaps() {
@@ -306,8 +311,8 @@ public class TaskDataManager {
                 return false;
             }
 
-            maxRecurTagInt = recurTagInt > maxRecurTagInt ? recurTagInt
-                    : maxRecurTagInt;
+            _maxRecurTagInt = recurTagInt > _maxRecurTagInt ? recurTagInt
+                    : _maxRecurTagInt;
 
             return true;
         }
@@ -329,8 +334,8 @@ public class TaskDataManager {
                 return false;
             }
 
-            maxBlockTagInt = blockTagInt > maxBlockTagInt ? blockTagInt
-                    : maxBlockTagInt;
+            _maxBlockTagInt = blockTagInt > _maxBlockTagInt ? blockTagInt
+                    : _maxBlockTagInt;
 
             return true;
         }
@@ -366,7 +371,7 @@ public class TaskDataManager {
     }
 
     private Task<?> addRecurringTask(DataParameter addParameters) {
-        String recurTag = "RECUR_" + maxRecurTagInt++;
+        String recurTag = "RECUR_" + _maxRecurTagInt++;
 
         assert (!_recurringTasks.containsKey(recurTag));
         assert (addParameters.getFreqOfTimeType() != 0);
@@ -445,7 +450,7 @@ public class TaskDataManager {
     }
 
     private Task<?> addBlockTask(DataParameter addParameters) {
-        String blockTag = "BLOCK_" + maxBlockTagInt++;
+        String blockTag = "BLOCK_" + _maxBlockTagInt++;
 
         Date currStartDate = addParameters.getStartDate();
         Date currEndDate = addParameters.getEndDate();
@@ -492,8 +497,9 @@ public class TaskDataManager {
         return startOfNextYear;
     }
 
-    private Task<?> addTodoTask(DataParameter addParameter) {
-        TodoTask newTodoTask = createTodoTask(addParameter);
+    private Task<?> addTodoTask(DataParameter addParameters) {
+        TodoTask newTodoTask = createTodoTask(addParameters);
+
         if (_uncompletedTodoTasks.add(newTodoTask)) {
             syncUncompletedTasks(TaskType.TODO);
 
@@ -502,8 +508,10 @@ public class TaskDataManager {
         return null;
     }
 
-    private Task<?> addEventTask(DataParameter addParameter) {
-        EventTask newEventTask = createEventTask(addParameter);
+    private Task<?> addEventTask(DataParameter addParameters) {
+        EventTask newEventTask = createEventTask(addParameters);
+        newEventTask.setTag(addParameters.getTag());
+
         if (_uncompletedEventTasks.add(newEventTask)) {
             syncUncompletedTasks(TaskType.EVENT);
 
@@ -512,8 +520,10 @@ public class TaskDataManager {
         return null;
     }
 
-    private Task<?> addDeadlineTask(DataParameter addParameter) {
-        DeadlineTask newDeadlineTask = createDeadlineTask(addParameter);
+    private Task<?> addDeadlineTask(DataParameter addParameters) {
+        DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
+        newDeadlineTask.setTag(addParameters.getTag());
+
         if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
             syncUncompletedTasks(TaskType.DEADLINE);
 
@@ -547,13 +557,15 @@ public class TaskDataManager {
      * @return Task<?> (if successful), null otherwise
      */
     public Task<?> deleteTask(DataParameter deleteParameters) {
-        if (deleteParameters.getTaskObject().getTag().contains("RECUR")) {
+        if (deleteParameters.getTaskObject().getTag() != null && deleteParameters
+                .getTaskObject().getTag().contains("RECUR")) {
             assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT) || deleteParameters
                     .getNewTaskType().equals(TaskType.DEADLINE));
 
             return deleteRecurringTasks(deleteParameters);
 
-        } else if (deleteParameters.getTaskObject().getTag().contains("BLOCK")) {
+        } else if (deleteParameters.getTaskObject().getTag() != null && deleteParameters
+                .getTaskObject().getTag().contains("BLOCK")) {
             assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT));
 
             return deleteBlockTasks(deleteParameters);
@@ -691,24 +703,67 @@ public class TaskDataManager {
      * @return task modified
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
-        if (modifyParameters.getTaskObject().getTag().contains("RECUR")) {
+        if (modifyParameters.getTaskObject().getTag() != null && modifyParameters
+                .getTaskObject().getTag().contains("RECUR")) {
             return modifyRecurringTask(modifyParameters);
-            
-        } else if (modifyParameters.getTaskObject().getTag().contains("BLOCK")) {
+
+        } else if (modifyParameters.getTaskObject().getTag() != null && modifyParameters
+                .getTaskObject().getTag().contains("BLOCK")) {
             return modifyBlockTasks(modifyParameters);
-            
+
         } else {
             return modifyRegTask(modifyParameters);
-        
+
         }
     }
 
     private EventTask modifyRecurringTask(DataParameter modifyParameters) {
-        // TODO Auto-generated method stub
+        if (modifyParameters.getNewTaskType() == TaskType.DEADLINE || modifyParameters
+                .getNewTaskType() == TaskType.EVENT) {
+
+            if (modifyParameters.isModifyAll()) {
+                return modifyAllRecurringTasks(modifyParameters);
+
+            } else {
+                return modfiyOneRecurringTask(modifyParameters);
+            }
+
+        } else {
+            return null;
+        }
+    }
+
+    private EventTask modifyAllRecurringTasks(DataParameter modifyParameters) {
+        // Note: Task does not contain information on frequency
+        return null;
+    }
+
+    private EventTask modfiyOneRecurringTask(DataParameter modifyParameters) {
+        // Note: Task does not contain information on frequency
         return null;
     }
 
     private EventTask modifyBlockTasks(DataParameter modifyParameters) {
+        if (modifyParameters.getNewTaskType() == TaskType.EVENT) {
+
+            if (modifyParameters.isModifyAll()) {
+                return modifyAllBlockTasks(modifyParameters);
+
+            } else {
+                return modfiyOneBlockringTask(modifyParameters);
+            }
+
+        } else {
+            return null;
+        }
+    }
+
+    private EventTask modifyAllBlockTasks(DataParameter modifyParameters) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private EventTask modfiyOneBlockringTask(DataParameter modifyParameters) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -914,6 +969,16 @@ public class TaskDataManager {
             }
         }
     }
+
+    // private void syncHashMaps() {
+    // for (MemoryDataObserver observer : _observers) {
+    // observer.updateChange(new HashSetDataParameter(
+    // _recurringTasks));
+    // observer.updateChange(new HashSetDataParameter(
+    // _blockTasks));
+    //
+    // }
+    // }
 
     /**
      * Saves all tasks into storage by calling all the sync methods
