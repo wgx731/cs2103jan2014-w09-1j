@@ -1,5 +1,23 @@
 # MINA CHANGE LOG #
 
+## 0.3 MINA-ready (2014-04-01) ##
+
+#### Features: ####
+
+* add recuring task
+* system tray
+* Advance flexicommand
+* Integration test
+* Better GUI
+
+
+#### Known issues: ####
+
+* Bugs listed in Google Code Issues
+* blocking tasks
+* Better integration test
+* Refactor code to production quality
+
 ## 0.2 MINA-small (2014-03-25) ##
 
 #### Features: ####
