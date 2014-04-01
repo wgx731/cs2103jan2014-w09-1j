@@ -8,8 +8,6 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
-import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -201,8 +199,8 @@ public class TaskDataManagerTest {
                     expectedEventTask_2, tdmTest.addTask(new DataParameter(
                             "RecurEventTask every month, forever.", 'H',
                             firstStartTime_2, firstEndTime_2, null,
-                            TaskType.EVENT, 123, "RECUR", null, "MONTH",
-                            1, null, false)));
+                            TaskType.EVENT, 123, "RECUR", null, "MONTH", 1,
+                            null, false)));
             assertEquals(45, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_4").size());
 
@@ -210,7 +208,6 @@ public class TaskDataManagerTest {
             e.printStackTrace();
         }
 
-        
         // Partition: some wrong parameters added for Recurring Events
 
         // Partition: Events overlap
@@ -283,8 +280,7 @@ public class TaskDataManagerTest {
 
     @Test
     public void testModifyTask() {
-        TaskDataManager tdmTest = new TaskDataManager(new DataSyncManager(
-                new JsonFileTaskDaoImpl()));
+        TaskDataManager tdmTest = new TaskDataManager();
         Long currDateMilliSec = System.currentTimeMillis();
 
         /* Partition: modify all task parameters but don't change the task type */

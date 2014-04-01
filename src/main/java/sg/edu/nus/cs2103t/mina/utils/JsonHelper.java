@@ -81,7 +81,8 @@ public class JsonHelper {
             }
             if (isValidJson) {
                 return new EventTask(taskType, description, id, priority,
-                        createdTime, lastEditedTime, isCompleted, start, end, tag);
+                        createdTime, lastEditedTime, isCompleted, start, end,
+                        tag);
             } else {
                 return null;
             }
@@ -153,7 +154,7 @@ public class JsonHelper {
             }
             if (isValidJson) {
                 return new TodoTask(taskType, description, id, priority,
-                        createdTime, lastEditedTime, isCompleted,tag);
+                        createdTime, lastEditedTime, isCompleted, tag);
             } else {
                 return null;
             }
@@ -229,4 +230,5 @@ public class JsonHelper {
                 return null;
         }
     }
+    
 }

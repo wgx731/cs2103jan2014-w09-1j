@@ -20,7 +20,7 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
-import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up
@@ -61,7 +61,7 @@ public class TaskDataManager {
     private static final int TAG_INT_POS = 1;
 
     // Sync tools
-    private final List<SyncDataParameter> allDataList = new ArrayList<SyncDataParameter>(
+    private final List<TaskSetDataParameter> allDataList = new ArrayList<TaskSetDataParameter>(
             6);
 
     private List<MemoryDataObserver> _observers;
@@ -875,15 +875,15 @@ public class TaskDataManager {
         for (MemoryDataObserver observer : _observers) {
             switch (taskType) {
                 case TODO :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _uncompletedTodoTasks, taskType, false));
                     break;
                 case DEADLINE :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _uncompletedDeadlineTasks, taskType, false));
                     break;
                 case EVENT :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _uncompletedEventTasks, taskType, false));
                     break;
                 default :
@@ -897,15 +897,15 @@ public class TaskDataManager {
         for (MemoryDataObserver observer : _observers) {
             switch (taskType) {
                 case TODO :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _completedTodoTasks, taskType, true));
                     break;
                 case DEADLINE :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _completedDeadlineTasks, taskType, true));
                     break;
                 case EVENT :
-                    observer.updateChange(new SyncDataParameter(
+                    observer.updateChange(new TaskSetDataParameter(
                             _completedEventTasks, taskType, true));
                     break;
                 default :
@@ -919,17 +919,17 @@ public class TaskDataManager {
      * Saves all tasks into storage by calling all the sync methods
      */
     public void saveAllTasks() {
-        allDataList.add(new SyncDataParameter(_completedEventTasks,
+        allDataList.add(new TaskSetDataParameter(_completedEventTasks,
                 TaskType.EVENT, true));
-        allDataList.add(new SyncDataParameter(_uncompletedEventTasks,
+        allDataList.add(new TaskSetDataParameter(_uncompletedEventTasks,
                 TaskType.EVENT, false));
-        allDataList.add(new SyncDataParameter(_completedDeadlineTasks,
+        allDataList.add(new TaskSetDataParameter(_completedDeadlineTasks,
                 TaskType.DEADLINE, true));
-        allDataList.add(new SyncDataParameter(_uncompletedDeadlineTasks,
+        allDataList.add(new TaskSetDataParameter(_uncompletedDeadlineTasks,
                 TaskType.DEADLINE, false));
-        allDataList.add(new SyncDataParameter(_completedTodoTasks,
+        allDataList.add(new TaskSetDataParameter(_completedTodoTasks,
                 TaskType.TODO, true));
-        allDataList.add(new SyncDataParameter(_uncompletedTodoTasks,
+        allDataList.add(new TaskSetDataParameter(_uncompletedTodoTasks,
                 TaskType.TODO, false));
         _syncManager.saveAll(allDataList);
     }

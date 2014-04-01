@@ -806,6 +806,9 @@ public class CommandProcessor {
             return markDeleteParam;
         }
         */
+        if (parameters.contains("-all")){
+        	markDeleteParam.setModifyAll(true);
+        }
         Task<?> markDeleteTask = pageOfMarkDeleteObject
                 .get(userfriendlyTaskID - 1);
         markDeleteParam.setTaskObject(markDeleteTask);

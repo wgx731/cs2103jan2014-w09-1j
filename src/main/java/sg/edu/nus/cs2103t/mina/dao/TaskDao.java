@@ -38,4 +38,5 @@ public interface TaskDao {
      */
     public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) throws IOException;
+
 }
