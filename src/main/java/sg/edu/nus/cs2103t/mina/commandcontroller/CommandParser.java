@@ -1,5 +1,14 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller;
 
+/**
+ * This class is in charges of normalizing the command for CommandProcessor
+ * 
+ * @author wgx731
+ * @author viettrung9012
+ * @author duzhiyuan
+ * @author joannemah
+ */
+
 import hirondelle.date4j.DateTime;
 import hirondelle.date4j.DateTime.DayOverflow;
 
@@ -96,6 +105,7 @@ public class CommandParser {
     private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
     
     private static final LinkedHashSet<String> TIME = new LinkedHashSet<String>();
+    
     private static final int DATETIME_VALUE_KEYWORD = 0;
     private static final int DATE_VALUE = 1;
     private static final int TIME_VALUE = 2;
@@ -135,7 +145,7 @@ public class CommandParser {
     
 
     
-    private HashMap<String, String> _arguments;
+    private LinkedHashMap<String, String> _arguments;
     
     private enum ActionsTaskID{
         MODIFY(CommandParser.MODIFY),
@@ -1304,17 +1314,19 @@ public class CommandParser {
 
     private void initArgMap() {
 
-        _arguments = new HashMap<String, String>();
-
+        _arguments = new LinkedHashMap<String, String>();
+        
+        
+        
         _arguments.put(ACTION, null);
-        _arguments.put(PRIORITY, null);
-        _arguments.put(DESCRIPTION, null);
-        _arguments.put(END, null);
-        _arguments.put(START, null);
         _arguments.put(TASKID, null);
         _arguments.put(TO_TASK_TYPE, null);
+        _arguments.put(DESCRIPTION, null);
+        _arguments.put(START, null);
+        _arguments.put(END, null);
         _arguments.put(RECURRING, null);
         _arguments.put(UNTIL, null);
+        _arguments.put(PRIORITY, null);
 
     }
     

@@ -937,7 +937,7 @@ public class TaskFilterManagerFilterTest {
                 + "Last modified: %7$s\n"
                 + "Completed: %8$s\n\n";
         String output = String.format(format, task.getId(), task.getType()
-                .getType(), task.getDescription(), task.getTags(), task
+                .getType(), task.getDescription(), task.getTag(), task
                 .getPriority(), task.getCreatedTime(),
                 task.getLastEditedTime(), task.isCompleted());
         return output;

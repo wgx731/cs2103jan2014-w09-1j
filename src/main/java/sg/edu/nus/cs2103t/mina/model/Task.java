@@ -18,7 +18,8 @@ import java.util.UUID;
 public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final long serialVersionUID = 7038530852821069011L;
-
+    
+    protected static final String DEFAULT_TAG = "";
     protected static final char L = 'L';
     protected static final char M = 'M';
     protected static final char H = 'H';
@@ -32,7 +33,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     protected String _id;
     protected TaskType _type;
     protected String _description;
-    protected List<String> _tags;
+    protected String _tag;
     protected char _priority;
     protected Date _createdTime;
     protected Date _lastEditedTime;
@@ -46,7 +47,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = new Date();
         _lastEditedTime = new Date();
         _isCompleted = false;
-        _tags = new ArrayList<String>();
+        _tag = DEFAULT_TAG;
     }
     
     public Task(TaskType type, String description, String id, char priority,
@@ -58,7 +59,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = new Date();
         _isCompleted = isCompleted;
-        _tags = new ArrayList<String>();
+        _tag = DEFAULT_TAG;
     }
 
     public Task(TaskType type, String description, String id, char priority,
@@ -70,7 +71,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = lastEditedTime;
         _isCompleted = isCompleted;
-        _tags = new ArrayList<String>();
+        _tag = DEFAULT_TAG;
     }
 
     protected int compareTo(Task<?> otherTask) {
@@ -111,14 +112,6 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _description = description;
     }
 
-    public List<String> getTags() {
-        return _tags;
-    }
-
-    public void setTags(List<String> tags) {
-        _tags = tags;
-    }
-
     public char getPriority() {
         return _priority;
     }
@@ -151,9 +144,12 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         return _createdTime;
     }
     
-    public void addTag(String tag) {
-        assert(_tags != null);
-        _tags.add(tag);
+    public String getTag() {
+        return _tag;
+    }
+
+    public void setTag(String tag) {
+        _tag = tag;
     }
 
     @Override
