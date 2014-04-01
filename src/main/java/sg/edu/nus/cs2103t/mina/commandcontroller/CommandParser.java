@@ -52,6 +52,11 @@ public class CommandParser {
     private static final String EMPTY = "";
     private static final String TIME_KEY = "time";
     private static final String DATE_KEY = "date";
+    private static final String EVERY_DAY = "day";
+    private static final String EVERY_WEEK = "week";
+    private static final String EVERY_MONTH = "month";
+    private static final String EVERY_YEAR = "year";
+    
     private static final int NEXT = 1;
     
     private static final Integer ONE_YEAR = 1;
@@ -69,16 +74,21 @@ public class CommandParser {
     private static final String END = "end";
     private static final String START = "start";
     private static final String TO_TASK_TYPE = "totype";
+    private static final String RECURRING = "every";
+    private static final String UNTIL = "until";
     
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
     private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> START_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> TO_TASK_TYPE_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> RECURRING_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> UNITL_KEYWORDS = new HashMap<String, Boolean>();
     
     private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
     private static final HashMap<String, String> DISPLAY_VALUES = new HashMap<String, String>();
+    private static final HashMap<String, String> RECURRING_VALUES = new HashMap<String, String>();
     
     private static final HashMap<String, String> TASKTYPE_ALIAS = new HashMap<String, String>();
     
@@ -99,6 +109,9 @@ public class CommandParser {
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
     private static final int AGENDAOF_FLAG = 7;
+    private static final int RECUR_FLAG = 8;
+    private static final int UNTIL_FLAG = 9;
+    private static final int UNTIL_CONTINUE_FLAG = 10;
     
     private static final int FIRST = 0;
     private static final int SECOND = 1;
@@ -118,6 +131,8 @@ public class CommandParser {
     private static final Integer NO_SEC = 0;
     private static final Integer NO_NANO_SEC = 0;
     
+    
+
     
     private HashMap<String, String> _arguments;
     
@@ -233,6 +248,34 @@ public class CommandParser {
         DISPLAY_VALUES.put("completed", FilterType.COMPLETE.getType());
         DISPLAY_VALUES.put("all", FilterType.COMPLETE_PLUS.getType());
         
+        RECURRING_KEYWORDS.put("daily", false);
+        RECURRING_KEYWORDS.put("weekly", false);
+        RECURRING_KEYWORDS.put("monthly", false);
+        RECURRING_KEYWORDS.put("yearly", false);
+        RECURRING_KEYWORDS.put("every", false);
+        
+        RECURRING_KEYWORDS.put("-every", true);   
+        RECURRING_KEYWORDS.put("-daily", true);
+        RECURRING_KEYWORDS.put("-weekly", true);
+        RECURRING_KEYWORDS.put("-monthly", true);
+        RECURRING_KEYWORDS.put("-yearly", true);   
+        
+        
+        RECURRING_VALUES.put(EVERY_DAY, EVERY_DAY);
+        RECURRING_VALUES.put(EVERY_WEEK, EVERY_WEEK);
+        RECURRING_VALUES.put(EVERY_MONTH, EVERY_MONTH);
+        RECURRING_VALUES.put(EVERY_YEAR, EVERY_YEAR);
+        RECURRING_VALUES.put("daily", EVERY_DAY);
+        RECURRING_VALUES.put("weekly", EVERY_WEEK);
+        RECURRING_VALUES.put("monthly", EVERY_MONTH);
+        RECURRING_VALUES.put("yearly", EVERY_YEAR);
+        RECURRING_VALUES.put("-daily", EVERY_DAY);
+        RECURRING_VALUES.put("-weekly", EVERY_WEEK);
+        RECURRING_VALUES.put("-monthly", EVERY_MONTH);
+        RECURRING_VALUES.put("-yearly", EVERY_YEAR);
+        
+        UNITL_KEYWORDS.put(UNTIL, false);
+        UNITL_KEYWORDS.put("-until", true);
     }
 
     private void initEndValues() {
@@ -439,6 +482,52 @@ public class CommandParser {
                 }
             }
             
+            if (keyFlags.get(UNTIL_FLAG) || keyFlags.get(UNTIL_CONTINUE_FLAG)) {
+                
+                logger.info("Extracting UNTIL: ");
+                logger.info("Setting until flag to false ");  
+                logger.info("until continue flag: " + keyFlags.get(UNTIL_CONTINUE_FLAG));
+                
+                keyFlags.put(UNTIL_FLAG, false);
+                boolean isValid = true;
+                boolean isReset = false;
+                
+                HashMap<String, String> dateAndTime = new HashMap<String, String>();
+                dateAndTime.put(DATE_KEY, endDate);
+                dateAndTime.put(TIME_KEY, endTime);
+                dateAndTime.put(IS_VALID, VALIDITY);
+                
+                dateAndTime = updateDateTimeArg(dateAndTime, keyword);
+                
+                endDate = dateAndTime.get(DATE_KEY);
+                endTime = dateAndTime.get(TIME_KEY);
+                if(dateAndTime.get(IS_VALID)==null) {
+                    isValid = false;
+                }
+                
+                if(!isFirstDateInvalid(isValid, keyFlags.get(UNTIL_CONTINUE_FLAG))){
+                    throw new ParseException("Invalid end date",0);
+                } else if(isNeedSecondDate(keyFlags.get(UNTIL_CONTINUE_FLAG))) {
+                    logger.info("Found first valid datetime");
+                    keyFlags.put(UNTIL_CONTINUE_FLAG, true);                   
+                } else {
+                    logger.info("Ending second datetime");
+                    keyFlags.put(UNTIL_CONTINUE_FLAG, false);
+                    isReset = true;
+                }
+                
+                addUntil(endDate + " " + endTime);
+                
+                if(isReset) {
+                    endDate = EMPTY;
+                    endTime = EMPTY;
+                }
+                
+                if(isValid){
+                    continue;
+                }
+            }
+            
             if(keyFlags.get(TO_TASK_TYPE_FLAG)){
                 keyFlags.put(TO_TASK_TYPE_FLAG, false);
                 addToType(keyword);
@@ -454,6 +543,14 @@ public class CommandParser {
                 dTokens.remove(i);
                 dTokens.addAll(i, newArguments);
             }
+            
+            if (keyFlags.get(RECUR_FLAG)) {
+                keyFlags.put(RECUR_FLAG, false);
+                String value = RECURRING_VALUES.get(keyword);
+                _arguments.put(RECURRING, value);
+                continue;
+            }
+                   
             
             //Checking for flags
             if (keyword.equals(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
@@ -519,6 +616,29 @@ public class CommandParser {
                 continue;
             }
             
+            if (RECURRING_KEYWORDS.containsKey(keyword) &&
+                    !hasValue(RECURRING) && (RECURRING_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Recurring task detected, setting Recur_flag to true");
+                keyFlags.put(RECUR_FLAG, true);
+                
+                if (!isKeywordEvery(keyword) && i+1 < dTokens.size()) {
+                    dTokens.add(i+1, RECURRING_VALUES.get(keyword));    
+                } else if (!isKeywordEvery(keyword)) {
+                    dTokens.add(RECURRING_VALUES.get(keyword));
+                } 
+                
+                continue;
+            }
+            
+            //If no dash, but description is wrapped or has dash
+            if (UNITL_KEYWORDS.containsKey(keyword) && !hasValue(UNTIL) &&
+                    (UNITL_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Setting Until flag as true");
+                keyFlags.put(UNTIL_FLAG, true);
+                continue;
+                
+            }
+            
             if (!hasValue(DESCRIPTION) && 
                     !(isModifyAction() && (keyword.equals("-description")))) {
                 String word = dTokens.get(i).trim();
@@ -540,6 +660,10 @@ public class CommandParser {
 
         logger.info(result);
         return result.toString().trim();
+    }
+
+    private boolean isKeywordEvery(String keyword) {
+        return keyword.equalsIgnoreCase(RECURRING) || keyword.equalsIgnoreCase("-" + RECURRING);
     }
 
     private String convertToSearch(String rawTokens) {
@@ -762,6 +886,9 @@ public class CommandParser {
         keyFlags.put(DESCRIPTION_FLAG, false);
         keyFlags.put(TO_TASK_TYPE_FLAG, false);
         keyFlags.put(AGENDAOF_FLAG, false);
+        keyFlags.put(RECUR_FLAG, false);
+        keyFlags.put(UNTIL_FLAG, false);
+        keyFlags.put(UNTIL_CONTINUE_FLAG, false);
     }
 
     private boolean isNeedSecondDate(boolean continueFlag) {
@@ -1028,7 +1155,11 @@ public class CommandParser {
     private void addStart(String dateTime) throws ParseException{
         addTime(START, dateTime);
     }
-
+    
+    private void addUntil(String dateTime) throws ParseException{
+        addTime(UNTIL, dateTime);
+    }
+    
     private String translateDateTime(String dateTime) throws ParseException{
         
         if(DateUtil.isValidDate(dateTime)) {
@@ -1080,7 +1211,9 @@ public class CommandParser {
                     "Description: " + getFormattedValue(DESCRIPTION) + "\n" + 
                     "Priority: " + getFormattedValue(PRIORITY) + "\n" +
                     "Start: " + getFormattedValue(START)+ "\n" +
-                    "End: " + getFormattedValue(END));
+                    "End: " + getFormattedValue(END) + "\n" + 
+                    "Every: " + getFormattedValue(RECURRING) + "\n" + 
+                    "Until: " + getFormattedValue(UNTIL));
         
         result.append(getFormattedValue(ACTION));
         
@@ -1108,9 +1241,17 @@ public class CommandParser {
             result.append(getFormattedKey(START));
             result.append(getFormattedValue(START));
         }
-        if(hasValue(END)){
+        if (hasValue(END)) {
             result.append(getFormattedKey(END));
             result.append(getFormattedValue(END));
+        }
+        if (hasValue(RECURRING)) {
+            result.append(getFormattedKey(RECURRING));
+            result.append(getFormattedValue(RECURRING));           
+        }
+        if (hasValue(UNTIL)) {
+            result.append(getFormattedKey(UNTIL));
+            result.append(getFormattedValue(UNTIL));           
         }
         return result;
     }
@@ -1164,6 +1305,8 @@ public class CommandParser {
         _arguments.put(START, null);
         _arguments.put(TASKID, null);
         _arguments.put(TO_TASK_TYPE, null);
+        _arguments.put(RECURRING, null);
+        _arguments.put(UNTIL, null);
 
     }
     
