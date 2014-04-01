@@ -83,7 +83,7 @@ public class TaskDataManagerTest {
         DeadlineTask expectedDeadlineTask_1 = new DeadlineTask(
                 "RecurDeadlineTask every 2 weeks, for 4 months.",
                 firstDeadline_1, 'M');
-        expectedDeadlineTask_1.addTag("RECUR_0");
+        expectedDeadlineTask_1.setTag("RECUR_0");
 
         int currMth_1 = calendar_1.get(Calendar.MONTH);
         calendar_1.set(Calendar.MONTH, currMth_1 + 4);
@@ -110,7 +110,7 @@ public class TaskDataManagerTest {
 
         DeadlineTask expectedDeadlineTask_2 = new DeadlineTask(
                 "RecurDeadlineTask every month, forever.", firstDeadline_2, 'M');
-        expectedDeadlineTask_2.addTag("RECUR_1");
+        expectedDeadlineTask_2.setTag("RECUR_1");
 
         try {
 
@@ -162,7 +162,7 @@ public class TaskDataManagerTest {
         EventTask expectedEventTask_1 = new EventTask(
                 "RecurEventTask every 8 hours, for 2 weeks.", firstStartTime_1,
                 firstEndTime_1, 'H');
-        expectedEventTask_1.addTag("RECUR_3");
+        expectedEventTask_1.setTag("RECUR_3");
 
         try {
             assertEquals(
@@ -193,7 +193,7 @@ public class TaskDataManagerTest {
         EventTask expectedEventTask_2 = new EventTask(
                 "RecurEventTask every month, forever.", firstStartTime_2,
                 firstEndTime_2, 'H');
-        expectedEventTask_2.addTag("RECUR_4");
+        expectedEventTask_2.setTag("RECUR_4");
 
         try {
             assertEquals(
