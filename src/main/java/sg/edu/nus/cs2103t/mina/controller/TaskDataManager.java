@@ -717,7 +717,7 @@ public class TaskDataManager {
         }
     }
 
-    private EventTask modifyRecurringTask(DataParameter modifyParameters) {
+    private Task<?> modifyRecurringTask(DataParameter modifyParameters) {
         if (modifyParameters.getNewTaskType() == TaskType.DEADLINE || modifyParameters
                 .getNewTaskType() == TaskType.EVENT) {
 
@@ -733,14 +733,46 @@ public class TaskDataManager {
         }
     }
 
-    private EventTask modifyAllRecurringTasks(DataParameter modifyParameters) {
+    private Task<?> modifyAllRecurringTasks(DataParameter modifyParameters) {
         // Note: Task does not contain information on frequency
-        return null;
+        if (modifyParameters.getNewTaskType() != null && modifyParameters
+                .getNewTaskType() == TaskType.DEADLINE ||
+                modifyParameters.getNewTaskType() != null &&
+                modifyParameters.getNewTaskType() == TaskType.EVENT) {
+
+            EventTask prevTask = (EventTask) deleteTask(modifyParameters);
+            _recurringTasks.remove(prevTask.getTag());
+
+            DataParameter newSetOfParameters = new DataParameter();
+            newSetOfParameters.loadOldTask(prevTask);
+            newSetOfParameters.loadNewParameters(modifyParameters);
+
+            return addRecurringTask(newSetOfParameters);
+        } else {
+
+            return null;
+        }
     }
 
-    private EventTask modfiyOneRecurringTask(DataParameter modifyParameters) {
+    private Task<?> modfiyOneRecurringTask(DataParameter modifyParameters) {
         // Note: Task does not contain information on frequency
-        return null;
+        EventTask prevTask = (EventTask) deleteTask(modifyParameters);
+        if (prevTask != null) {
+            _recurringTasks.get(prevTask.getTag()).remove(prevTask);
+            prevTask.setTag("");
+
+            DataParameter newSetOfParameters = new DataParameter();
+            newSetOfParameters.loadOldTask(prevTask);
+            newSetOfParameters.loadNewParameters(modifyParameters);
+
+            Task<?> newTask = addTask(newSetOfParameters);
+            newTask.setLastEditedTime(new Date());
+
+            return newTask;
+        } else {
+            return null;
+
+        }
     }
 
     private EventTask modifyBlockTasks(DataParameter modifyParameters) {
@@ -774,7 +806,6 @@ public class TaskDataManager {
             return null;
         } else {
             DataParameter newSetOfParameters = new DataParameter();
-
             newSetOfParameters.loadOldTask(prevTask);
             newSetOfParameters.loadNewParameters(modifyParameters);
 
