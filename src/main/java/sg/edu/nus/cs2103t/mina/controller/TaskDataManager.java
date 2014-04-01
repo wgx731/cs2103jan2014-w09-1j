@@ -208,7 +208,7 @@ public class TaskDataManager {
         if (deadlineTaskIterator.hasNext()) {
             DeadlineTask currDeadlineTask = deadlineTaskIterator.next();
             while (deadlineTaskIterator.hasNext()) {
-                checkRecur(currDeadlineTask);
+                checkTagListForRecur(currDeadlineTask);
                 currDeadlineTask = deadlineTaskIterator.next();
             }
         }
@@ -241,31 +241,46 @@ public class TaskDataManager {
     }
 
     private void checkRecur(Task<?> currTask) {
+        int recurTagIndex = checkTagListForRecur(currTask);
+        if (recurTagIndex >= 0) {
+            includeInRecurMap(currTask, currTask.getTags().get(recurTagIndex));
+        }
+    }
+
+    private void checkBlock(EventTask currEventTask) {
+        int blockTagIndex = checkTagListForBlock(currEventTask);
+        if (blockTagIndex >= 0) {
+            includeInBlockMap(currEventTask,
+                    currEventTask.getTags().get(blockTagIndex));
+        }
+    }
+
+    private int checkTagListForRecur(Task<?> currTask) {
         if (currTask.getTags().size() <= 0) {
-            return;
+            return -1;
 
         } else {
             for (int i = 0; i < currTask.getTags().size(); i++) {
                 if (currTask.getTags().get(i).contains("RECUR")) {
-                    includeInRecurMap(currTask, currTask.getTags().get(i));
+                    return i;
                 }
             }
-            return;
+            return -1;
         }
     }
 
-    private void checkBlock(EventTask currTask) {
+    private int checkTagListForBlock(EventTask currTask) {
         if (currTask.getTags().size() <= 0) {
-            return;
+            return -1;
 
         } else {
             for (int i = 0; i < currTask.getTags().size(); i++) {
                 if (currTask.getTags().get(i).contains("BLOCK")) {
-                    includeInBlockMap(currTask, currTask.getTags().get(i));
+                    return i;
                 }
             }
 
-            return;
+            return -1;
         }
 
     }
@@ -386,6 +401,7 @@ public class TaskDataManager {
         String recurTag = "RECUR_" + maxRecurTagInt++;
 
         assert (!_recurringTasks.containsKey(recurTag));
+        assert (addParameters.getFreqOfTimeType() != 0);
 
         Date endRecurOn = addParameters.getEndRecurOn() == null ? generateStartOfNextYear()
                 : addParameters.getEndRecurOn();
@@ -410,8 +426,8 @@ public class TaskDataManager {
                 Date currStartDate = addParameters.getStartDate();
                 Date currEndDate = addParameters.getEndDate();
 
-                while (currEndDate.compareTo(endRecurOn) < 0) {
-                    includeInRecurMap(addDeadlineTask(addParameters), recurTag);
+                while (currStartDate.compareTo(endRecurOn) < 0) {
+                    includeInRecurMap(addEventTask(addParameters), recurTag);
 
                     currStartDate = updateDate(currStartDate,
                             addParameters.getTimeType(),
@@ -504,9 +520,18 @@ public class TaskDataManager {
         calendar.set(currYear + 1, 0, 1);
 
         Date startOfNextYear = calendar.getTime();
-        System.out.println("NewYear: " + startOfNextYear);
 
         return startOfNextYear;
+    }
+
+    private Task<?> addTodoTask(DataParameter addParameter) {
+        TodoTask newTodoTask = createTodoTask(addParameter);
+        if (_uncompletedTodoTasks.add(newTodoTask)) {
+            syncUncompletedTasks(TaskType.TODO);
+
+            return newTodoTask;
+        }
+        return null;
     }
 
     private Task<?> addEventTask(DataParameter addParameter) {
@@ -525,16 +550,6 @@ public class TaskDataManager {
             syncUncompletedTasks(TaskType.DEADLINE);
 
             return newDeadlineTask;
-        }
-        return null;
-    }
-
-    private Task<?> addTodoTask(DataParameter addParameter) {
-        TodoTask newTodoTask = createTodoTask(addParameter);
-        if (_uncompletedTodoTasks.add(newTodoTask)) {
-            syncUncompletedTasks(TaskType.TODO);
-
-            return newTodoTask;
         }
         return null;
     }
@@ -564,6 +579,38 @@ public class TaskDataManager {
      * @return Task<?> (if successful), null otherwise
      */
     public Task<?> deleteTask(DataParameter deleteParameters) {
+        if (checkTagListForRecur(deleteParameters.getTaskObject()) >= 0) {
+            assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT) || deleteParameters
+                    .getNewTaskType().equals(TaskType.DEADLINE));
+            
+            return deleteRecurringTasks(deleteParameters.getTaskObject());
+            
+        } else if (checkTagListForRecur(deleteParameters.getTaskObject()) >= 0) {
+            assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT));
+            
+            return deleteBlockTasks(deleteParameters);
+            
+        } else {
+            return deleteRegTask(deleteParameters);
+            
+        }
+    }
+
+    private Task<?> deleteRecurringTasks(Task<?> recurTaskToDelete) {
+        if (_recurringTasks.containsKey(recurTaskToDelete.getTags().get(0))) {
+            
+            return recurTaskToDelete;
+        } else {
+            return null;
+        }
+    }
+
+    private Task<?> deleteBlockTasks(DataParameter deleteParameters) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private Task<?> deleteRegTask(DataParameter deleteParameters) {
         switch (deleteParameters.getTaskObject().getType()) {
             case TODO :
                 if (!deleteParameters.getTaskObject().isCompleted()) {
