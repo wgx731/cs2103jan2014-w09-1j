@@ -72,35 +72,64 @@ public class TaskDataManagerTest {
 
         tdmTest.resetTrees();
 
-        /* Adding a recurring task */
+        /* Adding a recurring DeadlineTask */
         // Partition: all parameters added correctly, recur every 2 weeks for 4
         // months
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2014, 1, 1);
-        Date firstDeadline = calendar.getTime();
+        Calendar calendar_1 = Calendar.getInstance();
+        calendar_1.set(2014, 1, 1);
+        Date firstDeadline_1 = calendar_1.getTime();
 
-        DeadlineTask expectedDeadlineTask = new DeadlineTask(
+        DeadlineTask expectedDeadlineTask_1 = new DeadlineTask(
                 "RecurDeadlineTask every 2 weeks, for 4 months.",
-                firstDeadline, 'M');
-        expectedDeadlineTask.addTag("RECUR_0");
+                firstDeadline_1, 'M');
+        expectedDeadlineTask_1.addTag("RECUR_0");
 
-        int currMth = calendar.get(Calendar.MONTH);
-        calendar.set(Calendar.MONTH, currMth + 4);
+        int currMth_1 = calendar_1.get(Calendar.MONTH);
+        calendar_1.set(Calendar.MONTH, currMth_1 + 4);
 
         try {
-            assertEquals("Adding Deadline Task that reccurs every fortnight.",
-                    expectedDeadlineTask, tdmTest.addTask(new DataParameter(
+            assertEquals("Adding Deadline Task that reccurs every fortnight for 4 months.",
+                    expectedDeadlineTask_1, tdmTest.addTask(new DataParameter(
                             "RecurDeadlineTask every 2 weeks, for 4 months.",
-                            'M', null, firstDeadline, null, TaskType.DEADLINE,
-                            123, "RECUR", (1000 * 3600 * 24 * 14), calendar
-                                    .getTime(), null, false)));
+                            'M', null, firstDeadline_1, null,
+                            TaskType.DEADLINE, 123, "RECUR", calendar_1
+                                    .getTime(), "WEEK", 2, null, false)));
             assertEquals(9, tdmTest.getUncompletedDeadlineTasks().size());
+            assertEquals(9, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Partition: all parameters added correctly, recur every month
+        // Partition: all parameters added correctly, recur every month forever
+        Calendar calendar_2 = Calendar.getInstance();
+        calendar_2.set(2014, 9, 16);
+        Date firstDeadline_2 = calendar_2.getTime();
+
+        DeadlineTask expectedDeadlineTask_2 = new DeadlineTask(
+                "RecurDeadlineTask every month, forever.", firstDeadline_2, 'M');
+        expectedDeadlineTask_2.addTag("RECUR_1");
+
+        try {
+  
+            assertEquals("Adding Deadline Task that reccurs every month forever.",
+                    expectedDeadlineTask_2, tdmTest.addTask(new DataParameter(
+                            "RecurDeadlineTask every month, forever.",
+                            'M', null, firstDeadline_2, null,
+                            TaskType.DEADLINE, 123, "RECUR", null, "MONTH", 1,
+                            null, false)));
+            assertEquals(12, tdmTest.getUncompletedDeadlineTasks().size());
+            assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /* Adding a recurring DeadlineTask */
+        // Partition: all parameters added correctly, recur every 2 weeks for 4
+        // months
+
+        // Partition: all parameters added correctly, recur every month forever
 
         /* Adding a block task */
         // TODO: set a limit to how many block tasks can be added at one go

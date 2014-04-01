@@ -177,6 +177,15 @@ public class TaskDataManager {
         return _completedEventTasks;
     }
 
+    /* load methods: HashMaps */
+    public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
+        return _recurringTasks;
+    }
+
+    public HashMap<String, ArrayList<EventTask>> getBlockTasks() {
+        return _blockTasks;
+    }
+
     /**
      * Updates HashMaps if user has modified their JSON files.
      */
@@ -388,8 +397,9 @@ public class TaskDataManager {
                 while (currDeadline.compareTo(endRecurOn) < 0) {
                     includeInRecurMap(addDeadlineTask(addParameters), recurTag);
 
-                    currDeadline = new Date(addParameters.getEndDate()
-                            .getTime() + addParameters.getFreqInMilliSec());
+                    currDeadline = updateDate(currDeadline,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
 
                     addParameters.setEndDate(currDeadline);
                 }
@@ -403,11 +413,12 @@ public class TaskDataManager {
                 while (currEndDate.compareTo(endRecurOn) < 0) {
                     includeInRecurMap(addDeadlineTask(addParameters), recurTag);
 
-                    currStartDate = new Date(addParameters.getEndDate()
-                            .getTime() + addParameters.getFreqInMilliSec());
-                    currEndDate = new Date(
-                            addParameters.getEndDate().getTime() + addParameters
-                                    .getFreqInMilliSec());
+                    currStartDate = updateDate(currStartDate,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
+                    currEndDate = updateDate(currEndDate,
+                            addParameters.getTimeType(),
+                            addParameters.getFreqOfTimeType());
 
                     addParameters.setStartDate(currStartDate);
                     addParameters.setEndDate(currEndDate);
@@ -419,6 +430,34 @@ public class TaskDataManager {
             default :
                 return null;
         }
+    }
+
+    private Date updateDate(Date currDate, String timeType, int freqOfTimeType) {
+        Calendar updateCal = Calendar.getInstance();
+        updateCal.setTime(currDate);
+
+        switch (timeType) {
+            case ("YEAR") :
+                updateCal.add(Calendar.YEAR, freqOfTimeType);
+                break;
+            case ("MONTH") :
+                updateCal.add(Calendar.MONTH, freqOfTimeType);
+                break;
+            case ("WEEK") :
+                updateCal.add(Calendar.WEEK_OF_YEAR, freqOfTimeType);
+                break;
+            case ("DAY") :
+                updateCal.add(Calendar.DAY_OF_MONTH, freqOfTimeType);
+                break;
+            case ("HOUR") :
+                updateCal.add(Calendar.HOUR_OF_DAY, freqOfTimeType);
+                break;
+            default :
+                return null;
+
+        }
+
+        return updateCal.getTime();
     }
 
     private Task<?> addBlockTask(DataParameter addParameters) {
@@ -831,6 +870,6 @@ public class TaskDataManager {
         _uncompletedTodoTasks.clear();
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
-        
+
     }
 }
