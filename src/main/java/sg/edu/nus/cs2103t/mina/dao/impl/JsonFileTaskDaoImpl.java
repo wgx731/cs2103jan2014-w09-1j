@@ -13,6 +13,8 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.JsonHelper;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * 
  * File based implementation for TaskSetDao
@@ -90,12 +92,15 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         while ((line = reader.readLine()) != null) {
             sb.append(line);
         }
-        SortedSet<? extends Task<?>> taskSet = JsonHelper.jsonToTaskSet(
-                sb.toString(), taskType);
+        SortedSet<? extends Task<?>> taskSet;
+        try {
+            taskSet = JsonHelper.jsonToTaskSet(sb.toString(), taskType);
+        } catch (JsonSyntaxException e) {
+            taskSet = null;
+        }
         if (taskSet == null) {
             throw new IOException(EMPTY_FILE_ERROR);
         }
         return taskSet;
     }
-
 }
