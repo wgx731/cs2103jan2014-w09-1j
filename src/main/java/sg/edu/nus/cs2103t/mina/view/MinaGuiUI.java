@@ -39,6 +39,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+import sg.edu.nus.cs2103t.mina.utils.ProgressBarDialog;
 
 import com.tulskiy.keymaster.common.HotKey;
 import com.tulskiy.keymaster.common.HotKeyListener;
@@ -58,6 +59,7 @@ public class MinaGuiUI extends MinaView {
     private Calendar _tomorrow;
 
     private AutoCompleteDB _autoComplete;
+    private ProgressBarDialog _progressDialog;
 
     private Shell _shell;
     private Display _display;
@@ -112,6 +114,26 @@ public class MinaGuiUI extends MinaView {
 
     private static Logger logger = LogManager.getLogger(MinaGuiUI.class
             .getName());
+
+    void showProgressDialog() {
+        if (_progressDialog == null) {
+            _progressDialog = new ProgressBarDialog(_shell);
+        }
+        _progressDialog.open();
+    }
+
+    void setProgress(int progress) {
+        if (_progressDialog != null) {
+            _progressDialog.updateProgress(progress);
+        }
+    }
+
+    void closeProgressDialog() {
+        if (_progressDialog != null) {
+            _progressDialog.killDialog();
+            _progressDialog = null;
+        }
+    }
 
     public MinaGuiUI(CommandManager commandController) {
         super(commandController);

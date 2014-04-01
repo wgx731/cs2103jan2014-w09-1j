@@ -1,6 +1,6 @@
 package sg.edu.nus.cs2103t.mina.dao;
 
-import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 
 /**
  * Observe memory data changes in MINA
@@ -18,6 +18,6 @@ public interface MemoryDataObserver {
      * 
      * @param syncData changed data signal
      */
-    public void updateChange(SyncDataParameter syncData);
+    public void updateChange(TaskSetDataParameter syncData);
 
 }
