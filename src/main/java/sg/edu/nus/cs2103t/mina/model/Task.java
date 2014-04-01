@@ -164,10 +164,11 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_description);
         sb.append(" priority (");
         sb.append(_priority);
-        sb.append(") done? (");
-        sb.append(_isCompleted ? "yes)" : "no)");
-        sb.append(" last modified: ");
-        sb.append(_lastEditedTime);
+        sb.append(")");
+        //sb.append(") done? (");
+        //sb.append(_isCompleted ? "yes)" : "no)");
+        //sb.append(" last modified: ");
+        //sb.append(_lastEditedTime);
         return sb.toString();
     }
 

@@ -2,6 +2,8 @@ package sg.edu.nus.cs2103t.mina.model;
 
 import java.util.Date;
 
+import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+
 /**
  * Task with deadline
  * 
@@ -61,9 +63,10 @@ public class DeadlineTask extends Task<DeadlineTask> implements
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
-        sb.append(" deadline(");
-        sb.append(_endTime.toString());
-        sb.append(")");
+        sb.append(" by ");
+        sb.append(DateUtil.displayDateTime(DateUtil.toCalendar(_endTime)));
+        sb.append(" ");
+        sb.append(super.isCompleted()?"done":"");
         return sb.toString();
     }
 
