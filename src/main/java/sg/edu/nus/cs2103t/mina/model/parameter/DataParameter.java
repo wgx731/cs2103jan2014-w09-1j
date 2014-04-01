@@ -26,7 +26,9 @@ public class DataParameter {
     /* for BLOCK tasks */
     private List<TimePair> _timeSlots; // for BLOCK only
     /* for RECURRING Tasks */
-    private long _freqInMilliSec; // lower bound: every hour (i.e. 60*60*1000ms)
+    private String _timeType; // refer to field values of CALENDAR
+    private int _freqOfTimeType;
+
     private Date _endRecurOn;
 
     private Task<?> _taskObject;
@@ -49,7 +51,9 @@ public class DataParameter {
 
         setTimeSlots(null);
 
-        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setTimeType(null);
+        setFreqOfTimeType(0);
+
         setEndRecurOn(null);
 
         setTaskObject(null);
@@ -72,7 +76,9 @@ public class DataParameter {
 
         setTimeSlots(null);
 
-        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setTimeType(null);
+        setFreqOfTimeType(0);
+
         setEndRecurOn(null);
 
         setTaskObject(null);
@@ -109,7 +115,8 @@ public class DataParameter {
 
         setTimeSlots(null);
 
-        setFreqInMilliSec(7 * 24 * 60 * 60 * 1000); // default: every week
+        setTimeType(null);
+        setFreqOfTimeType(0);
         setEndRecurOn(null);
 
     }
@@ -117,22 +124,22 @@ public class DataParameter {
     // for adding recurring or block tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, String tag,
-            long freqInMilliSec, Date endRecurOn, List<TimePair> timeSlots,
-            boolean isModifyAll) throws Exception {
+            Date endRecurOn, String timeType, int freqOfTimeType,
+            List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
         assert (!tag.equals(null));
 
         if (tag.equals("BLOCK")) {
             assert (newType.equals(TaskType.EVENT));
             createAddBlockParameters(des, pri, start, end, origType, newType,
-                    id, tag, freqInMilliSec, timeSlots, isModifyAll);
+                    id, tag, timeSlots);
 
         } else if (tag.equals("RECUR")) {
             assert (!newType.equals(TaskType.TODO));
             createAddRecurParameters(des, pri, start, end, origType, newType,
-                    id, tag, freqInMilliSec, timeSlots, endRecurOn, isModifyAll);
+                    id, tag, timeType, freqOfTimeType, endRecurOn);
 
         } else {
-            throw new Exception("invalid tag used by CC");
+            throw new Exception("invalid tag used");
         }
 
     }
@@ -140,7 +147,7 @@ public class DataParameter {
     // for modifying or deleting recurring or block tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
-            String tag, long freqInMilliSec, Date endRecurOn,
+            String tag, String timeType, int freqOfTimeType, Date endRecurOn,
             List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
         assert (!tag.equals(null));
 
@@ -148,13 +155,13 @@ public class DataParameter {
             assert (!origType.equals(null) && origType.equals(TaskType.EVENT) || !newType
                     .equals(null) && newType.equals(TaskType.EVENT));
             createBlockParameters(des, pri, start, end, origType, newType, id,
-                    taskObj, tag, freqInMilliSec, timeSlots, isModifyAll);
+                    taskObj, tag, timeSlots, isModifyAll);
 
         } else if (tag.equals("RECUR")) {
             assert (!origType.equals(null) && !origType.equals(TaskType.TODO) || !newType
                     .equals(null) && !newType.equals(TaskType.TODO));
             createRecurParameters(des, pri, start, end, origType, newType, id,
-                    taskObj, tag, freqInMilliSec, timeSlots, endRecurOn,
+                    taskObj, tag, timeType, freqOfTimeType, endRecurOn,
                     isModifyAll);
 
         } else {
@@ -166,7 +173,7 @@ public class DataParameter {
     // only for event TaskTypes
     private void createAddBlockParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id, String tag,
-            long freqInMilliSec, List<TimePair> timeSlots, boolean isModifyAll) {
+            List<TimePair> timeSlots) {
         setDescription(des);
         setPriority(pri);
         setStartDate(start);
@@ -176,16 +183,18 @@ public class DataParameter {
         setTaskID(id);
 
         setTag(tag);
-        setFreqInMilliSec(freqInMilliSec);
+        setTimeType(null);
+        setFreqOfTimeType(0);
+
         setTimeSlots(timeSlots);
-        setModifyAll(isModifyAll);
+        setModifyAll(false);
 
     }
 
     private void createBlockParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id,
-            Task<?> taskObj, String tag, long freqInMilliSec,
-            List<TimePair> timeSlots, boolean isModifyAll) {
+            Task<?> taskObj, String tag, List<TimePair> timeSlots,
+            boolean isModifyAll) {
         setDescription(des);
         setPriority(pri);
         setStartDate(start);
@@ -200,7 +209,10 @@ public class DataParameter {
         setStartDate(start == null ? eventTaskObj.getStartTime() : start);
 
         setTag(tag);
-        setFreqInMilliSec(freqInMilliSec);
+        setTimeType(null);
+        setFreqOfTimeType(0);
+        setEndRecurOn(null);
+
         setTimeSlots(timeSlots);
         setModifyAll(isModifyAll);
 
@@ -209,8 +221,7 @@ public class DataParameter {
     // only for event and deadline TaskTypes
     private void createAddRecurParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id, String tag,
-            long freqInMilliSec, List<TimePair> timeSlots, Date endRecurOn,
-            boolean isModifyAll) {
+            String timeType, int freqOfTimeType, Date endRecurOn) {
         setDescription(des);
         setPriority(pri);
         setStartDate(start);
@@ -220,18 +231,20 @@ public class DataParameter {
         setTaskID(id);
 
         setTag(tag);
-        setFreqInMilliSec(freqInMilliSec);
-        setTimeSlots(null);
-        setModifyAll(isModifyAll);
-
+        setTimeType(timeType);
+        setFreqOfTimeType(freqOfTimeType);
         setEndRecurOn(endRecurOn);
+
+        setTimeSlots(null);
+
+        setModifyAll(false);
 
     }
 
     private void createRecurParameters(String des, char pri, Date start,
             Date end, TaskType origType, TaskType newType, int id,
-            Task<?> taskObj, String tag, long freqInMilliSec,
-            List<TimePair> timeSlots, Date endRecurOn, boolean isModifyAll) {
+            Task<?> taskObj, String tag, String timeType, int freqOfTimeType,
+            Date endRecurOn, boolean isModifyAll) {
         setDescription(des);
         setPriority(pri);
         setStartDate(start);
@@ -254,9 +267,13 @@ public class DataParameter {
             setEndDate(end == null ? eventTaskObj.getEndTime() : end);
             setStartDate(start == null ? eventTaskObj.getStartTime() : start);
         }
+        
+        setTag(tag);
+        setTimeType(timeType);
+        setFreqOfTimeType(freqOfTimeType);
+        setEndRecurOn(endRecurOn);
 
         setTag(tag);
-        setFreqInMilliSec(freqInMilliSec);
         setTimeSlots(null);
         setModifyAll(isModifyAll);
 
@@ -433,10 +450,6 @@ public class DataParameter {
         return _tag;
     }
 
-    public long getFreqInMilliSec() {
-        return _freqInMilliSec;
-    }
-
     public boolean isModifyAll() {
         return _modifyAll;
     }
@@ -447,6 +460,14 @@ public class DataParameter {
 
     public Date getEndRecurOn() {
         return _endRecurOn;
+    }
+
+    public int getFreqOfTimeType() {
+        return _freqOfTimeType;
+    }
+
+    public String getTimeType() {
+        return _timeType;
     }
 
     /** set Methods */
@@ -486,10 +507,6 @@ public class DataParameter {
         _tag = tag;
     }
 
-    public void setFreqInMilliSec(long freqInMilliSec) {
-        _freqInMilliSec = freqInMilliSec;
-    }
-
     public void setModifyAll(boolean modifyAll) {
         _modifyAll = modifyAll;
     }
@@ -500,6 +517,14 @@ public class DataParameter {
 
     public void setEndRecurOn(Date endRecurOn) {
         _endRecurOn = endRecurOn;
+    }
+
+    public void setFreqOfTimeType(int freqOfTimeType) {
+        _freqOfTimeType = freqOfTimeType;
+    }
+
+    public void setTimeType(String timeType) {
+        _timeType = timeType;
     }
 
 }
