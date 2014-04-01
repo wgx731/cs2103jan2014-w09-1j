@@ -740,14 +740,26 @@ public class TaskDataManager {
                 modifyParameters.getNewTaskType() != null &&
                 modifyParameters.getNewTaskType() == TaskType.EVENT) {
 
-            EventTask prevTask = (EventTask) deleteTask(modifyParameters);
-            _recurringTasks.remove(prevTask.getTag());
+            Task<?> prevTask = modifyParameters.getTaskObject();
+            ArrayList<Task<?>> tempTaskList = _recurringTasks.remove(prevTask
+                    .getTag());
+            
+            Task<?> currTask = prevTask;
+            for (int i = 1; i < tempTaskList.size(); i++) {
+                DataParameter newSetOfParameters = new DataParameter();
+                newSetOfParameters.loadOldTask(currTask);
+                deleteRegTask(newSetOfParameters);
+                
+                newSetOfParameters.loadNewParameters(modifyParameters);
+                tempTaskList.add(addRegTask(newSetOfParameters));
+                
+                currTask = tempTaskList.get(i);
+            }
 
-            DataParameter newSetOfParameters = new DataParameter();
-            newSetOfParameters.loadOldTask(prevTask);
-            newSetOfParameters.loadNewParameters(modifyParameters);
+            _recurringTasks.put(prevTask.getTag(), tempTaskList);
 
-            return addRecurringTask(newSetOfParameters);
+            return tempTaskList.get(0);
+
         } else {
 
             return null;
@@ -782,7 +794,7 @@ public class TaskDataManager {
                 return modifyAllBlockTasks(modifyParameters);
 
             } else {
-                return modfiyOneBlockringTask(modifyParameters);
+                return modfiyOneBlockTask(modifyParameters);
             }
 
         } else {
@@ -795,7 +807,7 @@ public class TaskDataManager {
         return null;
     }
 
-    private EventTask modfiyOneBlockringTask(DataParameter modifyParameters) {
+    private EventTask modfiyOneBlockTask(DataParameter modifyParameters) {
         // TODO Auto-generated method stub
         return null;
     }
