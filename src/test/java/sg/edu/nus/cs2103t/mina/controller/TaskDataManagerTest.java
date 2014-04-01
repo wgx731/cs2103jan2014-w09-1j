@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Calendar;
 import java.util.Date;
+
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
@@ -88,7 +89,8 @@ public class TaskDataManagerTest {
         calendar_1.set(Calendar.MONTH, currMth_1 + 4);
 
         try {
-            assertEquals("Adding Deadline Task that reccurs every fortnight for 4 months.",
+            assertEquals(
+                    "Adding Deadline Task that reccurs every fortnight for 4 months.",
                     expectedDeadlineTask_1, tdmTest.addTask(new DataParameter(
                             "RecurDeadlineTask every 2 weeks, for 4 months.",
                             'M', null, firstDeadline_1, null,
@@ -111,13 +113,13 @@ public class TaskDataManagerTest {
         expectedDeadlineTask_2.addTag("RECUR_1");
 
         try {
-  
-            assertEquals("Adding Deadline Task that reccurs every month forever.",
+
+            assertEquals(
+                    "Adding Deadline Task that reccurs every month forever.",
                     expectedDeadlineTask_2, tdmTest.addTask(new DataParameter(
-                            "RecurDeadlineTask every month, forever.",
-                            'M', null, firstDeadline_2, null,
-                            TaskType.DEADLINE, 123, "RECUR", null, "MONTH", 1,
-                            null, false)));
+                            "RecurDeadlineTask every month, forever.", 'M',
+                            null, firstDeadline_2, null, TaskType.DEADLINE,
+                            123, "RECUR", null, "MONTH", 1, null, false)));
             assertEquals(12, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
@@ -125,11 +127,93 @@ public class TaskDataManagerTest {
             e.printStackTrace();
         }
 
-        /* Adding a recurring DeadlineTask */
-        // Partition: all parameters added correctly, recur every 2 weeks for 4
-        // months
+        // Partition: some wrong parameters added for Recurring Deadlines
+        try {
+            assertNull("Adding a recurring DeadlineTask wrongly.",
+                    tdmTest.addTask(new DataParameter(
+                            "RecurDeadlineTask every month, forever.", 'M',
+                            null, null, null, TaskType.DEADLINE, 123, "RECUR",
+                            null, "MONTH", 1, null, false)));
+            assertNull("Adding a recurring DeadlineTask wrongly.",
+                    tdmTest.addTask(new DataParameter(
+                            "RecurDeadlineTask every month, forever.", 'M',
+                            null, firstDeadline_2, null, null, 123, "RECUR",
+                            null, "MONTH", 1, null, false)));
+        } catch (Exception e) {
+            // e.printStackTrace();
+        }
+
+        /* Adding a recurring EventTask */
+        // Partition: all parameters added correctly, recur every 8 hours for 2
+        // weeks
+        Calendar calendar_e_1a = Calendar.getInstance();
+        calendar_e_1a.set(2014, 9, 16);
+        calendar_e_1a.set(Calendar.HOUR_OF_DAY, 14);
+        Date firstStartTime_1 = calendar_e_1a.getTime();
+
+        Calendar calendar_e_1b = Calendar.getInstance();
+        calendar_e_1b.set(2014, 9, 16);
+        calendar_e_1b.set(Calendar.HOUR_OF_DAY, 16);
+        Date firstEndTime_1 = calendar_e_1b.getTime();
+
+        calendar_e_1a.add(Calendar.WEEK_OF_YEAR, 2);
+        Date recurUntil = calendar_e_1a.getTime();
+
+        EventTask expectedEventTask_1 = new EventTask(
+                "RecurEventTask every 8 hours, for 2 weeks.", firstStartTime_1,
+                firstEndTime_1, 'H');
+        expectedEventTask_1.addTag("RECUR_3");
+
+        try {
+            assertEquals(
+                    "Adding Event Task that reccurs every 8 hours, for 2 weeks.",
+                    expectedEventTask_1, tdmTest.addTask(new DataParameter(
+                            "RecurEventTask every 8 hours, for 2 weeks.", 'H',
+                            firstStartTime_1, firstEndTime_1, null,
+                            TaskType.EVENT, 123, "RECUR", recurUntil, "HOUR",
+                            8, null, false)));
+            assertEquals(42, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(42, tdmTest.getRecurringTasks().get("RECUR_3").size());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Partition: all parameters added correctly, recur every month forever
+        Calendar calendar_e_2a = Calendar.getInstance();
+        calendar_e_2a.set(2014, 9, 16);
+        calendar_e_2a.set(Calendar.HOUR_OF_DAY, 14);
+        Date firstStartTime_2 = calendar_e_2a.getTime();
+
+        Calendar calendar_e_2b = Calendar.getInstance();
+        calendar_e_2b.set(2014, 9, 16);
+        calendar_e_2b.set(Calendar.HOUR_OF_DAY, 16);
+        Date firstEndTime_2 = calendar_e_2b.getTime();
+
+        EventTask expectedEventTask_2 = new EventTask(
+                "RecurEventTask every month, forever.", firstStartTime_2,
+                firstEndTime_2, 'H');
+        expectedEventTask_2.addTag("RECUR_4");
+
+        try {
+            assertEquals(
+                    "Adding Event Task that reccurs every month, forever.",
+                    expectedEventTask_2, tdmTest.addTask(new DataParameter(
+                            "RecurEventTask every month, forever.", 'H',
+                            firstStartTime_2, firstEndTime_2, null,
+                            TaskType.EVENT, 123, "RECUR", null, "MONTH",
+                            1, null, false)));
+            assertEquals(45, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_4").size());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        
+        // Partition: some wrong parameters added for Recurring Events
+
+        // Partition: Events overlap
 
         /* Adding a block task */
         // TODO: set a limit to how many block tasks can be added at one go

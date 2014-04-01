@@ -386,6 +386,7 @@ public class TaskDataManager {
         String recurTag = "RECUR_" + maxRecurTagInt++;
 
         assert (!_recurringTasks.containsKey(recurTag));
+        assert(addParameters.getFreqOfTimeType() != 0);
 
         Date endRecurOn = addParameters.getEndRecurOn() == null ? generateStartOfNextYear()
                 : addParameters.getEndRecurOn();
@@ -410,8 +411,8 @@ public class TaskDataManager {
                 Date currStartDate = addParameters.getStartDate();
                 Date currEndDate = addParameters.getEndDate();
 
-                while (currEndDate.compareTo(endRecurOn) < 0) {
-                    includeInRecurMap(addDeadlineTask(addParameters), recurTag);
+                while (currStartDate.compareTo(endRecurOn) < 0) {
+                    includeInRecurMap(addEventTask(addParameters), recurTag);
 
                     currStartDate = updateDate(currStartDate,
                             addParameters.getTimeType(),
@@ -504,7 +505,6 @@ public class TaskDataManager {
         calendar.set(currYear + 1, 0, 1);
 
         Date startOfNextYear = calendar.getTime();
-        System.out.println("NewYear: " + startOfNextYear);
 
         return startOfNextYear;
     }
