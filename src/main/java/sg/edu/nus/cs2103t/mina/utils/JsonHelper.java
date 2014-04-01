@@ -3,7 +3,9 @@ package sg.edu.nus.cs2103t.mina.utils;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -164,6 +166,10 @@ public class JsonHelper {
     }.getType();
     private static final Type DEADLINE_TREESET_TYPE = new TypeToken<TreeSet<DeadlineTask>>() {
     }.getType();
+    private static final Type RECURRING_TASK_MAP_TYPE = new TypeToken<HashMap<String, ArrayList<Task<?>>>>() {
+    }.getType();
+    private static final Type BLOCK_TASK_MAP_TYPE = new TypeToken<HashMap<String, ArrayList<EventTask>>>() {
+    }.getType();
 
     private static Gson setUp() {
         return new GsonBuilder()
@@ -224,5 +230,37 @@ public class JsonHelper {
             default :
                 return null;
         }
+    }
+
+    public static String recurringTaskMapToJson(
+            HashMap<String, ArrayList<Task<?>>> recurringTaskMap) {
+        if (gson == null) {
+            gson = setUp();
+        }
+        return gson.toJson(recurringTaskMap, RECURRING_TASK_MAP_TYPE);
+    }
+
+    public static HashMap<String, ArrayList<Task<?>>> jsonToRecurringTaskMap(
+            String json) {
+        if (gson == null) {
+            gson = setUp();
+        }
+        return gson.fromJson(json, RECURRING_TASK_MAP_TYPE);
+    }
+
+    public static String blockTaskMapToJson(
+            HashMap<String, ArrayList<EventTask>> blockTaskMap) {
+        if (gson == null) {
+            gson = setUp();
+        }
+        return gson.toJson(blockTaskMap, BLOCK_TASK_MAP_TYPE);
+    }
+
+    public static HashMap<String, ArrayList<Task<?>>> jsonToBlockTaskMap(
+            String json) {
+        if (gson == null) {
+            gson = setUp();
+        }
+        return gson.fromJson(json, BLOCK_TASK_MAP_TYPE);
     }
 }

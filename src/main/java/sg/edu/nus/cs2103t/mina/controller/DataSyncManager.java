@@ -13,7 +13,7 @@ import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
-import sg.edu.nus.cs2103t.mina.model.parameter.SyncDataParameter;
+import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 
 /**
  * Sync memory data to storage on predefined interval
@@ -29,7 +29,7 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
     private static Logger logger = LogManager.getLogger(DataSyncManager.class
             .getName());
 
-    private List<SyncDataParameter> _syncList;
+    private List<TaskSetDataParameter> _syncList;
     private TaskDao _storage;
 
     /**
@@ -40,7 +40,7 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
     public DataSyncManager(TaskDao storage) {
         super();
         _storage = storage;
-        _syncList = new ArrayList<SyncDataParameter>(6);
+        _syncList = new ArrayList<TaskSetDataParameter>(6);
     }
 
     /**
@@ -48,7 +48,7 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
      * 
      * @param changedDataList the list of data to be saved
      */
-    public boolean saveAll(List<SyncDataParameter> changedDataList) {
+    public boolean saveAll(List<TaskSetDataParameter> changedDataList) {
         return saveChangedData(changedDataList);
     }
 
@@ -64,8 +64,8 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
         _syncList.clear();
     }
 
-    private boolean saveChangedData(List<SyncDataParameter> changedData) {
-        for (SyncDataParameter data : changedData) {
+    private boolean saveChangedData(List<TaskSetDataParameter> changedData) {
+        for (TaskSetDataParameter data : changedData) {
             try {
                 _storage.saveTaskSet(data.getTaskSet(), data.getTaskType(),
                         data.isCompleted());
@@ -78,7 +78,7 @@ public class DataSyncManager extends TimerTask implements MemoryDataObserver {
         return true;
     }
 
-    public void updateChange(SyncDataParameter syncData) {
+    public void updateChange(TaskSetDataParameter syncData) {
         assert syncData != null : syncData;
         if (_syncList.contains(syncData)) {
             return;
