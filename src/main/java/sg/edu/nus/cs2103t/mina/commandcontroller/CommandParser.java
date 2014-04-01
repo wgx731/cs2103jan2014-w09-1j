@@ -1,5 +1,14 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller;
 
+/**
+ * This class is in charges of normalizing the command for CommandProcessor
+ * 
+ * @author wgx731
+ * @author viettrung9012
+ * @author duzhiyuan
+ * @author joannemah
+ */
+
 import hirondelle.date4j.DateTime;
 import hirondelle.date4j.DateTime.DayOverflow;
 
@@ -56,6 +65,7 @@ public class CommandParser {
     private static final String EVERY_WEEK = "week";
     private static final String EVERY_MONTH = "month";
     private static final String EVERY_YEAR = "year";
+    private static final String EVERY_HOUR = "hour";
     
     private static final int NEXT = 1;
     
@@ -95,6 +105,7 @@ public class CommandParser {
     private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
     
     private static final LinkedHashSet<String> TIME = new LinkedHashSet<String>();
+    
     private static final int DATETIME_VALUE_KEYWORD = 0;
     private static final int DATE_VALUE = 1;
     private static final int TIME_VALUE = 2;
@@ -134,7 +145,7 @@ public class CommandParser {
     
 
     
-    private HashMap<String, String> _arguments;
+    private LinkedHashMap<String, String> _arguments;
     
     private enum ActionsTaskID{
         MODIFY(CommandParser.MODIFY),
@@ -168,6 +179,8 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("edit", MODIFY);
         
         ACTIONS_KEYWORDS.put("remove", DELETE);
+        ACTIONS_KEYWORDS.put("rm", DELETE);
+        ACTIONS_KEYWORDS.put("-", DELETE);
         ACTIONS_KEYWORDS.put(DELETE, DELETE);
         
         ACTIONS_KEYWORDS.put(SEARCH, SEARCH);
@@ -265,14 +278,19 @@ public class CommandParser {
         RECURRING_VALUES.put(EVERY_WEEK, EVERY_WEEK);
         RECURRING_VALUES.put(EVERY_MONTH, EVERY_MONTH);
         RECURRING_VALUES.put(EVERY_YEAR, EVERY_YEAR);
+        RECURRING_VALUES.put(EVERY_HOUR, EVERY_HOUR);
+        
         RECURRING_VALUES.put("daily", EVERY_DAY);
         RECURRING_VALUES.put("weekly", EVERY_WEEK);
         RECURRING_VALUES.put("monthly", EVERY_MONTH);
+        RECURRING_VALUES.put("hourly", EVERY_HOUR);
+        
         RECURRING_VALUES.put("yearly", EVERY_YEAR);
         RECURRING_VALUES.put("-daily", EVERY_DAY);
         RECURRING_VALUES.put("-weekly", EVERY_WEEK);
         RECURRING_VALUES.put("-monthly", EVERY_MONTH);
         RECURRING_VALUES.put("-yearly", EVERY_YEAR);
+        RECURRING_VALUES.put("-hourly", EVERY_HOUR);
         
         UNITL_KEYWORDS.put(UNTIL, false);
         UNITL_KEYWORDS.put("-until", true);
@@ -1296,17 +1314,19 @@ public class CommandParser {
 
     private void initArgMap() {
 
-        _arguments = new HashMap<String, String>();
-
+        _arguments = new LinkedHashMap<String, String>();
+        
+        
+        
         _arguments.put(ACTION, null);
-        _arguments.put(PRIORITY, null);
-        _arguments.put(DESCRIPTION, null);
-        _arguments.put(END, null);
-        _arguments.put(START, null);
         _arguments.put(TASKID, null);
         _arguments.put(TO_TASK_TYPE, null);
+        _arguments.put(DESCRIPTION, null);
+        _arguments.put(START, null);
+        _arguments.put(END, null);
         _arguments.put(RECURRING, null);
         _arguments.put(UNTIL, null);
+        _arguments.put(PRIORITY, null);
 
     }
     

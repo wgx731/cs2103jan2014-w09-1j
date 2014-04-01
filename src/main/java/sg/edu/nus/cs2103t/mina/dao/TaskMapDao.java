@@ -24,6 +24,6 @@ public interface TaskMapDao {
      * 
      * @throws IOException
      */
-    public TaskMapDataParameter loadRecurringTaskMap() throws IOException;
+    public TaskMapDataParameter loadTaskMapData();
 
 }

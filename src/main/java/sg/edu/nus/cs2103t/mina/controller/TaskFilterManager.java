@@ -13,6 +13,7 @@ package sg.edu.nus.cs2103t.mina.controller;
 //@author Du Zhiyuan
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -114,6 +115,7 @@ public class TaskFilterManager {
         for (TaskType type : uncompletedTasks.keySet()) {
             ArrayList<Task<?>> currentTasks = uncompletedTasks.get(type);
             currentTasks.addAll(completedTasks.get(type));
+            //Collections.sort(currentTasks, new GenericTaskComparator);
             result.put(type, currentTasks);
         }
 
