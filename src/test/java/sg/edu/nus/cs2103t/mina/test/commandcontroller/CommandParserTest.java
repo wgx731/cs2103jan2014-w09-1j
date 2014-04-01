@@ -44,6 +44,7 @@ public class CommandParserTest {
 
     public static final String DEADLINE_DESCRIPTION = "Submit assignment ";
     public static final String EVENT_DESCRIPTION = "meet friends";
+    public static final String RECUR_DESCRIPTION = "CS2103 tutorial";
     private static final int HAS_SECS = 0;
     private static final int HAS_NO_SECS = 1;
     private static final int HAS_TODAY_NO_TIME_SLASH = 2;
@@ -73,7 +74,9 @@ public class CommandParserTest {
             addDeadlineControlNoDate, addDeadlineControlNoDateMorning,
             addDeadlineControlTodayNoTime, addDeadlineControlMonthTimeNoSecs,
             addEventControlADay, addEventControlDays, addEventControlMonths,
-            addEventControlYears, addEventControlToday, addEventControlTomorrow;
+            addEventControlYears, addEventControlToday, addEventControlTomorrow,
+            addRecurDayControl, addRecurWeekControl, addRecurMonthControl,
+            addRecurYearControl;
     
     private static String displayControlType;
     
@@ -128,6 +131,14 @@ public class CommandParserTest {
         DateTime tomorrow = today.plusDays(1);
         String tmrFormat = tomorrow.format("DDMMYYYY");
         addEventControlTomorrow = "add meet friends -start " + tmrFormat + "090000 -end " + tmrFormat + "213300";
+        
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2014
+        addRecurDayControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every day -until 23112014235959";
+        addRecurWeekControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every week -until 23112014235959";
+        addRecurMonthControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every month -until 23112014235959";
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2016
+        addRecurYearControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every year -until 23112016235959"; 
+        
         //Basic type
         displayControlType = "display";
         
@@ -831,8 +842,6 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);  
         assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
         
-        variation = "search booop ''what is going on?' he says' ' woooaaahh what ' boop";
-        result = parser.convertCommand(variation);  
         
     }
     
@@ -879,6 +888,48 @@ public class CommandParserTest {
         
         assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
                      result);     
+        
+    }
+    
+    @Test
+    public void testRecurringKeywordsControl() throws ParseException {
+        
+        result = parser.convertCommand(addRecurDayControl);
+        assertEquals(addRecurDayControl, result);
+        
+        result = parser.convertCommand(addRecurWeekControl);
+        assertEquals(addRecurWeekControl, result);
+        
+        result = parser.convertCommand(addRecurMonthControl);
+        assertEquals(addRecurMonthControl, result);
+        
+        result = parser.convertCommand(addRecurYearControl);
+        assertEquals(addRecurYearControl, result);
+        
+    }
+    
+    @Test
+    public void testRecurringKeywords() throws ParseException {
+
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -daily -until 23/11/2014";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurDayControl, result);
+        
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -weekly -until 23/11/2014";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurWeekControl, result);      
+        
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -yearly -until 23/11/2016";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurYearControl, result);  
+    }
+    
+    @Test
+    public void testRecurringReorder() throws ParseException {
+        
+        variation = "add every day until 23/11/2014 'CS2103 tutorial' from 24082014090000 to 24082014110000";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurDayControl, result);        
         
     }
     
