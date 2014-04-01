@@ -743,16 +743,16 @@ public class TaskDataManager {
             Task<?> prevTask = modifyParameters.getTaskObject();
             ArrayList<Task<?>> tempTaskList = _recurringTasks.remove(prevTask
                     .getTag());
-            
+
             Task<?> currTask = prevTask;
             for (int i = 1; i < tempTaskList.size(); i++) {
                 DataParameter newSetOfParameters = new DataParameter();
                 newSetOfParameters.loadOldTask(currTask);
                 deleteRegTask(newSetOfParameters);
-                
+
                 newSetOfParameters.loadNewParameters(modifyParameters);
                 tempTaskList.add(addRegTask(newSetOfParameters));
-                
+
                 currTask = tempTaskList.get(i);
             }
 
@@ -768,16 +768,19 @@ public class TaskDataManager {
 
     private Task<?> modfiyOneRecurringTask(DataParameter modifyParameters) {
         // Note: Task does not contain information on frequency
-        EventTask prevTask = (EventTask) deleteTask(modifyParameters);
+
+        Task<?> prevTask = deleteRegTask(modifyParameters);
         if (prevTask != null) {
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
-            prevTask.setTag("");
+            // the moment one of the recurring task is modified, it does not
+            // belong to the group of recurring tasks anymore
 
             DataParameter newSetOfParameters = new DataParameter();
             newSetOfParameters.loadOldTask(prevTask);
             newSetOfParameters.loadNewParameters(modifyParameters);
 
             Task<?> newTask = addTask(newSetOfParameters);
+            prevTask.setTag("");
             newTask.setLastEditedTime(new Date());
 
             return newTask;
@@ -803,12 +806,41 @@ public class TaskDataManager {
     }
 
     private EventTask modifyAllBlockTasks(DataParameter modifyParameters) {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     private EventTask modfiyOneBlockTask(DataParameter modifyParameters) {
-        // TODO Auto-generated method stub
+        EventTask prevTask = (EventTask) deleteRegTask(modifyParameters);
+
+        if (prevTask != null && modifyParameters.getNewTaskType() == null) {
+            DataParameter newSetOfParameters = new DataParameter();
+            newSetOfParameters.loadOldTask(prevTask);
+            newSetOfParameters.loadNewParameters(modifyParameters);
+
+            Task<?> newTask = addTask(newSetOfParameters);
+            newTask.setLastEditedTime(new Date());
+
+            if (modifyParameters.getDescription() != null) {
+                // if description is modified, task is removed from the rest of
+                // the block
+                _recurringTasks.get(prevTask.getTag()).remove(prevTask);
+                prevTask.setTag("");
+
+            }
+
+        } else {
+            DataParameter newSetOfParameters = new DataParameter();
+            newSetOfParameters.loadOldTask(prevTask);
+            newSetOfParameters.loadNewParameters(modifyParameters);
+
+            Task<?> newTask = addTask(newSetOfParameters);
+            newTask.setLastEditedTime(new Date());
+
+            _recurringTasks.get(prevTask.getTag()).remove(prevTask);
+            prevTask.setTag("");
+
+        }
         return null;
     }
 

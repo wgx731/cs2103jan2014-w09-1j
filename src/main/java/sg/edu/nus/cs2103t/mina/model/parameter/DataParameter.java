@@ -366,7 +366,6 @@ public class DataParameter {
         if (modifyParam.getTag() != "") {
             setTag(modifyParam.getTag());
         }
-
         if (modifyParam.getNewTaskType() != null) {
             setNewTaskType(modifyParam.getNewTaskType());
         }
