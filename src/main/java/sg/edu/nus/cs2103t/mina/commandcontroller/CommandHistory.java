@@ -23,8 +23,8 @@ public class CommandHistory {
     	_undoCommand.push(cmdType);
     	_undoParameter.push(undoParam);
     	if (_undoCommand.size()==6&&_undoParameter.size()==6){
-    		_undoCommand.poll();
-    		_undoParameter.poll();
+    		_undoCommand.removeLast();
+    		_undoParameter.removeLast();
     	}
     }
     

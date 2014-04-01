@@ -1,6 +1,16 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller;
 
+/**
+ * This class is in charges of normalizing the command for CommandProcessor
+ * 
+ * @author wgx731
+ * @author viettrung9012
+ * @author duzhiyuan
+ * @author joannemah
+ */
+
 import hirondelle.date4j.DateTime;
+import hirondelle.date4j.DateTime.DayOverflow;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +24,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TimeZone;
@@ -23,6 +34,8 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.model.FilterType;
+import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 public class CommandParser {
@@ -48,7 +61,17 @@ public class CommandParser {
     private static final String EMPTY = "";
     private static final String TIME_KEY = "time";
     private static final String DATE_KEY = "date";
+    private static final String EVERY_DAY = "day";
+    private static final String EVERY_WEEK = "week";
+    private static final String EVERY_MONTH = "month";
+    private static final String EVERY_YEAR = "year";
+    private static final String EVERY_HOUR = "hour";
+    
     private static final int NEXT = 1;
+    
+    private static final Integer ONE_YEAR = 1;
+    private static final Integer ONE_MONTH = 1;
+    private static final Integer ONE_WEEK = 7;
     private static final int ONE_DAY = 1;
     
     private static final int ACTION_INDEX = 0;
@@ -61,19 +84,28 @@ public class CommandParser {
     private static final String END = "end";
     private static final String START = "start";
     private static final String TO_TASK_TYPE = "totype";
+    private static final String RECURRING = "every";
+    private static final String UNTIL = "until";
     
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
     private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> START_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> TO_TASK_TYPE_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> RECURRING_KEYWORDS = new HashMap<String, Boolean>();
+    private static final HashMap<String, Boolean> UNITL_KEYWORDS = new HashMap<String, Boolean>();
     
     private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
     private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
+    private static final HashMap<String, String> DISPLAY_VALUES = new HashMap<String, String>();
+    private static final HashMap<String, String> RECURRING_VALUES = new HashMap<String, String>();
+    
+    private static final HashMap<String, String> TASKTYPE_ALIAS = new HashMap<String, String>();
     
     private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
     
     private static final LinkedHashSet<String> TIME = new LinkedHashSet<String>();
+    
     private static final int DATETIME_VALUE_KEYWORD = 0;
     private static final int DATE_VALUE = 1;
     private static final int TIME_VALUE = 2;
@@ -87,6 +119,10 @@ public class CommandParser {
     private static final int START_FLAG = 4;
     private static final int START_CONTINUE_FLAG = 5;
     private static final int TO_TASK_TYPE_FLAG = 6;
+    private static final int AGENDAOF_FLAG = 7;
+    private static final int RECUR_FLAG = 8;
+    private static final int UNTIL_FLAG = 9;
+    private static final int UNTIL_CONTINUE_FLAG = 10;
     
     private static final int FIRST = 0;
     private static final int SECOND = 1;
@@ -95,10 +131,21 @@ public class CommandParser {
     private static final int ARG_INDEX = 1;
     private static final int LAST = 1;
     private static final boolean IS_WHOLE_SEGMENT = true;
+   
+
+    
+    private static final Integer NO_YEAR = 0;
+    private static final Integer NO_MONTH = 0;
+    private static final Integer NO_DAY = 0;
+    private static final Integer NO_HOUR = 0;
+    private static final Integer NO_MIN = 0;
+    private static final Integer NO_SEC = 0;
+    private static final Integer NO_NANO_SEC = 0;
     
     
+
     
-    private HashMap<String, String> _arguments;
+    private LinkedHashMap<String, String> _arguments;
     
     private enum ActionsTaskID{
         MODIFY(CommandParser.MODIFY),
@@ -132,6 +179,8 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("edit", MODIFY);
         
         ACTIONS_KEYWORDS.put("remove", DELETE);
+        ACTIONS_KEYWORDS.put("rm", DELETE);
+        ACTIONS_KEYWORDS.put("-", DELETE);
         ACTIONS_KEYWORDS.put(DELETE, DELETE);
         
         ACTIONS_KEYWORDS.put(SEARCH, SEARCH);
@@ -145,6 +194,7 @@ public class CommandParser {
         ACTIONS_KEYWORDS.put("finish", COMPLETE);
         
         SINGLE_ACTION_KEYWORD.put(EXIT, EXIT);
+        SINGLE_ACTION_KEYWORD.put("quit", EXIT);
         SINGLE_ACTION_KEYWORD.put(UNDO, UNDO);
         SINGLE_ACTION_KEYWORD.put(REDO, REDO);
         
@@ -186,9 +236,64 @@ public class CommandParser {
         PRIORITY_VALUES.put("urgent", "H");
         PRIORITY_VALUES.put("-urgent", "H");
         
-        
         initEndValues();
         
+        TASKTYPE_ALIAS.put(TaskType.EVENT.getType(), TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("e", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("events", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appointment", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appt", TaskType.EVENT.getType());
+        TASKTYPE_ALIAS.put("appts", TaskType.EVENT.getType());
+        
+        TASKTYPE_ALIAS.put(TaskType.TODO.getType(), TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("td", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("to-do", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("todos", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("task", TaskType.TODO.getType());
+        TASKTYPE_ALIAS.put("tasks", TaskType.TODO.getType());
+        
+        TASKTYPE_ALIAS.put(TaskType.DEADLINE.getType(), TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("d", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("deadlines", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("cutoff", TaskType.DEADLINE.getType());
+        TASKTYPE_ALIAS.put("cutoffs", TaskType.DEADLINE.getType());
+        
+        DISPLAY_VALUES.put("completed", FilterType.COMPLETE.getType());
+        DISPLAY_VALUES.put("all", FilterType.COMPLETE_PLUS.getType());
+        
+        RECURRING_KEYWORDS.put("daily", false);
+        RECURRING_KEYWORDS.put("weekly", false);
+        RECURRING_KEYWORDS.put("monthly", false);
+        RECURRING_KEYWORDS.put("yearly", false);
+        RECURRING_KEYWORDS.put("every", false);
+        
+        RECURRING_KEYWORDS.put("-every", true);   
+        RECURRING_KEYWORDS.put("-daily", true);
+        RECURRING_KEYWORDS.put("-weekly", true);
+        RECURRING_KEYWORDS.put("-monthly", true);
+        RECURRING_KEYWORDS.put("-yearly", true);   
+        
+        
+        RECURRING_VALUES.put(EVERY_DAY, EVERY_DAY);
+        RECURRING_VALUES.put(EVERY_WEEK, EVERY_WEEK);
+        RECURRING_VALUES.put(EVERY_MONTH, EVERY_MONTH);
+        RECURRING_VALUES.put(EVERY_YEAR, EVERY_YEAR);
+        RECURRING_VALUES.put(EVERY_HOUR, EVERY_HOUR);
+        
+        RECURRING_VALUES.put("daily", EVERY_DAY);
+        RECURRING_VALUES.put("weekly", EVERY_WEEK);
+        RECURRING_VALUES.put("monthly", EVERY_MONTH);
+        RECURRING_VALUES.put("hourly", EVERY_HOUR);
+        
+        RECURRING_VALUES.put("yearly", EVERY_YEAR);
+        RECURRING_VALUES.put("-daily", EVERY_DAY);
+        RECURRING_VALUES.put("-weekly", EVERY_WEEK);
+        RECURRING_VALUES.put("-monthly", EVERY_MONTH);
+        RECURRING_VALUES.put("-yearly", EVERY_YEAR);
+        RECURRING_VALUES.put("-hourly", EVERY_HOUR);
+        
+        UNITL_KEYWORDS.put(UNTIL, false);
+        UNITL_KEYWORDS.put("-until", true);
     }
 
     private void initEndValues() {
@@ -198,6 +303,13 @@ public class CommandParser {
         END_VALUES.put("tmr", today.plusDays(ONE_DAY));
         END_VALUES.put("tommorrow", today.plusDays(ONE_DAY)); 
         END_VALUES.put("yesterday", today.minusDays(ONE_DAY));
+        
+        END_VALUES.put("next\\syear", today.plus(ONE_YEAR, NO_MONTH, NO_DAY, NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
+        END_VALUES.put("next\\smonth", today.plus(NO_YEAR, ONE_MONTH, NO_DAY, NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
+        END_VALUES.put("next\\sweek", today.plus(NO_YEAR, NO_MONTH, ONE_WEEK, NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
+        END_VALUES.put("next\\sday", today.plus(NO_YEAR, NO_MONTH, ONE_DAY, NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
+        
+        END_VALUES.put("next\\s\\d*?\\s(day)", today);
     }
 
     public String convertCommand(String userInput) throws NullPointerException,
@@ -230,7 +342,7 @@ public class CommandParser {
         
         //short circuit, if the action needs no argument
         if(SINGLE_ACTION_KEYWORD.containsKey(action)) {
-            return userInput;
+            return SINGLE_ACTION_KEYWORD.get(action);
         }
         
         if (ACTIONS_KEYWORDS.containsKey(action)) {
@@ -242,12 +354,12 @@ public class CommandParser {
         //process the rest of arguments
         //guard clause
         if(rawTokens.length<2) {
-            throw new ParseException("No such action", 0);
+           return userInput;
         }
         
         //Grant exceptions to certain actions that require special
         //processing.
-        if(_arguments.get(ACTION).equalsIgnoreCase(SEARCH)){
+        if(_arguments.get(ACTION).equalsIgnoreCase(SEARCH)) {
             return convertToSearch(rawTokens[ARG_INDEX]);
         }
         
@@ -388,11 +500,75 @@ public class CommandParser {
                 }
             }
             
+            if (keyFlags.get(UNTIL_FLAG) || keyFlags.get(UNTIL_CONTINUE_FLAG)) {
+                
+                logger.info("Extracting UNTIL: ");
+                logger.info("Setting until flag to false ");  
+                logger.info("until continue flag: " + keyFlags.get(UNTIL_CONTINUE_FLAG));
+                
+                keyFlags.put(UNTIL_FLAG, false);
+                boolean isValid = true;
+                boolean isReset = false;
+                
+                HashMap<String, String> dateAndTime = new HashMap<String, String>();
+                dateAndTime.put(DATE_KEY, endDate);
+                dateAndTime.put(TIME_KEY, endTime);
+                dateAndTime.put(IS_VALID, VALIDITY);
+                
+                dateAndTime = updateDateTimeArg(dateAndTime, keyword);
+                
+                endDate = dateAndTime.get(DATE_KEY);
+                endTime = dateAndTime.get(TIME_KEY);
+                if(dateAndTime.get(IS_VALID)==null) {
+                    isValid = false;
+                }
+                
+                if(!isFirstDateInvalid(isValid, keyFlags.get(UNTIL_CONTINUE_FLAG))){
+                    throw new ParseException("Invalid end date",0);
+                } else if(isNeedSecondDate(keyFlags.get(UNTIL_CONTINUE_FLAG))) {
+                    logger.info("Found first valid datetime");
+                    keyFlags.put(UNTIL_CONTINUE_FLAG, true);                   
+                } else {
+                    logger.info("Ending second datetime");
+                    keyFlags.put(UNTIL_CONTINUE_FLAG, false);
+                    isReset = true;
+                }
+                
+                addUntil(endDate + " " + endTime);
+                
+                if(isReset) {
+                    endDate = EMPTY;
+                    endTime = EMPTY;
+                }
+                
+                if(isValid){
+                    continue;
+                }
+            }
+            
             if(keyFlags.get(TO_TASK_TYPE_FLAG)){
                 keyFlags.put(TO_TASK_TYPE_FLAG, false);
                 addToType(keyword);
                 continue;
             }
+            
+            if (keyFlags.get(AGENDAOF_FLAG)) {
+                keyFlags.put(AGENDAOF_FLAG, false);
+                String currDate = converToMilitaryDate(keyword);
+                String newStart = currDate + "000000";
+                String newEnd = currDate + "235959";
+                List<String> newArguments = Arrays.asList("-start", newStart, "-end", newEnd);
+                dTokens.remove(i);
+                dTokens.addAll(i, newArguments);
+            }
+            
+            if (keyFlags.get(RECUR_FLAG)) {
+                keyFlags.put(RECUR_FLAG, false);
+                String value = RECURRING_VALUES.get(keyword);
+                _arguments.put(RECURRING, value);
+                continue;
+            }
+                   
             
             //Checking for flags
             if (keyword.equals(PRIORITY) && !hasValue(PRIORITY) && isWrapped) {
@@ -445,6 +621,42 @@ public class CommandParser {
             }
             
             
+            if(isFilterAction() && TASKTYPE_ALIAS.containsKey(keyword)){
+                dTokens.set(i, getTaskType(keyword));
+            }
+            
+            if(isFilterAction() && DISPLAY_VALUES.containsKey(keyword)) {
+                dTokens.set(i, DISPLAY_VALUES.get(keyword));
+            }
+            
+            if(isFilterAction() && keyword.equalsIgnoreCase("-agendaof")) {
+                keyFlags.put(AGENDAOF_FLAG, true);
+                continue;
+            }
+            
+            if (RECURRING_KEYWORDS.containsKey(keyword) &&
+                    !hasValue(RECURRING) && (RECURRING_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Recurring task detected, setting Recur_flag to true");
+                keyFlags.put(RECUR_FLAG, true);
+                
+                if (!isKeywordEvery(keyword) && i+1 < dTokens.size()) {
+                    dTokens.add(i+1, RECURRING_VALUES.get(keyword));    
+                } else if (!isKeywordEvery(keyword)) {
+                    dTokens.add(RECURRING_VALUES.get(keyword));
+                } 
+                
+                continue;
+            }
+            
+            //If no dash, but description is wrapped or has dash
+            if (UNITL_KEYWORDS.containsKey(keyword) && !hasValue(UNTIL) &&
+                    (UNITL_KEYWORDS.get(keyword) || isWrapped)) {
+                logger.info("Setting Until flag as true");
+                keyFlags.put(UNTIL_FLAG, true);
+                continue;
+                
+            }
+            
             if (!hasValue(DESCRIPTION) && 
                     !(isModifyAction() && (keyword.equals("-description")))) {
                 String word = dTokens.get(i).trim();
@@ -466,6 +678,10 @@ public class CommandParser {
 
         logger.info(result);
         return result.toString().trim();
+    }
+
+    private boolean isKeywordEvery(String keyword) {
+        return keyword.equalsIgnoreCase(RECURRING) || keyword.equalsIgnoreCase("-" + RECURRING);
     }
 
     private String convertToSearch(String rawTokens) {
@@ -568,15 +784,21 @@ public class CommandParser {
         
     }
     
+    /**
+     * 
+     * @param keyword
+     * @return
+     */
     private String getTaskType(String keyword){
-        if(keyword.equals("e")) {
-            keyword = "event";
-        } else if(keyword.equals("td")) {
-            keyword = "todo";
-        } else if (keyword.equals("d")) {
-            keyword = "deadline";
+        
+        keyword = keyword.trim().toLowerCase();
+        
+        if(TASKTYPE_ALIAS.containsKey(keyword)) {
+            return TASKTYPE_ALIAS.get(keyword);
+        } else {
+            return keyword;
         }
-        return keyword;
+        
     }
     
     private ArrayList<String> updateTaskID(ArrayList<String> dTokens) throws ParseException{
@@ -635,7 +857,19 @@ public class CommandParser {
         Pattern patternId = Pattern.compile("\\d+$");
         Matcher matcherId = patternId.matcher(taskId);
         
-        Pattern patternTask = Pattern.compile("^(event|todo|deadline|e|td|d)(\\s)?");
+        String regex = "^(%1$s)(\\s)?";
+        StringBuilder taskTypeAlias = new StringBuilder();
+        
+        for (String key: TASKTYPE_ALIAS.keySet()) {
+            taskTypeAlias.append(key);
+            taskTypeAlias.append("|");
+        }
+        taskTypeAlias = taskTypeAlias.deleteCharAt(taskTypeAlias.length()-1);
+        regex = String.format(regex, taskTypeAlias.toString());
+        
+        logger.info("Task id pattern: " + regex);
+        
+        Pattern patternTask = Pattern.compile(regex);
         Matcher matcherTaskType = patternTask.matcher(taskId);
         
         boolean hasMatchId = matcherId.find();
@@ -669,6 +903,10 @@ public class CommandParser {
         keyFlags.put(START_CONTINUE_FLAG, false);
         keyFlags.put(DESCRIPTION_FLAG, false);
         keyFlags.put(TO_TASK_TYPE_FLAG, false);
+        keyFlags.put(AGENDAOF_FLAG, false);
+        keyFlags.put(RECUR_FLAG, false);
+        keyFlags.put(UNTIL_FLAG, false);
+        keyFlags.put(UNTIL_CONTINUE_FLAG, false);
     }
 
     private boolean isNeedSecondDate(boolean continueFlag) {
@@ -696,11 +934,7 @@ public class CommandParser {
                 break;                
             case TIME_VALUE:
                 logger.info("Getting time: " + keyword);
-                if (hasAmPm(keyword)) {
-                    logger.info("Convering endTime");
-                    endTime = convertToMilitaryTime(keyword);
-                }
-                endTime = (endTime.equals(EMPTY)) ? keyword : endTime;
+                endTime = (endTime.equals(EMPTY)) ? convertToMilitaryTime(keyword) : endTime;
                 break;
             default:
                 logger.info("Invalid datetime");
@@ -719,12 +953,16 @@ public class CommandParser {
         initEndValues();
         
         String converted;
+        SimpleDateFormat milDateFormat = new SimpleDateFormat("ddMMyyyy");
         
-        if(END_VALUES.containsKey(date)) {
+        if(hasInformalDate(date)) {
             DateTime currDate = END_VALUES.get(date);
             converted = currDate.format("DDMMYYYY");
-        } else {
-            SimpleDateFormat milDateFormat = new SimpleDateFormat("ddMMyyyy");
+        } else if( isPartialDate(date) ) {
+            String format = getFullDateFormat(date);
+            Date convertedDate = getFullDate(date, format);
+            converted = milDateFormat.format(convertedDate);
+        }else {
             Date convertedDate = DateUtil.parse(date);
             converted = milDateFormat.format(convertedDate);
         }
@@ -732,10 +970,37 @@ public class CommandParser {
         return converted;
     }
 
+    private Date getFullDate(String date, String format) throws ParseException{
+        
+        DateTime today = DateTime.today(TimeZone.getDefault());
+        int year = today.getYear();
+        Date convertedDate = DateUtil.parse(date + format +  year);
+        
+        return convertedDate;
+    }
+
+    private String getFullDateFormat(String date) {
+        
+        logger.info("Getting delimiter for " + date);
+        
+        LinkedHashMap<String, String> partialRegexes = new LinkedHashMap<String, String>();
+        partialRegexes.put("^\\d{1,2}-\\d{1,2}$", "-");
+        partialRegexes.put("^\\d{1,2}/\\d{1,2}$", "/");
+        
+        for (String regex: partialRegexes.keySet()) {
+            if(date.matches(regex)) {
+                logger.info("Found: " + partialRegexes.get(regex));
+                return partialRegexes.get(regex);
+            }
+        }
+        return null;
+    }
+
     private int getDateValueType(String dateTime) throws ParseException{
         
         //Check keyword
-        if(END_VALUES.containsKey(dateTime)) {
+        if(hasInformalDate(dateTime)) {
+            logger.info(dateTime + " is special time keyword");
             return DATETIME_VALUE_KEYWORD;
         }
 
@@ -744,17 +1009,31 @@ public class CommandParser {
         
         if(format!=null && (format.equals("ddMMyyyyHHmm") || 
                             format.equals("ddMMyyyyHHmmss"))){
+            logger.info(dateTime + "is military format date");
             return PROPER_DATE_TIME;
         } else if(format!=null) {
+            logger.info(dateTime + " is date but not in mil-format");
             return DATE_VALUE;
+        }
+        
+        //Check whether is it partial date
+        if(isPartialDate(dateTime)) {
+            logger.info(dateTime + " is partial date");
+            return DATE_VALUE;           
         }
         
         //check time
         if(isTimeFormat(dateTime)) {
+            logger.info(dateTime + " is time");
             return TIME_VALUE;
         }
         
+        logger.info(dateTime + " is invalid");
         return INVALID_VALUE;
+    }
+
+    private boolean isPartialDate(String dateTime) {
+        return getFullDateFormat(dateTime)!=null;
     }
 
     private boolean isTimeFormat(String dateTime) throws ParseException{
@@ -774,20 +1053,33 @@ public class CommandParser {
     private String convertToMilitaryTime(String dateTime) throws ParseException{
         
         dateTime = dateTime.toLowerCase().trim();
-        
+        //Guard clause
+        logger.info("Converting " + dateTime + " to miltary date");
+        if(isMilitaryDate(dateTime)){
+            return dateTime;
+        }
         LinkedHashMap<String, String> timeMap = new LinkedHashMap<String, String>();
         
         //HH AM/PM
-        timeMap.put("^\\d{1}(am|pm)?$", "ha");
-        timeMap.put("^\\d{1,2}(am|pm)?$", "hha");
+        timeMap.put("^\\d{1}(am|pm){1}$", "ha");
+        timeMap.put("^\\d{1,2}(am|pm){1}$", "hha");
+        //HH no AM/PM
+        timeMap.put("^\\d{1}$", "h");
+        timeMap.put("^\\d{1,2}$", "hh");
         
         //HH:MM:SS AM/PM
-        timeMap.put("^\\d{1,2}:\\d{2}(am|pm)?", "hh:mma");
-        timeMap.put("^\\d{1,2}:\\d{2}:\\{d2}(am|pm)?", "hh:mm:ssa");
+        timeMap.put("^\\d{1,2}:\\d{2}(am|pm){1}", "hh:mma");
+        timeMap.put("^\\d{1,2}:\\d{2}:\\{d2}(am|pm){1}", "hh:mm:ssa");
+        //HH:MM:SS no AM/PM
+        timeMap.put("^\\d{1,2}:\\d{2}", "hh:mm");
+        timeMap.put("^\\d{1,2}:\\d{2}:\\{d2}", "hh:mm:ss");
         
         //HH.MM.SS AM/PM
-        timeMap.put("^\\d{1,2}.\\d{2}(am|pm)?", "hh.mma");
-        timeMap.put("^\\d{1,2}.\\d{2}.\\{d2}(am|pm)?", "hh.mm.ssa");
+        timeMap.put("^\\d{1,2}.\\d{2}(am|pm){1}", "hh.mma");
+        timeMap.put("^\\d{1,2}.\\d{2}.\\{d2}(am|pm){1}", "hh.mm.ssa");
+        //HH.MM.SS no AM/PM
+        timeMap.put("^\\d{1,2}.\\d{2}", "hh.mm");
+        timeMap.put("^\\d{1,2}.\\d{2}.\\{d2}", "hh.mm.ss");
         
         String pattern = "";
         boolean hasMatch = false;
@@ -825,6 +1117,14 @@ public class CommandParser {
         }
         
         return dateTime;
+    }
+
+    private boolean isMilitaryDate(String dateTime) throws ParseException{
+        DateTime today = DateTime.today(TimeZone.getDefault());
+        String format = today.format("DDMMYYYY");
+        int dateType = getDateValueType(format+dateTime);
+        
+        return dateType==PROPER_DATE_TIME;
     }
 
     private boolean hasAmPm(String dateTime) {
@@ -873,7 +1173,11 @@ public class CommandParser {
     private void addStart(String dateTime) throws ParseException{
         addTime(START, dateTime);
     }
-
+    
+    private void addUntil(String dateTime) throws ParseException{
+        addTime(UNTIL, dateTime);
+    }
+    
     private String translateDateTime(String dateTime) throws ParseException{
         
         if(DateUtil.isValidDate(dateTime)) {
@@ -894,7 +1198,7 @@ public class CommandParser {
         //refresh the time
         initEndValues();
         
-        if(!END_VALUES.containsKey(dateTimeTokens[0])) {
+        if(!hasInformalDate(dateTimeTokens[0])) {
             throw new ParseException("No such date: " + dateTimeTokens[0],0);
         }
         
@@ -925,7 +1229,9 @@ public class CommandParser {
                     "Description: " + getFormattedValue(DESCRIPTION) + "\n" + 
                     "Priority: " + getFormattedValue(PRIORITY) + "\n" +
                     "Start: " + getFormattedValue(START)+ "\n" +
-                    "End: " + getFormattedValue(END));
+                    "End: " + getFormattedValue(END) + "\n" + 
+                    "Every: " + getFormattedValue(RECURRING) + "\n" + 
+                    "Until: " + getFormattedValue(UNTIL));
         
         result.append(getFormattedValue(ACTION));
         
@@ -953,9 +1259,17 @@ public class CommandParser {
             result.append(getFormattedKey(START));
             result.append(getFormattedValue(START));
         }
-        if(hasValue(END)){
+        if (hasValue(END)) {
             result.append(getFormattedKey(END));
             result.append(getFormattedValue(END));
+        }
+        if (hasValue(RECURRING)) {
+            result.append(getFormattedKey(RECURRING));
+            result.append(getFormattedValue(RECURRING));           
+        }
+        if (hasValue(UNTIL)) {
+            result.append(getFormattedKey(UNTIL));
+            result.append(getFormattedValue(UNTIL));           
         }
         return result;
     }
@@ -980,18 +1294,39 @@ public class CommandParser {
     public String getFormattedValue(String key) {
         return _arguments.get(key) + SPACE;
     }
+    
+    private boolean hasInformalDate(String date){
+        
+        return getInformalDate(date) != null;
+    }
+    
+    private DateTime getInformalDate(String date) {
+        
+        initEndValues();
+        
+        for (String regex: END_VALUES.keySet()) {
+            if (date.matches(regex)) {
+                return END_VALUES.get(regex);
+            }
+        }
+        return null;
+    }
 
     private void initArgMap() {
 
-        _arguments = new HashMap<String, String>();
-
+        _arguments = new LinkedHashMap<String, String>();
+        
+        
+        
         _arguments.put(ACTION, null);
-        _arguments.put(PRIORITY, null);
-        _arguments.put(DESCRIPTION, null);
-        _arguments.put(END, null);
-        _arguments.put(START, null);
         _arguments.put(TASKID, null);
         _arguments.put(TO_TASK_TYPE, null);
+        _arguments.put(DESCRIPTION, null);
+        _arguments.put(START, null);
+        _arguments.put(END, null);
+        _arguments.put(RECURRING, null);
+        _arguments.put(UNTIL, null);
+        _arguments.put(PRIORITY, null);
 
     }
     

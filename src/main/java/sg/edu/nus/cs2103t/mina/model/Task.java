@@ -1,9 +1,7 @@
 package sg.edu.nus.cs2103t.mina.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -18,7 +16,8 @@ import java.util.UUID;
 public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final long serialVersionUID = 7038530852821069011L;
-
+    
+    protected static final String DEFAULT_TAG = "";
     protected static final char L = 'L';
     protected static final char M = 'M';
     protected static final char H = 'H';
@@ -32,7 +31,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     protected String _id;
     protected TaskType _type;
     protected String _description;
-    protected List<String> _tags;
+    protected String _tag;
     protected char _priority;
     protected Date _createdTime;
     protected Date _lastEditedTime;
@@ -46,7 +45,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = new Date();
         _lastEditedTime = new Date();
         _isCompleted = false;
-        _tags = new ArrayList<String>();
+        _tag = DEFAULT_TAG;
     }
     
     public Task(TaskType type, String description, String id, char priority,
@@ -58,11 +57,11 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = new Date();
         _isCompleted = isCompleted;
-        _tags = new ArrayList<String>();
+        _tag = DEFAULT_TAG;
     }
 
     public Task(TaskType type, String description, String id, char priority,
-            Date createdTime, Date lastEditedTime, boolean isCompleted) {
+            Date createdTime, Date lastEditedTime, boolean isCompleted, String tag) {
         _type = (TaskType) type;
         _description = description;
         _id = id;
@@ -70,7 +69,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = lastEditedTime;
         _isCompleted = isCompleted;
-        _tags = new ArrayList<String>();
+        _tag = tag;
     }
 
     protected int compareTo(Task<?> otherTask) {
@@ -111,14 +110,6 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _description = description;
     }
 
-    public List<String> getTags() {
-        return _tags;
-    }
-
-    public void setTags(List<String> tags) {
-        _tags = tags;
-    }
-
     public char getPriority() {
         return _priority;
     }
@@ -150,6 +141,14 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     public Date getCreatedTime() {
         return _createdTime;
     }
+    
+    public String getTag() {
+        return _tag;
+    }
+
+    public void setTag(String tag) {
+        _tag = tag;
+    }
 
     @Override
     public String toString() {
@@ -159,10 +158,11 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_description);
         sb.append(" priority (");
         sb.append(_priority);
-        sb.append(") done? (");
-        sb.append(_isCompleted ? "yes)" : "no)");
-        sb.append(" last modified: ");
-        sb.append(_lastEditedTime);
+        sb.append(")");
+        //sb.append(") done? (");
+        //sb.append(_isCompleted ? "yes)" : "no)");
+        //sb.append(" last modified: ");
+        //sb.append(_lastEditedTime);
         return sb.toString();
     }
 

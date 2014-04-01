@@ -1,5 +1,7 @@
 package sg.edu.nus.cs2103t.mina.stub;
 
+import hirondelle.date4j.DateTime;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.SortedSet;
@@ -20,8 +22,8 @@ public class TaskDataManagerStub extends TaskDataManager {
     public static final int ONE_WEEK = ONE_DAY * 7;
     
     public static final int PUNCTUATION_SEARCH = 0;
-
     public static final int DATE_RANGE_SEARCH = 1;
+    public static final int SANITISED_DATE_RANGE_SEARCH = 2;
     
 		private static SortedSet<TodoTask> _todoTasks;
     private static SortedSet<EventTask> _eventTasks;
@@ -183,6 +185,22 @@ public class TaskDataManagerStub extends TaskDataManager {
     		    }
     		    
     		    break;
+    		    
+          case SANITISED_DATE_RANGE_SEARCH :
+                _deadlineTasks.clear();
+                baseDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                baseDate.setTime(new Date(START_TIME));            
+                
+                baseDate.set(baseDate.get(Calendar.YEAR), 
+                        baseDate.get(Calendar.MONTH), 
+                        baseDate.get(Calendar.DATE), 
+                        23, 59, 59);
+                
+                Date end = baseDate.getTime();
+                newDeadline = new DeadlineTask("Deadline 1",end);
+                _deadlineTasks.add(newDeadline);
+                break;
+                
     		default:
     			throw new Error("Woah, no such test case yet!");
     	}

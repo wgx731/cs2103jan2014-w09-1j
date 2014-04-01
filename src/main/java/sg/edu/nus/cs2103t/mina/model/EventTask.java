@@ -2,6 +2,8 @@ package sg.edu.nus.cs2103t.mina.model;
 
 import java.util.Date;
 
+import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+
 /**
  * Appointment task
  * 
@@ -31,9 +33,9 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
 
     public EventTask(TaskType type, String description, String id,
             char priority, Date createdTime, Date lastEditedTime,
-            boolean isCompleted, Date start, Date end) {
+            boolean isCompleted, Date start, Date end, String tag) {
         super(type, description, id, priority, createdTime, lastEditedTime,
-                isCompleted);
+                isCompleted, tag);
         _startTime = start;
         _endTime = end;
     }
@@ -71,11 +73,12 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
-        sb.append(" start time(");
-        sb.append(_startTime.toString());
-        sb.append(") end time(");
-        sb.append(_endTime.toString());
-        sb.append(")");
+        sb.append(" from ");
+        sb.append(DateUtil.displayDateTime(DateUtil.toCalendar(_startTime)));
+        sb.append(" to ");
+        sb.append(DateUtil.displayDateTime(DateUtil.toCalendar(_endTime)));
+        sb.append(" ");
+        sb.append(super.isCompleted()?"done":"");
         return sb.toString();
     }
 

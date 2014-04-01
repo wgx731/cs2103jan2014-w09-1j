@@ -14,13 +14,13 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
  * @author duzhiyuan
  * @author joannemah
  */
-public class SyncDataParameter {
+public class TaskSetDataParameter {
 
     private SortedSet<? extends Task<?>> _taskSet;
     private TaskType _taskType;
     private boolean _isCompleted;
 
-    public SyncDataParameter(SortedSet<? extends Task<?>> taskSet,
+    public TaskSetDataParameter(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) {
         _taskSet = taskSet;
         _taskType = taskType;
@@ -47,7 +47,7 @@ public class SyncDataParameter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SyncDataParameter other = (SyncDataParameter) obj;
+        TaskSetDataParameter other = (TaskSetDataParameter) obj;
         if (_isCompleted != other._isCompleted)
             return false;
         if (_taskType != other._taskType)

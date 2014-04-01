@@ -10,12 +10,16 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
+import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
+import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
+import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 /**
  * 
@@ -52,6 +56,7 @@ public class ConsoleUI extends MinaView {
         _eventList = new ArrayList<Task<?>>();
         _todoList = new ArrayList<Task<?>>();
         _deadlineList = new ArrayList<Task<?>>();
+        _taskView = _commandController.getTaskView();
     }
 
     @Override
@@ -76,9 +81,9 @@ public class ConsoleUI extends MinaView {
 
     @Override
     public void updateLists() {
-        _eventList = _taskView.getEvents();
-        _deadlineList = _taskView.getDeadlines();
-        _todoList = _taskView.getTodos();
+		_eventList = _taskView.getEvents();
+		_deadlineList = _taskView.getDeadlines();
+		_todoList = _taskView.getTodos();  	
     }
 
     public void loop() {

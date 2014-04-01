@@ -403,7 +403,7 @@ public class TaskFilterManagerFilterTest {
         ArrayList<Task<?>> test = getResult(dateFilters, dateRange[START],
                                             dateRange[END], NO_TIME);
         
-        ArrayList<EventTask> expected = new ArrayList<EventTask>();
+        ArrayList<Task<?>> expected = new ArrayList<Task<?>>();
         
         
         for(int i=0; i<DATE_RANGE_EVENT_EXPECTED_SIZE; i++) {
@@ -421,7 +421,7 @@ public class TaskFilterManagerFilterTest {
         test = getResult(dateFilters, dateRange[START],
                          dateRange[END], HAS_TIME);  
         
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         for(int i=2; i<5; i++) {
             expected.add(events.get(i));
         } 
@@ -443,7 +443,7 @@ public class TaskFilterManagerFilterTest {
         test = getResult(dateFilters, null,
                          dateRange[END], HAS_TIME);  
         
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         for(int i=0; i<5; i++) {
             expected.add(events.get(i));
         }      
@@ -456,7 +456,7 @@ public class TaskFilterManagerFilterTest {
         test = getResult(dateFilters, null,
                     dateRange[END], HAS_TIME);  
         
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         for(int i=0; i<5; i++) {
         expected.add(events.get(i));
         }      
@@ -468,55 +468,51 @@ public class TaskFilterManagerFilterTest {
         logger.info("Getting date range");
         dateRange = getRange(TODAY, new int[]{0,0,0}, 
                             1, new int[]{12,0,0}, HAS_TIME);
-        test = getResult(dateFilters, null,
+        test = getResult(dateFilters,  dateRange[START],
                         dateRange[END], HAS_TIME);
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         expected.add(events.get(0));
         assertEquals(expected, test);
         
         logger.info("Testing overlaps: START < event.end but END > event.end ");
         logger.info("Getting date range");
-        dateRange = getRange(1, new int[]{12,0,0}, 
-                            0, new int[]{20,0,0}, HAS_TIME);
-        test = getResult(dateFilters, null,
+        dateRange = getRange(1, new int[]{4,45,0}, 
+                            0, new int[]{6,0,0}, HAS_TIME);
+        test = getResult(dateFilters, dateRange[START],
                         dateRange[END], HAS_TIME);
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         expected.add(events.get(0));
         assertEquals(expected, test);   
 
         logger.info("Testing strict subset: START > event.start and END < event.end ");
         logger.info("Getting date range");
-        dateRange = getRange(1, new int[]{12,0,0}, 
-                            0, new int[]{12,30,0}, HAS_TIME);
-        test = getResult(dateFilters, null,
+        dateRange = getRange(1, new int[]{4,45,0}, 
+                            0, new int[]{5,0,0}, HAS_TIME);
+        test = getResult(dateFilters,  dateRange[START],
                         dateRange[END], HAS_TIME);
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         expected.add(events.get(0));
         assertEquals(expected, test); 
         
         logger.info("Testing equality: START = event.start and END > event.end ");
         logger.info("Getting date range");
-        dateRange = getRange(1, new int[]{11,15,0}, 
+        dateRange = getRange(1, new int[]{3,45,0}, 
                             0, new int[]{20,30,0}, HAS_TIME);
-        test = getResult(dateFilters, null,
+        test = getResult(dateFilters,  dateRange[START],
                         dateRange[END], HAS_TIME);
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         expected.add(events.get(0));
         assertEquals(expected, test); 
         
         logger.info("Testing equality: START < event.start and END = event.end ");
         logger.info("Getting date range");
-        dateRange = getRange(1, new int[]{10,15,0}, 
-                            0, new int[]{13,15,0}, HAS_TIME);
-        test = getResult(dateFilters, null,
+        dateRange = getRange(1, new int[]{2,15,0}, 
+                            0, new int[]{5,45,0}, HAS_TIME);
+        test = getResult(dateFilters,  dateRange[START],
                         dateRange[END], HAS_TIME);
-        expected = new ArrayList<EventTask>();
+        expected = new ArrayList<Task<?>>();
         expected.add(events.get(0));
         assertEquals(expected, test); 
-        
-        //Deadlines only
-        
-        
         
         resetTdmTfm();
         
@@ -601,6 +597,7 @@ public class TaskFilterManagerFilterTest {
         logger.info("START: " + startDate.getTime());
         
         Calendar endDate = Calendar.getInstance();
+        endDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         endDate.setTime(startDate.getTime());
         
         if(hasTime) {
@@ -940,7 +937,7 @@ public class TaskFilterManagerFilterTest {
                 + "Last modified: %7$s\n"
                 + "Completed: %8$s\n\n";
         String output = String.format(format, task.getId(), task.getType()
-                .getType(), task.getDescription(), task.getTags(), task
+                .getType(), task.getDescription(), task.getTag(), task
                 .getPriority(), task.getCreatedTime(),
                 task.getLastEditedTime(), task.isCompleted());
         return output;

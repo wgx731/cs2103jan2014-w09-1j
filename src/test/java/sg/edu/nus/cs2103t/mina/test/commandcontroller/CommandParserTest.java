@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import hirondelle.date4j.DateTime;
 
 import java.text.ParseException;
-
 import java.util.TimeZone;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
+import sg.edu.nus.cs2103t.mina.model.FilterType;
 
 
 public class CommandParserTest {
@@ -44,6 +44,7 @@ public class CommandParserTest {
 
     public static final String DEADLINE_DESCRIPTION = "Submit assignment ";
     public static final String EVENT_DESCRIPTION = "meet friends";
+    public static final String RECUR_DESCRIPTION = "CS2103 tutorial";
     private static final int HAS_SECS = 0;
     private static final int HAS_NO_SECS = 1;
     private static final int HAS_TODAY_NO_TIME_SLASH = 2;
@@ -56,6 +57,7 @@ public class CommandParserTest {
     private static final int HAS_NO_DATE_BUT_MILITARY_TIME = 9;
     private static final int HAS_DATE_24_AUG_2014_0900 = 10;
     private static final int HAS_DATE_25_AUG_2014_1200 = 11;
+    private static final int HAS_DATE_24_AUG_2014_2133 = 12;
     
     private static final int DEAFULT_END = 0;
     private static final int DUE_END = 1;
@@ -64,17 +66,20 @@ public class CommandParserTest {
     private static final int DEFAULT_START = 4;
     private static final int FROM_START = 5;
     private static final int STARTING_START = 6;
+   
     
-    
-
     private static String addTodoControlLow, addTodoControlMed,
             addTodoControlHigh, addTodoControlNone,
             addDeadlineControlMonthDaySecs, addDeadlineControlMonthDaySame,
             addDeadlineControlNoDate, addDeadlineControlNoDateMorning,
             addDeadlineControlTodayNoTime, addDeadlineControlMonthTimeNoSecs,
             addEventControlADay, addEventControlDays, addEventControlMonths,
-            addEventControlYears;
-                           
+            addEventControlYears, addEventControlToday, addEventControlTomorrow,
+            addRecurDayControl, addRecurWeekControl, addRecurMonthControl,
+            addRecurYearControl;
+    
+    private static String displayControlType;
+    
     private static DateTime today;
     private static Logger logger;
 
@@ -119,7 +124,31 @@ public class CommandParserTest {
         // start: 24th of August 2014 0900 - 24th of September 2017 1200
         addEventControlYears = "add meet friends -start 24082014090000 -end 24092017120000";
         
+        //start: today 9am - today 9.33pm
+        addEventControlToday = "add meet friends -start " + todayDateString + "090000 -end " + todayDateString + "213300";
         
+        // start: tomorrow 0900 - tomorrow 2133
+        DateTime tomorrow = today.plusDays(1);
+        String tmrFormat = tomorrow.format("DDMMYYYY");
+        addEventControlTomorrow = "add meet friends -start " + tmrFormat + "090000 -end " + tmrFormat + "213300";
+        
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2014
+        addRecurDayControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every day -until 23112014235959";
+        addRecurWeekControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every week -until 23112014235959";
+        addRecurMonthControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every month -until 23112014235959";
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2016
+        addRecurYearControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every year -until 23112016235959"; 
+        
+        //Basic type
+        displayControlType = "display";
+        
+        for (FilterType filter: FilterType.values()){
+            if(!(filter.equals(FilterType.START) || 
+                    filter.equals(FilterType.END) || 
+                    filter.equals(FilterType.PRIORITY))) {
+                displayControlType+= " " + filter.getType();
+            }
+        }
     }
 
     @Before
@@ -597,7 +626,7 @@ public class CommandParserTest {
      * @throws Exception
      */
     @Test
-    public void testAddDeadlinesDateFormat() throws Exception {
+    public void testAddDateFormat() throws Exception {
 
         logger.info("Today's date is: " + today.toString());
 
@@ -669,6 +698,25 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);
         logger.info(variation);
         assertEquals(addDeadlineControlNoDate, result);
+        
+        //Testing implicit today
+        start = "-start today 9am";
+        end = "-end 9.33pm";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        logger.info(variation);
+        assertEquals(addEventControlToday, result);        
+        
+        //Testing for partial format
+        String partialFormat = today.format("DD/MM");
+        //String fullFormat = today.format("DDMMYYYY");
+        start = "-start " + partialFormat + " 9:00";
+        end =  "-end " + partialFormat + " 21.33";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        logger.info(variation);
+        assertEquals(addEventControlToday, result);   
+        
     }
 
     @Test
@@ -794,8 +842,94 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);  
         assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
         
-        variation = "search booop ''what is going on?' he says' ' woooaaahh what ' boop";
+        
+    }
+    
+    @Test
+    public void testDisplayControl() throws ParseException {
+        
+        result = parser.convertCommand("display");  
+        assertEquals("display", result);  
+        
+        result = parser.convertCommand(displayControlType);  
+        assertEquals(displayControlType, result);          
+    }
+    
+    @Test
+    public void testDisplayBasicKeywords() throws ParseException{
+        
+        variation = "show deadlines todos events complete +complete";
         result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+        
+        variation = "filter d td e completed +complete";
+        result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+        
+        variation = "filter d td e completed all";
+        result = parser.convertCommand(variation);  
+        assertEquals(displayControlType, result);
+    }
+    
+    @Test
+    public void testDisplayCompositeKeywords() throws ParseException{
+        
+        String todayDate = today.format("DDMMYYYY");
+        
+        variation = "display deadlines -agendaof today";
+        result = parser.convertCommand(variation);  
+        assertEquals("display deadline -start " + todayDate + "000000" + " -end " + todayDate + "235959",
+                     result);
+        
+        variation = "display deadlines -agendaof tmr";
+        result = parser.convertCommand(variation);
+        DateTime tmr = today.plusDays(1);
+        String tmrDate = tmr.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
+                     result);     
+        
+    }
+    
+    @Test
+    public void testRecurringKeywordsControl() throws ParseException {
+        
+        result = parser.convertCommand(addRecurDayControl);
+        assertEquals(addRecurDayControl, result);
+        
+        result = parser.convertCommand(addRecurWeekControl);
+        assertEquals(addRecurWeekControl, result);
+        
+        result = parser.convertCommand(addRecurMonthControl);
+        assertEquals(addRecurMonthControl, result);
+        
+        result = parser.convertCommand(addRecurYearControl);
+        assertEquals(addRecurYearControl, result);
+        
+    }
+    
+    @Test
+    public void testRecurringKeywords() throws ParseException {
+
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -daily -until 23/11/2014";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurDayControl, result);
+        
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -weekly -until 23/11/2014";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurWeekControl, result);      
+        
+        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -yearly -until 23/11/2016";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurYearControl, result);  
+    }
+    
+    @Test
+    public void testRecurringReorder() throws ParseException {
+        
+        variation = "add every day until 23/11/2014 'CS2103 tutorial' from 24082014090000 to 24082014110000";
+        result = parser.convertCommand(variation);
+        assertEquals(addRecurDayControl, result);        
         
     }
     
@@ -812,11 +946,6 @@ public class CommandParserTest {
      *     4,5 can be combined.
      */
     
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdSizeZero() throws ParseException{
-        variation = "delete ";
-        result =  parser.convertCommand(variation);      
-    }
     @Test(expected=ParseException.class)
     public void testUpdateTaskIdSizeOneInv() throws ParseException{
         variation = "delete 1";
@@ -976,7 +1105,8 @@ public class CommandParserTest {
                 return endType + " 24082014090000";
             case HAS_DATE_25_AUG_2014_1200:
                 return endType + " 25082014120000";
-            
+            case HAS_DATE_24_AUG_2014_2133:
+                return endType + " 24082014121330";
             
 //            // start: 24th of August 2014 0900 - 25th of August 2014 1200
 //            addEventControlADay = "add meet friends -start 24082014090000 -end 25082014120000";

@@ -21,7 +21,10 @@ public class TaskView {
 
     private static final int EVERYTHING = Integer.MAX_VALUE;
     private static final int PAGE_ONE = 0;
-    public static final int ITEMS_PER_PAGE = 5;
+    public static int ITEMS_PER_PAGE = 1;
+    public static final int ITEMS_PER_PAGE_EVENT = 3;
+    public static final int ITEMS_PER_PAGE_DEADLINE = 5;
+    public static final int ITEMS_PER_PAGE_TODO = 7;    
     
     public TaskView(String status, 
                     HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
@@ -63,20 +66,28 @@ public class TaskView {
         return _status;
     }
     
-    public int pageSize(){
-    	return ITEMS_PER_PAGE;
+    public int eventPageSize(){
+    	return ITEMS_PER_PAGE_EVENT;
+    }
+    
+    public int deadlinePageSize(){
+    	return ITEMS_PER_PAGE_DEADLINE;
+    }
+    
+    public int todoPageSize(){
+    	return ITEMS_PER_PAGE_TODO;
     }
     
     public int maxTodoPage(){
-    	return (getTodos().size()+pageSize()-1)/pageSize();
+    	return (getTodos().size()+todoPageSize()-1)/todoPageSize();
     }
     
     public int maxDeadlinePage(){
-    	return (getDeadlines().size()+pageSize()-1)/pageSize();
+    	return (getDeadlines().size()+deadlinePageSize()-1)/deadlinePageSize();
     }
     
     public int maxEventPage(){
-    	return (getEvents().size()+pageSize()-1)/pageSize();
+    	return (getEvents().size()+eventPageSize()-1)/eventPageSize();
     }
     
     public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{
@@ -91,7 +102,13 @@ public class TaskView {
         if (page<MIN_PAGE) {
            throw new NumberFormatException(); 
         }
-        
+        if (type == TaskType.TODO){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_TODO;
+        } else if (type == TaskType.DEADLINE){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_DEADLINE;
+        } else if (type == TaskType.EVENT){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_EVENT;
+        }
         int end = page * ITEMS_PER_PAGE - 1;
         int start = end - ITEMS_PER_PAGE + 1;
         return getTasks(type, start, end);
