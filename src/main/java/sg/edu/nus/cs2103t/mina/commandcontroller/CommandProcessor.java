@@ -518,6 +518,21 @@ public class CommandProcessor {
             char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
             addParam.setPriority(priority);
         }
+        if (parameters.contains("-every")){
+        	String timeType = parameters.get(parameters.indexOf("-every")+1).toUpperCase();
+        	addParam.setTimeType(timeType);
+        	addParam.setFreqOfTimeType(1);
+        	addParam.setTag("RECUR");
+        }
+        if (parameters.contains("-until")){
+        	try{
+        		Date recurEndDate = DateUtil.parse(parameters.get(parameters.indexOf("-until")+1));
+        		addParam.setEndRecurOn(recurEndDate);
+        	} catch (Exception e){
+        		addParam = null;
+        		logger.error(e.getMessage(), e);
+        	}
+        }
         if (addParam.getDescription().equals("")){
         	addParam = null;
         }
