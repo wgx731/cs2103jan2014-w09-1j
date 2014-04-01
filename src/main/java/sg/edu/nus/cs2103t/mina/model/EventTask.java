@@ -33,9 +33,9 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
 
     public EventTask(TaskType type, String description, String id,
             char priority, Date createdTime, Date lastEditedTime,
-            boolean isCompleted, Date start, Date end) {
+            boolean isCompleted, Date start, Date end, String tag) {
         super(type, description, id, priority, createdTime, lastEditedTime,
-                isCompleted);
+                isCompleted, tag);
         _startTime = start;
         _endTime = end;
     }

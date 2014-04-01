@@ -63,7 +63,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     }
 
     public Task(TaskType type, String description, String id, char priority,
-            Date createdTime, Date lastEditedTime, boolean isCompleted) {
+            Date createdTime, Date lastEditedTime, boolean isCompleted, String tag) {
         _type = (TaskType) type;
         _description = description;
         _id = id;
@@ -71,7 +71,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _createdTime = createdTime;
         _lastEditedTime = lastEditedTime;
         _isCompleted = isCompleted;
-        _tag = DEFAULT_TAG;
+        _tag = tag;
     }
 
     protected int compareTo(Task<?> otherTask) {

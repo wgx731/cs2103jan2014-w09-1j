@@ -25,9 +25,9 @@ public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
 
     public TodoTask(TaskType type, String description, String id,
             char priority, Date createdTime, Date lastEditedTime,
-            boolean isCompleted) {
+            boolean isCompleted, String tag) {
         super(type, description, id, priority, createdTime, lastEditedTime,
-                isCompleted);
+                isCompleted, tag);
     }
 
     public int compareTo(TodoTask otherTask) {

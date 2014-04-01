@@ -32,9 +32,9 @@ public class DeadlineTask extends Task<DeadlineTask> implements
 
     public DeadlineTask(TaskType type, String description, String id,
             char priority, Date createdTime, Date lastEditedTime,
-            boolean isCompleted, Date end) {
+            boolean isCompleted, Date end, String tag) {
         super(type, description, id, priority, createdTime, lastEditedTime,
-                isCompleted);
+                isCompleted, tag);
         _endTime = end;
     }
 

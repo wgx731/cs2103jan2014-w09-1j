@@ -35,6 +35,7 @@ public class JsonHelper {
 
     private static final String KEY_ID = "_id";
     private static final String KEY_DESCRIPTION = "_description";
+    private static final String KEY_TAG = "_tag";
     private static final String KEY_PRIORITY = "_priority";
     private static final String KEY_COMPLETED = "_isCompleted";
     private static final String KEY_CREATED_TIME = "_createdTime";
@@ -59,6 +60,7 @@ public class JsonHelper {
             String id = jsonObject.get(KEY_ID).getAsString();
             TaskType taskType = TaskType.EVENT;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;
@@ -79,7 +81,7 @@ public class JsonHelper {
             }
             if (isValidJson) {
                 return new EventTask(taskType, description, id, priority,
-                        createdTime, lastEditedTime, isCompleted, start, end);
+                        createdTime, lastEditedTime, isCompleted, start, end, tag);
             } else {
                 return null;
             }
@@ -97,6 +99,7 @@ public class JsonHelper {
             String id = jsonObject.get(KEY_ID).getAsString();
             TaskType taskType = TaskType.DEADLINE;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;
@@ -115,7 +118,7 @@ public class JsonHelper {
             }
             if (isValidJson) {
                 return new DeadlineTask(taskType, description, id, priority,
-                        createdTime, lastEditedTime, isCompleted, end);
+                        createdTime, lastEditedTime, isCompleted, end, tag);
             } else {
                 return null;
             }
@@ -133,6 +136,7 @@ public class JsonHelper {
             String id = jsonObject.get(KEY_ID).getAsString();
             TaskType taskType = TaskType.TODO;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;
@@ -149,7 +153,7 @@ public class JsonHelper {
             }
             if (isValidJson) {
                 return new TodoTask(taskType, description, id, priority,
-                        createdTime, lastEditedTime, isCompleted);
+                        createdTime, lastEditedTime, isCompleted,tag);
             } else {
                 return null;
             }
