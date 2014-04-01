@@ -691,6 +691,29 @@ public class TaskDataManager {
      * @return task modified
      */
     public Task<?> modifyTask(DataParameter modifyParameters) {
+        if (modifyParameters.getTaskObject().getTag().contains("RECUR")) {
+            return modifyRecurringTask(modifyParameters);
+            
+        } else if (modifyParameters.getTaskObject().getTag().contains("BLOCK")) {
+            return modifyBlockTasks(modifyParameters);
+            
+        } else {
+            return modifyRegTask(modifyParameters);
+        
+        }
+    }
+
+    private EventTask modifyRecurringTask(DataParameter modifyParameters) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private EventTask modifyBlockTasks(DataParameter modifyParameters) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private Task<?> modifyRegTask(DataParameter modifyParameters) {
         Task<?> prevTask = deleteTask(modifyParameters);
         if (prevTask == null) {
             return null;
