@@ -58,6 +58,9 @@ public class CommandProcessorTest {
         assertEquals(
         		commandProcessorTest.processAddParameter("meet friends -start 12/12/1212 -end 11/11/1111 -priority L"),
         		null);
+        assertEquals(
+        		commandProcessorTest.processAddParameter("meet friends -start 12/12/1212 -end 12/12/1212"),
+        		null);
     }
 
     @SuppressWarnings("serial")
