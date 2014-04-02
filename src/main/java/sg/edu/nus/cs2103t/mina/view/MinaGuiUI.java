@@ -787,9 +787,9 @@ public class MinaGuiUI extends MinaView {
             }
             String eventStringIndex = "\t" + (i + 1) + ". ";
             String eventDescription = event.getDescription() + "\n";
-            String eventTime = "\tstart: " + DateUtil
+            String eventTime = "\t" + DateUtil
                     .displayTimeOnly(itemStartDate) +
-                    "\n\tend: " +
+                    " - " +
                     (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? DateUtil
                             .displayTimeOnly(itemEndDate) : DateUtil
                             .displayDateTime(itemEndDate)) +
