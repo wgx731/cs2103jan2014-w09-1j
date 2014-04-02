@@ -22,7 +22,7 @@ public class TaskView {
     private static final int EVERYTHING = Integer.MAX_VALUE;
     private static final int PAGE_ONE = 0;
     public static int ITEMS_PER_PAGE = 1;
-    public static final int ITEMS_PER_PAGE_EVENT = 3;
+    public static final int ITEMS_PER_PAGE_EVENT = 4;
     public static final int ITEMS_PER_PAGE_DEADLINE = 5;
     public static final int ITEMS_PER_PAGE_TODO = 7;    
     
