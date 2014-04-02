@@ -25,18 +25,18 @@ public class CommandKeywords {
         UNTIL("until"),
         PRIORITY("priority");
         
-        private String _value;
+        private String _keyword;
         
-        private StandardKeyword(String value) {
-            _value = value;
+        private StandardKeyword(String keyword) {
+            _keyword = keyword;
         }
         
-        public String getValue() {
-            return _value;
+        public String getKeyword() {
+            return _keyword;
         }
         
-        public String getFormattedValue(){
-            return "-" + _value;
+        public String getFormattedKeyword(){
+            return "-" + _keyword;
         }
         
     }
