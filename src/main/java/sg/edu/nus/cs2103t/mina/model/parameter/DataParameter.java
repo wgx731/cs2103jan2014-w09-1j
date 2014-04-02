@@ -46,7 +46,7 @@ public class DataParameter {
         setNewTaskType(null);
         setTaskID(-1);
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);
@@ -71,7 +71,7 @@ public class DataParameter {
         setNewTaskType(newType);
         setTaskID(id);
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);
@@ -110,7 +110,7 @@ public class DataParameter {
             setStartDate(start == null ? eventTaskObj.getStartTime() : start);
         }
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);

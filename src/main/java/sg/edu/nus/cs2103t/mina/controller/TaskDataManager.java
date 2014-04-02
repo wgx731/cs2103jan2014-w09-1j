@@ -413,9 +413,13 @@ public class TaskDataManager {
         switch (addParameters.getNewTaskType()) {
             case DEADLINE :
                 Date currDeadline = addParameters.getEndDate();
+                DeadlineTask currDeadlineTask;
 
                 while (currDeadline.compareTo(endRecurOn) <= 0) {
-                    includeInRecurMap(addDeadlineTask(addParameters), recurTag);
+                    currDeadlineTask = (DeadlineTask) addDeadlineTask(addParameters);
+                    currDeadlineTask.setTag(recurTag);
+                    
+                    includeInRecurMap(currDeadlineTask, recurTag);
 
                     currDeadline = updateDate(currDeadline,
                             addParameters.getTimeType(),
@@ -429,9 +433,13 @@ public class TaskDataManager {
             case EVENT :
                 Date currStartDate = addParameters.getStartDate();
                 Date currEndDate = addParameters.getEndDate();
+                EventTask currEventTask;
 
                 while (currStartDate.compareTo(endRecurOn) < 0) {
-                    includeInRecurMap(addEventTask(addParameters), recurTag);
+                    currEventTask = (EventTask) addEventTask(addParameters);
+                    currEventTask.setTag(recurTag);
+                    
+                    includeInRecurMap(currEventTask, recurTag);
 
                     currStartDate = updateDate(currStartDate,
                             addParameters.getTimeType(),
@@ -485,9 +493,12 @@ public class TaskDataManager {
 
         Date currStartDate = addParameters.getStartDate();
         Date currEndDate = addParameters.getEndDate();
+        
+        EventTask currEventTask = (EventTask) addEventTask(addParameters); 
 
         for (int i = 1; i <= addParameters.getTimeSlots().size(); i++) {
-            includeInBlockMap((EventTask) addEventTask(addParameters), blockTag);
+            includeInBlockMap(currEventTask, blockTag);
+            currEventTask.setTag(blockTag);
 
             currStartDate = addParameters.getTimeSlots().get(i).getStartDate();
             currEndDate = addParameters.getTimeSlots().get(i).getEndDate();
