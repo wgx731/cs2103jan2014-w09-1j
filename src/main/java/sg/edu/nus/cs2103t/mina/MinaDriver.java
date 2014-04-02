@@ -1,7 +1,5 @@
 package sg.edu.nus.cs2103t.mina;
 
-import java.util.Timer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Shell;
@@ -32,26 +30,21 @@ public class MinaDriver {
     private static Logger logger = LogManager.getLogger(MinaDriver.class
             .getName());
 
-    private static final String SYNC_INTERVAL_KEY = "synctime";
     private static final String VIEW_TYPE_KEY = "viewtype";
     private static final String GUI = "gui";
     private static final String CONSOLE = "console";
     private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
-    private static CommandManager commandController;
+    private static CommandManager commandManager;
     private static TaskDataManager taskDataManager;
     private static TaskFilterManager taskFilterManager;
     private static MinaView uiView;
     private static DataSyncManager dataSyncManager;
-    private static Timer dataSyncTimer;
 
     static void initDao() {
         TaskDao taskDao = new JsonFileTaskDaoImpl();
         TaskMapDao taskMapDao = new FileTaskMapDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao, taskMapDao);
-        dataSyncTimer = new Timer();
-        dataSyncTimer.schedule(dataSyncManager, 0,
-                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
     static void initTDM() {
@@ -63,19 +56,19 @@ public class MinaDriver {
     }
 
     static void initCC() {
-        commandController = new CommandManager(taskDataManager,
+        commandManager = new CommandManager(taskDataManager,
                 taskFilterManager);
     }
 
     static void initView() {
         switch (ConfigHelper.getProperty(VIEW_TYPE_KEY)) {
             case GUI :
-                MinaGuiUI gui = new MinaGuiUI(commandController);
+                MinaGuiUI gui = new MinaGuiUI(commandManager);
                 gui.open();
                 uiView = gui;
                 break;
             case CONSOLE :
-                uiView = new ConsoleUI(System.in, System.out, commandController);
+                uiView = new ConsoleUI(System.in, System.out, commandManager);
                 break;
             default :
                 throw new Error(UNKOWN_TYPE_ERROR);
@@ -96,17 +89,13 @@ public class MinaDriver {
         initTDM();
         initTFM();
         initCC();
-        MinaGuiUI gui = new MinaGuiUI(commandController);
+        MinaGuiUI gui = new MinaGuiUI(commandManager);
         gui.updateLists();
         return gui.open();
     }
 
     public void cleanUp() {
         taskDataManager.resetTrees();
-    }
-
-    public void stopSync() {
-        dataSyncTimer.cancel();
     }
 
     public void processLoop() {

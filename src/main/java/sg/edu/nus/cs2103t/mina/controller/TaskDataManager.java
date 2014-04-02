@@ -94,7 +94,7 @@ public class TaskDataManager {
         _syncManager = syncManager;
 
         _observers = new ArrayList<MemoryDataObserver>();
-        _observers.add((MemoryDataObserver) syncManager);
+        _observers.add(syncManager.getDataOberserver());
 
         try {
             tempTasks = _syncManager.loadTaskSet(TaskType.TODO, false);
@@ -147,15 +147,12 @@ public class TaskDataManager {
 
         TaskMapDataParameter taskMapData = _syncManager.loadTaskMap();
         if (taskMapData == null) {
-            // TODO: load from data sync manager, then add to observer
             _recurringTasks = new HashMap<String, ArrayList<Task<?>>>();
             _blockTasks = new HashMap<String, ArrayList<EventTask>>();
-
             updateHashMaps();
         } else {
             _recurringTasks = taskMapData.getRecurringTasks();
             _blockTasks = taskMapData.getBlockTasks();
-
             _maxRecurTagInt = taskMapData.getMaxRecurTagInt();
             _maxBlockTagInt = taskMapData.getMaxBlockTagInt();
         }
@@ -203,7 +200,6 @@ public class TaskDataManager {
     private void updateHashMaps() {
         updateTasksMaps();
         updateBlockTaskMap(); // iterates through Event Tasks only
-
     }
 
     private void updateTasksMaps() {
@@ -254,7 +250,6 @@ public class TaskDataManager {
     private void checkRecur(Task<?> currTask) {
         if (currTask.getTag().contains("RECUR")) {
             includeInRecurMap(currTask, currTask.getTag());
-
         }
     }
 
@@ -353,7 +348,7 @@ public class TaskDataManager {
         assert (addParameters.getNewTaskType() != null);
         if (addParameters.getTaskObject() != null) {
             return directAddTask(addParameters.getTaskObject());
-            
+
         } else if (addParameters.getTag() != null && addParameters.getTag()
                 .equals("RECUR")) {
             assert (addParameters.getNewTaskType().equals(TaskType.EVENT) || addParameters
@@ -418,7 +413,7 @@ public class TaskDataManager {
                 while (currDeadline.compareTo(endRecurOn) <= 0) {
                     currDeadlineTask = (DeadlineTask) addDeadlineTask(addParameters);
                     currDeadlineTask.setTag(recurTag);
-                    
+
                     includeInRecurMap(currDeadlineTask, recurTag);
 
                     currDeadline = updateDate(currDeadline,
@@ -435,10 +430,10 @@ public class TaskDataManager {
                 Date currEndDate = addParameters.getEndDate();
                 EventTask currEventTask;
 
-                while (currStartDate.compareTo(endRecurOn) < 0) {
+                while (currStartDate.compareTo(endRecurOn) <= 0) {
                     currEventTask = (EventTask) addEventTask(addParameters);
                     currEventTask.setTag(recurTag);
-                    
+
                     includeInRecurMap(currEventTask, recurTag);
 
                     currStartDate = updateDate(currStartDate,
@@ -493,8 +488,8 @@ public class TaskDataManager {
 
         Date currStartDate = addParameters.getStartDate();
         Date currEndDate = addParameters.getEndDate();
-        
-        EventTask currEventTask = (EventTask) addEventTask(addParameters); 
+
+        EventTask currEventTask = (EventTask) addEventTask(addParameters);
 
         for (int i = 1; i <= addParameters.getTimeSlots().size(); i++) {
             includeInBlockMap(currEventTask, blockTag);
@@ -508,7 +503,7 @@ public class TaskDataManager {
 
         }
 
-        return _recurringTasks.get(blockTag).get(0);
+        return _blockTasks.get(blockTag).get(0);
     }
 
     private Task<?> addRegTask(DataParameter addParameters) {
@@ -601,8 +596,9 @@ public class TaskDataManager {
     public Task<?> deleteTask(DataParameter deleteParameters) {
         if (deleteParameters.getTaskObject().getTag() != null && deleteParameters
                 .getTaskObject().getTag().contains("RECUR")) {
-            assert (deleteParameters.getNewTaskType().equals(TaskType.EVENT) || deleteParameters
-                    .getNewTaskType().equals(TaskType.DEADLINE));
+            assert (deleteParameters.getOriginalTaskType().equals(
+                    TaskType.EVENT) || deleteParameters.getOriginalTaskType()
+                    .equals(TaskType.DEADLINE));
 
             return deleteRecurringTasks(deleteParameters);
 
@@ -622,7 +618,7 @@ public class TaskDataManager {
         Task<?> recurTaskToDelete = deleteParameters.getTaskObject();
 
         if (_recurringTasks.containsKey(recurTaskToDelete.getTag())) {
-            List<Task<?>> listOfRecTasks = _recurringTasks
+            ArrayList<Task<?>> listOfRecTasks = _recurringTasks
                     .remove(recurTaskToDelete.getTag());
 
             if (deleteParameters.isModifyAll()) {
@@ -631,12 +627,10 @@ public class TaskDataManager {
                     deleteRegTask(deleteParameters);
                 }
             } else {
-                List<Task<?>> tempListOfRecTasks = _recurringTasks
-                        .remove(recurTaskToDelete.getTag());
-                tempListOfRecTasks.remove(deleteParameters.getTaskObject());
+                listOfRecTasks.remove(recurTaskToDelete);
+                _recurringTasks.put(recurTaskToDelete.getTag(), listOfRecTasks);
                 deleteRegTask(deleteParameters);
             }
-
             return recurTaskToDelete;
         } else {
             return null;
@@ -648,7 +642,7 @@ public class TaskDataManager {
                 .getTaskObject();
 
         if (_blockTasks.containsKey(blockTaskToDelete.getTag())) {
-            List<EventTask> listOfBlockTasks = _blockTasks
+            ArrayList<EventTask> listOfBlockTasks = _blockTasks
                     .remove(blockTaskToDelete.getTag());
 
             if (deleteParameters.isModifyAll()) {
@@ -657,12 +651,10 @@ public class TaskDataManager {
                     deleteRegTask(deleteParameters);
                 }
             } else {
-                List<EventTask> tempListOfBlockTasks = _blockTasks
-                        .remove(blockTaskToDelete.getTag());
-                tempListOfBlockTasks.remove(deleteParameters.getTaskObject());
+                listOfBlockTasks.remove(blockTaskToDelete);
+                _blockTasks.put(blockTaskToDelete.getTag(), listOfBlockTasks);
                 deleteRegTask(deleteParameters);
             }
-
             return blockTaskToDelete;
         } else {
             return null;
@@ -1047,15 +1039,15 @@ public class TaskDataManager {
         for (MemoryDataObserver observer : _observers) {
             switch (taskType) {
                 case TODO :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _uncompletedTodoTasks, taskType, false));
                     break;
                 case DEADLINE :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _uncompletedDeadlineTasks, taskType, false));
                     break;
                 case EVENT :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _uncompletedEventTasks, taskType, false));
                     break;
                 default :
@@ -1069,15 +1061,15 @@ public class TaskDataManager {
         for (MemoryDataObserver observer : _observers) {
             switch (taskType) {
                 case TODO :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _completedTodoTasks, taskType, true));
                     break;
                 case DEADLINE :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _completedDeadlineTasks, taskType, true));
                     break;
                 case EVENT :
-                    observer.updateChange(new TaskSetDataParameter(
+                    observer.updateTaskSet(new TaskSetDataParameter(
                             _completedEventTasks, taskType, true));
                     break;
                 default :
@@ -1087,15 +1079,12 @@ public class TaskDataManager {
         }
     }
 
-    // private void syncHashMaps() {
-    // for (MemoryDataObserver observer : _observers) {
-    // observer.updateChange(new HashSetDataParameter(
-    // _recurringTasks));
-    // observer.updateChange(new HashSetDataParameter(
-    // _blockTasks));
-    //
-    // }
-    // }
+    private void syncHashMaps() {
+        for (MemoryDataObserver observer : _observers) {
+            observer.updateTaskMap(new TaskMapDataParameter(_recurringTasks,
+                    _blockTasks, _maxRecurTagInt, _maxBlockTagInt));
+        }
+    }
 
     /**
      * Saves all tasks into storage by calling all the sync methods
@@ -1114,6 +1103,7 @@ public class TaskDataManager {
         allDataList.add(new TaskSetDataParameter(_uncompletedTodoTasks,
                 TaskType.TODO, false));
         _syncManager.saveAll(allDataList);
+        syncHashMaps();
     }
 
     /**
