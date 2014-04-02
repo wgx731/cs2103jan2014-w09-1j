@@ -267,7 +267,7 @@ public class DataParameter {
             setEndDate(end == null ? eventTaskObj.getEndTime() : end);
             setStartDate(start == null ? eventTaskObj.getStartTime() : start);
         }
-        
+
         setTag(tag);
         setTimeType(timeType);
         setFreqOfTimeType(freqOfTimeType);
@@ -317,10 +317,13 @@ public class DataParameter {
         // setTaskID(taskToLoad.getId());
         setOriginalTaskType(taskToLoad.getType());
 
+        setTag(taskToLoad.getTag());
+
         if (taskToLoad.getType() == TaskType.DEADLINE) {
             DeadlineTask taskToLoadDeadline = (DeadlineTask) taskToLoad;
             setEndDate(taskToLoadDeadline.getEndTime());
         }
+
         if (taskToLoad.getType() == TaskType.EVENT) {
             EventTask taskToLoadEvent = (EventTask) taskToLoad;
             setEndDate(taskToLoadEvent.getEndTime());
@@ -360,22 +363,31 @@ public class DataParameter {
         if (modifyParam.getTaskId() != -1) {
             setTaskID(modifyParam.getTaskId());
         }
-
-        if (_originalTaskType != _newTaskType) {
-            if (_originalTaskType == TaskType.DEADLINE && _newTaskType == TaskType.TODO) {
-                // _description += (" by " + _end);
-                // _end = null;
-            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.TODO) {
-                // _description += (" from " + _start + " to " + _end);
-                // _start = null;
-                // _end = null;
-            } else if (_originalTaskType == TaskType.EVENT && _newTaskType == TaskType.DEADLINE) {
-                // _end = _start;
-                // _start = null;
-            }
-
-            _originalTaskType = _newTaskType;
+        if (modifyParam.getTag() != "") {
+            setTag(modifyParam.getTag());
         }
+        if (modifyParam.getNewTaskType() != null) {
+            setNewTaskType(modifyParam.getNewTaskType());
+        }
+
+        // if (_originalTaskType != _newTaskType) {
+        // if (_originalTaskType == TaskType.DEADLINE && _newTaskType ==
+        // TaskType.TODO) {
+        // // _description += (" by " + _end);
+        // // _end = null;
+        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
+        // TaskType.TODO) {
+        // // _description += (" from " + _start + " to " + _end);
+        // // _start = null;
+        // // _end = null;
+        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
+        // TaskType.DEADLINE) {
+        // // _end = _start;
+        // // _start = null;
+        // }
+        //
+        // _originalTaskType = _newTaskType;
+        // }
     }
 
     @Override

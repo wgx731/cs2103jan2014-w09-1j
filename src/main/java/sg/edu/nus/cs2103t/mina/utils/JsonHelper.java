@@ -21,6 +21,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -206,7 +207,7 @@ public class JsonHelper {
     }
 
     public static SortedSet<? extends Task<?>> jsonToTaskSet(String json,
-            TaskType taskType) {
+            TaskType taskType) throws JsonSyntaxException {
         if (gson == null) {
             gson = setUp();
         }
@@ -230,5 +231,5 @@ public class JsonHelper {
                 return null;
         }
     }
-    
+
 }
