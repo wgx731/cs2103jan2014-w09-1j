@@ -170,8 +170,8 @@ public class TaskDataManagerTest {
                             firstStartTime_1, firstEndTime_1, null,
                             TaskType.EVENT, 123, "RECUR", recurUntil, "HOUR",
                             8, null, false)));
-            assertEquals(42, tdmTest.getUncompletedEventTasks().size());
-            assertEquals(42, tdmTest.getRecurringTasks().get("RECUR_3").size());
+            assertEquals(43, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(43, tdmTest.getRecurringTasks().get("RECUR_3").size());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -201,7 +201,7 @@ public class TaskDataManagerTest {
                             firstStartTime_2, firstEndTime_2, null,
                             TaskType.EVENT, 123, "RECUR", null, "MONTH", 1,
                             null, false)));
-            assertEquals(45, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(46, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_4").size());
 
         } catch (Exception e) {
