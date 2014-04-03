@@ -48,6 +48,9 @@ public class DescriptionKeywordTest {
         }
         assertEquals(control, descript.getValue());
         
-        //check to see whether we
+        //check to see whether we have all nulls
+        for(int i=0; i<tokens.size(); i++) {
+            assertNull(tokens.get(i));
+        }
     }
 }
