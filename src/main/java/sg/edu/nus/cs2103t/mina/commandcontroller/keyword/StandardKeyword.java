@@ -11,11 +11,13 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
  */
 
 /**
- * This enum contains standard keywords that CommandProcessor recognized
+ * This enum contains standard keywords that CommandProcessor recognized 
+ * (with the exception of COMPOSITE (that's only for CommandParser) )
  */
 public enum StandardKeyword {
     
     //Add your standard keywords here
+    COMPOSITE("composite"),
     ACTION("action"), 
     TASKID("taskid"), 
     TO_TASK_TYPE("totype"), 

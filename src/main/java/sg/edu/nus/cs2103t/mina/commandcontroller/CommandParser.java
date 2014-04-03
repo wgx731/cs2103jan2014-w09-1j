@@ -40,15 +40,17 @@ public class CommandParser {
     private static final String SEARCH_DELIMIT = "//";
     private static final String SEGMENT_END_DELIMIT = "' ";
     private static final String SEGMENT_START_DELIMIT = " '";
+    
     private static final String REDO = "redo";
     private static final String SEARCH = "search";
     private static final String UNDO = "undo";
     private static final String EXIT = "exit";
-    private static final String COMPLETE = "complete";
     private static final String DISPLAY = "display";
     private static final String DELETE = "delete";
     private static final String ADD = "add";
     private static final String MODIFY = "modify";
+    
+    private static final String COMPLETE = "complete";
     private static final String VALIDITY = "v";
     private static final String IS_VALID = "valid";
     private static final String PM = "pm";
@@ -1350,7 +1352,9 @@ public class CommandParser {
     private void initArgMap() {
         _arguments = new LinkedHashMap<StandardKeyword, String>();
         for (StandardKeyword type: StandardKeyword.values()) {
-            _arguments.put(type, null);
+            if(type!=StandardKeyword.COMPOSITE){
+                _arguments.put(type, null);
+            }
         }
     }
     

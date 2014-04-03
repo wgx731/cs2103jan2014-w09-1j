@@ -2,10 +2,16 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * Description keyword
+ * Description keyword and its associated methods.
+ * 
+ * Like its parent, Keyword, processKeyword only process tokens after the keyword. Developers would 
+ * have to manually extract out the value of the keyword with getValue(). However, the CommandParser
+ * should have done it.
  * 
  * @author wgx731
  * @author viettrung9012
@@ -16,29 +22,23 @@ import java.util.HashSet;
 
 public class DescriptionKeyword extends Keyword{
     
-    HashSet<String> descriptAlias = initAlias();
+    private static final Logger logger = LogManager.getLogger(DescriptionKeyword.class.getName());
     
     public DescriptionKeyword() {
         super(StandardKeyword.DESCRIPTION);
-        setValue("");
     }
 
     @Override
-    protected HashSet<String> initAlias() {
+    protected void initAlias() {
         
-        HashSet<String> newAlias = new HashSet<String>();
-        
-        newAlias.add(getType().getFormattedKeyword());
-        newAlias.add(getType().getKeyword());
-        newAlias.add("descript");
-        newAlias.add(StandardKeyword.getFormattedKeyword("descript"));
-        
-        return newAlias;
+        addAlias(getType().getKeyword());
+        addAlias("descript");
+
     }
     
     @Override
-    public boolean contains(String alias) {
-        return descriptAlias.contains(alias);
+    protected void initValues() {
+       return; 
     }
     
     @Override
@@ -54,21 +54,23 @@ public class DescriptionKeyword extends Keyword{
     public ArrayList<String> processKeyword(ArrayList<String> tokens,
                                             int currIndex) throws ParseException {
         
+        logger.info("Adding description");
         String description = extractWord(tokens, currIndex);
-        updateValue(tokens, currIndex, description);
+        setValue(description);
+        tokens = updateTokens(tokens, currIndex);
         
         return tokens;
     }
     
     @Override
     public String getValue() {
+        logger.info("returning " + _value);
         return _value.trim();
     }
     
-    private void updateValue(ArrayList<String> tokens, int currIndex,
-                             String description) {
+    private ArrayList<String> updateTokens(ArrayList<String> tokens, int currIndex) {
         tokens.set(currIndex, null);
-        setValue(description);
+        return tokens;
     }
 
     private String extractWord(ArrayList<String> tokens, int currIndex) {
@@ -76,11 +78,15 @@ public class DescriptionKeyword extends Keyword{
         StringBuilder descriptBuilder = new StringBuilder(_value);
         String word = tokens.get(currIndex);
         
+        logger.info("Appending " + word + " to " + _value);
+        
         descriptBuilder.append(word);
         descriptBuilder.append(" ");
        
         return descriptBuilder.toString();
     }
+
+
     
 
 }
