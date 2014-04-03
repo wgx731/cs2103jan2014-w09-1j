@@ -33,11 +33,11 @@ public class FileOperationHelper {
     public FileOperationHelper(String completedSuffix, String fileExtension) {
         _fileLocationMap = new HashMap<TaskType, String>();
         _fileLocationMap.put(TaskType.TODO,
-                ConfigHelper.getProperty(TaskType.TODO.getType()));
+                ConfigHelper.getProperty(ConfigHelper.TODO_KEY));
         _fileLocationMap.put(TaskType.EVENT,
-                ConfigHelper.getProperty(TaskType.EVENT.getType()));
+                ConfigHelper.getProperty(ConfigHelper.EVENT_KEY));
         _fileLocationMap.put(TaskType.DEADLINE,
-                ConfigHelper.getProperty(TaskType.DEADLINE.getType()));
+                ConfigHelper.getProperty(ConfigHelper.DEADLINE_KEY));
         _completedSuffix = completedSuffix;
         _fileExtension = fileExtension;
     }

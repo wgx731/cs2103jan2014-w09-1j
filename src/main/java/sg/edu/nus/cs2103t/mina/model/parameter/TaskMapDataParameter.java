@@ -1,12 +1,15 @@
 package sg.edu.nus.cs2103t.mina.model.parameter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 
-public class TaskMapDataParameter {
+public class TaskMapDataParameter implements Serializable {
+
+    private static final long serialVersionUID = -1665500740615897037L;
 
     private HashMap<String, ArrayList<Task<?>>> _recurringTasks;
     private HashMap<String, ArrayList<EventTask>> _blockTasks;

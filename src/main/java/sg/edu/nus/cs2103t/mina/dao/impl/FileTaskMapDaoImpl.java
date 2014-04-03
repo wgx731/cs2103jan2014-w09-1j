@@ -26,12 +26,11 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
             .getLogger(FileTaskMapDaoImpl.class.getName());
 
     private static final String FILE_EXTENSION = ".ser";
-    private static final String TASK_MAP_KEY = "taskmap";;
 
     private String taskMapFile;
 
     public FileTaskMapDaoImpl() {
-        taskMapFile = ConfigHelper.getProperty(TASK_MAP_KEY) + FILE_EXTENSION;
+        taskMapFile = ConfigHelper.getProperty(ConfigHelper.TASK_MAP_KEY) + FILE_EXTENSION;
     }
 
     private void createFileIfNotExist(String fileName) {

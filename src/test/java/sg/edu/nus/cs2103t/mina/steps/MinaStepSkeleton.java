@@ -42,16 +42,6 @@ public abstract class MinaStepSkeleton {
     private static Thread uiThread;
     private static Shell appShell;
 
-    public MinaStepSkeleton() {
-        if (driver == null) {
-            driver = new MinaDriver();
-        }
-        if (uiThread == null) {
-            initializeUIThread();
-            uiThread.start();
-        }
-    }
-
     private void initializeUIThread() {
         uiThread = new Thread(new Runnable() {
             public void run() {
@@ -78,6 +68,13 @@ public abstract class MinaStepSkeleton {
     @BeforeStories
     public void beforeStories() throws InterruptedException,
             BrokenBarrierException {
+        if (driver == null) {
+            driver = new MinaDriver();
+        }
+        if (uiThread == null) {
+            initializeUIThread();
+            uiThread.start();
+        }
         swtBarrier.await();
     }
 
@@ -89,7 +86,6 @@ public abstract class MinaStepSkeleton {
             }
         });
         driver.cleanUp();
-        driver.stopSync();
         jsonFileOperationHelper.cleanUp();
     }
 

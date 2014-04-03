@@ -59,7 +59,7 @@ public class TaskFilterManager {
     }
 
     /**
-     * Filter the tasks based on its critieria
+     * Filter the tasks based on its criteria
      * 
      * @param param a FilterParameter object that represents the criteria
      * @return An arraylist of tasks that satisfied the task. Empty if there's
