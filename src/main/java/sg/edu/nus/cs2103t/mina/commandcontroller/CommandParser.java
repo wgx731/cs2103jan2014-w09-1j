@@ -16,17 +16,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +29,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandKeywords.StandardKeyword;
+import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
@@ -133,6 +128,8 @@ public class CommandParser {
     private static final int LAST = 1;
     private static final boolean IS_WHOLE_SEGMENT = true;
    
+    private static final int LOOKAHEAD_LIMIT = 5;
+    
     private static final Integer NO_YEAR = 0;
     private static final Integer NO_MONTH = 0;
     private static final Integer NO_DAY = 0;
@@ -389,7 +386,34 @@ public class CommandParser {
         
         logger.info("Original: " + userInput);
         StringBuilder description = new StringBuilder();
-        for (int i = 0; i < dTokens.size(); i++) {
+        
+        //TODO new parsing
+//        for (int i = 0; i < dTokens.size(); i++) {
+//            
+//            String segment = getSegment(dTokens, i);
+//            String keyword = dTokens.get(i).toLowerCase();
+//            
+//            if (keyword.equals(PRIORITY.getKeyword()) && !hasValue(PRIORITY) && isWrapped) {
+//                logger.info("Checking priority");
+//                int prevIndex = i - 1;
+//                if (prevIndex>=0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
+//                    addPriority(dTokens.get(prevIndex));
+//                    continue;
+//                } else {
+//                    keyFlags.put(PRIORITY_FLAG, true);
+//                    continue;
+//                }
+//            }
+//
+//            if (keyword.equals("-priority") && !hasValue(PRIORITY)) {
+//                keyFlags.put(PRIORITY_FLAG, true);
+//                continue;
+//            }
+//        }
+        
+        //XXX Old parsing
+        boolean skipOld = false;
+        for (int i = 0; i < dTokens.size() && !skipOld; i++) {
            
             String keyword = dTokens.get(i).toLowerCase();
             
@@ -664,6 +688,7 @@ public class CommandParser {
             }
         }
         
+        //XXX end old parsing
         if (!hasValue(DESCRIPTION)) {
             String descript =  description.toString().trim();
             if(!descript.equals(EMPTY)){
@@ -675,6 +700,17 @@ public class CommandParser {
 
         logger.info(result);
         return result.toString().trim();
+    }
+
+    private String getSegment(ArrayList<String> dTokens, int index) {
+        
+        StringBuilder segment = new StringBuilder();
+        for (int i=index; i<LOOKAHEAD_LIMIT && i<dTokens.size(); i++) {
+            segment.append(dTokens.get(i));
+            segment.append(SPACE);
+        }
+        
+        return segment.toString().trim();
     }
 
     private boolean isKeywordEvery(String keyword) {
