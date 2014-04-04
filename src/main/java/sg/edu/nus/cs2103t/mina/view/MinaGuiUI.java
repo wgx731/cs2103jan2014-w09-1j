@@ -1206,7 +1206,7 @@ public class MinaGuiUI extends MinaView {
                     if (view.getHelperDescription().contains("Help Contents")){
                     	_helpWindow.append("\n[ESC:Exit help menu]");
                     } else {
-                    	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE]:Back");
+                    	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE:Back]");
                     }
                 }
                 if (event.keyCode == SWT.ESC) {
@@ -1231,7 +1231,7 @@ public class MinaGuiUI extends MinaView {
                 		if (view.getHelperDescription().contains("Help Contents")){
                         	_helpWindow.append("\n[ESC:Exit help menu]");
                         } else {
-                        	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE]:Back");
+                        	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE:Back]");
                         }
                 	} else if (view.getHelperFunction().equals("COPY")){
                 		String text = view.getHelperDescription();

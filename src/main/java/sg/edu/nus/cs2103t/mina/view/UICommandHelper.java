@@ -125,7 +125,7 @@ public class UICommandHelper {
 			add("add [description] -from [date time] -to [date time]");
 			add("new [description] -start [date time] -end [date time]");
 			add("create [description] -start [date time] -end [date time] [more description]");
-			add("+ [description] -from[date time] -to [date time]");
+			add("+ [description] -from [date time] -to [date time]");
 		}
 	};
 	
@@ -301,7 +301,10 @@ public class UICommandHelper {
 					break;
 				}
 				default: break;
-			}}
+			}
+			} else {
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+			}
 			return helperView;
 		}
 		case OPEN:{
