@@ -82,6 +82,14 @@ public class MinaGuiUI extends MinaView {
     private int _eventPage;
     private int _deadlinePage;
     private int _todoPage;
+    
+    private int _eventMaxPage;
+    private int _deadlineMaxPage;
+    private int _todoMaxPage;
+    
+    private Label _eventPageLabel;
+    private Label _deadlinePageLabel;
+    private Label _todoPageLabel;
 
     private Label _eventPrevPage;
     private Label _eventNextPage;
@@ -100,7 +108,6 @@ public class MinaGuiUI extends MinaView {
     private boolean _isExpanded;
 
     private int _currentTab;
-    // private boolean _highlightOn;
 
     private boolean _isAutoComplete;
 
@@ -267,17 +274,16 @@ public class MinaGuiUI extends MinaView {
         _commandReHistory = new LinkedList<String>();
 
         _currentTab = 0;
-        // _highlightOn = false;
-
-        _eventPage = 1;
-        _deadlinePage = 1;
-        _todoPage = 1;
 
         _today = Calendar.getInstance();
         _tomorrow = Calendar.getInstance();
         _tomorrow.add(Calendar.DAY_OF_YEAR, 1);
 
         _taskView = _commandController.getTaskView();
+        
+        _eventPage = 1;
+        _deadlinePage = 1;
+        _todoPage = 1;
 
         _isAutoComplete = false;
 
@@ -394,6 +400,30 @@ public class MinaGuiUI extends MinaView {
                 SWT.BOLD));
         _eventNextPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _eventNextPage.setAlignment(SWT.CENTER);
+        
+        _todoPageLabel = new Label(_shell, SWT.NONE);
+        _todoPageLabel.setForeground(SWTResourceManager
+                .getColor(SWT.COLOR_WHITE));
+        _todoPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.NORMAL));
+        _todoPageLabel.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _todoPageLabel.setAlignment(SWT.CENTER);
+        
+        _deadlinePageLabel = new Label(_shell, SWT.NONE);
+        _deadlinePageLabel.setForeground(SWTResourceManager
+                .getColor(SWT.COLOR_WHITE));
+        _deadlinePageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+        		SWT.NORMAL));
+        _deadlinePageLabel.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _deadlinePageLabel.setAlignment(SWT.CENTER);
+        
+        _eventPageLabel = new Label(_shell, SWT.NONE);
+        _eventPageLabel.setForeground(SWTResourceManager
+                .getColor(SWT.COLOR_WHITE));
+        _eventPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+        		SWT.NORMAL));
+        _eventPageLabel.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _eventPageLabel.setAlignment(SWT.CENTER);
 
         updateArrowNavigation();
 
@@ -457,14 +487,21 @@ public class MinaGuiUI extends MinaView {
                     addToUnHistory(command);
                     if (command.trim().toLowerCase().equals("help")||command.trim().toLowerCase().equals("-h")){
                     	startHelpWindows();
+                    } else if (command.length()>=5&&command.substring(0,5).equals("page ")){
+                    	String[] commands = command.split(" ");
+                    	try {
+                    		int page = Integer.parseInt(commands[1]);
+                    		setPage(page);
+                    	} catch (Exception e){
+                    		logger.log(Level.ERROR, e.getMessage());
+                    	}
                     } else {
-                    _taskView = _commandController.processUserInput(
-                            command, _eventPage, _deadlinePage, _todoPage);
+                    	_taskView = _commandController.processUserInput(
+                    			command, _eventPage, _deadlinePage, _todoPage);
+                    	updatePageFromTaskView();
                     }
                     _userInputTextField.setText(EMPTY_STRING);
-                    _eventPage = 1;
-                    _deadlinePage = 1;
-                    _todoPage = 1;
+                    updatePage();
                     displayOutput();
                     updateLists();
                     updateArrowNavigation();
@@ -583,6 +620,45 @@ public class MinaGuiUI extends MinaView {
         });
     }
     
+    private void updatePage(){
+    	_eventMaxPage = _taskView.maxEventPage();
+        _deadlineMaxPage = _taskView.maxDeadlinePage();
+        _todoMaxPage = _taskView.maxTodoPage();
+        if (_todoPage>_todoMaxPage){
+        	_todoPage = _todoMaxPage;
+        }
+        if (_deadlinePage>_deadlineMaxPage){
+        	_deadlinePage = _deadlineMaxPage;
+        }
+        if (_eventPage>_eventMaxPage){
+        	_eventPage = _eventMaxPage;
+        }
+    }
+    
+    private void updatePageFromTaskView(){
+        if (_taskView.getTabEdited()==0&&_taskView.getCurPage()>0){
+        	_eventPage = _taskView.getCurPage();
+        }
+        if (_taskView.getTabEdited()==1&&_taskView.getCurPage()>0){
+        	_deadlinePage = _taskView.getCurPage();
+        }
+        if (_taskView.getTabEdited()==2&&_taskView.getCurPage()>0){
+        	_todoPage = _taskView.getCurPage();
+        }
+    }
+    
+    private void setPage(int page){
+    	if (page>0){
+    		if (_currentTab == 0) {
+    			_eventPage = page;
+    		} else if (_currentTab == 1) {
+    			_deadlinePage = page;
+    		} else {
+    			_todoPage = page;
+    		}
+    	}
+    }
+    
     private void addToUnHistory(String text){
     	if (_commandUnHistory.size() < 5) {
             _commandUnHistory.addFirst(text);
@@ -651,10 +727,20 @@ public class MinaGuiUI extends MinaView {
     @Override
     public void updateLists() {
         logger.log(Level.INFO, "shell update lists");
-
-        updateEventList();
-        updateDeadlineList();
-        updateTodoList();
+        if (_taskView.getTabEdited()==-1){
+        	updateEventList();
+        	updateDeadlineList();
+        	updateTodoList();
+        } else if (_taskView.getTabEdited()==0){
+        	updateEventList();
+        	_currentTab = 0;
+        } else if (_taskView.getTabEdited()==1){
+        	updateDeadlineList();
+        	_currentTab = 1;
+        } else {
+        	updateTodoList();
+        	_currentTab = 2;
+        }
 
     }
 
@@ -920,6 +1006,12 @@ public class MinaGuiUI extends MinaView {
         } else {
             _todoPrevPage.setText(LEFT_ARROW);
         }
+        _eventMaxPage = _taskView.maxEventPage();
+        _deadlineMaxPage = _taskView.maxDeadlinePage();
+        _todoMaxPage = _taskView.maxTodoPage();
+        _todoPageLabel.setText(_todoPage+"/"+_todoMaxPage);
+        _deadlinePageLabel.setText(_deadlinePage+"/"+_deadlineMaxPage);
+        _eventPageLabel.setText(_eventPage+"/"+_eventMaxPage);
     }
 
     private void showEvent() {
@@ -1041,10 +1133,17 @@ public class MinaGuiUI extends MinaView {
                     84, 36);
             _eventNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
+            _eventPageLabel.setBounds(x_coordinate+width/2-50, y_coordinate + height - 36,
+            		100, 36);
+            _eventListUI.setVisible(true);
+            _eventPrevPage.setVisible(true);
+            _eventNextPage.setVisible(true);
+            _eventPageLabel.setVisible(true);
         } else {
-            _eventListUI.setBounds(0, 0, 0, 0);
-            _eventPrevPage.setBounds(0, 0, 0, 0);
-            _eventNextPage.setBounds(0, 0, 0, 0);
+            _eventListUI.setVisible(false);
+            _eventPrevPage.setVisible(false);
+            _eventNextPage.setVisible(false);
+            _eventPageLabel.setVisible(false);
         }
     }
 
@@ -1057,10 +1156,17 @@ public class MinaGuiUI extends MinaView {
                     36, 84, 36);
             _deadlineNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
+            _deadlinePageLabel.setBounds(x_coordinate+width/2-50, y_coordinate + height - 36,
+            		100, 36);
+            _deadlineListUI.setVisible(true);
+            _deadlinePrevPage.setVisible(true);
+            _deadlineNextPage.setVisible(true);
+            _deadlinePageLabel.setVisible(true);
         } else {
-            _deadlineListUI.setBounds(0, 0, 0, 0);
-            _deadlinePrevPage.setBounds(0, 0, 0, 0);
-            _deadlineNextPage.setBounds(0, 0, 0, 0);
+            _deadlineListUI.setVisible(false);
+            _deadlinePrevPage.setVisible(false);
+            _deadlineNextPage.setVisible(false);
+            _deadlinePageLabel.setVisible(true);
         }
     }
 
@@ -1072,10 +1178,17 @@ public class MinaGuiUI extends MinaView {
                     84, 36);
             _todoNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
+            _todoPageLabel.setBounds(x_coordinate+width/2-50, y_coordinate + height - 36,
+            		100, 36);
+            _todoListUI.setVisible(true);
+            _todoPrevPage.setVisible(true);
+            _todoNextPage.setVisible(true);
+            _todoPageLabel.setVisible(true);
         } else {
-            _todoListUI.setBounds(0, 0, 0, 0);
-            _todoPrevPage.setBounds(0, 0, 0, 0);
-            _todoNextPage.setBounds(0, 0, 0, 0);
+            _todoListUI.setVisible(false);
+            _todoPrevPage.setVisible(false);
+            _todoNextPage.setVisible(false);
+            _todoPageLabel.setVisible(false);
         }
     }
     
