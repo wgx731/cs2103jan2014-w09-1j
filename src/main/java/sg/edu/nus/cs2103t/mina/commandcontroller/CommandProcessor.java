@@ -158,10 +158,10 @@ public class CommandProcessor {
                 if (task == null) {
                     _taskView = errorCommandReturn(CommandType.ADD);
                 } else {
-                    // UIprocess();
                     String output = String.format(ADDED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    postUpdateTaskView(task);
                     DataParameter undoParam = processUndoAddParameter(task);
                     _commandHistory.addUndo(CommandType.DELETE, undoParam);
                     _commandHistory.clearRedo();
@@ -177,6 +177,7 @@ public class CommandProcessor {
                     String output = String.format(DELETED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    postUpdateTaskView(task);
                     DataParameter undoParam = processUndoDeleteParameter(deleteParameter);
                     _commandHistory.addUndo(CommandType.ADD, undoParam);
                     _commandHistory.clearRedo();
@@ -195,6 +196,7 @@ public class CommandProcessor {
                     String output = String.format(MODIFIED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    postUpdateTaskView(task);
                     DataParameter undoParam = processUndoModifyParameter(task,
                             modifyParameter);
                     _commandHistory.addUndo(CommandType.MODIFY, undoParam);
@@ -242,6 +244,7 @@ public class CommandProcessor {
                     String output = String.format(COMPLETED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    postUpdateTaskView(task);
                     DataParameter undoParam = processUndoCompleteParameter(task,
                             completeParameter);
                     _commandHistory.addUndo(CommandType.UNCOMPLETE, undoParam);
@@ -292,6 +295,28 @@ public class CommandProcessor {
             }
         }
     }
+    
+    private void postUpdateTaskView(Task<?> task){
+        if (task.getType()==TaskType.EVENT){
+        	_taskView.setTabEdited(0);
+        	if (_taskView.getEvents().contains(task)){
+        		int page = _taskView.getEvents().indexOf(task)/_taskView.eventPageSize()+1;
+        		_taskView.setCurPage(page);
+        	}
+        } else if (task.getType()==TaskType.DEADLINE){
+        	_taskView.setTabEdited(1);
+        	if (_taskView.getDeadlines().contains(task)){
+        		int page = _taskView.getDeadlines().indexOf(task)/_taskView.deadlinePageSize()+1;
+        		_taskView.setCurPage(page);
+        	}
+        } else {
+        	_taskView.setTabEdited(2);
+        	if (_taskView.getTodos().contains(task)){
+        		int page = _taskView.getTodos().indexOf(task)/_taskView.todoPageSize()+1;
+        		_taskView.setCurPage(page);
+        	}
+        }
+    }
 
     private void performUndoRedo(CommandType cmd, DataParameter param) {
         switch (cmd) {
@@ -305,9 +330,11 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(addedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(addedTask);
                     }
                 }
                 break;
@@ -321,9 +348,11 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(deletedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(deletedTask);
                     }
                 }
                 break;
@@ -338,9 +367,11 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(modifiedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(modifiedTask);
                     }
                 }
                 break;
@@ -355,9 +386,11 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(completedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(completedTask);
                     }
             	}
             	break;
@@ -372,9 +405,11 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(uncompletedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskView(uncompletedTask);
                     }
             	}
             	break;
