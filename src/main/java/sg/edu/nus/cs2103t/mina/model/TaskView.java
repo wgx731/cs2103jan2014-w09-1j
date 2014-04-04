@@ -29,6 +29,9 @@ public class TaskView {
     private int CUR_PAGE = 0;
     private int TAB_EDITED = -1;
     
+    private int CUR_PAGE_ALT = 0;
+    private int TAB_EDITED_ALT = -1;
+    
     public TaskView(String status, 
                     HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
         _tasksOutput = tasksOutput;
@@ -107,6 +110,22 @@ public class TaskView {
     
     public int getTabEdited(){
     	return TAB_EDITED;
+    }
+    
+    public void setCurPageAlt(int page){
+    	CUR_PAGE_ALT = page;
+    }
+    
+    public int getCurPageAlt(){
+    	return CUR_PAGE_ALT;
+    }
+    
+    public void setTabEditedAlt(int tabNum){
+    	TAB_EDITED_ALT = tabNum;
+    }
+    
+    public int getTabEditedAlt(){
+    	return TAB_EDITED_ALT;
     }
     
     public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{

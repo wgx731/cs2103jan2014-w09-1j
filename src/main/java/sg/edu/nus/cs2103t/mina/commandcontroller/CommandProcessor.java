@@ -196,6 +196,7 @@ public class CommandProcessor {
                     String output = String.format(MODIFIED_MESSAGE,
                             task.getType(), task.getDescription());
                     _taskView = updatedTaskView(output);
+                    postUpdateTaskViewAlt(modifyParameter.getTaskObject());
                     postUpdateTaskView(task);
                     DataParameter undoParam = processUndoModifyParameter(task,
                             modifyParameter);
@@ -296,6 +297,28 @@ public class CommandProcessor {
         }
     }
     
+    private void postUpdateTaskViewAlt(Task<?> task){
+        if (task.getType()==TaskType.EVENT){
+        	_taskView.setTabEditedAlt(0);
+        	if (_taskView.getEvents().contains(task)){
+        		int page = _taskView.getEvents().indexOf(task)/_taskView.eventPageSize()+1;
+        		_taskView.setCurPageAlt(page);
+        	}
+        } else if (task.getType()==TaskType.DEADLINE){
+        	_taskView.setTabEditedAlt(1);
+        	if (_taskView.getDeadlines().contains(task)){
+        		int page = _taskView.getDeadlines().indexOf(task)/_taskView.deadlinePageSize()+1;
+        		_taskView.setCurPageAlt(page);
+        	}
+        } else {
+        	_taskView.setTabEditedAlt(2);
+        	if (_taskView.getTodos().contains(task)){
+        		int page = _taskView.getTodos().indexOf(task)/_taskView.todoPageSize()+1;
+        		_taskView.setCurPageAlt(page);
+        	}
+        }
+    }
+    
     private void postUpdateTaskView(Task<?> task){
         if (task.getType()==TaskType.EVENT){
         	_taskView.setTabEdited(0);
@@ -367,6 +390,7 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
+                        postUpdateTaskViewAlt(param.getTaskObject());
                         postUpdateTaskView(modifiedTask);
                     } else {
                         String output = REDO_MESSAGE;
@@ -673,11 +697,22 @@ public class CommandProcessor {
         } else {
             pageNum = 0;
         }
+        
+        if (modifyParam.getOriginalTaskType()==null||modifyParam.getOriginalTaskType()==TaskType.UNKNOWN){
+        	modifyParam = null;
+        	return modifyParam;
+        }
+        
         ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original,
                 pageNum);
         Task<?> modifyTask = pageOfModifyObject.get(userfriendlyTaskID - 1);
         modifyParam.setTaskObject(modifyTask);
         modifyParam.setTaskID(userfriendlyTaskID);
+        
+        if (parameters.contains("-all")){
+        	modifyParam.setModifyAll(true);
+        }
+        
         if (parameters.contains("-totype")) {
             int indexOfNewTaskType = parameters.indexOf("-totype") + 1;
             TaskType newType = processTaskTypeFromString(parameters
@@ -823,24 +858,14 @@ public class CommandProcessor {
         } else {
             pageNum = 0;
         }
-        /*
-        if (markDeleteParam.getOriginalTaskType()==null||markDeleteParam.getOriginalTaskType()==TaskType.UNKOWN){
+        
+        if (markDeleteParam.getOriginalTaskType()==null||markDeleteParam.getOriginalTaskType()==TaskType.UNKNOWN){
         	markDeleteParam = null;
         	return markDeleteParam;
         }
-        if (markDeleteParam.getTaskId() == -1){
-        	markDeleteParam = null;
-        	return markDeleteParam;
-        }
-        */
+        
         ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original,
                 pageNum);
-        /*
-        if (markDeleteParam.getTaskId()>=pageOfMarkDeleteObject.size()){
-            markDeleteParam = null;
-            return markDeleteParam;
-        }
-        */
         if (parameters.contains("-all")){
         	markDeleteParam.setModifyAll(true);
         }
