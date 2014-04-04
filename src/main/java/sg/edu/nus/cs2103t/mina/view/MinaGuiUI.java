@@ -34,6 +34,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.HelperView;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
@@ -65,6 +66,10 @@ public class MinaGuiUI extends MinaView {
     private Display _display;
     private Image _trayImage;
     private Tray _tray;
+    
+    private StyledText _helpWindowBorder;
+    private StyledText _helpWindow;
+    private UICommandHelper _help;
 
     private Text _userInputTextField;
     private Label _statusBar;
@@ -107,6 +112,9 @@ public class MinaGuiUI extends MinaView {
 
     private int SHELL_WIDTH;
     private int SHELL_HEIGHT;
+    
+    private String UI_FONT;
+    private int UI_FONT_SIZE;
 
     private static final String ERROR = "Operation failed. Please try again.";
     private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
@@ -254,6 +262,10 @@ public class MinaGuiUI extends MinaView {
 
         SHELL_HEIGHT = 580;
         logger.log(Level.INFO, "width" + SHELL_WIDTH);
+        
+        UI_FONT = "Trebuchet MS";
+        UI_FONT_SIZE = (SHELL_WIDTH==1096)?15:14;
+        
         _autoComplete = new AutoCompleteDB();
 
         _commandHistory = new LinkedList<String>();
@@ -285,22 +297,45 @@ public class MinaGuiUI extends MinaView {
         _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
         _shell.setSize(SHELL_WIDTH, SHELL_HEIGHT);
         _shell.setText("MINA");
+        
+        _helpWindow = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _helpWindow.setDoubleClickEnabled(false);
+        _helpWindow.setEnabled(false);
+        _helpWindow.setEditable(false);
+        _helpWindow.setForeground(SWTResourceManager
+                .getColor(SWT.COLOR_WHITE));
+        _helpWindow.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.NORMAL));
+        _helpWindow.setBackground(SWTResourceManager.getColor(89, 89, 89));
 
+        _helpWindowBorder = new StyledText(_shell, SWT.NONE);
+        _helpWindowBorder.setDoubleClickEnabled(false);
+        _helpWindowBorder.setEnabled(false);
+        _helpWindowBorder.setEditable(false);
+        _helpWindowBorder.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+        
+        _helpWindowBorder.setBounds(0, 0, SHELL_WIDTH, SHELL_HEIGHT-40);
+        _helpWindow.setBounds(5, 5, SHELL_WIDTH-10, SHELL_HEIGHT-50);
+        
+        _helpWindowBorder.setVisible(false);
+        _helpWindow.setVisible(false);
+        _help = new UICommandHelper();
+        
         _statusBar = new Label(_shell, SWT.NONE);
-        _statusBar.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _statusBar.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _statusBar.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 
         _userInputTextField = new Text(_shell, SWT.NONE);
         _userInputTextField
                 .setForeground(SWTResourceManager.getColor(0, 51, 0));
-        _userInputTextField.setFont(SWTResourceManager.getFont("Trebuchet MS",
-                15, SWT.NORMAL));
+        _userInputTextField.setFont(SWTResourceManager.getFont(UI_FONT,
+                UI_FONT_SIZE, SWT.NORMAL));
 
         _lblEvent = new Label(_shell, SWT.NONE);
         _lblEvent.setAlignment(SWT.CENTER);
         _lblEvent.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        _lblEvent.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _lblEvent.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
         _lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _lblEvent.setText("Events(e)");
@@ -309,7 +344,7 @@ public class MinaGuiUI extends MinaView {
         _lblDeadline.setAlignment(SWT.CENTER);
         _lblDeadline
                 .setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        _lblDeadline.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _lblDeadline.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
         _lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _lblDeadline.setText("Deadlines(d)");
@@ -317,7 +352,7 @@ public class MinaGuiUI extends MinaView {
         _lblTodo = new Label(_shell, SWT.NONE);
         _lblTodo.setAlignment(SWT.CENTER);
         _lblTodo.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        _lblTodo.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _lblTodo.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
         _lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _lblTodo.setText("To-do(td)");
@@ -325,7 +360,7 @@ public class MinaGuiUI extends MinaView {
         _todoNextPage = new Label(_shell, SWT.NONE);
         _todoNextPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _todoNextPage.setFont(SWTResourceManager.getFont("Trebuchet MS", 20,
+        _todoNextPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _todoNextPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _todoNextPage.setAlignment(SWT.CENTER);
@@ -333,7 +368,7 @@ public class MinaGuiUI extends MinaView {
         _todoPrevPage = new Label(_shell, SWT.NONE);
         _todoPrevPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _todoPrevPage.setFont(SWTResourceManager.getFont("Trebuchet MS", 20,
+        _todoPrevPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _todoPrevPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _todoPrevPage.setAlignment(SWT.CENTER);
@@ -341,7 +376,7 @@ public class MinaGuiUI extends MinaView {
         _deadlinePrevPage = new Label(_shell, SWT.NONE);
         _deadlinePrevPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _deadlinePrevPage.setFont(SWTResourceManager.getFont("Trebuchet MS",
+        _deadlinePrevPage.setFont(SWTResourceManager.getFont(UI_FONT,
                 20, SWT.BOLD));
         _deadlinePrevPage
                 .setBackground(SWTResourceManager.getColor(89, 89, 89));
@@ -350,7 +385,7 @@ public class MinaGuiUI extends MinaView {
         _deadlineNextPage = new Label(_shell, SWT.NONE);
         _deadlineNextPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _deadlineNextPage.setFont(SWTResourceManager.getFont("Trebuchet MS",
+        _deadlineNextPage.setFont(SWTResourceManager.getFont(UI_FONT,
                 20, SWT.BOLD));
         _deadlineNextPage
                 .setBackground(SWTResourceManager.getColor(89, 89, 89));
@@ -359,7 +394,7 @@ public class MinaGuiUI extends MinaView {
         _eventPrevPage = new Label(_shell, SWT.NONE);
         _eventPrevPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _eventPrevPage.setFont(SWTResourceManager.getFont("Trebuchet MS", 20,
+        _eventPrevPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _eventPrevPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _eventPrevPage.setAlignment(SWT.CENTER);
@@ -367,7 +402,7 @@ public class MinaGuiUI extends MinaView {
         _eventNextPage = new Label(_shell, SWT.NONE);
         _eventNextPage.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _eventNextPage.setFont(SWTResourceManager.getFont("Trebuchet MS", 20,
+        _eventNextPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _eventNextPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _eventNextPage.setAlignment(SWT.CENTER);
@@ -379,7 +414,7 @@ public class MinaGuiUI extends MinaView {
         _eventListUI.setEditable(false);
         _eventListUI
                 .setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        _eventListUI.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _eventListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _eventListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
 
@@ -388,7 +423,7 @@ public class MinaGuiUI extends MinaView {
         _deadlineListUI.setEditable(false);
         _deadlineListUI.setForeground(SWTResourceManager
                 .getColor(SWT.COLOR_WHITE));
-        _deadlineListUI.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _deadlineListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _deadlineListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
 
@@ -396,10 +431,17 @@ public class MinaGuiUI extends MinaView {
         _todoListUI.setEnabled(false);
         _todoListUI.setEditable(false);
         _todoListUI.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-        _todoListUI.setFont(SWTResourceManager.getFont("Trebuchet MS", 15,
+        _todoListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _todoListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        
+        _backgroundBox = new StyledText(_shell, SWT.NONE);
+        _backgroundBox.setDoubleClickEnabled(false);
+        _backgroundBox.setEnabled(false);
+        _backgroundBox.setEditable(false);
 
+        resetPanel();
+        
         _userInputTextField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 int key = e.keyCode;
@@ -413,8 +455,12 @@ public class MinaGuiUI extends MinaView {
                             _commandHistory.push(command);
                         }
                         _commandPosition = 0;
+                        if (command.trim().toLowerCase().equals("help")||command.trim().toLowerCase().equals("-h")){
+                        	startHelpWindows();
+                        } else {
                         _taskView = _commandController.processUserInput(
                                 command, _eventPage, _deadlinePage, _todoPage);
+                        }
                         _userInputTextField.setText(EMPTY_STRING);
                         _eventPage = 1;
                         _deadlinePage = 1;
@@ -512,13 +558,6 @@ public class MinaGuiUI extends MinaView {
                 }
             }
         });
-
-        _backgroundBox = new StyledText(_shell, SWT.NONE);
-        _backgroundBox.setDoubleClickEnabled(false);
-        _backgroundBox.setEnabled(false);
-        _backgroundBox.setEditable(false);
-
-        resetPanel();
 
         _userInputTextField.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event event) {
@@ -787,7 +826,7 @@ public class MinaGuiUI extends MinaView {
             }
             String eventStringIndex = "\t" + (i + 1) + ". ";
             String eventDescription = event.getDescription() + "\n";
-            String eventTime = "\t" + DateUtil
+            String eventTime = "\t\t" + DateUtil
                     .displayTimeOnly(itemStartDate) +
                     " - " +
                     (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? DateUtil
@@ -1139,5 +1178,75 @@ public class MinaGuiUI extends MinaView {
             _todoPrevPage.setBounds(0, 0, 0, 0);
             _todoNextPage.setBounds(0, 0, 0, 0);
         }
+    }
+    
+    public void startHelpWindows(){
+        _helpWindowBorder.setVisible(true);
+        _helpWindow.setVisible(true);
+        _help.setDefaultMenu();
+        HelperView defaultView = _help.getDefaultMenu();
+        _helpWindow.append(defaultView.getHelperDescription());
+        for (int i=0; i<defaultView.getHelperText().size(); i++){
+        	_helpWindow.append((i+1)+". ");
+        	_helpWindow.append(defaultView.getHelperText().get(i));
+        	_helpWindow.append("\n");
+        }
+        _helpWindow.append("\n[ESC:Exit help menu]");
+        _userInputTextField.addListener(SWT.KeyUp, new Listener() {
+            public void handleEvent(Event event) {
+                if (event.keyCode == SWT.BS) {
+                    HelperView view = _help.getHelperView(0);
+                    _helpWindow.setText(EMPTY_STRING);
+                    _helpWindow.append(view.getHelperDescription());
+                    for (int i=0; i<view.getHelperText().size(); i++){
+                    	_helpWindow.append((i+1)+". ");
+                    	_helpWindow.append(view.getHelperText().get(i));
+                    	_helpWindow.append("\n");
+                    }
+                    if (view.getHelperDescription().contains("Help Contents")){
+                    	_helpWindow.append("\n[ESC:Exit help menu]");
+                    } else {
+                    	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE]:Back");
+                    }
+                }
+                if (event.keyCode == SWT.ESC) {
+                	_helpWindowBorder.setVisible(false);
+                    _helpWindow.setVisible(false);
+            		_helpWindow.setText(EMPTY_STRING);
+                    _userInputTextField.forceFocus();
+                }
+                if (event.keyCode>='0'&&event.keyCode<='9'){
+                	int menu_index = Integer.parseInt(String
+                            .valueOf((char) event.keyCode));
+                	_userInputTextField.setText(EMPTY_STRING);
+                	HelperView view = _help.getHelperView(menu_index);
+                	if (view.getHelperFunction().equals("DISPLAY")){
+                		_helpWindow.setText(EMPTY_STRING);
+                		_helpWindow.append(view.getHelperDescription());
+                		for (int i=0; i<view.getHelperText().size(); i++){
+                        	_helpWindow.append((i+1)+". ");
+                        	_helpWindow.append(view.getHelperText().get(i));
+                        	_helpWindow.append("\n");
+                        }
+                		if (view.getHelperDescription().contains("Help Contents")){
+                        	_helpWindow.append("\n[ESC:Exit help menu]");
+                        } else {
+                        	_helpWindow.append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE]:Back");
+                        }
+                	} else if (view.getHelperFunction().equals("COPY")){
+                		String text = view.getHelperDescription();
+                		_helpWindowBorder.setVisible(false);
+                        _helpWindow.setVisible(false);
+                        _helpWindow.setText(EMPTY_STRING);
+                        _userInputTextField.forceFocus();
+                        _userInputTextField.setText(text);
+                        _userInputTextField.setSelection(text.length(), text.length());
+                	}
+                } else if (_helpWindow.getVisible()){
+                	_userInputTextField.setText(EMPTY_STRING);
+                }
+            }
+        });
+        
     }
 }
