@@ -1,7 +1,5 @@
 package sg.edu.nus.cs2103t.mina.view;
 
-import java.awt.AWTException;
-import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -14,8 +12,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -97,10 +95,8 @@ public class MinaGuiUI extends MinaView {
     private final String RIGHT_ARROW = "\u2192";
     private final String LEFT_ARROW = "\u2190";
 
-    private LinkedList<String> _commandHistory;
-    private int _commandPosition;
-    private boolean _historyUp;
-
+    private LinkedList<String> _commandUnHistory;
+    private LinkedList<String> _commandReHistory;
     private boolean _isExpanded;
 
     private int _currentTab;
@@ -108,7 +104,6 @@ public class MinaGuiUI extends MinaView {
 
     private boolean _isAutoComplete;
 
-    private Robot _bot;
 
     private int SHELL_WIDTH;
     private int SHELL_HEIGHT;
@@ -268,9 +263,8 @@ public class MinaGuiUI extends MinaView {
         
         _autoComplete = new AutoCompleteDB();
 
-        _commandHistory = new LinkedList<String>();
-        _commandPosition = 0;
-        _historyUp = true;
+        _commandUnHistory = new LinkedList<String>();
+        _commandReHistory = new LinkedList<String>();
 
         _currentTab = 0;
         // _highlightOn = false;
@@ -286,12 +280,6 @@ public class MinaGuiUI extends MinaView {
         _taskView = _commandController.getTaskView();
 
         _isAutoComplete = false;
-
-        try {
-            _bot = new Robot();
-        } catch (AWTException e) {
-            logger.log(Level.ERROR, e.getMessage());
-        }
 
         _shell = new Shell(_display, SWT.NO_TRIM);
         _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
@@ -442,123 +430,6 @@ public class MinaGuiUI extends MinaView {
 
         resetPanel();
         
-        _userInputTextField.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                int key = e.keyCode;
-                switch (key) {
-                    case SWT.CR :
-                        String command = _userInputTextField.getText();
-                        if (_commandHistory.size() < 5) {
-                            _commandHistory.push(command);
-                        } else {
-                            _commandHistory.removeLast();
-                            _commandHistory.push(command);
-                        }
-                        _commandPosition = 0;
-                        if (command.trim().toLowerCase().equals("help")||command.trim().toLowerCase().equals("-h")){
-                        	startHelpWindows();
-                        } else {
-                        _taskView = _commandController.processUserInput(
-                                command, _eventPage, _deadlinePage, _todoPage);
-                        }
-                        _userInputTextField.setText(EMPTY_STRING);
-                        _eventPage = 1;
-                        _deadlinePage = 1;
-                        _todoPage = 1;
-                        displayOutput();
-                        updateLists();
-                        updateArrowNavigation();
-                        if (_taskView.hasOnlyOneType(TaskType.EVENT)) {
-                            _currentTab = 0;
-                            expand();
-                        } else if (_taskView.hasOnlyOneType(TaskType.DEADLINE)) {
-                            _currentTab = 1;
-                            expand();
-                        } else if (_taskView.hasOnlyOneType(TaskType.TODO)) {
-                            _currentTab = 2;
-                            expand();
-                        } else {
-                            resetPanel();
-                        }
-                        break;
-                    case SWT.ARROW_UP :
-                        if (_commandHistory.size() != 0) {
-                            if (_historyUp) {
-                                if (_commandPosition < _commandHistory.size() - 1) {
-                                    _userInputTextField.setText(_commandHistory
-                                            .get(_commandPosition) + " ");
-                                    _userInputTextField
-                                            .setSelection(_userInputTextField
-                                                    .getCharCount());
-                                    _commandPosition++;
-                                } else {
-                                    _userInputTextField.setText(_commandHistory
-                                            .get(_commandPosition) + " ");
-                                    _userInputTextField
-                                            .setSelection(_userInputTextField
-                                                    .getCharCount());
-                                }
-                            } else {
-                                _commandPosition++;
-                                _historyUp = true;
-                                _userInputTextField.setText(_commandHistory
-                                        .get(_commandPosition) + " ");
-                                _userInputTextField
-                                        .setSelection(_userInputTextField
-                                                .getCharCount());
-                                if (_commandPosition < _commandHistory.size() - 1) {
-                                    _commandPosition++;
-                                }
-                            }
-                        }
-                        break;
-                    case SWT.ARROW_DOWN :
-                        if (_commandHistory.size() != 0) {
-                            if (_commandPosition > 0) {
-                                _commandPosition--;
-                                _userInputTextField.setText(_commandHistory
-                                        .get(_commandPosition));
-                                _userInputTextField
-                                        .setSelection(_userInputTextField
-                                                .getCharCount());
-                            } else {
-                                _commandPosition = -1;
-                                _userInputTextField.setText(EMPTY_STRING);
-                            }
-                            _historyUp = false;
-                        }
-                        break;
-                    case SWT.ESC :
-                        _taskView = _commandController
-                                .processUserInput("display", _eventPage,
-                                        _deadlinePage, _todoPage);
-                        resetPanel();
-                        updateLists();
-                        break;
-                    default :
-                        break;
-                }
-            }
-
-            public void keyReleased(KeyEvent e) {
-                int key = e.keyCode;
-                switch (key) {
-                    case SWT.CR :
-                        break;
-                    case SWT.ARROW_UP :
-                        _userInputTextField.setText(_userInputTextField
-                                .getText().trim());
-                        _userInputTextField.setSelection(_userInputTextField
-                                .getCharCount());
-                        break;
-                    case SWT.ARROW_DOWN :
-                        break;
-                    default :
-                        break;
-                }
-            }
-        });
-
         _userInputTextField.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event event) {
                 if (event.keyCode > 31 && event.keyCode < 127) {
@@ -566,16 +437,89 @@ public class MinaGuiUI extends MinaView {
                         autoComplete();
                     }
                 }
+            }
+        });
+        
+        _userInputTextField.addListener(SWT.KeyDown, new Listener() {
+            public void handleEvent(Event event) {
                 if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS) {
                     setAutoComplete();
                 }
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.F11) {
+                    if (_isExpanded) {
+                        resetPanel();
+                    } else {
+                        expand();
+                    }
+                }
+                if (event.keyCode == SWT.CR){
+                	String command = _userInputTextField.getText();
+                    addToUnHistory(command);
+                    if (command.trim().toLowerCase().equals("help")||command.trim().toLowerCase().equals("-h")){
+                    	startHelpWindows();
+                    } else {
+                    _taskView = _commandController.processUserInput(
+                            command, _eventPage, _deadlinePage, _todoPage);
+                    }
+                    _userInputTextField.setText(EMPTY_STRING);
+                    _eventPage = 1;
+                    _deadlinePage = 1;
+                    _todoPage = 1;
+                    displayOutput();
+                    updateLists();
+                    updateArrowNavigation();
+                    if (_taskView.hasOnlyOneType(TaskType.EVENT)) {
+                        _currentTab = 0;
+                        expand();
+                    } else if (_taskView.hasOnlyOneType(TaskType.DEADLINE)) {
+                        _currentTab = 1;
+                        expand();
+                    } else if (_taskView.hasOnlyOneType(TaskType.TODO)) {
+                        _currentTab = 2;
+                        expand();
+                    } else {
+                        resetPanel();
+                    }
+                }
+                if (event.keyCode == SWT.ARROW_UP){
+                	event.doit = false;
+                	if (_commandUnHistory.size()!=0){
+                		String text = _commandUnHistory.removeFirst();
+                    	if (!_userInputTextField.getText().equals(EMPTY_STRING)){
+                			_commandReHistory.addFirst(_userInputTextField.getText());
+                		}
+                		_userInputTextField.setText(text);
+                		_userInputTextField.setSelection(text.length());
+                	}
+                }
+                if (event.keyCode == SWT.ARROW_DOWN){
+                	event.doit = false;
+            		if (!_userInputTextField.getText().equals(EMPTY_STRING)){
+            			addToUnHistory(_userInputTextField.getText());
+            		}
+                	if (_commandReHistory.size()!=0){
+                		String text = _commandReHistory.removeFirst();
+                		_userInputTextField.setText(text);
+                		_userInputTextField.setSelection(text.length());
+                	} else {
+                		_userInputTextField.setText(EMPTY_STRING);
+                	}
+                }
+                if (event.keyCode == SWT.ESC){
+                	_taskView = _commandController
+                            .processUserInput("display", _eventPage,
+                                    _deadlinePage, _todoPage);
+                    resetPanel();
+                    updateLists();
+                }
             }
         });
-
-        _shell.addListener(SWT.KeyDown, new Listener() {
-            public void handleEvent(Event event) {
-                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.TAB) {
-                    _currentTab = (_currentTab + 1) % 3;
+        
+        _userInputTextField.addTraverseListener(new TraverseListener(){
+        	public void keyTraversed(TraverseEvent event){
+        		if (event.stateMask==SWT.CTRL&&(event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
+        			event.doit = false;
+        			_currentTab = (_currentTab + 1) % 3;
                     if (!_isExpanded) {
                         positionBackgroundBox();
                         showBackgroundBox();
@@ -588,34 +532,8 @@ public class MinaGuiUI extends MinaView {
                             expandTodo();
                         }
                     }
-                }
-                if (event.stateMask != SWT.CTRL && event.keyCode == SWT.TAB) {
-                    _userInputTextField.forceFocus();
-                    _userInputTextField.setSelection(_userInputTextField
-                            .getText().length(), _userInputTextField.getText()
-                            .length());
-                    botPress(SWT.TAB);
-                }
-                if (event.stateMask != SWT.CTRL && event.keyCode == SWT.BS) {
-                    _userInputTextField.forceFocus();
-                    _userInputTextField.setSelection(_userInputTextField
-                            .getText().length(), _userInputTextField.getText()
-                            .length());
-                    botPress(SWT.BS);
-                }
-                if (event.stateMask != SWT.CTRL && event.keyCode == SWT.DEL) {
-                    _userInputTextField.forceFocus();
-                    botPress(SWT.DEL);
-                }
-                if (event.stateMask != SWT.CTRL && event.keyCode == SWT.HOME) {
-                    _userInputTextField.forceFocus();
-                    botPress(SWT.HOME);
-                }
-                if (event.stateMask != SWT.CTRL && event.keyCode == SWT.END) {
-                    _userInputTextField.forceFocus();
-                    botPress(SWT.END);
-                }
-                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_RIGHT) {
+        		}
+        		if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_RIGHT) {
                     if (_currentTab == 0) {
                         int maxNumberOfEventPages = _taskView.maxEventPage();
                         if (_eventPage < maxNumberOfEventPages) {
@@ -657,40 +575,21 @@ public class MinaGuiUI extends MinaView {
                     }
                     updateArrowNavigation();
                 }
-                if (event.stateMask == SWT.CTRL && event.keyCode == 'e') {
-                    if (_isExpanded) {
-                        resetPanel();
-                    } else {
-                        expand();
-                    }
-                }
-                if (event.stateMask != SWT.CTRL && ((event.keyCode > 31 && event.keyCode < 127) || (event.keyCode == SWT.ARROW_UP || event.keyCode == SWT.ARROW_DOWN ||
-                        event.keyCode == SWT.ARROW_LEFT || event.keyCode == SWT.ARROW_RIGHT))) {
-                    _userInputTextField.forceFocus();
-                    if (event.keyCode > 31 && event.keyCode < 127) {
-                        _userInputTextField.append(String
-                                .valueOf((char) event.keyCode));
-                    }
-                    if (_isAutoComplete) {
-                        autoComplete();
-                    }
-                }
-                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS) {
-                    setAutoComplete();
-                }
-                if (event.keyCode == SWT.ESC) {
-                    _taskView = _commandController.processUserInput("display",
-                            _eventPage, _deadlinePage, _todoPage);
-                    resetPanel();
-                    updateLists();
-                }
-            }
-
-            private void botPress(int key) {
-                _bot.keyPress(key);
-                _bot.keyRelease(key);
-            }
+                if (event.stateMask!=SWT.CTRL&&(event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
+        			event.doit = false;
+        			_userInputTextField.setSelection(_userInputTextField.getText().length());
+        		}
+        	}
         });
+    }
+    
+    private void addToUnHistory(String text){
+    	if (_commandUnHistory.size() < 5) {
+            _commandUnHistory.addFirst(text);
+        } else {
+            _commandUnHistory.removeLast();
+            _commandUnHistory.addFirst(text);
+        }
     }
 
     private void setAutoComplete() {
