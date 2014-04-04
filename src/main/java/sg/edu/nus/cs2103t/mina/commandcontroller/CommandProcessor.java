@@ -353,11 +353,9 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(addedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(addedTask);
                     }
                 }
                 break;
@@ -371,11 +369,9 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(deletedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(deletedTask);
                     }
                 }
                 break;
@@ -390,12 +386,9 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskViewAlt(param.getTaskObject());
-                        postUpdateTaskView(modifiedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(modifiedTask);
                     }
                 }
                 break;
@@ -410,11 +403,9 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(completedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(completedTask);
                     }
             	}
             	break;
@@ -429,11 +420,9 @@ public class CommandProcessor {
                     if (_isUndoNow) {
                         String output = UNDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(uncompletedTask);
                     } else {
                         String output = REDO_MESSAGE;
                         _taskView = updatedTaskView(output);
-                        postUpdateTaskView(uncompletedTask);
                     }
             	}
             	break;

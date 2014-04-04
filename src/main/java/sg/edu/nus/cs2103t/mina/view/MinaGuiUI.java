@@ -59,6 +59,7 @@ public class MinaGuiUI extends MinaView {
 
     private TaskView _taskView;
 
+    private Calendar _yesterday;
     private Calendar _today;
     private Calendar _tomorrow;
 
@@ -118,7 +119,8 @@ public class MinaGuiUI extends MinaView {
     private int SHELL_WIDTH;
     private int SHELL_HEIGHT;
 
-    private String UI_FONT;
+    private final String UI_FONT = "Trebuchet MS";
+    private final String UI_FONT_2 = "Tahoma";
     private int UI_FONT_SIZE;
 
     private static Logger logger = LogManager.getLogger(MinaGuiUI.class
@@ -244,7 +246,6 @@ public class MinaGuiUI extends MinaView {
         SHELL_HEIGHT = 580;
         logger.log(Level.INFO, "width" + SHELL_WIDTH);
 
-        UI_FONT = "Trebuchet MS";
         UI_FONT_SIZE = (SHELL_WIDTH == 1096) ? 15 : 14;
 
         _autoComplete = new AutoCompleteDB();
@@ -253,11 +254,13 @@ public class MinaGuiUI extends MinaView {
         _commandReHistory = new LinkedList<String>();
 
         _currentTab = 0;
-
+        
         _today = Calendar.getInstance();
         _tomorrow = Calendar.getInstance();
         _tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-
+        _yesterday = Calendar.getInstance();
+        _yesterday.add(Calendar.DAY_OF_YEAR, -1);        
+        
         _taskView = _commandController.getTaskView();
 
         _eventPage = 1;
@@ -788,10 +791,19 @@ public class MinaGuiUI extends MinaView {
                     currentDate, itemStartDate))) {
                 currentDate = itemStartDate;
                 StyleRange eventStyle = new StyleRange();
-                if (currentDate.before(_today) && !DateUtil.isSameDateCalendar(
-                        _today, currentDate)) {
+                if (currentDate.before(_yesterday) && !DateUtil.isSameDateCalendar(
+                        _yesterday, currentDate)) {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = SWTResourceManager
+                            .getColor(SWT.COLOR_GRAY);
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_yesterday, currentDate)) {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = "Yesterday\n";
                     eventStyle.length = currentDateString.length();
                     eventStyle.foreground = SWTResourceManager
                             .getColor(SWT.COLOR_GRAY);
@@ -835,7 +847,7 @@ public class MinaGuiUI extends MinaView {
                             .displayTimeOnly(itemEndDate) : DateUtil
                             .displayDateTime(itemEndDate)) +
                     "\n";
-            String eventCompleted = (event.isCompleted() ? "\t\tdone\n" : "");
+            String eventCompleted = (event.getTag().contains("BLOCK")?"\t\tBOOKED":"")+(event.getTag().contains("RECUR")?"\t\tRECUR":"")+(event.isCompleted() ? "\t\tdone\n" : "\n");
             _eventListUI.append(eventStringIndex);
             initialCursorPosition += eventStringIndex.length();
 
@@ -855,6 +867,7 @@ public class MinaGuiUI extends MinaView {
             completedStyle.start = initialCursorPosition;
             completedStyle.length = eventCompleted.length();
             completedStyle.fontStyle = SWT.ITALIC;
+            completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
             _eventListUI.setStyleRange(completedStyle);
             initialCursorPosition += eventCompleted.length();
         }
@@ -875,10 +888,19 @@ public class MinaGuiUI extends MinaView {
                     currentDate, itemDate))) {
                 currentDate = itemDate;
                 StyleRange deadlineStyle = new StyleRange();
-                if (currentDate.before(_today) && !DateUtil.isSameDateCalendar(
-                        _today, currentDate)) {
+                if (currentDate.before(_yesterday) && !DateUtil.isSameDateCalendar(
+                        _yesterday, currentDate)) {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = SWTResourceManager
+                            .getColor(SWT.COLOR_GRAY);
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_yesterday, currentDate)) {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = "Yesterday\n";
                     deadlineStyle.length = currentDateString.length();
                     deadlineStyle.foreground = SWTResourceManager
                             .getColor(SWT.COLOR_GRAY);
@@ -918,8 +940,7 @@ public class MinaGuiUI extends MinaView {
             String deadlineDescription = deadline.getDescription();
             String deadlineTime = " by " + DateUtil.displayTimeOnly(itemDate) +
                     "\n";
-            String deadlineCompleted = (deadline.isCompleted() ? "\t\tdone\n"
-                    : "");
+            String deadlineCompleted = (deadline.getTag().contains("RECUR")?"\t\tRECUR":"")+(deadline.isCompleted() ? "\t\tdone\n": "\n");
             _deadlineListUI.append(deadlineStringIndex);
             initialCursorPosition += deadlineStringIndex.length();
 
@@ -939,6 +960,7 @@ public class MinaGuiUI extends MinaView {
             completedStyle.start = initialCursorPosition;
             completedStyle.length = deadlineCompleted.length();
             completedStyle.fontStyle = SWT.ITALIC;
+            completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
             _deadlineListUI.setStyleRange(completedStyle);
             initialCursorPosition += deadlineCompleted.length();
         }
@@ -969,7 +991,7 @@ public class MinaGuiUI extends MinaView {
             _todoListUI.setStyleRange(todoStyle);
             initialCursorPosition += todoString.length();
 
-            String todoCompleted = (todo.isCompleted() ? "\t\tdone\n" : "");
+            String todoCompleted = (todo.isCompleted() ? "\tdone\n" : "");
 
             _todoListUI.append(todoCompleted);
             StyleRange completedStyle = new StyleRange();
