@@ -430,13 +430,18 @@ public class MinaGuiUI extends MinaView {
 
         resetPanel();
         
-        _userInputTextField.addListener(SWT.KeyDown, new Listener() {
+        _userInputTextField.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event event) {
                 if (event.keyCode > 31 && event.keyCode < 127) {
                     if (_isAutoComplete) {
                         autoComplete();
                     }
                 }
+            }
+        });
+        
+        _userInputTextField.addListener(SWT.KeyDown, new Listener() {
+            public void handleEvent(Event event) {
                 if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS) {
                     setAutoComplete();
                 }
