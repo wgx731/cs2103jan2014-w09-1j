@@ -532,37 +532,17 @@ public class MinaGuiUI extends MinaView {
                     resetPanel();
                     updateLists();
                 }
-            }
-        });
-
-        _userInputTextField.addTraverseListener(new TraverseListener() {
-            public void keyTraversed(TraverseEvent event) {
-                if (event.stateMask == SWT.CTRL && (event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)) {
-                    event.doit = false;
-                    _currentTab = (_currentTab + 1) % 3;
-                    if (!_isExpanded) {
-                        positionBackgroundBox();
-                        showBackgroundBox();
-                    } else {
-                        if (_currentTab == 0) {
-                            expandEvent();
-                        } else if (_currentTab == 1) {
-                            expandDeadline();
-                        } else {
-                            expandTodo();
-                        }
-                    }
-                }
                 if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_RIGHT) {
-                    if (_currentTab == 0) {
+        			event.doit = false;
+    				event.detail = SWT.TRAVERSE_NONE;
+        			if (_currentTab == 0) {
                         int maxNumberOfEventPages = _taskView.maxEventPage();
                         if (_eventPage < maxNumberOfEventPages) {
                             _eventPage++;
                             updateEventList();
                         }
                     } else if (_currentTab == 1) {
-                        int maxNumberOfDeadlinePages = _taskView
-                                .maxDeadlinePage();
+                        int maxNumberOfDeadlinePages = _taskView.maxDeadlinePage();
                         if (_deadlinePage < maxNumberOfDeadlinePages) {
                             _deadlinePage++;
                             updateDeadlineList();
@@ -577,7 +557,9 @@ public class MinaGuiUI extends MinaView {
                     updateArrowNavigation();
                 }
                 if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_LEFT) {
-                    if (_currentTab == 0) {
+                	event.doit = false;
+                	event.detail = SWT.TRAVERSE_NONE;
+                	if (_currentTab == 0) {
                         if (_eventPage > 1) {
                             _eventPage--;
                             updateEventList();
@@ -595,6 +577,27 @@ public class MinaGuiUI extends MinaView {
                     }
                     updateArrowNavigation();
                 }
+            }
+        });
+        
+        _userInputTextField.addTraverseListener(new TraverseListener(){
+        	public void keyTraversed(TraverseEvent event){
+        		if (event.stateMask==SWT.CTRL&&(event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
+        			event.doit = false;
+        			_currentTab = (_currentTab + 1) % 3;
+                    if (!_isExpanded) {
+                        positionBackgroundBox();
+                        showBackgroundBox();
+                    } else {
+                        if (_currentTab == 0) {
+                            expandEvent();
+                        } else if (_currentTab == 1) {
+                            expandDeadline();
+                        } else {
+                            expandTodo();
+                        }
+                    }
+        		}
                 if (event.stateMask != SWT.CTRL && (event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)) {
                     event.doit = false;
                     _userInputTextField.setSelection(_userInputTextField
@@ -605,9 +608,7 @@ public class MinaGuiUI extends MinaView {
     }
 
     private void updatePage() {
-        _eventMaxPage = _taskView.maxEventPage();
-        _deadlineMaxPage = _taskView.maxDeadlinePage();
-        _todoMaxPage = _taskView.maxTodoPage();
+    	maxPages();
         if (_todoPage > _todoMaxPage) {
             _todoPage = _todoMaxPage;
         }
@@ -620,6 +621,15 @@ public class MinaGuiUI extends MinaView {
     }
 
     private void updatePageFromTaskView() {
+    	if (_taskView.getTabEditedAlt()==0&&_taskView.getCurPageAlt()>0){
+        	_eventPage = _taskView.getCurPageAlt();
+        }
+        if (_taskView.getTabEditedAlt()==1&&_taskView.getCurPageAlt()>0){
+        	_deadlinePage = _taskView.getCurPageAlt();
+        }
+        if (_taskView.getTabEditedAlt()==2&&_taskView.getCurPageAlt()>0){
+        	_todoPage = _taskView.getCurPageAlt();
+        }
         if (_taskView.getTabEdited() == 0 && _taskView.getCurPage() > 0) {
             _eventPage = _taskView.getCurPage();
         }
@@ -727,21 +737,29 @@ public class MinaGuiUI extends MinaView {
     @Override
     public void updateLists() {
         logger.log(Level.INFO, "shell update lists");
+        if (_taskView.getTabEditedAlt()!=-1){
+        	if (_taskView.getTabEditedAlt()==0){
+            	updateEventList();
+            } else if (_taskView.getTabEditedAlt()==1){
+            	updateDeadlineList();
+            } else if (_taskView.getTabEditedAlt()==2){
+            	updateTodoList();
+            }
+        }
         if (_taskView.getTabEdited() == -1) {
             updateEventList();
             updateDeadlineList();
             updateTodoList();
         } else if (_taskView.getTabEdited() == 0) {
-            updateEventList();
             _currentTab = 0;
+        	updateEventList();
         } else if (_taskView.getTabEdited() == 1) {
-            updateDeadlineList();
             _currentTab = 1;
-        } else {
-            updateTodoList();
+        	updateDeadlineList();
+        } else if (_taskView.getTabEdited()==2){
             _currentTab = 2;
+        	updateTodoList();
         }
-
     }
 
     public void loop() {
@@ -1005,13 +1023,26 @@ public class MinaGuiUI extends MinaView {
         } else {
             _todoPrevPage.setText(LEFT_ARROW);
         }
-        _eventMaxPage = _taskView.maxEventPage();
-        _deadlineMaxPage = _taskView.maxDeadlinePage();
-        _todoMaxPage = _taskView.maxTodoPage();
+        maxPages();
         _todoPageLabel.setText(_todoPage + "/" + _todoMaxPage);
         _deadlinePageLabel.setText(_deadlinePage + "/" + _deadlineMaxPage);
         _eventPageLabel.setText(_eventPage + "/" + _eventMaxPage);
     }
+
+	private void maxPages() {
+		_eventMaxPage = _taskView.maxEventPage();
+        _deadlineMaxPage = _taskView.maxDeadlinePage();
+        _todoMaxPage = _taskView.maxTodoPage();
+        if (_eventMaxPage==0){
+        	_eventMaxPage = 1;
+        }
+        if (_deadlineMaxPage==0){
+        	_deadlineMaxPage = 1;
+        }
+        if (_todoMaxPage==0){
+        	_todoMaxPage = 1;
+        }
+	}
 
     private void showEvent() {
         _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 36);
