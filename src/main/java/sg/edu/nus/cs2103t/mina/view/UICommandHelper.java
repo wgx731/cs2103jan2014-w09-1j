@@ -304,6 +304,7 @@ public class UICommandHelper {
 			}
 			} else {
 				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
 			}
 			return helperView;
 		}
