@@ -16,7 +16,7 @@ import java.util.UUID;
 public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final long serialVersionUID = 7038530852821069011L;
-    
+
     protected static final String DEFAULT_TAG = "";
     protected static final char L = 'L';
     protected static final char M = 'M';
@@ -47,7 +47,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         _isCompleted = false;
         _tag = DEFAULT_TAG;
     }
-    
+
     public Task(TaskType type, String description, String id, char priority,
             Date createdTime, boolean isCompleted) {
         _type = (TaskType) type;
@@ -61,7 +61,8 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     }
 
     public Task(TaskType type, String description, String id, char priority,
-            Date createdTime, Date lastEditedTime, boolean isCompleted, String tag) {
+            Date createdTime, Date lastEditedTime, boolean isCompleted,
+            String tag) {
         _type = (TaskType) type;
         _description = description;
         _id = id;
@@ -78,9 +79,9 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         if (priorityComparedResult == 0) {
             if (_tag.compareTo(otherTask._tag) == 0) {
                 return _description.compareTo(otherTask._description);
-            } else {
-                return _tag.compareTo(otherTask._tag);
             }
+            
+            return _tag.compareTo(otherTask._tag);
         }
         return priorityComparedResult;
     }
@@ -145,7 +146,7 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
     public Date getCreatedTime() {
         return _createdTime;
     }
-    
+
     public String getTag() {
         return _tag;
     }
@@ -166,8 +167,8 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_priority);
         sb.append(", completed: ");
         sb.append(_isCompleted ? "yes)" : "no)");
-        //sb.append(" last modified: ");
-        //sb.append(_lastEditedTime);
+        // sb.append(" last modified: ");
+        // sb.append(_lastEditedTime);
         return sb.toString();
     }
 
