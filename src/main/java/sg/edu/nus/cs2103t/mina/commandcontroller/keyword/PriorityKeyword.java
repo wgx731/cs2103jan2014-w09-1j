@@ -45,6 +45,7 @@ public class PriorityKeyword extends Keyword {
         _priorityValues.put("med", "M");
         _priorityValues.put("h", "H");
         _priorityValues.put("high", "H");
+        _priorityValues.put("urgent", "H");
     }
     
     @Override
