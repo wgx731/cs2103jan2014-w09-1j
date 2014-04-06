@@ -24,7 +24,7 @@ public class PriorityKeyword extends Keyword {
     
     static {
         PriorityKeyword newPriority = new PriorityKeyword(IS_PROTOTYPE);
-        KeywordFactory.addAliasEntry(PRIORITY.getFormattedKeyword(), newPriority);
+        KeywordFactory.getInstance().addAliasEntry(PRIORITY.getFormattedKeyword(), newPriority);
     }
     
     public PriorityKeyword(boolean isPrototype) {
@@ -109,7 +109,7 @@ public class PriorityKeyword extends Keyword {
         String key;
         
         try{
-            key = tokens.get(valueIndex);
+            key = tokens.get(valueIndex).toLowerCase();
         } catch (IndexOutOfBoundsException e) {
             return null;
         }

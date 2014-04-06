@@ -29,7 +29,7 @@ public class DescriptionKeyword extends Keyword{
     //else where.
     static {
         DescriptionKeyword newDescript = new DescriptionKeyword(IS_PROTOTYPE);
-        KeywordFactory.addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
+        KeywordFactory.getInstance().addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
     }
     
     public DescriptionKeyword(boolean isPrototype) {
