@@ -86,8 +86,7 @@ public class TaskDataManagerTest {
                 firstDeadline_1, 'M');
         expectedDeadlineTask_1.setTag("RECUR_0");
 
-        int currMth_1 = calendar_1.get(Calendar.MONTH);
-        calendar_1.set(Calendar.MONTH, currMth_1 + 4);
+        calendar_1.add(Calendar.MONTH, 4);
 
         try {
             assertEquals(
@@ -321,7 +320,7 @@ public class TaskDataManagerTest {
                 tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                         TaskType.TODO, null, 2, testDeleteTodo1)));
         assertEquals(2, tdmTest.getUncompletedTodoTasks().size());
-        
+
         assertEquals(3, tdmTest.getUncompletedDeadlineTasks().size());
         assertEquals("Deadline tasks.", new DeadlineTask("Lie down", new Date(
                 currDateMilliSec), 'H'), tdmTest.deleteTask(new DataParameter(
@@ -1087,12 +1086,10 @@ public class TaskDataManagerTest {
             // no more tag
             TodoTask expectedTodo4 = new TodoTask("Changed block to todo", 'L');
 
-            assertEquals(expectedTodo4,
-                    tdmTest.modifyTask(new DataParameter(
-                            "Changed block to todo", 'L', null, null,
-                            null, TaskType.TODO, 35, tdmTest.getBlockTasks()
-                                    .get("BLOCK_0").get(1), null, null, 0,
-                            null, null, true)));
+            assertEquals(expectedTodo4, tdmTest.modifyTask(new DataParameter(
+                    "Changed block to todo", 'L', null, null, null,
+                    TaskType.TODO, 35, tdmTest.getBlockTasks().get("BLOCK_0")
+                            .get(1), null, null, 0, null, null, true)));
             assertEquals(5, tdmTest.getUncompletedEventTasks().size());
             assertEquals(1, tdmTest.getUncompletedTodoTasks().size());
             assertNull(tdmTest.getBlockTasks().get("BLOCK_0"));
@@ -1108,6 +1105,8 @@ public class TaskDataManagerTest {
         TaskDataManager tdmTest = new TaskDataManager();
         Long currDateMilliSec = System.currentTimeMillis();
 
+        /* regular mark complete */
+        // Partition: to-do tasks
         Task<?> testMarkTodo1 = tdmTest.addTask(new DataParameter(
                 "Mark this TodoTask complete", 'M', null, null, null,
                 TaskType.TODO, 1));
@@ -1120,6 +1119,7 @@ public class TaskDataManagerTest {
         assertEquals(0, tdmTest.getUncompletedTodoTasks().size());
         assertEquals(1, tdmTest.getCompletedTodoTasks().size());
 
+        // Partition: deadline tasks
         Task<?> testMarkDeadline1 = tdmTest.addTask(new DataParameter(
                 "Mark this DeadlineTask complete", 'M', null, new Date(
                         currDateMilliSec), null, TaskType.DEADLINE, 123));
@@ -1134,6 +1134,7 @@ public class TaskDataManagerTest {
         assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
         assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
 
+        // Partition: event tasks
         Task<?> testMarkEvent1 = tdmTest.addTask(new DataParameter(
                 "Mark this EventTask complete", 'M',
                 new Date(currDateMilliSec), new Date(currDateMilliSec), null,
@@ -1147,6 +1148,141 @@ public class TaskDataManagerTest {
                         TaskType.EVENT, null, 1, testMarkEvent1)));
         assertEquals(0, tdmTest.getUncompletedEventTasks().size());
         assertEquals(1, tdmTest.getCompletedEventTasks().size());
-    }
 
+        tdmTest.resetTrees();
+
+        /* Mark recurring tasks as completed */
+        // Partition: recurring deadline tasks, until a certain date
+
+        Calendar recurDeadlineCal1 = Calendar.getInstance();
+        Calendar endRecurDeadlineCal1 = Calendar.getInstance();
+        recurDeadlineCal1.set(2014, 2, 23, 23, 59);
+        endRecurDeadlineCal1.set(2014, 3, 13, 23, 59);
+
+        try {
+            tdmTest.addTask(new DataParameter(
+                    "Completed recurring assignment.", 'L', null,
+                    recurDeadlineCal1.getTime(), null, TaskType.DEADLINE, 23,
+                    "RECUR", endRecurDeadlineCal1.getTime(), "WEEK", 1, null));
+            assertEquals(4, tdmTest.getUncompletedDeadlineTasks().size());
+            assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_0").size());
+
+            Calendar expectedCompletedDeadline1 = Calendar.getInstance();
+            expectedCompletedDeadline1.set(2014, 3, 6, 23, 59);
+            DeadlineTask expectedCompleteDeadlineRecur1 = new DeadlineTask(
+                    "Completed recurring assignment",
+                    expectedCompletedDeadline1.getTime(), 'L');
+            expectedCompleteDeadlineRecur1.setTag("RECUR_0");
+            expectedCompleteDeadlineRecur1.setCompleted(true);
+
+            // TODO: something wrong with comparing deadlineTasks
+            // assertEquals(expectedCompleteDeadlineRecur1,
+            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
+            // null, null, null, 231, tdmTest.getRecurringTasks()
+            // .get("RECUR_0").get(2), null, null, 0,
+            // null, null, false)));
+            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
+                            .get(2), null, null, 0, null, null, false));
+
+            assertEquals(3, tdmTest.getUncompletedDeadlineTasks().size());
+            assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_0").size());
+            assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
+
+            DeadlineTask expectedCompleteDeadlineRecur2 = new DeadlineTask(
+                    "Completed recurring assignment",
+                    recurDeadlineCal1.getTime(), 'L');
+            expectedCompleteDeadlineRecur2.setTag("RECUR_0");
+            expectedCompleteDeadlineRecur2.setCompleted(true);
+
+            // assertEquals(expectedCompleteDeadlineRecur2,
+            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
+            // null, null, null, 231, tdmTest.getRecurringTasks()
+            // .get("RECUR_0").get(2), null, null, 0,
+            // null, null, true)));
+
+            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
+                            .get(2), null, null, 0, null, null, true));
+
+            assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
+            assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));
+            assertEquals(4, tdmTest.getCompletedDeadlineTasks().size());
+
+            // Partition: recurring deadline tasks, forever
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+        /* Mark recurring event tasks as completed */
+        // Partition: recurring event tasks, until a certain date
+        // Partition: recurring event tasks, forever
+
+        /* Mark block tasks as completed */
+        // Partition: recurring deadline tasks, until a certain date
+
+        List<TimePair> blockEvent1TimePairs = new ArrayList<TimePair>();
+
+        Calendar blockStartEventCal1a = Calendar.getInstance();
+        Calendar blockEndEventCal1a = Calendar.getInstance();
+        blockStartEventCal1a.set(2014, 2, 23, 7, 00);
+        blockEndEventCal1a.set(2014, 2, 23, 10, 34);
+        blockEvent1TimePairs.add(new TimePair(blockStartEventCal1a.getTime(),
+                blockEndEventCal1a.getTime()));
+
+        Calendar blockStartEventCal1b = Calendar.getInstance();
+        Calendar blockEndEventCal1b = Calendar.getInstance();
+        blockStartEventCal1b.set(2014, 2, 24, 7, 00);
+        blockEndEventCal1b.set(2014, 2, 24, 9, 34);
+        blockEvent1TimePairs.add(new TimePair(blockStartEventCal1b.getTime(),
+                blockEndEventCal1b.getTime()));
+
+        Calendar blockStartEventCal1c = Calendar.getInstance();
+        Calendar blockEndEventCal1c = Calendar.getInstance();
+        blockStartEventCal1c.set(2014, 2, 24, 12, 00);
+        blockEndEventCal1c.set(2014, 2, 24, 14, 34);
+        blockEvent1TimePairs.add(new TimePair(blockStartEventCal1c.getTime(),
+                blockEndEventCal1c.getTime()));
+
+        try {
+            tdmTest.addTask(new DataParameter("completed block", 'L',
+                    blockStartEventCal1a.getTime(), blockEndEventCal1a
+                            .getTime(), null, TaskType.EVENT, 41, "BLOCK",
+                    null, null, 0, blockEvent1TimePairs));
+            assertEquals(3, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(3, tdmTest.getBlockTasks().get("BLOCK_0").size());
+
+            // Partition: mark one of the task as completed
+            EventTask expectedBlockEvent1 = new EventTask("completed block",
+                    blockStartEventCal1b.getTime(),
+                    blockEndEventCal1b.getTime(), 'L');
+            expectedBlockEvent1.setTag("BLOCK_0");
+            expectedBlockEvent1.setCompleted(true);
+
+            assertEquals(expectedBlockEvent1,
+                    tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                            null, null, null, 123, tdmTest.getBlockTasks()
+                                    .get("BLOCK_0").get(1), null, null, 0,
+                            null, null, false)));
+            assertEquals(2, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(2, tdmTest.getBlockTasks().get("BLOCK_0").size());
+            assertEquals(1, tdmTest.getCompletedEventTasks().size());
+
+            assertNull(tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                    null, null, null, 123, tdmTest.getBlockTasks()
+                            .get("BLOCK_0").get(1), null, null, 0, null, null,
+                    true)));
+            assertEquals(2, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(2, tdmTest.getBlockTasks().get("BLOCK_0").size());
+            assertEquals(1, tdmTest.getCompletedEventTasks().size());
+
+            // Partition: mark all as completed (not allowed)
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
