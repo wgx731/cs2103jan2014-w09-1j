@@ -18,17 +18,21 @@ public class PriorityKeyword extends Keyword {
     private static final int PREV = -1;
     private static final int NEXT = 1;
     private static final String INVALID_PRIORITY = "Invalid priority";
+    private static final StandardKeyword PRIORITY = SimpleKeyword.PRIORITY;
     
     private HashMap<String, String> _priorityValues;
     
-    public PriorityKeyword() {
-        super(StandardKeyword.PRIORITY);
+    static {
+        PriorityKeyword newPriority = new PriorityKeyword(IS_PROTOTYPE);
+        KeywordFactory.addAliasEntry(PRIORITY.getFormattedKeyword(), newPriority);
     }
-
-    @Override
-    protected void initAlias() {
-        addAlias(getType().getKeyword());
-        addAlias("p");
+    
+    public PriorityKeyword(boolean isPrototype) {
+        super(PRIORITY, isPrototype);
+    }
+    
+    public PriorityKeyword() {
+        this(IS_NOT_PROTOTYPE);
     }
 
     @Override
@@ -49,31 +53,29 @@ public class PriorityKeyword extends Keyword {
      * its keyword.
      */
     public ArrayList<String> processKeyword(ArrayList<String> tokens,
-                                            int currIndex) throws ParseException {
+                                            int currIndex, Argument argument) throws ParseException {
         
         assert(tokens!=null);
         
         String keyword = tokens.get(currIndex);
-
-        assert(containsAlias(keyword)); //Make sure it's the right keyword
         
         if (hasDelimiter(keyword)) {
-            tokens = processPriorityValue(tokens, currIndex, NEXT);
+            tokens = processPriorityValue(tokens, currIndex, NEXT, argument);
         } else if (isValidPriorityPrefix(tokens, currIndex)) {
-            tokens = processPriorityValue(tokens, currIndex, PREV);
+            tokens = processPriorityValue(tokens, currIndex, PREV, argument);
         } else {
-            tokens = processPriorityValue(tokens, currIndex, NEXT);
+            tokens = processPriorityValue(tokens, currIndex, NEXT, argument);
         }
-
+        
         return tokens;
     }
 
     private ArrayList<String> processPriorityValue(ArrayList<String> tokens,
-                                                    int currIndex, int nextIndex) throws ParseException{
+                                                    int currIndex, int nextIndex, Argument arguments) throws ParseException{
         int valueIndex = currIndex + nextIndex;
         String value = getValidValue(tokens, valueIndex); 
         if(value!=null) {
-            setValue(value);
+            arguments.setKeywordValue(_type, value);
             tokens = updateTokens(tokens, currIndex, valueIndex);
         } else {
             throw new ParseException(INVALID_PRIORITY, 0);
@@ -131,6 +133,11 @@ public class PriorityKeyword extends Keyword {
     
     private boolean hasDelimiter(String keyword) {
         return keyword.startsWith(StandardKeyword.DELIMITER);
+    }
+
+    @Override
+    protected Keyword createKeyword() {
+        return new PriorityKeyword();
     }
 
 }

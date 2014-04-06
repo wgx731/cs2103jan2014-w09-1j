@@ -23,17 +23,21 @@ import org.apache.logging.log4j.Logger;
 public class DescriptionKeyword extends Keyword{
     
     private static final Logger logger = LogManager.getLogger(DescriptionKeyword.class.getName());
+    private static final StandardKeyword DESCRIPTION = SimpleKeyword.DESCRIPTION;
+    
+    //Static initalizer to add entry to KeywordFactory. This is only for standard keyword, alias will be added
+    //else where.
+    static {
+        DescriptionKeyword newDescript = new DescriptionKeyword(IS_PROTOTYPE);
+        KeywordFactory.addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
+    }
+    
+    public DescriptionKeyword(boolean isPrototype) {
+        super(DESCRIPTION, isPrototype);
+    }
     
     public DescriptionKeyword() {
-        super(StandardKeyword.DESCRIPTION);
-    }
-
-    @Override
-    protected void initAlias() {
-        
-        addAlias(getType().getKeyword());
-        addAlias("descript");
-
+        this(IS_NOT_PROTOTYPE);
     }
     
     @Override
@@ -41,31 +45,23 @@ public class DescriptionKeyword extends Keyword{
        return; 
     }
     
-    @Override
     /**
      * Process keyword by using the current tokens and current index
      * For description, tokens are processed one-by-one.
-     * 
      * 
      * @param tokens The arraylist in question
      * @param currindex the index where the the keyword should start
      * @return the tokens of which all of its
      */
     public ArrayList<String> processKeyword(ArrayList<String> tokens,
-                                            int currIndex) throws ParseException {
-        
+                                            int currIndex, Argument argument) throws ParseException {
         logger.info("Adding description");
-        String description = extractWord(tokens, currIndex);
-        setValue(description);
+        String description = extractWord(tokens, currIndex, argument);
         tokens = updateTokens(tokens, currIndex);
         
+        argument.setKeywordValue(_type, description);
+        
         return tokens;
-    }
-    
-    @Override
-    public String getValue() {
-        logger.info("returning " + _value);
-        return _value.trim();
     }
     
     private ArrayList<String> updateTokens(ArrayList<String> tokens, int currIndex) {
@@ -73,20 +69,29 @@ public class DescriptionKeyword extends Keyword{
         return tokens;
     }
 
-    private String extractWord(ArrayList<String> tokens, int currIndex) {
+    private String extractWord(ArrayList<String> tokens, int currIndex, Argument argument) {
         
-        StringBuilder descriptBuilder = new StringBuilder(_value);
+        String oldDescript = argument.getKeywordValue(_type);
+        StringBuilder descriptBuilder;
+        
+        if (oldDescript==null) {
+            descriptBuilder = new StringBuilder();
+        } else {
+            descriptBuilder = new StringBuilder(oldDescript); 
+        }
+        
         String word = tokens.get(currIndex);
         
-        logger.info("Appending " + word + " to " + _value);
+        logger.info("Appending " + word + " to " + oldDescript);
         
         descriptBuilder.append(word);
-        descriptBuilder.append(" ");
        
         return descriptBuilder.toString();
     }
 
-
+    @Override
+    protected Keyword createKeyword() {
+        return new DescriptionKeyword();
+    }
     
-
 }

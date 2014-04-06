@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
@@ -75,15 +76,15 @@ public class CommandParser {
     private static final String SPACE = " ";
     
     //Specifying argument keys
-    private static final StandardKeyword ACTION = StandardKeyword.ACTION;
-    private static final StandardKeyword TASKID = StandardKeyword.TASKID;
-    private static final StandardKeyword PRIORITY = StandardKeyword.PRIORITY;
-    private static final StandardKeyword DESCRIPTION = StandardKeyword.DESCRIPTION;
-    private static final StandardKeyword END = StandardKeyword.END;
-    private static final StandardKeyword START = StandardKeyword.START;
-    private static final StandardKeyword TO_TASK_TYPE = StandardKeyword.TO_TASK_TYPE;
-    private static final StandardKeyword RECURRING = StandardKeyword.RECURRING;
-    private static final StandardKeyword UNTIL = StandardKeyword.UNTIL;
+    //private static final StandardKeyword ACTION = SimpleKeyword.COMMAND;
+    private static final StandardKeyword TASKID = SimpleKeyword.TASKID;
+    private static final StandardKeyword PRIORITY = SimpleKeyword.PRIORITY;
+    private static final StandardKeyword DESCRIPTION = SimpleKeyword.DESCRIPTION;
+    private static final StandardKeyword END = SimpleKeyword.END;
+    private static final StandardKeyword START = SimpleKeyword.START;
+    private static final StandardKeyword TO_TASK_TYPE = SimpleKeyword.TO_TASK_TYPE;
+    private static final StandardKeyword RECURRING = SimpleKeyword.RECURRING;
+    private static final StandardKeyword UNTIL = SimpleKeyword.UNTIL;
     
     private static final HashMap<String, String> ACTIONS_KEYWORDS = new HashMap<String, String>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
@@ -140,7 +141,7 @@ public class CommandParser {
     private static final Integer NO_SEC = 0;
     private static final Integer NO_NANO_SEC = 0;
     
-    private LinkedHashMap<StandardKeyword, String> _arguments;
+    private LinkedHashMap<String, String> _arguments;
     
     private enum ActionsTaskID{
         MODIFY(CommandParser.MODIFY),
@@ -389,32 +390,34 @@ public class CommandParser {
         logger.info("Original: " + userInput);
         StringBuilder description = new StringBuilder();
         
+        boolean skipOld = false;
+        
         //TODO new parsing
-//        for (int i = 0; i < dTokens.size(); i++) {
-//            
-//            String segment = getSegment(dTokens, i);
-//            String keyword = dTokens.get(i).toLowerCase();
-//            
-//            if (keyword.equals(PRIORITY.getKeyword()) && !hasValue(PRIORITY) && isWrapped) {
-//                logger.info("Checking priority");
-//                int prevIndex = i - 1;
-//                if (prevIndex>=0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
-//                    addPriority(dTokens.get(prevIndex));
-//                    continue;
-//                } else {
-//                    keyFlags.put(PRIORITY_FLAG, true);
-//                    continue;
-//                }
-//            }
-//
-//            if (keyword.equals("-priority") && !hasValue(PRIORITY)) {
-//                keyFlags.put(PRIORITY_FLAG, true);
-//                continue;
-//            }
-//        }
+        for (int i = 0; i < dTokens.size() && skipOld; i++) {
+            
+            String segment = getSegment(dTokens, i);
+            String keyword = dTokens.get(i).toLowerCase();
+            
+            if (keyword.equals(PRIORITY.getKeyword()) && !hasValue(PRIORITY) && isWrapped) {
+                logger.info("Checking priority");
+                int prevIndex = i - 1;
+                if (prevIndex>=0 && isValidPriorityValue(dTokens.get(prevIndex)) ) {
+                    addPriority(dTokens.get(prevIndex));
+                    continue;
+                } else {
+                    keyFlags.put(PRIORITY_FLAG, true);
+                    continue;
+                }
+            }
+
+            if (keyword.equals("-priority") && !hasValue(PRIORITY)) {
+                keyFlags.put(PRIORITY_FLAG, true);
+                continue;
+            }
+        }
         
         //XXX Old parsing
-        boolean skipOld = false;
+        
         for (int i = 0; i < dTokens.size() && !skipOld; i++) {
            
             String keyword = dTokens.get(i).toLowerCase();
@@ -1350,7 +1353,8 @@ public class CommandParser {
     }
 
     private void initArgMap() {
-        _arguments = new LinkedHashMap<StandardKeyword, String>();
+        _arguments = new LinkedHashMap<String, String>();
+        _argum
         for (StandardKeyword type: StandardKeyword.values()) {
             if(type!=StandardKeyword.COMPOSITE){
                 _arguments.put(type, null);

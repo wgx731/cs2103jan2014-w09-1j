@@ -11,25 +11,29 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.Argument;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.DescriptionKeyword;
+import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 
 public class DescriptionKeywordTest {
     
     private DescriptionKeyword descript;
-    private static String control;
     private ArrayList<String> tokens;
+    private Argument argument;
     
+    private static String control;
     private static Logger logger;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         logger = LogManager.getLogger(DescriptionKeywordTest.class.getName());
         
-        control = "hello bye world what";
+        control = "hello bye world what ";
     }
     
     @Before
     public void setUp() {
+        argument = new Argument();
         tokens = new ArrayList<String>();
         String[] tokensArr = control.split(" ");
         descript = new DescriptionKeyword();
@@ -44,7 +48,7 @@ public class DescriptionKeywordTest {
         
         logger.info("Testing to see if tokens are updated with null value in place");
         
-        tokens = descript.processKeyword(tokens, 0);
+        tokens = descript.processKeyword(tokens, 0, argument);
         int size = tokens.size();
         
         assertNull(tokens.get(0));
@@ -57,10 +61,10 @@ public class DescriptionKeywordTest {
         logger.info("Testing to see if descriptions are added correctly.");
         
         for (int i=0; i<tokens.size(); i++) {
-            tokens = descript.processKeyword(tokens, i);
+            tokens = descript.processKeyword(tokens, i, argument);
             logger.info("tokens are: " + tokens.toString());
         }
-        assertEquals(control, descript.getValue());
+        assertEquals(control, argument.getKeywordValue(SimpleKeyword.DESCRIPTION));
         
         //check to see whether we have all nulls
         logger.info("Testing to see if all of entires are nullified");

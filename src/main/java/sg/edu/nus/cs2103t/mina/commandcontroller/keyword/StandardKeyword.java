@@ -10,40 +10,9 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
  * @author joannemah
  */
 
-/**
- * This enum contains standard keywords that CommandProcessor recognized 
- * (with the exception of COMPOSITE (that's only for CommandParser) )
- */
-public enum StandardKeyword {
-    
-    //Add your standard keywords here
-    COMPOSITE("composite"),
-    ACTION("action"), 
-    TASKID("taskid"), 
-    TO_TASK_TYPE("totype"), 
-    DESCRIPTION("description"), 
-    START("start"), 
-    END("end"), 
-    RECURRING("every"), 
-    UNTIL("until"), 
-    PRIORITY("priority");
-    
+public interface StandardKeyword {
     public static final String DELIMITER = "-";
-    private String _keyword;
-
-    private StandardKeyword(String keyword) {
-        _keyword = keyword;
-    }
-
-    public String getKeyword() {
-        return _keyword;
-    }
-
-    public String getFormattedKeyword() {
-        return DELIMITER + _keyword;
-    }
-    
-    public static String getFormattedKeyword(String keyword) {
-        return DELIMITER + keyword;
-    }
+    public String getFilePrefix();
+    public String getFormattedKeyword();
+    public String getKeyword();
 }
