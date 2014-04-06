@@ -468,12 +468,15 @@ public class MinaGuiUI extends MinaView {
 				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS) {
 					setAutoComplete();
 				}
-				if (event.stateMask == SWT.CTRL && event.keyCode == SWT.F11) {
+				if (event.keyCode == SWT.F11||(event.stateMask == SWT.CTRL && event.keyCode == 'e')) {
 					if (_isExpanded) {
 						resetPanel();
 					} else {
 						expand();
 					}
+				}
+				if (event.keyCode == SWT.F1||(event.stateMask == SWT.CTRL && event.keyCode=='h')) {
+					startHelpWindows();
 				}
 				if (event.keyCode == SWT.CR) {
 					showBusyStatus();
