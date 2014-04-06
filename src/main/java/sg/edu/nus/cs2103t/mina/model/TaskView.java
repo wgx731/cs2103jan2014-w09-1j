@@ -24,7 +24,13 @@ public class TaskView {
     public static int ITEMS_PER_PAGE = 1;
     public static final int ITEMS_PER_PAGE_EVENT = 4;
     public static final int ITEMS_PER_PAGE_DEADLINE = 5;
-    public static final int ITEMS_PER_PAGE_TODO = 7;    
+    public static final int ITEMS_PER_PAGE_TODO = 7; 
+    
+    private int CUR_PAGE = 0;
+    private int TAB_EDITED = -1;
+    
+    private int CUR_PAGE_ALT = 0;
+    private int TAB_EDITED_ALT = -1;
     
     public TaskView(String status, 
                     HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
@@ -88,6 +94,38 @@ public class TaskView {
     
     public int maxEventPage(){
     	return (getEvents().size()+eventPageSize()-1)/eventPageSize();
+    }
+    
+    public void setCurPage(int page){
+    	CUR_PAGE = page;
+    }
+    
+    public int getCurPage(){
+    	return CUR_PAGE;
+    }
+    
+    public void setTabEdited(int tabNum){
+    	TAB_EDITED = tabNum;
+    }
+    
+    public int getTabEdited(){
+    	return TAB_EDITED;
+    }
+    
+    public void setCurPageAlt(int page){
+    	CUR_PAGE_ALT = page;
+    }
+    
+    public int getCurPageAlt(){
+    	return CUR_PAGE_ALT;
+    }
+    
+    public void setTabEditedAlt(int tabNum){
+    	TAB_EDITED_ALT = tabNum;
+    }
+    
+    public int getTabEditedAlt(){
+    	return TAB_EDITED_ALT;
     }
     
     public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{

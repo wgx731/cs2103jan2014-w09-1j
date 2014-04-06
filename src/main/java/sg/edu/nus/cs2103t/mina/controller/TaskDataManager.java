@@ -978,10 +978,17 @@ public class TaskDataManager {
     }
 
     private Task<?> modifyRegTask(DataParameter modifyParameters) {
-        Task<?> prevTask = deleteTask(modifyParameters);
-        if (prevTask == null) {
+        if (modifyParameters.getTaskObject() == null || modifyParameters
+                .getNewTaskType() == TaskType.UNKNOWN) {
             return null;
         } else {
+            
+            Task<?> prevTask = deleteTask(modifyParameters);
+            
+            if (prevTask == null) {
+                return null;
+            }
+
             DataParameter newSetOfParameters = createNewParameters(
                     modifyParameters, prevTask);
 
