@@ -1219,6 +1219,77 @@ public class TaskDataManagerTest {
         /* Mark recurring event tasks as completed */
         // Partition: recurring event tasks, until a certain date
         // Partition: recurring event tasks, forever
+        Calendar recurStartEventCal1 = Calendar.getInstance();
+        Calendar recurEndEventCal1 = Calendar.getInstance();
+        Calendar recurUntilEventCal1 = Calendar.getInstance();
+
+        recurStartEventCal1.set(2014, 2, 23, 20, 59);
+        recurEndEventCal1.set(2014, 2, 23, 23, 59);
+        recurUntilEventCal1.set(2014, 3, 13, 23, 59);
+
+        try {
+            tdmTest.addTask(new DataParameter(
+                    "Completed recurring assignment.", 'L', recurStartEventCal1
+                            .getTime(), recurEndEventCal1.getTime(), null,
+                    TaskType.EVENT, 23, "RECUR", recurUntilEventCal1.getTime(),
+                    "WEEK", 1, null));
+            assertEquals(4, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_1").size());
+
+            Calendar recurStartEventCal1c = Calendar.getInstance();
+            Calendar recurEndEventCal1c = Calendar.getInstance();
+
+            recurStartEventCal1c.set(2014, 3, 6, 20, 59);
+            recurEndEventCal1c.set(2014, 3, 6, 23, 59);
+
+            EventTask expectedCompleteEventRecur1 = new EventTask(
+                    "Completed recurring assignment",
+                    recurStartEventCal1c.getTime(),
+                    recurEndEventCal1c.getTime(), 'L');
+            expectedCompleteEventRecur1.setTag("RECUR_1");
+            expectedCompleteEventRecur1.setCompleted(true);
+
+            // TODO: something wrong
+            // assertEquals(expectedCompleteEventRecur1,
+            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
+            // null, null, null, 231, tdmTest.getRecurringTasks()
+            // .get("RECUR_1").get(2), null, null, 0,
+            // null, null, false)));
+            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
+                            .get(2), null, null, 0, null, null, false));
+
+            assertEquals(3, tdmTest.getUncompletedEventTasks().size());
+            assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
+            assertEquals(1, tdmTest.getCompletedEventTasks().size());
+
+            EventTask expectedCompleteEventRecur2 = new EventTask(
+                    "Completed recurring assignment",
+                    recurStartEventCal1.getTime(), recurEndEventCal1.getTime(),
+                    'L');
+            expectedCompleteEventRecur2.setTag("RECUR_1");
+            expectedCompleteEventRecur2.setCompleted(true);
+
+            // TODO: something wrong
+            // assertEquals(expectedCompleteEventRecur2,
+            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
+            // null, null, null, 231, tdmTest.getRecurringTasks()
+            // .get("RECUR_1").get(2), null, null, 0,
+            // null, null, true)));
+            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
+                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
+                            .get(2), null, null, 0, null, null, true));
+
+            assertEquals(0, tdmTest.getUncompletedEventTasks().size());
+            assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));
+            assertEquals(4, tdmTest.getCompletedEventTasks().size());
+
+            // Partition: recurring deadline tasks, forever
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
 
         /* Mark block tasks as completed */
         // Partition: recurring deadline tasks, until a certain date
@@ -1268,7 +1339,7 @@ public class TaskDataManagerTest {
                             null, null, false)));
             assertEquals(2, tdmTest.getUncompletedEventTasks().size());
             assertEquals(2, tdmTest.getBlockTasks().get("BLOCK_0").size());
-            assertEquals(1, tdmTest.getCompletedEventTasks().size());
+            assertEquals(5, tdmTest.getCompletedEventTasks().size());
 
             assertNull(tdmTest.markCompleted(new DataParameter(null, 'M', null,
                     null, null, null, 123, tdmTest.getBlockTasks()
@@ -1276,7 +1347,7 @@ public class TaskDataManagerTest {
                     true)));
             assertEquals(2, tdmTest.getUncompletedEventTasks().size());
             assertEquals(2, tdmTest.getBlockTasks().get("BLOCK_0").size());
-            assertEquals(1, tdmTest.getCompletedEventTasks().size());
+            assertEquals(5, tdmTest.getCompletedEventTasks().size());
 
             // Partition: mark all as completed (not allowed)
 

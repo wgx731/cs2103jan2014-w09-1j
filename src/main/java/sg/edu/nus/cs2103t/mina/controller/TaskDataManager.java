@@ -1062,7 +1062,7 @@ public class TaskDataManager {
 
             }
 
-            if (prevTask.equals(TaskType.EVENT)) {
+            if (prevTask.getType().equals(TaskType.EVENT)) {
                 for (int i = 0; i < listSize; i++) {
                     ;
                     currTask = _recurringTasks.get(prevTask.getTag()).get(i);
@@ -1108,6 +1108,7 @@ public class TaskDataManager {
             }
 
         }
+        
         return null;
     }
 
