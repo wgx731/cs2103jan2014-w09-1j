@@ -216,6 +216,7 @@ public class CommandProcessor {
                 HashMap<TaskType, ArrayList<Task<?>>> filterResult;
                 filterResult = _taskFilterManager.filterTask(filterParam);
                 _taskView = new TaskView(RESULTS_DISPLAYED, filterResult);
+                _commandHistory.updateLatestFilter(processFilterParameter(filterParameterString));
                 break;
             }
             case SEARCH : {
@@ -441,35 +442,35 @@ public class CommandProcessor {
 
     private TaskView updatedTaskView(String statusMessage) {
         return new TaskView(statusMessage,
-                _taskFilterManager.filterTask(new FilterParameter()));
+                _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
     }
 
     private TaskView errorCommandReturn(CommandType type) {
         switch (type) {
             case ADD :
                 return new TaskView(ADD_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case DELETE :
                 return new TaskView(DELETE_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case MODIFY :
                 return new TaskView(MODIFY_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case COMPLETE :
                 return new TaskView(COMPLETE_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case UNDO :
                 return new TaskView(UNDO_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case REDO :
                 return new TaskView(REDO_ERROR_MESSAGE,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             case INVALID :
                 return new TaskView(INVALID_COMMAND,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
             default :
                 return new TaskView(INVALID_COMMAND,
-                        _taskFilterManager.filterTask(new FilterParameter()));
+                        _taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
         }
     }
 
