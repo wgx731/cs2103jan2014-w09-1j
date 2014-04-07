@@ -83,7 +83,10 @@ public class DescriptionKeyword extends Keyword{
         }
         
         String word = tokens.get(currIndex);
-        
+        //Ignore -description flag
+        if(word.equalsIgnoreCase(DESCRIPTION.getFormattedKeyword())) {
+            return descriptBuilder.toString();
+        }
         logger.info("Appending " + word + " to " + oldDescript);
         
         descriptBuilder.append(word);

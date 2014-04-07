@@ -66,13 +66,6 @@ public abstract class CommandFormat{
      */
     public CommandFormat(CommandType commandType, String argumentStr) throws IllegalArgumentException{
         
-        
-        setAcceptedCommand(new HashSet<CommandType>());
-        initAcceptedCommands();
-        
-        if(!isValidCommandType(commandType)) {
-            throw new IllegalArgumentException("CommandType cannot be used for this command format");
-        }
         setCommandType(commandType);
         initArgument(argumentStr);
     }
@@ -86,15 +79,33 @@ public abstract class CommandFormat{
         _commandType = type;
     }
     
-    protected void setAcceptedCommand(HashSet<CommandType> acceptedCommands) {
-        _acceptedCommands = acceptedCommands;
-    }
-    
-    private boolean isValidCommandType(CommandType commandType) {
-        return _acceptedCommands.contains(commandType); 
-    }
     
     //Shared methods that all other CommandKeyword will use
+    
+    protected String trimmedCommand(StringBuilder properCommand) {
+        return properCommand.toString().trim();
+    }
+
+    private StringBuilder appendWord(StringBuilder properCommand, String word){
+        properCommand.append(word);
+        properCommand.append(" ");
+        return properCommand;
+    }
+    
+    protected StringBuilder appendValue(StringBuilder properCommand,
+                                        StandardKeyword keyword) {
+        String value = _argument.getKeywordValue(keyword).trim();
+        return appendWord(properCommand, value);
+    }
+
+    protected StringBuilder appendKeyword(StringBuilder properCommand,
+                                        StandardKeyword keyword) {
+        String key = keyword.getFormattedKeyword();
+        String value = _argument.getKeywordValue(keyword).trim();
+        String keyValue = String.format(KEYWORD_VALUE_PAIR, key, value);
+        
+        return appendWord(properCommand, keyValue);
+    }
     
     protected void addAcceptedCommand(CommandType type) {
         _acceptedCommands.add(type);
@@ -261,11 +272,18 @@ public abstract class CommandFormat{
         return processKeyword(tokens, i, descriptKeyword);
     }
     
-    private ArrayList<String> tokenize(String segment) {
+    protected ArrayList<String> tokenize(String segment) {
         logger.info("Segregating segment: " + segment);
         String[] tokens = segment.trim().split(" ");
         ArrayList<String> dTokens = new ArrayList<String>();
-        Collections.addAll(dTokens, tokens);
+        
+        for(int i=0; i<tokens.length; i++) {
+            String token = tokens[i].trim();
+            if (!token.equals("")) {
+                dTokens.add(token);
+            }
+        }
+        
         return dTokens;    
     }
     
@@ -292,5 +310,4 @@ public abstract class CommandFormat{
     protected abstract void preProcessArgument() throws ParseException;
     protected abstract void postProcessing(ArrayList<String> tokens);
     protected abstract String getProperArgument(String properCommand);
-    protected abstract void initAcceptedCommands();
 }

@@ -24,7 +24,13 @@ public class Argument {
     }
     
     public void setKeywordValue(StandardKeyword key, String value) {
-        value = value.trim() + " ";
+        
+        if(value==null){
+            value = null;
+        } else {
+            value = value.trim() + " ";
+        }
+        
         _arguments.put(key, value);
     }
     

@@ -439,62 +439,7 @@ public class CommandParserTest {
         variation = "add -description what";
         result = parser.convertCommand(variation);
         assertEquals("add -description what", result);
-        
-        //For modify
-        variation = "modify todo 1 'whahaha' priority high";
-        result = parser.convertCommand(variation);
-        assertEquals("modify todo 1 -description whahaha -priority H", result);
-        
-        variation = "modify event 100 'whahaha' from 7am to 1pm";
-        result = parser.convertCommand(variation);
-        resultDate = today.format("DDMMYYYY");
-        start = resultDate + "070000";
-        end = resultDate + "130000";
-        assertEquals("modify event 100 -description whahaha -start " + start +
-                    " -end " + end, result);
-        
-        //For changing task type
-        variation = "modify deadline 5 changeto event 'whahaha' from tmr 3am";
-        result = parser.convertCommand(variation);
-        tmr = today.plusDays(1);
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
-    
-        //For shorten id
-        variation = "modify d5 changeto event 'whahaha' from tmr 3am";
-        result = parser.convertCommand(variation);     
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
 
-        //For shorten id
-        variation = "modify d5 -changeto event -from tmr 3am";
-        result = parser.convertCommand(variation);     
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -start " + start, result);
-
-        //delete with shorten id
-        variation = "delete td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);
-        
-        //remove with shorten id
-        variation = "remove td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);
-        
-        //complete with shorten id
-        variation = "complete td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("complete todo 1", result);
-        
-        //complete with id
-        variation = "complete event 9999";
-        result = parser.convertCommand(variation);  
-        assertEquals("complete event 9999", result);   
-        
         //filter no special
         variation = "filter deadline complete";
         result = parser.convertCommand(variation);  
@@ -884,10 +829,62 @@ public class CommandParserTest {
                 result);        
     }
     
-    @Ignore
     @Test
     public void testModify() throws ParseException{
-     
+        variation = "modify todo 1 'whahaha' priority high";
+        result = parser.convertCommand(variation);
+        assertEquals("modify todo 1 -description whahaha -priority H", result);
+        
+        variation = "modify event 100 'whahaha' from 7am to 1pm";
+        result = parser.convertCommand(variation);
+        String resultDate = today.format("DDMMYYYY");
+        start = resultDate + "070000";
+        end = resultDate + "130000";
+        assertEquals("modify event 100 -description whahaha -start " + start +
+                    " -end " + end, result);
+        
+        //For changing task type
+        variation = "modify deadline 5 changeto event 'whahaha' from tmr 3am";
+        result = parser.convertCommand(variation);
+        DateTime tmr = today.plusDays(1);
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
+    
+        //For shorten id
+        variation = "modify d5 changeto event 'whahaha' from tmr 3am";
+        result = parser.convertCommand(variation);     
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
+
+        //For shorten id
+        variation = "modify d5 -changeto event -from tmr 3am";
+        result = parser.convertCommand(variation);     
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -start " + start, result);
+        
+        //delete with shorten id
+        variation = "delete td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);
+        
+        //remove with shorten id
+        variation = "remove td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);
+        
+        //complete with shorten id
+        variation = "complete td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("complete todo 1", result);
+        
+        //complete with id
+        variation = "complete event 9999";
+        result = parser.convertCommand(variation);  
+        assertEquals("complete event 9999", result);   
+        
     }
     
     @Test

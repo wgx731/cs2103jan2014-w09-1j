@@ -63,37 +63,6 @@ public class CommandOnlyKeywordValues extends CommandFormat{
         
         return trimmedCommand(commandBuilder);
     }
-    
-    private String trimmedCommand(StringBuilder properCommand) {
-        return properCommand.toString().trim();
-    }
-
-    private StringBuilder appendWord(StringBuilder properCommand, String word){
-        properCommand.append(word);
-        properCommand.append(" ");
-        return properCommand;
-    }
-    
-    private StringBuilder appendValue(StringBuilder properCommand,
-                                        StandardKeyword keyword) {
-        String value = _argument.getKeywordValue(keyword).trim();
-        return appendWord(properCommand, value);
-    }
-
-    private StringBuilder appendKeyword(StringBuilder properCommand,
-                                        StandardKeyword keyword) {
-        String key = keyword.getFormattedKeyword();
-        String value = _argument.getKeywordValue(keyword).trim();
-        String keyValue = String.format(KEYWORD_VALUE_PAIR, key, value);
-        
-        return appendWord(properCommand, keyValue);
-    }
-
-    @Override
-    protected void initAcceptedCommands() {
-        addAcceptedCommand(CommandType.ADD);
-        addAcceptedCommand(CommandType.DISPLAY);
-    }
 
     @Override
     protected void preProcessArgument() throws ParseException {

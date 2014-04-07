@@ -4,6 +4,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+
 /**
  * Priority keyword.
  * 
@@ -21,6 +25,9 @@ public class PriorityKeyword extends Keyword {
     private static final StandardKeyword PRIORITY = SimpleKeyword.PRIORITY;
     
     private HashMap<String, String> _priorityValues;
+    
+    private static Logger logger = LogManager.getLogger(PriorityKeyword.class
+            .getName());
     
     static {
         PriorityKeyword newPriority = new PriorityKeyword();
@@ -59,6 +66,8 @@ public class PriorityKeyword extends Keyword {
         assert(tokens!=null);
         
         String keyword = tokens.get(currIndex);
+        
+        logger.info("Getting priority from: " + tokens.toString() + " " + currIndex);
         
         if (hasDelimiter(keyword)) {
             tokens = processPriorityValue(tokens, currIndex, NEXT, argument);
@@ -111,9 +120,9 @@ public class PriorityKeyword extends Keyword {
         
         try{
             key = tokens.get(valueIndex).toLowerCase();
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException|NullPointerException e) {
             return null;
-        }
+        } 
         
         if(_priorityValues.containsKey(key)) {
             return _priorityValues.get(key);
