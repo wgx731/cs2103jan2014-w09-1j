@@ -68,13 +68,14 @@ public class CommandParser {
     private static final String EVERY_YEAR = "year";
     private static final String EVERY_HOUR = "hour";
 
-    private static final int NEXT = 1;
+   
 
     private static final Integer ONE_YEAR = 1;
     private static final Integer ONE_MONTH = 1;
     private static final Integer ONE_WEEK = 7;
     private static final int ONE_DAY = 1;
-
+    
+    private static final int NEXT = 1;
     private static final int ACTION_INDEX = 0;
     private static final String SPACE = " ";
 
@@ -156,8 +157,7 @@ public class CommandParser {
     public CommandParser() {
 
         KeywordFactory keywordFactory = KeywordFactory.getInstance();
-        
-        
+                
         
         ACTIONS_KEYWORDS.put("add", ADD);
         ACTIONS_KEYWORDS.put("make", ADD);

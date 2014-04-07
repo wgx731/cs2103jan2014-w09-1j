@@ -80,6 +80,10 @@ public class CommandParserTest {
     
     private static String displayControlType;
     
+    private static DateTime thisFri, thisWed, thisSunday, 
+                            nextFri, nextWed, nextSunday,
+                            threeDays, fourWeeks, fiveMonths, sixYears;
+    
     private static DateTime today;
     private static Logger logger;
 
@@ -149,6 +153,29 @@ public class CommandParserTest {
                 displayControlType+= " " + filter.getType();
             }
         }
+        
+        // Date phrases
+        //wed //sun //fri
+        int sun = 7;
+        int wed = 3;
+        int fri = 5;
+        int weekday = (today.getWeekDay() + 6) % 7;
+        thisSunday = today.plusDays(sun-weekday);
+        thisWed = today.plusDays(wed-weekday);
+        thisFri = today.plusDays(fri-weekday);
+        nextSunday = thisSunday.plusDays(7);
+        nextWed = thisWed.plusDays(7);
+        nextFri = thisFri.plusDays(7);
+        
+        // Dynamic Date phrases
+        //3 days
+        threeDays = today.plus(0, 0, 3, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //4 weeks
+        fourWeeks = today.plus(0, 0, 4*7, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //5 months
+        fiveMonths = today.plus(0, 5, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //6 years
+        sixYears = today.plus(6, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
     }
 
     @Before
@@ -626,7 +653,7 @@ public class CommandParserTest {
      * @throws Exception
      */
     @Test
-    public void testAddDateFormat() throws Exception {
+    public void testDateFormat() throws Exception {
 
         logger.info("Today's date is: " + today.toString());
 
@@ -716,6 +743,61 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);
         logger.info(variation);
         assertEquals(addEventControlToday, result);   
+        
+        //date phrase this wednesday ORDER_EVENT_SDE
+        String thisWedStr = thisWed.format("DDMMYYYY");
+        String thisFriStr = thisFri.format("DDMMYYYY");
+        start = "-from this wednesday 3am";
+        end = "-end friday 4am";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        String expected = "add " + EVENT_DESCRIPTION + " -start " + thisWedStr + "030000 " + "-end " + thisFriStr + "040000";
+        logger.info(variation);
+        assertEquals(expected, result); 
+        
+        //date phrase next wednesday
+        String nextWedStr = nextWed.format("DDMMYYYY");
+        String nextSunStr = nextSunday.format("DDMMYYYY");
+        start = "-from next wednesday 11:00am";
+        end = "-end next sunday";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + nextWedStr + "110000 " + "-end " + nextSunStr + "235959";
+        logger.info(variation);
+        assertEquals(expected, result); 
+        
+        //date phrase 3 days
+        String threeDaysStr = threeDays.format("DDMMYYYY");
+        start = "-from next 3 days 11:00pm";
+        end = "-end next sunday";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + threeDaysStr + "230000 " + "-end " + nextSunStr + "235959";
+        logger.info(variation);
+        assertEquals(expected, result);        
+        
+        //date phrase 4 weeks
+        String fourWeeksStr = fourWeeks.format("DDMMYYYY");
+        String nextFriStr = nextFri.format("DDMMYYYY");
+        start = "-from next fri 22:39";
+        end = "-end next 4 week 0900";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SED, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + nextFriStr + "223900 " + "-end " + fourWeeksStr + "090000";
+        logger.info(variation);
+        assertEquals(expected, result);       
+        
+        //date phrase 5 months
+        //date phrase 6 years
+        String fiveMonthsStr = fiveMonths.format("DDMMYYYY");
+        String sixYearsStr = sixYears.format("DDMMYYYY");
+        start = "-from next 5 months 10.46am";
+        end = "-end next 6 years 9am";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_EDS, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + fiveMonthsStr + "104600 " + "-end " + sixYearsStr + "090000";
+        logger.info(variation);
+        assertEquals(expected, result);   
         
     }
 

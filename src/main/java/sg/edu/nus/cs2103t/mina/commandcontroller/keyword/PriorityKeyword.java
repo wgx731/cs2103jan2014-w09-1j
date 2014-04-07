@@ -23,16 +23,16 @@ public class PriorityKeyword extends Keyword {
     private HashMap<String, String> _priorityValues;
     
     static {
-        PriorityKeyword newPriority = new PriorityKeyword(IS_PROTOTYPE);
-        KeywordFactory.getInstance().addAliasEntry(PRIORITY.getFormattedKeyword(), newPriority);
+        PriorityKeyword newPriority = new PriorityKeyword();
+        KeywordFactory.addAliasEntry(PRIORITY.getFormattedKeyword(), newPriority);
     }
     
-    public PriorityKeyword(boolean isPrototype) {
-        super(PRIORITY, isPrototype);
+    public PriorityKeyword(StandardKeyword type) {
+        super(type);
     }
     
     public PriorityKeyword() {
-        this(IS_NOT_PROTOTYPE);
+        this(PRIORITY);
     }
 
     @Override

@@ -28,16 +28,18 @@ public class DescriptionKeyword extends Keyword{
     //Static initalizer to add entry to KeywordFactory. This is only for standard keyword, alias will be added
     //else where.
     static {
-        DescriptionKeyword newDescript = new DescriptionKeyword(IS_PROTOTYPE);
-        KeywordFactory.getInstance().addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
+        System.out.println("Initialising");
+        DescriptionKeyword newDescript = new DescriptionKeyword();
+        KeywordFactory.addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
+        System.out.println("Done");
     }
     
-    public DescriptionKeyword(boolean isPrototype) {
-        super(DESCRIPTION, isPrototype);
+    public DescriptionKeyword(StandardKeyword type) {
+        super(type);
     }
     
     public DescriptionKeyword() {
-        this(IS_NOT_PROTOTYPE);
+        this(DESCRIPTION);
     }
     
     @Override

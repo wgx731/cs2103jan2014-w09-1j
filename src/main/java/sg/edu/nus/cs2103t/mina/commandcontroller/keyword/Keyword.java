@@ -3,20 +3,38 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public abstract class Keyword {
     
     protected StandardKeyword _type;
     protected final static boolean IS_PROTOTYPE = true;
     protected final static boolean IS_NOT_PROTOTYPE = false;
-    protected static final int LOOK_AHEAD_LIMIT = 5;
+    protected static final int LOOK_AHEAD_LIMIT = 4;
     
-    public Keyword(StandardKeyword type, boolean isPrototype) {
+    private static Logger logger = LogManager.getLogger(Keyword.class
+            .getName());
+    
+    public Keyword(StandardKeyword type) {
         _type = type;
-        if(!isPrototype) {
-            initValues();
-        }
+        initValues();
     }
-
+    
+    protected String getLookAhead(ArrayList<String> tokens, int currIndex, int lookaheadLimit) {
+        
+        StringBuilder lookahead = new StringBuilder();
+        
+        for(int i=0, index=currIndex+1; i<tokens.size() && i<lookaheadLimit && index<tokens.size(); i++, index++) {
+            logger.info("Getting word");
+            String word = tokens.get(index);
+            lookahead.append(word);
+            lookahead.append(" ");
+        }
+        
+        return lookahead.toString().trim();
+    }
+    
     //Functions that need to be implemented
     protected abstract Keyword createKeyword();
     protected abstract void initValues();
