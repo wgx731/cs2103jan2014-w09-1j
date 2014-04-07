@@ -191,6 +191,11 @@
 			<version>${jbehave.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>uk.com.robust-it</groupId>
+			<artifactId>cloning</artifactId>
+			<version>1.9.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
