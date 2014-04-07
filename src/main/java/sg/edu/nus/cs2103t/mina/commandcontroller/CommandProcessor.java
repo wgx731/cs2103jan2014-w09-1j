@@ -698,9 +698,28 @@ public class CommandProcessor {
         Task<?> modifyTask = pageOfModifyObject.get(userfriendlyTaskID - 1);
         modifyParam.setTaskObject(modifyTask);
         modifyParam.setTaskID(userfriendlyTaskID);
+        if (modifyTask.getTag().contains("RECUR")){
+        	modifyParam.setTag("RECUR");
+        }
         
         if (parameters.contains("-all")){
         	modifyParam.setModifyAll(true);
+        }
+        
+        if (parameters.contains("-every")){
+        	String timeType = parameters.get(parameters.indexOf("-every")+1).toUpperCase();
+        	modifyParam.setTimeType(timeType);
+        	modifyParam.setFreqOfTimeType(1);
+        }
+        
+        if (parameters.contains("-until")){
+        	try{
+        		Date recurEndDate = DateUtil.parse(parameters.get(parameters.indexOf("-until")+1));
+        		modifyParam.setEndRecurOn(recurEndDate);
+        	} catch (Exception e){
+        		modifyParam = null;
+        		logger.error(e.getMessage(), e);
+        	}
         }
         
         if (parameters.contains("-totype")) {
