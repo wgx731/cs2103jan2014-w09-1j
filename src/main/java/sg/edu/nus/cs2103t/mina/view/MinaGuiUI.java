@@ -471,8 +471,10 @@ public class MinaGuiUI extends MinaView {
 				if (event.keyCode == SWT.F11||(event.stateMask == SWT.CTRL && event.keyCode == 'e')) {
 					if (_isExpanded) {
 						resetPanel();
+						updateLists();
 					} else {
 						expand();
+						updateLists();
 					}
 				}
 				if (event.keyCode == SWT.F1||(event.stateMask == SWT.CTRL && event.keyCode=='h')) {
@@ -500,10 +502,6 @@ public class MinaGuiUI extends MinaView {
 						updatePageFromTaskView();
 					}
 					_userInputTextField.setText(EMPTY_STRING);
-					updatePage();
-					displayOutput();
-					updateLists();
-					updateArrowNavigation();
 					if (_taskView.hasOnlyOneType(TaskType.EVENT)) {
 						_currentTab = 0;
 						expand();
@@ -516,6 +514,10 @@ public class MinaGuiUI extends MinaView {
 					} else {
 						resetPanel();
 					}
+					updatePage();
+					displayOutput();
+					updateLists();
+					updateArrowNavigation();
 				}
 				if (event.keyCode == SWT.ARROW_UP) {
 					event.doit = false;
@@ -673,7 +675,7 @@ public class MinaGuiUI extends MinaView {
 	}
 
 	private void addToUnHistory(String text) {
-		if (_commandUnHistory.size() < 5) {
+		if (_commandUnHistory.size() < 100) {
 			_commandUnHistory.addFirst(text);
 		} else {
 			_commandUnHistory.removeLast();
@@ -856,14 +858,14 @@ public class MinaGuiUI extends MinaView {
 				}
 			}
 			String eventStringIndex = "\t" + (i + 1) + ". ";
-			String eventDescription = event.getDescription() + "\n";
+			String eventDescription = getDisplayedText(event.getDescription()) + "\n";
 			String eventTime = "\t\t" + DateUtil.displayTimeOnly(itemStartDate) +
 					" - " +
 					(DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? DateUtil
 							.displayTimeOnly(itemEndDate) : DateUtil
 							.displayDateTime(itemEndDate)) +
 							"\n";
-			String eventCompleted = (event.getTag().contains("BLOCK")?"\t\tBOOKED":"")+(event.getTag().contains("RECUR")?"\t\tRECUR":"")+(event.isCompleted() ? "\t\tdone\n" : "\n");
+			String eventCompleted = (event.getTag().contains("RECUR")?"\t\tRECUR":"")+(event.isCompleted() ? "\t\tdone" : "");
 			_eventListUI.append(eventStringIndex);
 			initialCursorPosition += eventStringIndex.length();
 
@@ -886,6 +888,11 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_eventListUI.setStyleRange(completedStyle);
 			initialCursorPosition += eventCompleted.length();
+			
+			if (eventCompleted.length()>0){
+				_eventListUI.append("\n");
+				initialCursorPosition++;
+			}
 		}
 	}
 
@@ -953,10 +960,10 @@ public class MinaGuiUI extends MinaView {
 				}
 			}
 			String deadlineStringIndex = "\t" + (i + 1) + ". ";
-			String deadlineDescription = deadline.getDescription();
+			String deadlineDescription = getDisplayedText(deadline.getDescription());
 			String deadlineTime = " by " + DateUtil.displayTimeOnly(itemDate) +
 					"\n";
-			String deadlineCompleted = (deadline.getTag().contains("RECUR")?"\t\tRECUR":"")+(deadline.isCompleted() ? "\t\tdone\n": "\n");
+			String deadlineCompleted = (deadline.getTag().contains("RECUR")?"\t\tRECUR":"")+(deadline.isCompleted() ? "\t\tdone": "");
 			_deadlineListUI.append(deadlineStringIndex);
 			initialCursorPosition += deadlineStringIndex.length();
 
@@ -979,6 +986,11 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_deadlineListUI.setStyleRange(completedStyle);
 			initialCursorPosition += deadlineCompleted.length();
+			
+			if (deadlineCompleted.length()>0){
+				_deadlineListUI.append("\n");
+				initialCursorPosition++;
+			}
 		}
 	}
 
@@ -989,7 +1001,7 @@ public class MinaGuiUI extends MinaView {
 		int initialCursorPosition = 0;
 		for (int i = 0; i < todoList.size(); i++) {
 			TodoTask todo = (TodoTask) todoList.get(i);
-			String todoString = (i + 1) + ". " + todo.getDescription() + "\n";
+			String todoString = (i + 1) + ". " + getDisplayedText(todo.getDescription()) + "\n";
 			_todoListUI.append(todoString);
 			StyleRange todoStyle = new StyleRange();
 			todoStyle.start = initialCursorPosition;
@@ -1014,10 +1026,25 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.start = initialCursorPosition;
 			completedStyle.length = todoCompleted.length();
 			completedStyle.fontStyle = SWT.ITALIC;
+			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_todoListUI.setStyleRange(completedStyle);
 			initialCursorPosition += todoCompleted.length();
 		}
-
+	}
+	
+	public String getDisplayedText(String des){
+		String str = des;
+		int limit;
+		if (_isExpanded){
+			limit = 397;
+		} else {
+			limit = 47;
+		}
+		if (str.length()>limit){
+			str = str.substring(0, limit);
+			str = str.concat("...");
+		}
+		return str;
 	}
 
 	private void expand() {
