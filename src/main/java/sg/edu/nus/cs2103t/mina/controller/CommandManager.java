@@ -12,9 +12,12 @@ import sg.edu.nus.cs2103t.mina.model.TaskView;
 /**
  * Facade class uses for process user commands
  * 
+ * @author wgx731
  * @author viettrung9012
- * 
+ * @author duzhiyuan
+ * @author joannemah
  */
+//@author A0099324X
 
 public class CommandManager {
 

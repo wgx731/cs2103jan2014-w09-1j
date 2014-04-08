@@ -28,9 +28,12 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 /**
  * Processor class to process user input command
  * 
+ * @author wgx731
  * @author viettrung9012
- * 
+ * @author duzhiyuan
+ * @author joannemah
  */
+//@author A0099324X
 
 public class CommandProcessor {
 

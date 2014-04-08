@@ -7,9 +7,12 @@ import sg.edu.nus.cs2103t.mina.model.HelperView;
 /**
  * Helper class uses for display help
  * 
+ * @author wgx731
  * @author viettrung9012
- * 
+ * @author duzhiyuan
+ * @author joannemah
  */
+//@author A0099324X
 
 public class UICommandHelper {	
 	private final String MAIN_HELP_MENU_DESCRIPTION = "Help Contents\n\n\n";

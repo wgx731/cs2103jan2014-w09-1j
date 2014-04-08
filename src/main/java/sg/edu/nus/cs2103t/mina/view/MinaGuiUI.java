@@ -47,10 +47,12 @@ import com.tulskiy.keymaster.common.Provider;
 /**
  * GUI class
  * 
- * @author viettrung9012
  * @author wgx731
- * 
+ * @author viettrung9012
+ * @author duzhiyuan
+ * @author joannemah
  */
+//@author A0099324X
 
 public class MinaGuiUI extends MinaView {
 
