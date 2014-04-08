@@ -67,7 +67,7 @@ public class MinaGuiUI extends MinaView {
 
 	private Shell _shell;
 	private Display _display;
-	private Image _trayImage;
+	private Image _icon;
 	private Tray _tray;
 
 	private StyledText _helpWindowBorder;
@@ -177,7 +177,7 @@ public class MinaGuiUI extends MinaView {
 	 */
 	private void createTray() {
 		_tray = _display.getSystemTray();
-		_trayImage = new Image(_display, getClass().getResourceAsStream(
+		_icon = new Image(_display, getClass().getResourceAsStream(
 				ConfigHelper.getProperty(ConfigHelper.ICONPATH_KEY)));
 
 		TrayItem item;
@@ -212,7 +212,7 @@ public class MinaGuiUI extends MinaView {
 				}
 			});
 
-			item.setImage(_trayImage);
+			item.setImage(_icon);
 		}
 
 	}
@@ -228,7 +228,7 @@ public class MinaGuiUI extends MinaView {
 		int x = bounds.x + (bounds.width - rect.width) / 2;
 		int y = bounds.y + (bounds.height - rect.height) / 2;
 		_shell.setLocation(x, y);
-
+		_shell.setImage(_icon);
 		logger.log(Level.INFO, "shell set position");
 		_shell.open();
 		_shell.layout();
