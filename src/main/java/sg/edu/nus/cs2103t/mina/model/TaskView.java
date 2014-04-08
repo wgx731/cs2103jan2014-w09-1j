@@ -26,11 +26,15 @@ public class TaskView {
     public static final int ITEMS_PER_PAGE_DEADLINE = 5;
     public static final int ITEMS_PER_PAGE_TODO = 7; 
     
-    private int CUR_PAGE = 0;
-    private int TAB_EDITED = -1;
+    private boolean IS_EVENT_CHANGE = false;
+    private boolean IS_DEADLINE_CHANGE = false;
+    private boolean IS_TODO_CHANGE = false;
     
-    private int CUR_PAGE_ALT = 0;
-    private int TAB_EDITED_ALT = -1;
+    private int TAB_SELECTED = -1;
+    
+    private int EVENT_PAGE = 0;
+    private int DEADLINE_PAGE = 0;
+    private int TODO_PAGE = 0;
     
     public TaskView(String status, 
                     HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
@@ -96,36 +100,60 @@ public class TaskView {
     	return (getEvents().size()+eventPageSize()-1)/eventPageSize();
     }
     
-    public void setCurPage(int page){
-    	CUR_PAGE = page;
+    public void setEventPage(int page){
+    	EVENT_PAGE = page;
     }
     
-    public int getCurPage(){
-    	return CUR_PAGE;
+    public void setDeadlinePage(int page){
+    	DEADLINE_PAGE = page;
     }
     
-    public void setTabEdited(int tabNum){
-    	TAB_EDITED = tabNum;
+    public void setTodoPage(int page){
+    	TODO_PAGE = page;
     }
     
-    public int getTabEdited(){
-    	return TAB_EDITED;
+    public int getEventPage(){
+    	return EVENT_PAGE;
     }
     
-    public void setCurPageAlt(int page){
-    	CUR_PAGE_ALT = page;
+    public int getDeadlinePage(){
+    	return DEADLINE_PAGE;
     }
     
-    public int getCurPageAlt(){
-    	return CUR_PAGE_ALT;
+    public int getTodoPage(){
+    	return TODO_PAGE;
     }
     
-    public void setTabEditedAlt(int tabNum){
-    	TAB_EDITED_ALT = tabNum;
+    public void setTabSelected(int tabNum){
+    	TAB_SELECTED = tabNum;
     }
     
-    public int getTabEditedAlt(){
-    	return TAB_EDITED_ALT;
+    public int getTabSelected(){
+    	return TAB_SELECTED;
+    }
+    
+    public void setEventChange(boolean isChanged){
+    	IS_EVENT_CHANGE = isChanged;
+    }
+    
+    public void setDeadlineChange(boolean isChanged){
+    	IS_DEADLINE_CHANGE = isChanged;
+    }
+    
+    public void setTodoChange(boolean isChanged){
+    	IS_TODO_CHANGE = isChanged;
+    }
+    
+    public boolean isEventChange(){
+    	return IS_EVENT_CHANGE;
+    }
+    
+    public boolean isDeadlineChange(){
+    	return IS_DEADLINE_CHANGE;
+    }
+    
+    public boolean isTodoChange(){
+    	return IS_TODO_CHANGE;
     }
     
     public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{
