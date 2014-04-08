@@ -20,9 +20,6 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
  * Sync memory data to storage on predefined interval
  * 
  * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 // @author A0105853H
 public class DataSyncManager {
@@ -45,8 +42,7 @@ public class DataSyncManager {
         _taskMapDao = taskMapDao;
         _dataOberserver = new MemoryDataObserverImp(taskDao, taskMapDao);
     }
-    
-   
+
     public MemoryDataObserver getDataOberserver() {
         return _dataOberserver;
     }
@@ -78,11 +74,11 @@ public class DataSyncManager {
 
     public void saveTaskMap(TaskMapDataParameter taskMapData)
             throws IOException {
-        _taskMapDao.saveTaskMapData(taskMapData);
+        _taskMapDao.saveTaskMap(taskMapData);
     }
 
     public TaskMapDataParameter loadTaskMap() {
-        return _taskMapDao.loadTaskMapData();
+        return _taskMapDao.loadTaskMap();
     }
 
 }
