@@ -118,8 +118,10 @@ public class MinaGuiUI extends MinaView {
 	private final String RIGHT_ARROW = "\u2192";
 	private final String LEFT_ARROW = "\u2190";
 
-	private LinkedList<String> _commandUnHistory;
-	private LinkedList<String> _commandReHistory;
+	private LinkedList<String> _commandHistory;
+	private int _positionInCommandHistory;
+	private boolean _isHistoryDirectionUp;
+	
 	private boolean _isExpanded;
 
 	private int _currentTab;
@@ -265,8 +267,9 @@ public class MinaGuiUI extends MinaView {
 
 		_autoComplete = new AutoCompleteDB();
 
-		_commandUnHistory = new LinkedList<String>();
-		_commandReHistory = new LinkedList<String>();
+		_commandHistory = new LinkedList<String>();
+		_positionInCommandHistory = 0;
+		_isHistoryDirectionUp = true;
 
 		_currentTab = 0;
 
@@ -493,7 +496,7 @@ public class MinaGuiUI extends MinaView {
 				if (event.keyCode == SWT.CR) {
 					showBusyStatus();
 					String command = _userInputTextField.getText();
-					addToUnHistory(command);
+					addToHistory(command);
 					if (command.trim().toLowerCase().equals("help") || command
 							.trim().toLowerCase().equals("-h")) {
 						startHelpWindows();
@@ -540,27 +543,33 @@ public class MinaGuiUI extends MinaView {
 				}
 				if (event.keyCode == SWT.ARROW_UP) {
 					event.doit = false;
-					if (_commandUnHistory.size() != 0) {
-						String text = _commandUnHistory.removeFirst();
-						if (!_userInputTextField.getText().equals(EMPTY_STRING)) {
-							_commandReHistory.addFirst(_userInputTextField
-									.getText());
+					if (_commandHistory.size() > 0&&_positionInCommandHistory<_commandHistory.size()-1) {
+						if (!_isHistoryDirectionUp){
+							_positionInCommandHistory++;
+							_isHistoryDirectionUp = true;
 						}
+						String text = _commandHistory.get(_positionInCommandHistory);
 						_userInputTextField.setText(text);
-						_userInputTextField.setSelection(text.length());
+						_userInputTextField.selectAll();
+						_positionInCommandHistory++;
+					} else if (_commandHistory.size() > 0&&_positionInCommandHistory==_commandHistory.size()-1){
+						String text = _commandHistory.get(_positionInCommandHistory);
+						_userInputTextField.setText(text);
+						_userInputTextField.selectAll();
 					}
 				}
 				if (event.keyCode == SWT.ARROW_DOWN) {
 					event.doit = false;
-					if (!_userInputTextField.getText().equals(EMPTY_STRING)) {
-						addToUnHistory(_userInputTextField.getText());
-					}
-					if (_commandReHistory.size() != 0) {
-						String text = _commandReHistory.removeFirst();
+					_isHistoryDirectionUp = false;
+					if (_commandHistory.size() > 0 && _positionInCommandHistory>0) {
+						_positionInCommandHistory--;
+						String text = _commandHistory.get(_positionInCommandHistory);
 						_userInputTextField.setText(text);
-						_userInputTextField.setSelection(text.length());
-					} else {
-						_userInputTextField.setText(EMPTY_STRING);
+						_userInputTextField.selectAll();
+					} else if (_commandHistory.size() > 0 && _positionInCommandHistory==0){
+						String text = _commandHistory.get(_positionInCommandHistory);
+						_userInputTextField.setText(text);
+						_userInputTextField.selectAll();
 					}
 				}
 				if (event.keyCode == SWT.ESC) {
@@ -717,13 +726,15 @@ public class MinaGuiUI extends MinaView {
 		}
 	}
 
-	private void addToUnHistory(String text) {
-		if (_commandUnHistory.size() < 100) {
-			_commandUnHistory.addFirst(text);
+	private void addToHistory(String text) {
+		if (_commandHistory.size() < 100) {
+			_commandHistory.addFirst(text);
 		} else {
-			_commandUnHistory.removeLast();
-			_commandUnHistory.addFirst(text);
+			_commandHistory.removeLast();
+			_commandHistory.addFirst(text);
 		}
+		_positionInCommandHistory = 0;
+		_isHistoryDirectionUp = true;
 	}
 
 	private void setAutoComplete() {
