@@ -919,7 +919,7 @@ public class CommandParserTest {
         
         variation = "search 'hohoho hohoho ' 'sasads dfdf' ' vvvvv '";
         result = parser.convertCommand(variation);  
-        assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
+        assertEquals("search hohoho hohoho//sasads dfdf//vvvvv", result);        
         
         
     }

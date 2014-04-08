@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandFormat;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandOnlyKeywordValues;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandWithTaskId;
+import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandWithValuesOnly;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.KeywordFactory;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
@@ -345,7 +346,9 @@ public class CommandParser {
             case COMPLETE :
                 currCommand = new CommandWithTaskId(command, argument);
                 break;
-                
+            case SEARCH :
+                currCommand = new CommandWithValuesOnly(command, argument);
+                break;                
             default:
                 throw new Error("No such action, yet.");
             
