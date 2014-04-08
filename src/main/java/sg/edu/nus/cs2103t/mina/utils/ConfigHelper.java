@@ -17,6 +17,15 @@ import org.apache.logging.log4j.Logger;
  */
 public class ConfigHelper {
 
+    // KEYS
+    public static final String ICONPATH_KEY = "iconpath";
+    public static final String SPLASHPATH_KEY = "splashscreenpath";
+    public static final String TODO_KEY = "todo";
+    public static final String EVENT_KEY = "event";
+    public static final String DEADLINE_KEY = "deadline";
+    public static final String TASK_MAP_KEY = "taskmap";
+    public static final String VIEW_TYPE_KEY = "viewtype";
+
     private static Logger logger = LogManager.getLogger(ConfigHelper.class
             .getName());
 

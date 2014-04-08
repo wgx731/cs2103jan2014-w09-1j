@@ -139,6 +139,10 @@ public class FilterParameter {
 	    return _filters.remove(type);
 	}
 	
+	public void addFilter(FilterType type){
+		_filters.add(type);
+	}
+	
 	public boolean hasNoTaskTypes() {
 	    return !(_filters.contains(FilterType.EVENT) ||
 	            _filters.contains(FilterType.DEADLINE) ||

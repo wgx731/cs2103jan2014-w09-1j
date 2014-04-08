@@ -1,9 +1,11 @@
 package sg.edu.nus.cs2103t.mina;
 
-import java.util.Timer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
@@ -18,6 +20,7 @@ import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
 import sg.edu.nus.cs2103t.mina.view.MinaView;
+import sg.edu.nus.cs2103t.mina.view.SplashScreen;
 
 /**
  * Start driver for MINA
@@ -29,53 +32,48 @@ import sg.edu.nus.cs2103t.mina.view.MinaView;
  */
 public class MinaDriver {
 
+    private static final int DEFAULT_TASK_LIST_SIZE = 4;
+
     private static Logger logger = LogManager.getLogger(MinaDriver.class
             .getName());
 
-    private static final String SYNC_INTERVAL_KEY = "synctime";
-    private static final String VIEW_TYPE_KEY = "viewtype";
     private static final String GUI = "gui";
     private static final String CONSOLE = "console";
     private static final String UNKOWN_TYPE_ERROR = "unkown type";
 
-    private static CommandManager commandController;
+    private static CommandManager commandManager;
     private static TaskDataManager taskDataManager;
     private static TaskFilterManager taskFilterManager;
     private static MinaView uiView;
     private static DataSyncManager dataSyncManager;
-    private static Timer dataSyncTimer;
 
-    static void initDao() {
+    void initDao() {
         TaskDao taskDao = new JsonFileTaskDaoImpl();
         TaskMapDao taskMapDao = new FileTaskMapDaoImpl();
         dataSyncManager = new DataSyncManager(taskDao, taskMapDao);
-        dataSyncTimer = new Timer();
-        dataSyncTimer.schedule(dataSyncManager, 0,
-                Long.valueOf(ConfigHelper.getProperty(SYNC_INTERVAL_KEY)));
     }
 
-    static void initTDM() {
+    void initTDM() {
         taskDataManager = new TaskDataManager(dataSyncManager);
     }
 
-    static void initTFM() {
+    void initTFM() {
         taskFilterManager = new TaskFilterManager(taskDataManager);
     }
 
-    static void initCC() {
-        commandController = new CommandManager(taskDataManager,
-                taskFilterManager);
+    void initCC() {
+        commandManager = new CommandManager(taskDataManager, taskFilterManager);
     }
 
-    static void initView() {
-        switch (ConfigHelper.getProperty(VIEW_TYPE_KEY)) {
+    void showMinaView() {
+        switch (ConfigHelper.getProperty(ConfigHelper.VIEW_TYPE_KEY)) {
             case GUI :
-                MinaGuiUI gui = new MinaGuiUI(commandController);
+                MinaGuiUI gui = new MinaGuiUI(commandManager);
                 gui.open();
                 uiView = gui;
                 break;
             case CONSOLE :
-                uiView = new ConsoleUI(System.in, System.out, commandController);
+                uiView = new ConsoleUI(System.in, System.out, commandManager);
                 break;
             default :
                 throw new Error(UNKOWN_TYPE_ERROR);
@@ -83,20 +81,12 @@ public class MinaDriver {
         uiView.updateLists();
     }
 
-    private void initComponents() {
-        initDao();
-        initTDM();
-        initTFM();
-        initCC();
-        initView();
-    }
-
     public Shell guiTestSetUp() {
         initDao();
         initTDM();
         initTFM();
         initCC();
-        MinaGuiUI gui = new MinaGuiUI(commandController);
+        MinaGuiUI gui = new MinaGuiUI(commandManager);
         gui.updateLists();
         return gui.open();
     }
@@ -105,19 +95,52 @@ public class MinaDriver {
         taskDataManager.resetTrees();
     }
 
-    public void stopSync() {
-        dataSyncTimer.cancel();
-    }
-
     public void processLoop() {
         uiView.displayOutput();
         uiView.loop();
     }
 
+    private static void showSplashScreen(final MinaDriver driver) {
+        List<Runnable> tasks = createTaskList(driver);
+        SplashScreen screen = SplashScreen.getInstance(Display.getDefault(),
+                tasks);
+        screen.open();
+    }
+
+    private static List<Runnable> createTaskList(final MinaDriver driver) {
+        List<Runnable> tasks = new ArrayList<Runnable>(DEFAULT_TASK_LIST_SIZE);
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                driver.initDao();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                driver.initTDM();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                driver.initTFM();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                driver.initCC();
+            }
+        });
+        return tasks;
+    }
+
     public static void main(String[] args) {
         try {
             MinaDriver driver = new MinaDriver();
-            driver.initComponents();
+            showSplashScreen(driver);
+            driver.showMinaView();
             driver.processLoop();
         } catch (Exception e) {
             logger.error(e, e);

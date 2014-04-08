@@ -46,7 +46,7 @@ public class DataParameter {
         setNewTaskType(null);
         setTaskID(-1);
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);
@@ -71,7 +71,7 @@ public class DataParameter {
         setNewTaskType(newType);
         setTaskID(id);
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);
@@ -110,7 +110,7 @@ public class DataParameter {
             setStartDate(start == null ? eventTaskObj.getStartTime() : start);
         }
 
-        setTag(null);
+        setTag("");
         setModifyAll(false);
 
         setTimeSlots(null);
@@ -125,15 +125,15 @@ public class DataParameter {
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, String tag,
             Date endRecurOn, String timeType, int freqOfTimeType,
-            List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
+            List<TimePair> timeSlots) throws Exception {
         assert (!tag.equals(null));
 
-        if (tag.equals("BLOCK")) {
+        if (!tag.equals(null) && tag.equals("BLOCK")) {
             assert (newType.equals(TaskType.EVENT));
             createAddBlockParameters(des, pri, start, end, origType, newType,
                     id, tag, timeSlots);
 
-        } else if (tag.equals("RECUR")) {
+        } else if (!tag.equals(null) && tag.equals("RECUR")) {
             assert (!newType.equals(TaskType.TODO));
             createAddRecurParameters(des, pri, start, end, origType, newType,
                     id, tag, timeType, freqOfTimeType, endRecurOn);
@@ -149,22 +149,25 @@ public class DataParameter {
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
             String tag, String timeType, int freqOfTimeType, Date endRecurOn,
             List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
-        assert (!tag.equals(null));
 
-        if (tag.equals("BLOCK")) {
-            assert (!origType.equals(null) && origType.equals(TaskType.EVENT) || !newType
-                    .equals(null) && newType.equals(TaskType.EVENT));
+        if (taskObj.getTag().contains("BLOCK")) {
+            assert (!taskObj.getType().equals(null) && taskObj.getType()
+                    .equals(TaskType.EVENT) || !newType.equals(null) && newType
+                    .equals(TaskType.EVENT));
             createBlockParameters(des, pri, start, end, origType, newType, id,
                     taskObj, tag, timeSlots, isModifyAll);
 
-        } else if (tag.equals("RECUR")) {
-            assert (!origType.equals(null) && !origType.equals(TaskType.TODO) || !newType
-                    .equals(null) && !newType.equals(TaskType.TODO));
+        } else if (taskObj.getTag().contains("RECUR")) {
+            assert (!taskObj.getType().equals(null) && !taskObj.getType()
+                    .equals(TaskType.TODO) || !newType.equals(null) && !newType
+                    .equals(TaskType.TODO));
             createRecurParameters(des, pri, start, end, origType, newType, id,
                     taskObj, tag, timeType, freqOfTimeType, endRecurOn,
                     isModifyAll);
 
         } else {
+            System.out.println("task obj: " + taskObj);
+            System.out.println("tag: " + taskObj.getTag());
             throw new Exception("invalid tag used by CC");
         }
 
@@ -202,6 +205,8 @@ public class DataParameter {
         setOriginalTaskType(origType);
         setNewTaskType(newType);
         setTaskID(id);
+
+        setTaskObject(taskObj);
 
         // parameters specific to EventTask
         EventTask eventTaskObj = (EventTask) taskObj;
@@ -322,6 +327,7 @@ public class DataParameter {
         if (taskToLoad.getType() == TaskType.DEADLINE) {
             DeadlineTask taskToLoadDeadline = (DeadlineTask) taskToLoad;
             setEndDate(taskToLoadDeadline.getEndTime());
+
         }
 
         if (taskToLoad.getType() == TaskType.EVENT) {
@@ -352,23 +358,34 @@ public class DataParameter {
         }
         if (modifyParam.getOriginalTaskType() != null) {
             setOriginalTaskType(modifyParam.getOriginalTaskType());
-        } else {
-            assert (false); // shouldn't be null
         }
         if (modifyParam.getNewTaskType() != null) {
             setNewTaskType(modifyParam.getNewTaskType());
         } else {
-            assert (false); // shouldn't be null
+            setNewTaskType(this._originalTaskType);
         }
         if (modifyParam.getTaskId() != -1) {
             setTaskID(modifyParam.getTaskId());
         }
+        
         if (modifyParam.getTag() != "") {
             setTag(modifyParam.getTag());
         }
-        if (modifyParam.getNewTaskType() != null) {
-            setNewTaskType(modifyParam.getNewTaskType());
+        if (modifyParam.getTimeType() != null) {
+            setTimeType(modifyParam.getTimeType());
         }
+        if (modifyParam.getFreqOfTimeType() != 0) {
+            setFreqOfTimeType(modifyParam.getFreqOfTimeType());
+        }
+        if (modifyParam.getEndRecurOn() != null) {
+            setEndRecurOn(modifyParam.getEndRecurOn()); 
+        }
+        
+        if (modifyParam.isModifyAll()) {
+            setModifyAll(true);
+        }
+        
+        // not doing for TimeSlots
 
         // if (_originalTaskType != _newTaskType) {
         // if (_originalTaskType == TaskType.DEADLINE && _newTaskType ==

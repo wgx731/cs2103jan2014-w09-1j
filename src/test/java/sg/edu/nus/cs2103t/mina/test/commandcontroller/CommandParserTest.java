@@ -16,7 +16,7 @@ import org.junit.Test;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 
-
+// @author A0099151B
 public class CommandParserTest {
 
     private static final int ORDER_EVENT_EDS = 4;
@@ -79,6 +79,10 @@ public class CommandParserTest {
             addRecurYearControl;
     
     private static String displayControlType;
+    
+    private static DateTime thisFri, thisWed, thisSunday, 
+                            nextFri, nextWed, nextSunday,
+                            threeDays, fourWeeks, fiveMonths, sixYears;
     
     private static DateTime today;
     private static Logger logger;
@@ -149,6 +153,29 @@ public class CommandParserTest {
                 displayControlType+= " " + filter.getType();
             }
         }
+        
+        // Date phrases
+        //wed //sun //fri
+        int sun = 7;
+        int wed = 3;
+        int fri = 5;
+        int weekday = (today.getWeekDay() + 6) % 7;
+        thisSunday = today.plusDays(sun-weekday);
+        thisWed = today.plusDays(wed-weekday);
+        thisFri = today.plusDays(fri-weekday);
+        nextSunday = thisSunday.plusDays(7);
+        nextWed = thisWed.plusDays(7);
+        nextFri = thisFri.plusDays(7);
+        
+        // Dynamic Date phrases
+        //3 days
+        threeDays = today.plus(0, 0, 3, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //4 weeks
+        fourWeeks = today.plus(0, 0, 4*7, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //5 months
+        fiveMonths = today.plus(0, 5, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        //6 years
+        sixYears = today.plus(6, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
     }
 
     @Before
@@ -332,15 +359,6 @@ public class CommandParserTest {
         setUp();
         variationBuild.append("add ");
         variationBuild.append(wrapDescription(TODO_THREE));
-        variationBuild.append(" urgent priority");
-        variation = variationBuild.toString();
-        logger.info(variation);
-        result = parser.convertCommand(variation);
-        assertEquals(addTodoControlHigh, result);
-
-        setUp();
-        variationBuild.append("add ");
-        variationBuild.append(wrapDescription(TODO_THREE));
         variationBuild.append(" urgent");
         variation = variationBuild.toString();
         logger.info(variation);
@@ -412,62 +430,7 @@ public class CommandParserTest {
         variation = "add -description what";
         result = parser.convertCommand(variation);
         assertEquals("add -description what", result);
-        
-        //For modify
-        variation = "modify todo 1 'whahaha' priority high";
-        result = parser.convertCommand(variation);
-        assertEquals("modify todo 1 -description whahaha -priority H", result);
-        
-        variation = "modify event 100 'whahaha' from 7am to 1pm";
-        result = parser.convertCommand(variation);
-        resultDate = today.format("DDMMYYYY");
-        start = resultDate + "070000";
-        end = resultDate + "130000";
-        assertEquals("modify event 100 -description whahaha -start " + start +
-                    " -end " + end, result);
-        
-        //For changing task type
-        variation = "modify deadline 5 changeto event 'whahaha' from tmr 3am";
-        result = parser.convertCommand(variation);
-        tmr = today.plusDays(1);
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
-    
-        //For shorten id
-        variation = "modify d5 changeto event 'whahaha' from tmr 3am";
-        result = parser.convertCommand(variation);     
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
 
-        //For shorten id
-        variation = "modify d5 -changeto event -from tmr 3am";
-        result = parser.convertCommand(variation);     
-        resultDate = tmr.format("DDMMYYYY");
-        start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -start " + start, result);
-
-        //delete with shorten id
-        variation = "delete td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);
-        
-        //remove with shorten id
-        variation = "remove td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);
-        
-        //complete with shorten id
-        variation = "complete td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("complete todo 1", result);
-        
-        //complete with id
-        variation = "complete event 9999";
-        result = parser.convertCommand(variation);  
-        assertEquals("complete event 9999", result);   
-        
         //filter no special
         variation = "filter deadline complete";
         result = parser.convertCommand(variation);  
@@ -626,7 +589,7 @@ public class CommandParserTest {
      * @throws Exception
      */
     @Test
-    public void testAddDateFormat() throws Exception {
+    public void testDateFormat() throws Exception {
 
         logger.info("Today's date is: " + today.toString());
 
@@ -717,6 +680,68 @@ public class CommandParserTest {
         logger.info(variation);
         assertEquals(addEventControlToday, result);   
         
+        //date phrase this wednesday ORDER_EVENT_SDE
+        String thisWedStr = thisWed.format("DDMMYYYY");
+        String thisFriStr = thisFri.format("DDMMYYYY");
+        start = "-from this wednesday 3am";
+        end = "-end friday 4am";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        String expected = "add " + EVENT_DESCRIPTION + " -start " + thisWedStr + "030000 " + "-end " + thisFriStr + "040000";
+        logger.info(variation);
+        assertEquals(expected, result); 
+        
+        //date phrase next wednesday
+        String nextWedStr = nextWed.format("DDMMYYYY");
+        String nextSunStr = nextSunday.format("DDMMYYYY");
+        start = "-from next wednesday 11:00am";
+        end = "-end next sunday";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + nextWedStr + "110000 " + "-end " + nextSunStr + "235959";
+        logger.info(variation);
+        assertEquals(expected, result); 
+        
+        //date phrase 3 days
+        String threeDaysStr = threeDays.format("DDMMYYYY");
+        start = "-from next 3 days 11:00pm";
+        end = "-end next sunday";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + threeDaysStr + "230000 " + "-end " + nextSunStr + "235959";
+        logger.info(variation);
+        assertEquals(expected, result);        
+        
+        //date phrase 4 weeks
+        String fourWeeksStr = fourWeeks.format("DDMMYYYY");
+        String nextFriStr = nextFri.format("DDMMYYYY");
+        start = "-from next fri 22:39";
+        end = "-end next 4 week 0900";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SED, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + nextFriStr + "223900 " + "-end " + fourWeeksStr + "090000";
+        logger.info(variation);
+        assertEquals(expected, result);       
+        
+        //date phrase 5 months
+        //date phrase 6 years
+        String fiveMonthsStr = fiveMonths.format("DDMMYYYY");
+        String sixYearsStr = sixYears.format("DDMMYYYY");
+        start = "-from next 5 months 10.46am";
+        end = "-end next 6 years 9am";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_EDS, !IS_WRAPPED); 
+        result = parser.convertCommand(variation);
+        expected = "add " + EVENT_DESCRIPTION + " -start " + fiveMonthsStr + "104600 " + "-end " + sixYearsStr + "090000";
+        logger.info(variation);
+        assertEquals(expected, result);   
+        
+        DateTime nextMonth = today.plus(0, 1, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        end = "-end next month 9am";
+        variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, end,
+                                        !IS_REORDER, IS_WRAPPED);
+        result = parser.convertCommand(variation);
+        expected = "add " + DEADLINE_DESCRIPTION + "-end " + nextMonth.format("DDMMYYYY") + "090000";
+        assertEquals(expected, result);   
     }
 
     @Test
@@ -802,10 +827,62 @@ public class CommandParserTest {
                 result);        
     }
     
-    @Ignore
     @Test
     public void testModify() throws ParseException{
-     
+        variation = "modify todo 1 'whahaha' priority high";
+        result = parser.convertCommand(variation);
+        assertEquals("modify todo 1 -description whahaha -priority H", result);
+        
+        variation = "modify event 100 'whahaha' from 7am to 1pm";
+        result = parser.convertCommand(variation);
+        String resultDate = today.format("DDMMYYYY");
+        start = resultDate + "070000";
+        end = resultDate + "130000";
+        assertEquals("modify event 100 -description whahaha -start " + start +
+                    " -end " + end, result);
+        
+        //For changing task type
+        variation = "modify deadline 5 changeto event 'whahaha' from tmr 3am";
+        result = parser.convertCommand(variation);
+        DateTime tmr = today.plusDays(1);
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
+    
+        //For shorten id
+        variation = "modify d5 changeto event 'whahaha' from tmr 3am";
+        result = parser.convertCommand(variation);     
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
+
+        //For shorten id
+        variation = "modify d5 -changeto event -from tmr 3am";
+        result = parser.convertCommand(variation);     
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -start " + start, result);
+        
+        //delete with shorten id
+        variation = "delete td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);
+        
+        //remove with shorten id
+        variation = "remove td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("delete todo 1", result);
+        
+        //complete with shorten id
+        variation = "complete td1";
+        result = parser.convertCommand(variation);  
+        assertEquals("complete todo 1", result);
+        
+        //complete with id
+        variation = "complete event 9999";
+        result = parser.convertCommand(variation);  
+        assertEquals("complete event 9999", result);   
+        
     }
     
     @Test
@@ -840,7 +917,7 @@ public class CommandParserTest {
         
         variation = "search 'hohoho hohoho ' 'sasads dfdf' ' vvvvv '";
         result = parser.convertCommand(variation);  
-        assertEquals("search hohoho hohoho //sasads dfdf// vvvvv ", result);        
+        assertEquals("search hohoho hohoho//sasads dfdf//vvvvv", result);        
         
         
     }
@@ -888,6 +965,22 @@ public class CommandParserTest {
         
         assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
                      result);     
+        
+        variation = "display deadlines -agendaof next 2 weeks";
+        result = parser.convertCommand(variation);
+        DateTime twoWeeks = today.plusDays(14);
+        String twoWeeksDate = twoWeeks.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + twoWeeksDate + "000000" + " -end " + twoWeeksDate + "235959",
+                     result);   
+        
+        variation = "display deadlines -agendaof next week";
+        result = parser.convertCommand(variation);
+        DateTime oneWeeks = today.plusDays(7);
+        String oneWeeksDate = oneWeeks.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + oneWeeksDate + "000000" + " -end " + oneWeeksDate + "235959",
+                     result);
         
     }
     

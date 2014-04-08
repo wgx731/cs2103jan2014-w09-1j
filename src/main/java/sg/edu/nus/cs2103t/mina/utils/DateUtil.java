@@ -7,9 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Useful Date utilities.
@@ -21,7 +25,7 @@ import java.util.TimeZone;
 public final class DateUtil {
 
     // Init ---------------------------------------------------------------------------------------
-
+    
     private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {/**
 		 * 
 		 */
@@ -56,7 +60,7 @@ public final class DateUtil {
         put("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}$", "yyyy.MM.dd");
         put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s\\d{1,2}:\\d{2}$", "dd.MM.yyyy hh:mm");
         put("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy.MM.dd hh:mm");
-        put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd.MM.yyyy hh12:mm:ss");
+        put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd.MM.yyyy hh:mm:ss");
         
         put("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}.\\d{2}.\\d{2}$", "dd-MM-yyyy HH.mm.ss");
         put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}.\\d{2}.\\d{2}$", "yyyy-MM-dd HH.mm.ss");
@@ -75,7 +79,77 @@ public final class DateUtil {
         put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}.\\d{2}$", "dd MMMM yyyy HH.mm");
         
 	}};
+	
+	private static final LinkedHashMap<String, String> TIME_FORMAT_REGEX = new LinkedHashMap<String, String>(){
+	    private static final long serialVersionUID = 3L;
+	    {
+	      //Military time
+	      put("^\\d{4}$", "HHmm");
+	      
+    	  //HH AM/PM
+    	  put("^\\d{1}(am|pm){1}$", "ha");
+    	  put("^\\d{1,2}(am|pm){1}$", "hha");
+    	  //HH no AM/PM
+    	  put("^\\d{1}$", "H");
+    	  put("^\\d{1,2}$", "HH");
+    	 
+    	  //HH:MM:SS AM/PM
+    	  put("^\\d{1,2}:\\d{2}(am|pm){1}", "hh:mma");
+    	  put("^\\d{1,2}:\\d{2}:\\{d2}(am|pm){1}", "hh:mm:ssa");
+    	  //HH:MM:SS no AM/PM
+    	  put("^\\d{1,2}:\\d{2}", "HH:mm");
+    	  put("^\\d{1,2}:\\d{2}:\\{d2}", "HH:mm:ss");
+    	 
+    	  //HH.MM.SS AM/PM
+    	  put("^\\d{1,2}\\.\\d{2}(am|pm){1}", "hh.mma");
+    	  put("^\\d{1,2}\\.\\d{2}\\.\\{d2}(am|pm){1}", "hh.mm.ssa");
+    	  //HH.MM.SS no AM/PM
+    	  put("^\\d{1,2}\\.\\d{2}", "HH.mm");
+    	  put("^\\d{1,2}\\.\\d{2}\\.\\{d2}", "HH.mm.ss");  
+	    }
+	};
+	
+   private static final LinkedHashMap<String, String> DATE_FORMAT_REGEX = new LinkedHashMap<String, String>(){
+        private static final long serialVersionUID = 2L;
+        {
+            put("^\\d{8}$", "ddMMyyyy");
+            put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
+            put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
+            put("^\\d{1,2}/\\d{1,2}/\\d{4}$", "dd/MM/yyyy");
+            put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd");
 
+            put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$", "dd.MM.yyyy");
+            put("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}$", "yyyy.MM.dd");           
+            
+            
+            put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}$", "dd MMM yyyy");
+            put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}$", "dd MMMM yyyy");
+            
+            //i.e 12th july 2014
+            put("^\\d{1,2}th\\s[a-z]{3}\\s\\d{4}$", "dd MMM yyyy");
+            put("^\\d{1,2}th\\s[a-z]{4,}\\s\\d{4}$", "dd MMMM yyyy");
+            
+            //partial date i.e 12/3
+            //put("^\\d{1,2}-\\d{1,2}$", "dd-MM");
+            //put("^\\d{1,2}/\\d{1,2}$", "dd/MM");
+        }
+    };
+	
+    private static final HashMap<String, String> PARTIAL_DATE_FORMAT = new HashMap<String, String>(){
+        private static final long serialVersionUID = 4L;
+        {
+            put("^\\d{1,2}-\\d{1,2}$", "-");
+            put("^\\d{1,2}/\\d{1,2}$", "/");           
+        }
+    };
+    
+    private static Logger logger = LogManager.getLogger(DateUtil.class
+            .getName());
+    
+	private static final String MOCK_DATE = "25081989";
+	public static final String MILITARY_DATE_FORMAT = "ddMMyyyy";    
+	public static final String MILITARY_TIME_FORMAT = "HHmmss";
+	
     private DateUtil() {
         // Utility class, hide the constructor.
     }
@@ -175,7 +249,122 @@ public final class DateUtil {
             return false;
         }
     }
+    
+    //From here on, this is our added methods and classes. Not the original author
+    
+    public static boolean isTime(String token) {
+        if(token==null) {
+            return false;
+        }
+        return getTimeFormat(token)!=null;
+    }   
+    
+    /**
+     * Return the time format based on the token. If none is found, return a null.
+     * @param token
+     * @return
+     */
+    public static String getTimeFormat(String token) {
+        for(String regex: TIME_FORMAT_REGEX.keySet()) {
+            logger.info("Matching " + token + " with " + regex);
+            if (token.matches(regex)) {
+                logger.info("Matched!");
+                return TIME_FORMAT_REGEX.get(regex);
+            }
+        }
+        return null;      
+    }
+    
+    /**
+     * Convert to military time
+     * 
+     * @param token the time
+     * @return the time converted to military format. If it's not parseable, return null
+     * @throws ParseException
+     */
+    public static String getMilitaryTime(String token) throws ParseException {
+        if(!isTime(token)) {
+            return null;
+        }
+        
+        String timeFormat = getTimeFormat(token);
+        String mockFormat = MILITARY_DATE_FORMAT + " " + timeFormat;
+        String dateTimeStr = MOCK_DATE + " " + token;
+        
+        logger.info("Time format: " + timeFormat + "\n" +
+                    "Mock format: " + mockFormat + "\n" + 
+                    "DateTime: " + dateTimeStr);
+        
+        SimpleDateFormat mockDateTimeFormat = new SimpleDateFormat(mockFormat);
+        Date mockDate = mockDateTimeFormat.parse(dateTimeStr);
+        
+        SimpleDateFormat milTimeFormat = new SimpleDateFormat(MILITARY_TIME_FORMAT);
+        return milTimeFormat.format(mockDate);
+    }
+    
+    public static boolean isDate(String token) {
+        if(token==null) {
+            return false;
+        }
+        return getDateFormat(token) != null;
+    }
+    
+    public static String getDateFormat(String token) {
+        for(String regex: DATE_FORMAT_REGEX.keySet()) {
+            if (token.matches(regex)) {
+                return DATE_FORMAT_REGEX.get(regex);
+            }
+        }
+        return null;
+    }
+    
+    public static String getMilitaryDate(String token) throws ParseException {
+        
+        if(!isDate(token)) {
+            return null;
+        }
+        
+        Date date = parse(token);
+        SimpleDateFormat milDateFormat = new SimpleDateFormat(MILITARY_DATE_FORMAT);
+        return milDateFormat.format(date);
+    }
+    
+    public static boolean isPartialDate(String token) {
+        return getPartialToken(token)!=null;
+    }
 
+    public static String getPartialToken(String token) {
+        
+        if(token==null) {
+            return null;
+        }
+        
+        for(String regex: PARTIAL_DATE_FORMAT.keySet()) {
+            if (token.matches(regex)) {
+                return PARTIAL_DATE_FORMAT.get(regex);
+            }
+        }
+        
+        return null;
+    }
+    
+    public static String getDateFromPartial(String token) throws ParseException {
+        
+        if(token==null || !isPartialDate(token)) {
+            return null;
+        }
+        String partialDate = token;
+        String partialToken = getPartialToken(partialDate);
+        int year = getToday().getYear();
+        Date convertedDate = parse(partialDate + partialToken + year);
+        SimpleDateFormat milDateFormat = new SimpleDateFormat(MILITARY_DATE_FORMAT);
+        return milDateFormat.format(convertedDate);
+    }
+    
+    public static DateTime getToday() {
+        return DateTime.today(TimeZone.getDefault());
+    }
+    
     // Checkers -----------------------------------------------------------------------------------
 
     /**
@@ -311,4 +500,5 @@ public final class DateUtil {
     	DateTime sunBeforeLast = thisSun.minusDays(14);
     	return sunBeforeLast;
     }
+
 }

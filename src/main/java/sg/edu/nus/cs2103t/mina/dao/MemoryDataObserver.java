@@ -1,5 +1,6 @@
 package sg.edu.nus.cs2103t.mina.dao;
 
+import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 
 /**
@@ -14,10 +15,17 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 public interface MemoryDataObserver {
 
     /**
-     * update state based on memory data change signal
+     * notify observer task set memory data change
      * 
-     * @param syncData changed data signal
+     * @param changedTaskSetData changed taskset data
      */
-    public void updateChange(TaskSetDataParameter syncData);
+    public void updateTaskSet(TaskSetDataParameter changedTaskSetData);
+
+    /**
+     * notify observer task map memory data change
+     * 
+     * @param changedTaskMapData changed taskmap data
+     */
+    public void updateTaskMap(TaskMapDataParameter changedTaskMapData);
 
 }
