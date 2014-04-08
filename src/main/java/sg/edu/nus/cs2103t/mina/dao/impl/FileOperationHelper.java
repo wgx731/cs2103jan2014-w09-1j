@@ -16,11 +16,8 @@ import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
  * Common file operations to be used by file based Dao implementation
  * 
  * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
-// @author A0105853H
+//@author A0105853H
 public class FileOperationHelper {
 
     private static Logger logger = LogManager
