@@ -11,6 +11,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.TaskIdKeyword;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 
+//@author A0099151B
 public class DisplayCommand extends AddCommand {
     
     private static Logger logger = LogManager.getLogger(DisplayCommand.class

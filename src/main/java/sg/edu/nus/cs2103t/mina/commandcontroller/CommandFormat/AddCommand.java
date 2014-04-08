@@ -29,6 +29,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
  * 
  */
 
+//@author A0099151B
 public class AddCommand extends CommandFormat{
     
     private static Logger logger = LogManager.getLogger(AddCommand.class

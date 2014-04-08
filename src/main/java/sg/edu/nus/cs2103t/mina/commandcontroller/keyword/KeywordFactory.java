@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 public class KeywordFactory {
 
     private static KeywordFactory _keywordFactory;
-    private static HashMap<String, Keyword>  _keywordAliasMap = new HashMap<String, Keyword>();;
+    private static LinkedHashMap<String, Keyword>  _keywordAliasMap = new LinkedHashMap<String, Keyword>();
     
     private static final Logger logger = LogManager.getLogger(KeywordFactory.class.getName());
     
@@ -17,7 +18,14 @@ public class KeywordFactory {
     private static final String ERR_CLASS_NOT_FOUND = "Cannot find class: %1$s";
 
     private KeywordFactory()  {
-        for (SimpleKeyword type : SimpleKeyword.values()) {
+        
+        initKeywordClasses(SimpleKeyword.values());
+        initKeywordClasses(CompositeKeyword.values());
+                
+    }
+    
+    private void initKeywordClasses(StandardKeyword[] values) {
+        for (StandardKeyword type : values) {
             String className = String.format(CLASS_NAME, type.getFilePrefix());
             try {
                 Class.forName(className);
@@ -26,8 +34,9 @@ public class KeywordFactory {
                 logger.error(classNotFoundErr);
             }
         }
+        
     }
-    
+
     public static KeywordFactory getInstance() {
         if (_keywordFactory == null) {
             _keywordFactory = new KeywordFactory();

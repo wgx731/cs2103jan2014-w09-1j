@@ -16,7 +16,7 @@ import org.junit.Test;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 
-
+// @author A0099151B
 public class CommandParserTest {
 
     private static final int ORDER_EVENT_EDS = 4;
@@ -974,6 +974,22 @@ public class CommandParserTest {
         
         assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
                      result);     
+        
+        variation = "display deadlines -agendaof next 2 weeks";
+        result = parser.convertCommand(variation);
+        DateTime twoWeeks = today.plusDays(14);
+        String twoWeeksDate = twoWeeks.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + twoWeeksDate + "000000" + " -end " + twoWeeksDate + "235959",
+                     result);   
+        
+        variation = "display deadlines -agendaof next week";
+        result = parser.convertCommand(variation);
+        DateTime oneWeeks = today.plusDays(7);
+        String oneWeeksDate = oneWeeks.format("DDMMYYYY");
+        
+        assertEquals("display deadline -start " + oneWeeksDate + "000000" + " -end " + oneWeeksDate + "235959",
+                     result);
         
     }
     

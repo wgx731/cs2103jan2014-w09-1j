@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
+// @author A0099151B
 public class StartKeyword extends Keyword {
     
     private LinkedHashMap<String, DateTime> _startValues;
@@ -206,7 +207,7 @@ public class StartKeyword extends Keyword {
         }
     }
 
-    private ArrayList<String> nullifyTokens(ArrayList<String> tokens,
+    protected ArrayList<String> nullifyTokens(ArrayList<String> tokens,
                                             int currIndex, int argLimit) {
         argLimit = currIndex + 1 + argLimit;
         for(int i=currIndex+1; i<argLimit; i++){
@@ -236,7 +237,7 @@ public class StartKeyword extends Keyword {
         argument.setKeywordValue(_type, dateTime.trim());
     }
     
-    private String getMilitaryDate(String rawDate) throws ParseException {
+    protected String getMilitaryDate(String rawDate) throws ParseException {
         
         logger.info("Getting military date: " + rawDate);
         
@@ -253,7 +254,7 @@ public class StartKeyword extends Keyword {
         return DateUtil.getMilitaryDate(rawDate);
     }
 
-    private String convertDatePharseToDate(String rawDate) {
+    protected String convertDatePharseToDate(String rawDate) {
         
         Pattern phrasePattern;
         Matcher phraseMatch;
@@ -330,7 +331,7 @@ public class StartKeyword extends Keyword {
         return DateUtil.getMilitaryTime(rawTime);
     }
 
-    private int getArgLimit(String rawDateTime) {
+    protected int getArgLimit(String rawDateTime) {
         String[] rawDateTimeTokens = rawDateTime.split(" ");
         return rawDateTimeTokens.length;
     }
@@ -358,7 +359,7 @@ public class StartKeyword extends Keyword {
         return lookahead.substring(rawLength).trim();
     }
 
-    private String parseDateFirst(String lookahead) throws ParseException{
+    protected String parseDateFirst(String lookahead) throws ParseException{
         
         logger.info("Getting date first: " + lookahead + "|");
         String dateCandidate = getFirstToken(lookahead); 
@@ -375,11 +376,11 @@ public class StartKeyword extends Keyword {
         return null;
     }
 
-    private boolean hasDatePhrase(String lookahead) {
+    protected boolean hasDatePhrase(String lookahead) {
         return getDatePhrase(lookahead)!=null;
     }
     
-    private String getDatePhrase(String lookahead) {
+    protected String getDatePhrase(String lookahead) {
         Pattern phraseRegex;
         Matcher phraseMatcher;
         
