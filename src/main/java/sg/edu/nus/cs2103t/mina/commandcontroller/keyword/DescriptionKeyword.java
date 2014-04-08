@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
  * 
  */
 
+//@author A0099151B
 public class DescriptionKeyword extends Keyword{
     
     private static final Logger logger = LogManager.getLogger(DescriptionKeyword.class.getName());

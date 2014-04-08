@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 
+//@author A0099151B
 public class SearchCommand extends CommandFormat {
 
     private static Logger logger = LogManager

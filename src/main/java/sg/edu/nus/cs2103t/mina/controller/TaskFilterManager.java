@@ -10,7 +10,6 @@ package sg.edu.nus.cs2103t.mina.controller;
  * @author joannemah
  */
 
-//@author Du Zhiyuan
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -31,6 +30,7 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 
+//@author A0099151B
 public class TaskFilterManager {
 
     private static final boolean IS_END = false;

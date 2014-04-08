@@ -10,6 +10,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
 
+//@author A0099151B
 public class ModifyCommand extends CommandFormat {
     
     private static Logger logger = LogManager.getLogger(ModifyCommand.class
