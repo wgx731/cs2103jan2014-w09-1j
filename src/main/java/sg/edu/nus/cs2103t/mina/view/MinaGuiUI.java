@@ -503,6 +503,7 @@ public class MinaGuiUI extends MinaView {
 						try {
 							int page = Integer.parseInt(commands[1]);
 							setPage(page);
+							_taskView.setCurPage(page);
 						} catch (Exception e) {
 							logger.log(Level.ERROR, e.getMessage());
 						}
@@ -575,18 +576,21 @@ public class MinaGuiUI extends MinaView {
 						int maxNumberOfEventPages = _taskView.maxEventPage();
 						if (_eventPage < maxNumberOfEventPages) {
 							_eventPage++;
+							_taskView.setCurPage(_eventPage);
 							updateEventList();
 						}
 					} else if (_currentTab == 1) {
 						int maxNumberOfDeadlinePages = _taskView.maxDeadlinePage();
 						if (_deadlinePage < maxNumberOfDeadlinePages) {
 							_deadlinePage++;
+							_taskView.setCurPage(_deadlinePage);
 							updateDeadlineList();
 						}
 					} else {
 						int maxNumberOfTodoPages = _taskView.maxTodoPage();
 						if (_todoPage < maxNumberOfTodoPages) {
 							_todoPage++;
+							_taskView.setCurPage(_todoPage);
 							updateTodoList();
 						}
 					}
@@ -598,16 +602,19 @@ public class MinaGuiUI extends MinaView {
 					if (_currentTab == 0) {
 						if (_eventPage > 1) {
 							_eventPage--;
+							_taskView.setCurPage(_eventPage);
 							updateEventList();
 						}
 					} else if (_currentTab == 1) {
 						if (_deadlinePage > 1) {
 							_deadlinePage--;
+							_taskView.setCurPage(_deadlinePage);
 							updateDeadlineList();
 						}
 					} else {
 						if (_todoPage > 1) {
 							_todoPage--;
+							_taskView.setCurPage(_todoPage);
 							updateTodoList();
 						}
 					}
@@ -623,6 +630,7 @@ public class MinaGuiUI extends MinaView {
 				if (event.stateMask==SWT.CTRL&&(event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
 					event.doit = false;
 					_currentTab = (_currentTab + 1) % 3;
+					_taskView.setTabEdited(_currentTab);
 					if (!_isExpanded) {
 						positionBackgroundBox();
 						showBackgroundBox();
