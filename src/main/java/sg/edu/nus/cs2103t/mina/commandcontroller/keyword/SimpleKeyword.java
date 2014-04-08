@@ -12,7 +12,7 @@ public enum SimpleKeyword implements StandardKeyword{
     DESCRIPTION("Description"), 
     START("Start"), 
     END("End"), 
-//    RECURRING("Every"), 
+    RECURRING("Every"), 
     UNTIL("Until"), 
     PRIORITY("Priority");
     
