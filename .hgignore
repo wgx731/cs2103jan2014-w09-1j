@@ -1,0 +1,70 @@
+# use glob syntax
+syntax: glob
+
+###################################################
+## Linux.hgignore
+###################################################
+.*
+!.hgignore
+*~
+
+###################################################
+## Vim.hgignore
+###################################################
+.*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+#*************************************************#
+
+###################################################
+## Java.hgignore
+###################################################
+*.class
+# Package Files #
+*.jar
+*.war
+*.ear
+
+###################################################
+## Eclipse.hgignore
+###################################################
+*.pydevproject
+.project
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+# External tool builders
+.externalToolBuilders/
+# Locally stored "Eclipse launch configurations"
+*.launch
+# CDT-specific
+.cproject
+# PDT-specific
+.buildpath
+
+
+###################################################
+## Maven.hgignore
+###################################################
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+release.properties
+
+###################################################
+## Mina.hgignore
+###################################################
+mina-*
+test-*
