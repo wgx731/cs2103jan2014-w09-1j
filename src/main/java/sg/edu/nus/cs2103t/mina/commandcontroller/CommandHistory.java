@@ -28,6 +28,11 @@ public class CommandHistory {
 	private LinkedList<SortedSet<DeadlineTask>> _redoDeadlineCompletedSet;
 	private LinkedList<SortedSet<EventTask>> _redoEventCompletedSet;
 	
+	private LinkedList<FilterParameter> _undoFilterParameter;
+	private LinkedList<FilterParameter> _redoFilterParameter;
+	private LinkedList<int[]> _undoTaskViewValues;
+	private LinkedList<int[]> _redoTaskViewValues;
+	
 	private FilterParameter _latestFilter;
 		
 	public CommandHistory(){
@@ -49,6 +54,12 @@ public class CommandHistory {
 		_redoEventCompletedSet = new LinkedList<SortedSet<EventTask>>();
 		
 		_latestFilter = new FilterParameter();
+		
+		_undoFilterParameter = new LinkedList<FilterParameter>();
+		_redoFilterParameter = new LinkedList<FilterParameter>();
+		
+		_undoTaskViewValues = new LinkedList<int[]>();
+		_redoTaskViewValues = new LinkedList<int[]>();
 	}
     
 	public void updateLatestFilter(FilterParameter filterParam){
@@ -64,7 +75,9 @@ public class CommandHistory {
     		SortedSet<EventTask> uncompletedEventTasks,
     		SortedSet<TodoTask> completedTodoTasks,
     		SortedSet<DeadlineTask> completedDeadlineTasks,
-    		SortedSet<EventTask> completedEventTasks){
+    		SortedSet<EventTask> completedEventTasks,
+    		FilterParameter filterParam,
+    		int tabEdited, int curPage, int tabEditedAlt, int curPageAlt){
     	
     	Cloner cloner = new Cloner();
     	SortedSet<TodoTask> cloneUncompletedTodoTasks = cloner.deepClone(uncompletedTodoTasks);
@@ -75,17 +88,25 @@ public class CommandHistory {
     	SortedSet<DeadlineTask> cloneCompletedDeadlineTasks = cloner.deepClone(completedDeadlineTasks);
     	SortedSet<EventTask> cloneCompletedEventTasks = cloner.deepClone(completedEventTasks);
     	
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	int[] taskViewValues = new int[]{tabEdited, curPage, tabEditedAlt, curPageAlt};
+    	
     	_undoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
     	_undoDeadlineUncompletedSet.addFirst(cloneUncompletedDeadlineTasks);
     	_undoEventUncompletedSet.addFirst(cloneUncompletedEventTasks);
     	
     	_undoTodoCompletedSet.addFirst(cloneCompletedTodoTasks);
     	_undoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
-    	_undoEventCompletedSet.addFirst(cloneCompletedEventTasks);    
+    	_undoEventCompletedSet.addFirst(cloneCompletedEventTasks);
+    	
+    	_undoFilterParameter.addFirst(cloneFilterParam);
+    	_undoTaskViewValues.addFirst(taskViewValues);
     	
     	if (_undoTodoUncompletedSet.size()==6&&_undoDeadlineUncompletedSet.size()==6&&
     			_undoEventUncompletedSet.size()==6&&_undoTodoCompletedSet.size()==6&&
-    			_undoDeadlineCompletedSet.size()==6&&_undoEventCompletedSet.size()==6){
+    			_undoDeadlineCompletedSet.size()==6&&_undoEventCompletedSet.size()==6&&
+    			_undoFilterParameter.size()==6&&_undoTaskViewValues.size()==6){
     		
     		_undoTodoUncompletedSet.removeLast();
         	_undoDeadlineUncompletedSet.removeLast();
@@ -94,6 +115,9 @@ public class CommandHistory {
         	_undoTodoCompletedSet.removeLast();
         	_undoDeadlineCompletedSet.removeLast();
         	_undoEventCompletedSet.removeLast();
+        	
+        	_undoFilterParameter.removeLast();
+        	_undoTaskViewValues.removeLast();
     	}
     }
     
@@ -105,6 +129,9 @@ public class CommandHistory {
     	_undoTodoCompletedSet.removeFirst();
     	_undoDeadlineCompletedSet.removeFirst();
     	_undoEventCompletedSet.removeFirst();
+    	
+    	_undoFilterParameter.removeFirst();
+    	_undoTaskViewValues.removeFirst();
     }
     
     public void removeLatestRedo(){
@@ -115,6 +142,9 @@ public class CommandHistory {
     	_redoTodoCompletedSet.removeFirst();
     	_redoDeadlineCompletedSet.removeFirst();
     	_redoEventCompletedSet.removeFirst();
+    	
+    	_redoFilterParameter.removeFirst();
+    	_redoTaskViewValues.removeFirst();
     }
     
     public SortedSet<TodoTask> getUndoTodoUncompleted(){
@@ -141,12 +171,22 @@ public class CommandHistory {
     	return _undoEventCompletedSet.removeFirst();
     }
     
+    public FilterParameter getUndoFilterParameter(){
+    	return _undoFilterParameter.removeFirst();
+    }
+    
+    public int[] getUndoTaskViewValues(){
+    	return _undoTaskViewValues.removeFirst();
+    }
+    
     public void addRedo(SortedSet<TodoTask> uncompletedTodoTasks, 
     		SortedSet<DeadlineTask> uncompletedDeadlineTasks,
     		SortedSet<EventTask> uncompletedEventTasks,
     		SortedSet<TodoTask> completedTodoTasks,
     		SortedSet<DeadlineTask> completedDeadlineTasks,
-    		SortedSet<EventTask> completedEventTasks){
+    		SortedSet<EventTask> completedEventTasks,
+    		FilterParameter filterParam,
+    		int tabEdited, int curPage, int tabEditedAlt, int curPageAlt){
     	
     	Cloner cloner = new Cloner();
     	SortedSet<TodoTask> cloneUncompletedTodoTasks = cloner.deepClone(uncompletedTodoTasks);
@@ -157,6 +197,10 @@ public class CommandHistory {
     	SortedSet<DeadlineTask> cloneCompletedDeadlineTasks = cloner.deepClone(completedDeadlineTasks);
     	SortedSet<EventTask> cloneCompletedEventTasks = cloner.deepClone(completedEventTasks);
     	
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	int[] taskViewValues = new int[]{tabEdited, curPage, tabEditedAlt, curPageAlt};
+    	
     	_redoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
     	_redoDeadlineUncompletedSet.addFirst(cloneUncompletedDeadlineTasks);
     	_redoEventUncompletedSet.addFirst(cloneUncompletedEventTasks);
@@ -164,6 +208,9 @@ public class CommandHistory {
     	_redoTodoCompletedSet.addFirst(cloneCompletedTodoTasks);
     	_redoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
     	_redoEventCompletedSet.addFirst(cloneCompletedEventTasks); 
+    	
+    	_redoFilterParameter.addFirst(cloneFilterParam);
+    	_redoTaskViewValues.addFirst(taskViewValues);
     }
     
     public SortedSet<TodoTask> getRedoTodoUncompleted(){
@@ -190,6 +237,14 @@ public class CommandHistory {
     	return _redoEventCompletedSet.removeFirst();
     }
     
+    public FilterParameter getRedoFilterParameter(){
+    	return _redoFilterParameter.removeFirst();
+    }
+    
+    public int[] getRedoTaskViewValues(){
+    	return _redoTaskViewValues.removeFirst();
+    }
+    
     public void clearRedo(){
     	_redoTodoUncompletedSet.clear();
     	_redoDeadlineUncompletedSet.clear();
@@ -198,6 +253,9 @@ public class CommandHistory {
     	_redoTodoCompletedSet.clear();
     	_redoDeadlineCompletedSet.clear();
     	_redoEventCompletedSet.clear(); 
+    	
+    	_redoFilterParameter.clear();
+    	_redoTaskViewValues.clear();
     }
 
     public boolean isEmptyUndo(){
@@ -206,7 +264,9 @@ public class CommandHistory {
     			_undoEventUncompletedSet.isEmpty()&&    	
     			_undoTodoCompletedSet.isEmpty()&&
     			_undoDeadlineCompletedSet.isEmpty()&&
-    			_undoEventCompletedSet.isEmpty(); 
+    			_undoEventCompletedSet.isEmpty()&&
+    			_undoFilterParameter.isEmpty()&&
+    			_undoTaskViewValues.isEmpty(); 
     }
 
     public boolean isEmptyRedo(){
@@ -215,6 +275,8 @@ public class CommandHistory {
     			_redoEventUncompletedSet.isEmpty()&&    	
     			_redoTodoCompletedSet.isEmpty()&&
     			_redoDeadlineCompletedSet.isEmpty()&&
-    			_redoEventCompletedSet.isEmpty();
+    			_redoEventCompletedSet.isEmpty()&&
+    			_redoFilterParameter.isEmpty()&&
+    			_redoTaskViewValues.isEmpty();
     }
 }

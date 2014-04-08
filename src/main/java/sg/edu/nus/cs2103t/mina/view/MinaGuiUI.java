@@ -512,7 +512,15 @@ public class MinaGuiUI extends MinaView {
 						_currentTab = 2;
 						expand();
 					} else {
-						resetPanel();
+						if (!_isExpanded||command.equals("display")){
+							resetPanel();
+							if (command.equals("display")){
+								resetPage();
+							}
+						} else {
+							_currentTab = _taskView.getTabEdited();
+							expand();
+						}
 					}
 					updatePage();
 					displayOutput();
@@ -626,6 +634,13 @@ public class MinaGuiUI extends MinaView {
 			}
 		};
 		_userInputTextField.addTraverseListener(_tabListener);
+	}
+	
+	private void resetPage() {
+		_todoPage = 1;
+		_deadlinePage = 1;
+		_eventPage = 1;
+		
 	}
 
 	private void updatePage() {
@@ -1358,8 +1373,7 @@ public class MinaGuiUI extends MinaView {
 						_userInputTextField.removeListener(SWT.KeyUp, _helpListener);
 						addAllListeners();
 						_userInputTextField.setText(text);
-						_userInputTextField.setSelection(text.length(),
-								text.length());
+						_userInputTextField.selectAll();
 					}
 				} else if (_helpWindow.getVisible()) {
 					_userInputTextField.setText(EMPTY_STRING);
