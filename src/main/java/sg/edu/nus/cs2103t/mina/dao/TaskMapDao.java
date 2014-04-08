@@ -25,6 +25,6 @@ public interface TaskMapDao {
      * 
      * @throws IOException
      */
-    public TaskMapDataParameter loadTaskMap() throws IOException;
+    public TaskMapDataParameter loadTaskMap();
 
 }
