@@ -62,7 +62,7 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
     }
 
     @Override
-    public void saveTaskMapData(TaskMapDataParameter taskMapData)
+    public void saveTaskMap(TaskMapDataParameter taskMapData)
             throws IOException {
         ObjectOutput output = getOutputWriter();
         output.writeObject(taskMapData);
@@ -70,7 +70,7 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
     }
 
     @Override
-    public TaskMapDataParameter loadTaskMapData() {
+    public TaskMapDataParameter loadTaskMap() {
         try {
             ObjectInput input = getInputReader();
             Object object = input.readObject();

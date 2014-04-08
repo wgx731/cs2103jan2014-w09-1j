@@ -45,8 +45,7 @@ public class DataSyncManager {
         _taskMapDao = taskMapDao;
         _dataOberserver = new MemoryDataObserverImp(taskDao, taskMapDao);
     }
-    
-   
+
     public MemoryDataObserver getDataOberserver() {
         return _dataOberserver;
     }
@@ -78,11 +77,15 @@ public class DataSyncManager {
 
     public void saveTaskMap(TaskMapDataParameter taskMapData)
             throws IOException {
-        _taskMapDao.saveTaskMapData(taskMapData);
+        _taskMapDao.saveTaskMap(taskMapData);
     }
 
     public TaskMapDataParameter loadTaskMap() {
-        return _taskMapDao.loadTaskMapData();
+        try {
+            return _taskMapDao.loadTaskMap();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 }

@@ -34,7 +34,7 @@ public class MemoryDataObserverImp implements MemoryDataObserver {
     @Override
     public void updateTaskMap(TaskMapDataParameter changedTaskMapData) {
         try {
-            _taskMapDao.saveTaskMapData(changedTaskMapData);
+            _taskMapDao.saveTaskMap(changedTaskMapData);
         } catch (IOException e) {
             logger.error(e, e);
             logger.error("can't save task map data");
