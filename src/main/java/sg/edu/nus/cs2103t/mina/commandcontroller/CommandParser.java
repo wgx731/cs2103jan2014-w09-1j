@@ -320,7 +320,12 @@ public class CommandParser {
 
         String[] rawTokens = userInput.trim().split(SPACE, 2);
         logger.info("Distinguishing action: " + Arrays.toString(rawTokens));
-
+        
+        if(rawTokens.length<2) {
+            String[] newRawTokens = {rawTokens[ACTION_INDEX], ""};
+            rawTokens = newRawTokens;
+        }
+        
         // get action
         String action = rawTokens[ACTION_INDEX].toLowerCase();
         String argument = rawTokens[ARG_INDEX].trim();
