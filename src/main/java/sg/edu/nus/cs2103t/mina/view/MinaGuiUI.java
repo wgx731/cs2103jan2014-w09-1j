@@ -503,7 +503,6 @@ public class MinaGuiUI extends MinaView {
 						try {
 							int page = Integer.parseInt(commands[1]);
 							setPage(page);
-							_taskView.setCurPage(page);
 						} catch (Exception e) {
 							logger.log(Level.ERROR, e.getMessage());
 						}
@@ -529,13 +528,14 @@ public class MinaGuiUI extends MinaView {
 								resetPage();
 							}
 						} else {
-							_currentTab = _taskView.getTabEdited();
+							_currentTab = _taskView.getTabSelected();
 							expand();
 						}
 					}
 					updatePage();
 					displayOutput();
 					updateLists();
+					positionBackgroundBox();
 					updateArrowNavigation();
 				}
 				if (event.keyCode == SWT.ARROW_UP) {
@@ -576,21 +576,21 @@ public class MinaGuiUI extends MinaView {
 						int maxNumberOfEventPages = _taskView.maxEventPage();
 						if (_eventPage < maxNumberOfEventPages) {
 							_eventPage++;
-							_taskView.setCurPage(_eventPage);
+							_taskView.setEventPage(_eventPage);
 							updateEventList();
 						}
 					} else if (_currentTab == 1) {
 						int maxNumberOfDeadlinePages = _taskView.maxDeadlinePage();
 						if (_deadlinePage < maxNumberOfDeadlinePages) {
 							_deadlinePage++;
-							_taskView.setCurPage(_deadlinePage);
+							_taskView.setDeadlinePage(_deadlinePage);
 							updateDeadlineList();
 						}
 					} else {
 						int maxNumberOfTodoPages = _taskView.maxTodoPage();
 						if (_todoPage < maxNumberOfTodoPages) {
 							_todoPage++;
-							_taskView.setCurPage(_todoPage);
+							_taskView.setTodoPage(_todoPage);
 							updateTodoList();
 						}
 					}
@@ -602,19 +602,19 @@ public class MinaGuiUI extends MinaView {
 					if (_currentTab == 0) {
 						if (_eventPage > 1) {
 							_eventPage--;
-							_taskView.setCurPage(_eventPage);
+							_taskView.setEventPage(_eventPage);
 							updateEventList();
 						}
 					} else if (_currentTab == 1) {
 						if (_deadlinePage > 1) {
 							_deadlinePage--;
-							_taskView.setCurPage(_deadlinePage);
+							_taskView.setDeadlinePage(_deadlinePage);
 							updateDeadlineList();
 						}
 					} else {
 						if (_todoPage > 1) {
 							_todoPage--;
-							_taskView.setCurPage(_todoPage);
+							_taskView.setTodoPage(_todoPage);
 							updateTodoList();
 						}
 					}
@@ -630,7 +630,14 @@ public class MinaGuiUI extends MinaView {
 				if (event.stateMask==SWT.CTRL&&(event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
 					event.doit = false;
 					_currentTab = (_currentTab + 1) % 3;
-					_taskView.setTabEdited(_currentTab);
+					_taskView.setTabSelected(_currentTab);
+					if (_currentTab == 0){
+						_taskView.setEventPage(_eventPage);
+					} else if (_currentTab == 1){
+						_taskView.setDeadlinePage(_deadlinePage);
+					} else if (_currentTab == 2){
+						_taskView.setTodoPage(_todoPage);
+					}
 					if (!_isExpanded) {
 						positionBackgroundBox();
 						showBackgroundBox();
@@ -639,7 +646,7 @@ public class MinaGuiUI extends MinaView {
 							expandEvent();
 						} else if (_currentTab == 1) {
 							expandDeadline();
-						} else {
+						} else if (_currentTab == 2){
 							expandTodo();
 						}
 					}
@@ -672,26 +679,26 @@ public class MinaGuiUI extends MinaView {
 		if (_eventPage > _eventMaxPage) {
 			_eventPage = _eventMaxPage;
 		}
+		if (_todoPage <= 0) {
+			_todoPage = 1;
+		}
+		if (_deadlinePage <= 0) {
+			_deadlinePage = 1;
+		}
+		if (_eventPage <= 0) {
+			_eventPage = 1;
+		}
 	}
 
 	private void updatePageFromTaskView() {
-		if (_taskView.getTabEditedAlt()==0&&_taskView.getCurPageAlt()>0){
-			_eventPage = _taskView.getCurPageAlt();
+		if (_taskView.getEventPage()>0){
+			_eventPage = _taskView.getEventPage();
 		}
-		if (_taskView.getTabEditedAlt()==1&&_taskView.getCurPageAlt()>0){
-			_deadlinePage = _taskView.getCurPageAlt();
+		if (_taskView.getDeadlinePage()>0){
+			_deadlinePage = _taskView.getDeadlinePage();
 		}
-		if (_taskView.getTabEditedAlt()==2&&_taskView.getCurPageAlt()>0){
-			_todoPage = _taskView.getCurPageAlt();
-		}
-		if (_taskView.getTabEdited() == 0 && _taskView.getCurPage() > 0) {
-			_eventPage = _taskView.getCurPage();
-		}
-		if (_taskView.getTabEdited() == 1 && _taskView.getCurPage() > 0) {
-			_deadlinePage = _taskView.getCurPage();
-		}
-		if (_taskView.getTabEdited() == 2 && _taskView.getCurPage() > 0) {
-			_todoPage = _taskView.getCurPage();
+		if (_taskView.getTodoPage()>0){
+			_todoPage = _taskView.getTodoPage();
 		}
 	}
 
@@ -699,10 +706,13 @@ public class MinaGuiUI extends MinaView {
 		if (page > 0) {
 			if (_currentTab == 0) {
 				_eventPage = page;
+				_taskView.setEventPage(_eventPage);
 			} else if (_currentTab == 1) {
 				_deadlinePage = page;
+				_taskView.setDeadlinePage(_deadlinePage);
 			} else {
 				_todoPage = page;
+				_taskView.setTodoPage(_todoPage);
 			}
 		}
 	}
@@ -791,28 +801,11 @@ public class MinaGuiUI extends MinaView {
 	@Override
 	public void updateLists() {
 		logger.log(Level.INFO, "shell update lists");
-		if (_taskView.getTabEditedAlt()!=-1){
-			if (_taskView.getTabEditedAlt()==0){
-				updateEventList();
-			} else if (_taskView.getTabEditedAlt()==1){
-				updateDeadlineList();
-			} else if (_taskView.getTabEditedAlt()==2){
-				updateTodoList();
-			}
-		}
-		if (_taskView.getTabEdited() == -1) {
 			updateEventList();
 			updateDeadlineList();
 			updateTodoList();
-		} else if (_taskView.getTabEdited() == 0) {
-			_currentTab = 0;
-			updateEventList();
-		} else if (_taskView.getTabEdited() == 1) {
-			_currentTab = 1;
-			updateDeadlineList();
-		} else if (_taskView.getTabEdited()==2){
-			_currentTab = 2;
-			updateTodoList();
+		if (_taskView.getTabSelected()!=-1){
+			_currentTab = _taskView.getTabSelected();
 		}
 	}
 
