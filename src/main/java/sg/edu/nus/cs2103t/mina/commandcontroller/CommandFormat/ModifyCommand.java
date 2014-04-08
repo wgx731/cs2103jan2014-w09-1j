@@ -10,12 +10,12 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
 
-public class CommandWithTaskId extends CommandFormat {
+public class ModifyCommand extends CommandFormat {
     
-    private static Logger logger = LogManager.getLogger(CommandWithTaskId.class
+    private static Logger logger = LogManager.getLogger(ModifyCommand.class
             .getName());
     
-    public CommandWithTaskId(CommandType commandType, String argumentStr) {
+    public ModifyCommand(CommandType commandType, String argumentStr) {
         super(commandType, argumentStr);
     }
     

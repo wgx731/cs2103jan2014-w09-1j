@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,5 +41,6 @@ public abstract class Keyword {
     protected abstract void initValues();
     public abstract ArrayList<String> processKeyword(ArrayList<String> tokens, int currIndex,  
                                                         Argument argument) throws ParseException;
+    public abstract Map<String, String> getKeywordValues();
 }
  

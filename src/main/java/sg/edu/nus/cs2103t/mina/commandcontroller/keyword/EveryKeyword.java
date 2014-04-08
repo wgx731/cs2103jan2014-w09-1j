@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class EveryKeyword extends Keyword {
     
@@ -85,6 +86,11 @@ public class EveryKeyword extends Keyword {
         } else{
             return value;
         }
+    }
+
+    @Override
+    public Map<String, String> getKeywordValues() {
+        return _everyValues;
     }
 
 }

@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -162,6 +163,11 @@ public class TaskIdKeyword extends Keyword {
         }
         
         argument.setKeywordValue(_type, taskId);
+    }
+
+    @Override
+    public Map<String, String> getKeywordValues() {
+        return _taskTypeValues;
     }
     
 }

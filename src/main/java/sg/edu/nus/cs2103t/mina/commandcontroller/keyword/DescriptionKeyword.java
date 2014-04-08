@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,6 +98,11 @@ public class DescriptionKeyword extends Keyword{
     @Override
     protected Keyword createKeyword() {
         return new DescriptionKeyword();
+    }
+
+    @Override
+    public Map<String, String> getKeywordValues() {
+        return null;
     }
     
 }

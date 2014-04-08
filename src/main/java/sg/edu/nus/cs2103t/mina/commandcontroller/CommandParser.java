@@ -9,43 +9,27 @@ package sg.edu.nus.cs2103t.mina.commandcontroller;
  * @author joannemah
  */
 
-import hirondelle.date4j.DateTime;
-import hirondelle.date4j.DateTime.DayOverflow;
+
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.AddCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandFormat;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandOnlyKeywordValues;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandWithTaskId;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandWithValuesOnly;
+import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.DisplayCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.ModifyCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.SearchCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.KeywordFactory;
-import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
-import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
-import sg.edu.nus.cs2103t.mina.model.FilterType;
-import sg.edu.nus.cs2103t.mina.model.TaskType;
-import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+
 
 public class CommandParser {
-
-    private static final String SEARCH_DELIMIT = "//";
-    private static final String SEGMENT_END_DELIMIT = "' ";
-    private static final String SEGMENT_START_DELIMIT = " '";
 
     private static final CommandType REDO = CommandType.REDO;
     private static final CommandType SEARCH = CommandType.SEARCH;
@@ -57,101 +41,21 @@ public class CommandParser {
     private static final CommandType MODIFY = CommandType.MODIFY;
     private static final CommandType COMPLETE = CommandType.COMPLETE;
     
-    private static final String VALIDITY = "v";
-    private static final String IS_VALID = "valid";
-    private static final String PM = "pm";
-    private static final String AM = "am";
-    private static final String EMPTY = "";
-    private static final String TIME_KEY = "time";
-    private static final String DATE_KEY = "date";
     private static final String EVERY_DAY = "day";
     private static final String EVERY_WEEK = "week";
     private static final String EVERY_MONTH = "month";
     private static final String EVERY_YEAR = "year";
     private static final String EVERY_HOUR = "hour";
 
-   
-
-    private static final Integer ONE_YEAR = 1;
-    private static final Integer ONE_MONTH = 1;
-    private static final Integer ONE_WEEK = 7;
-    private static final int ONE_DAY = 1;
-    
-    private static final int NEXT = 1;
     private static final int ACTION_INDEX = 0;
+    private static final int ARG_INDEX = 1;
     private static final String SPACE = " ";
 
     private static final HashMap<String, CommandType> ACTIONS_KEYWORDS = new HashMap<String, CommandType>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
-    private static final HashMap<String, Boolean> END_KEYWORDS = new HashMap<String, Boolean>();
-    private static final HashMap<String, Boolean> START_KEYWORDS = new HashMap<String, Boolean>();
-    private static final HashMap<String, Boolean> TO_TASK_TYPE_KEYWORDS = new HashMap<String, Boolean>();
     private static final HashMap<String, Boolean> RECURRING_KEYWORDS = new HashMap<String, Boolean>();
-    private static final HashMap<String, Boolean> UNITL_KEYWORDS = new HashMap<String, Boolean>();
-
-    private static final HashMap<String, DateTime> END_VALUES = new HashMap<String, DateTime>();
-    private static final HashMap<String, String> PRIORITY_VALUES = new HashMap<String, String>();
-    private static final HashMap<String, String> DISPLAY_VALUES = new HashMap<String, String>();
     private static final HashMap<String, String> RECURRING_VALUES = new HashMap<String, String>();
-
-    private static final HashMap<String, String> TASKTYPE_ALIAS = new HashMap<String, String>();
-
-    private HashMap<Integer, Boolean> keyFlags = new HashMap<Integer, Boolean>();
-
-    private static final LinkedHashSet<String> TIME = new LinkedHashSet<String>();
-
-    private static final int DATETIME_VALUE_KEYWORD = 0;
-    private static final int DATE_VALUE = 1;
-    private static final int TIME_VALUE = 2;
-    private static final int PROPER_DATE_TIME = 3;
-    private static final int INVALID_VALUE = -1;
-
-    private static final int PRIORITY_FLAG = 0;
-    private static final int END_FLAG = 1;
-    private static final int END_CONTINUE_FLAG = 2;
-    private static final int DESCRIPTION_FLAG = 3;
-    private static final int START_FLAG = 4;
-    private static final int START_CONTINUE_FLAG = 5;
-    private static final int TO_TASK_TYPE_FLAG = 6;
-    private static final int AGENDAOF_FLAG = 7;
-    private static final int RECUR_FLAG = 8;
-    private static final int UNTIL_FLAG = 9;
-    private static final int UNTIL_CONTINUE_FLAG = 10;
-
-    private static final int FIRST = 0;
-    private static final int SECOND = 1;
-    private static final int ONE_TOKEN = 1;
-    private static final int TWO_TOKEN = 2;
-    private static final int ARG_INDEX = 1;
-    private static final int LAST = 1;
-    private static final boolean IS_WHOLE_SEGMENT = true;
-
-    private static final int LOOKAHEAD_LIMIT = 5;
-
-    private static final Integer NO_YEAR = 0;
-    private static final Integer NO_MONTH = 0;
-    private static final Integer NO_DAY = 0;
-    private static final Integer NO_HOUR = 0;
-    private static final Integer NO_MIN = 0;
-    private static final Integer NO_SEC = 0;
-    private static final Integer NO_NANO_SEC = 0;
-
-    private LinkedHashMap<String, String> _arguments;
-
-    private enum ActionsTaskID {
-        MODIFY(CommandParser.MODIFY), DELETE(CommandParser.DELETE), COMPLETE(
-                CommandParser.COMPLETE);
-
-        private CommandType _action;
-
-        private ActionsTaskID(CommandType value) {
-            _action = value;
-        }
-
-        private String getValue() {
-            return _action.toString();
-        }
-    }
+    private static final String EMPTY = "";
 
     private static Logger logger = LogManager.getLogger(CommandParser.class
             .getName());
@@ -159,7 +63,6 @@ public class CommandParser {
     public CommandParser() {
 
         KeywordFactory keywordFactory = KeywordFactory.getInstance();
-                
         
         ACTIONS_KEYWORDS.put("add", ADD);
         ACTIONS_KEYWORDS.put("make", ADD);
@@ -191,70 +94,6 @@ public class CommandParser {
         SINGLE_ACTION_KEYWORD.put(UNDO.getType(), UNDO.getType());
         SINGLE_ACTION_KEYWORD.put(REDO.getType(), REDO.getType());
 
-        TO_TASK_TYPE_KEYWORDS.put("totype", false);
-        TO_TASK_TYPE_KEYWORDS.put("-totype", true);
-        TO_TASK_TYPE_KEYWORDS.put("changeto", false);
-        TO_TASK_TYPE_KEYWORDS.put("-changeto", true);
-        TO_TASK_TYPE_KEYWORDS.put("totask", false);
-        TO_TASK_TYPE_KEYWORDS.put("-totask", true);
-
-        END_KEYWORDS.put("end", false);
-        END_KEYWORDS.put("due", false);
-        END_KEYWORDS.put("by", false);
-        END_KEYWORDS.put("before", false);
-        END_KEYWORDS.put("on", false);
-        END_KEYWORDS.put("to", false);
-
-        END_KEYWORDS.put("-end", true);
-        END_KEYWORDS.put("-due", true);
-        END_KEYWORDS.put("-by", true);
-        END_KEYWORDS.put("-before", true);
-        END_KEYWORDS.put("-on", true);
-        END_KEYWORDS.put("-to", true);
-
-        START_KEYWORDS.put("start", false);
-        START_KEYWORDS.put("-start", true);
-        START_KEYWORDS.put("starting", false);
-        START_KEYWORDS.put("-starting", true);
-        START_KEYWORDS.put("from", false);
-        START_KEYWORDS.put("-from", true);
-
-        PRIORITY_VALUES.put("low", "L");
-        PRIORITY_VALUES.put("l", "L");
-        PRIORITY_VALUES.put("medium", "M");
-        PRIORITY_VALUES.put("m", "M");
-        PRIORITY_VALUES.put("med", "M");
-        PRIORITY_VALUES.put("h", "H");
-        PRIORITY_VALUES.put("high", "H");
-        PRIORITY_VALUES.put("urgent", "H");
-        PRIORITY_VALUES.put("-urgent", "H");
-
-        initEndValues();
-
-        TASKTYPE_ALIAS.put(TaskType.EVENT.getType(), TaskType.EVENT.getType());
-        TASKTYPE_ALIAS.put("e", TaskType.EVENT.getType());
-        TASKTYPE_ALIAS.put("events", TaskType.EVENT.getType());
-        TASKTYPE_ALIAS.put("appointment", TaskType.EVENT.getType());
-        TASKTYPE_ALIAS.put("appt", TaskType.EVENT.getType());
-        TASKTYPE_ALIAS.put("appts", TaskType.EVENT.getType());
-
-        TASKTYPE_ALIAS.put(TaskType.TODO.getType(), TaskType.TODO.getType());
-        TASKTYPE_ALIAS.put("td", TaskType.TODO.getType());
-        TASKTYPE_ALIAS.put("to-do", TaskType.TODO.getType());
-        TASKTYPE_ALIAS.put("todos", TaskType.TODO.getType());
-        TASKTYPE_ALIAS.put("task", TaskType.TODO.getType());
-        TASKTYPE_ALIAS.put("tasks", TaskType.TODO.getType());
-
-        TASKTYPE_ALIAS.put(TaskType.DEADLINE.getType(),
-                TaskType.DEADLINE.getType());
-        TASKTYPE_ALIAS.put("d", TaskType.DEADLINE.getType());
-        TASKTYPE_ALIAS.put("deadlines", TaskType.DEADLINE.getType());
-        TASKTYPE_ALIAS.put("cutoff", TaskType.DEADLINE.getType());
-        TASKTYPE_ALIAS.put("cutoffs", TaskType.DEADLINE.getType());
-
-        DISPLAY_VALUES.put("completed", FilterType.COMPLETE.getType());
-        DISPLAY_VALUES.put("all", FilterType.COMPLETE_PLUS.getType());
-
         RECURRING_KEYWORDS.put("daily", false);
         RECURRING_KEYWORDS.put("weekly", false);
         RECURRING_KEYWORDS.put("monthly", false);
@@ -284,29 +123,6 @@ public class CommandParser {
         RECURRING_VALUES.put("-monthly", EVERY_MONTH);
         RECURRING_VALUES.put("-yearly", EVERY_YEAR);
         RECURRING_VALUES.put("-hourly", EVERY_HOUR);
-
-        UNITL_KEYWORDS.put("until", false);
-        UNITL_KEYWORDS.put("-until", true);
-    }
-
-    private void initEndValues() {
-        DateTime today = DateTime.today(TimeZone.getDefault());
-        END_VALUES.put("today", today);
-        END_VALUES.put("tomorrow", today.plusDays(ONE_DAY));
-        END_VALUES.put("tmr", today.plusDays(ONE_DAY));
-        END_VALUES.put("tommorrow", today.plusDays(ONE_DAY));
-        END_VALUES.put("yesterday", today.minusDays(ONE_DAY));
-
-        END_VALUES.put("next\\syear", today.plus(ONE_YEAR, NO_MONTH, NO_DAY,
-                NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
-        END_VALUES.put("next\\smonth", today.plus(NO_YEAR, ONE_MONTH, NO_DAY,
-                NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
-        END_VALUES.put("next\\sweek", today.plus(NO_YEAR, NO_MONTH, ONE_WEEK,
-                NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
-        END_VALUES.put("next\\sday", today.plus(NO_YEAR, NO_MONTH, ONE_DAY,
-                NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
-
-        END_VALUES.put("next\\s\\d*?\\s(day)", today);
     }
 
     public String convertCommand(String userInput) throws NullPointerException,
@@ -342,17 +158,19 @@ public class CommandParser {
         switch(command){
             
             case DISPLAY :
+                currCommand = new DisplayCommand(command, argument);
+                break;
             case ADD :
-                currCommand = new CommandOnlyKeywordValues(command, argument);
+                currCommand = new AddCommand(command, argument);
                 break;
                 
             case MODIFY :
             case DELETE :
             case COMPLETE :
-                currCommand = new CommandWithTaskId(command, argument);
+                currCommand = new ModifyCommand(command, argument);
                 break;
             case SEARCH :
-                currCommand = new CommandWithValuesOnly(command, argument);
+                currCommand = new SearchCommand(command, argument);
                 break;                
             default:
                 throw new Error("No such action, yet.");

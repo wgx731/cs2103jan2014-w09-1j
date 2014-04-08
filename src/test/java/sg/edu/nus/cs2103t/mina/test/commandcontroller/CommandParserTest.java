@@ -744,6 +744,13 @@ public class CommandParserTest {
         logger.info(variation);
         assertEquals(expected, result);   
         
+        DateTime nextMonth = today.plus(0, 1, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        end = "-end next month 9am";
+        variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, end,
+                                        !IS_REORDER, IS_WRAPPED);
+        result = parser.convertCommand(variation);
+        expected = "add " + DEADLINE_DESCRIPTION + "-end " + nextMonth.format("DDMMYYYY") + "090000";
+        assertEquals(expected, result);   
     }
 
     @Test

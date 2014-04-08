@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,20 +86,14 @@ public class StartKeyword extends Keyword {
         
         //this or next day
         _startValues.put("^(this\\s)?(monday|mon)", getWeekday(today, MONDAY));
-        _startValues.put("^(this\\s)?(tuesday|tue|tues)", getWeekday(today, TUESDAY));
+        _startValues.put("^(this\\s)?(tuesday|tues|tue)", getWeekday(today, TUESDAY));
         _startValues.put("^(this\\s)?(wednesday|wed)", getWeekday(today, WEDNESDAY));
         _startValues.put("^(this\\s)?(thursday|thurs|thur)", getWeekday(today, THURSDAY));
         _startValues.put("^(this\\s)?(friday|fri)", getWeekday(today, FRIDAY));
         _startValues.put("^(this\\s)?(saturday|sat)", getWeekday(today, SATURDAY));
         _startValues.put("^(this\\s)?(sunday|sun)", getWeekday(today, SUNDAY));
         
-        _startValues.put("^next\\s(monday|mon)", getNextWeekday(today, MONDAY));
-        _startValues.put("^next\\s(tuesday|tue)", getNextWeekday(today, TUESDAY));
-        _startValues.put("^next\\s(wednesday|wed)", getNextWeekday(today, WEDNESDAY));
-        _startValues.put("^next\\s(thursday|thurs)", getNextWeekday(today, THURSDAY));
-        _startValues.put("^next\\s(friday|fri)", getNextWeekday(today, FRIDAY));
-        _startValues.put("^next\\s(saturday|sat)", getNextWeekday(today, SATURDAY));
-        _startValues.put("^next\\s(sunday|sun)", getNextWeekday(today, SUNDAY));
+        _startValues.put("^next\\s\\d*?\\s(days|weeks|months|years|day|week|month|year)", null);
         
         _startValues.put("^next\\syear", today.plus(ONE_YEAR, NO_MONTH, NO_DAY,
                 NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
@@ -108,8 +103,15 @@ public class StartKeyword extends Keyword {
                 NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
         _startValues.put("^next\\sday", today.plus(NO_YEAR, NO_MONTH, ONE_DAY,
                 NO_HOUR, NO_MIN, NO_SEC, NO_NANO_SEC, DayOverflow.Spillover));
-
-        _startValues.put("^next\\s\\d*?\\s(days|weeks|months|years|day|week|month|year)", null);
+        
+        _startValues.put("^next\\s(monday|mon)", getNextWeekday(today, MONDAY));
+        _startValues.put("^next\\s(tuesday|tue)", getNextWeekday(today, TUESDAY));
+        _startValues.put("^next\\s(wednesday|wed)", getNextWeekday(today, WEDNESDAY));
+        _startValues.put("^next\\s(thursday|thurs)", getNextWeekday(today, THURSDAY));
+        _startValues.put("^next\\s(friday|fri)", getNextWeekday(today, FRIDAY));
+        _startValues.put("^next\\s(saturday|sat)", getNextWeekday(today, SATURDAY));
+        _startValues.put("^next\\s(sunday|sun)", getNextWeekday(today, SUNDAY));
+        
     }
 
     private DateTime getNextWeekday(DateTime today, Integer nextWeekday) {
@@ -423,5 +425,17 @@ public class StartKeyword extends Keyword {
         }
         String firstToken = lookahead.substring(0, firstDelimit);
         return firstToken;
+    }
+
+    @Override
+    public Map<String, String> getKeywordValues() {
+        LinkedHashMap<String, String> dateStrings = new LinkedHashMap<String, String>();
+        
+        for(String key: _startValues.keySet()) {
+            String value = _startValues.get(key).format("DDMMYYYYHHMMSS");
+            dateStrings.put(key, value);
+        }
+        
+        return dateStrings;
     }
 }

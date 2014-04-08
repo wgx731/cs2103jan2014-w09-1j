@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -148,6 +149,11 @@ public class PriorityKeyword extends Keyword {
     @Override
     protected Keyword createKeyword() {
         return new PriorityKeyword();
+    }
+
+    @Override
+    public Map<String, String> getKeywordValues() {
+        return _priorityValues;
     }
 
 }

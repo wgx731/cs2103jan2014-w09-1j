@@ -29,13 +29,13 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
  * 
  */
 
-public class CommandOnlyKeywordValues extends CommandFormat{
+public class AddCommand extends CommandFormat{
     
-    private static Logger logger = LogManager.getLogger(CommandOnlyKeywordValues.class
+    private static Logger logger = LogManager.getLogger(AddCommand.class
             .getName());
     
     
-    public CommandOnlyKeywordValues(CommandType type, String argumentStr) throws IllegalArgumentException{
+    public AddCommand(CommandType type, String argumentStr) throws IllegalArgumentException{
         super(type, argumentStr);
     }
 

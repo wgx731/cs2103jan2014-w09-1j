@@ -11,14 +11,14 @@ import org.apache.logging.log4j.Logger;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 
-public class CommandWithValuesOnly extends CommandFormat {
+public class SearchCommand extends CommandFormat {
 
     private static Logger logger = LogManager
-            .getLogger(CommandWithValuesOnly.class.getName());
+            .getLogger(SearchCommand.class.getName());
 
     private static final String SEARCH_DELIMIT = "//";
 
-    public CommandWithValuesOnly(CommandType commandType, String argumentStr)
+    public SearchCommand(CommandType commandType, String argumentStr)
             throws IllegalArgumentException {
         super(commandType, argumentStr);
     }
