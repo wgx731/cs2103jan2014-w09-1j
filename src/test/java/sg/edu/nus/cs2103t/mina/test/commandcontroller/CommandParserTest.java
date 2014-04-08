@@ -359,15 +359,6 @@ public class CommandParserTest {
         setUp();
         variationBuild.append("add ");
         variationBuild.append(wrapDescription(TODO_THREE));
-        variationBuild.append(" urgent priority");
-        variation = variationBuild.toString();
-        logger.info(variation);
-        result = parser.convertCommand(variation);
-        assertEquals(addTodoControlHigh, result);
-
-        setUp();
-        variationBuild.append("add ");
-        variationBuild.append(wrapDescription(TODO_THREE));
         variationBuild.append(" urgent");
         variation = variationBuild.toString();
         logger.info(variation);

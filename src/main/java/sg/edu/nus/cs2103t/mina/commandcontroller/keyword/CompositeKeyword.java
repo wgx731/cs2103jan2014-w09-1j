@@ -3,7 +3,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 public enum CompositeKeyword implements StandardKeyword {
     AGENDAOF("AgendaOf"),
-    URGENT("Urgent");
+    PRIORITY("Priority");
     
     private String _type;
     private CompositeKeyword(String type) {

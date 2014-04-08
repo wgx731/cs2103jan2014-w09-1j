@@ -14,6 +14,7 @@ public class AgendaOfCompositeKeyword extends StartKeyword {
     private static final String START_TIME = "000000";
     private static final String END_TIME = "235959";
     private static final int LOOK_AHEAD_LIMIT = 3;
+    
     public AgendaOfCompositeKeyword(StandardKeyword type) {
         super(type);
     }
