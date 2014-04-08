@@ -900,7 +900,6 @@ public class TaskDataManagerTest {
             // modify to illegal task type
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

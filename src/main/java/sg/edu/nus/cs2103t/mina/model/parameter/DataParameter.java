@@ -367,12 +367,25 @@ public class DataParameter {
         if (modifyParam.getTaskId() != -1) {
             setTaskID(modifyParam.getTaskId());
         }
+        
         if (modifyParam.getTag() != "") {
             setTag(modifyParam.getTag());
         }
-        if (modifyParam.getNewTaskType() != null) {
-            setNewTaskType(modifyParam.getNewTaskType());
+        if (modifyParam.getTimeType() != null) {
+            setTimeType(modifyParam.getTimeType());
         }
+        if (modifyParam.getFreqOfTimeType() != 0) {
+            setFreqOfTimeType(modifyParam.getFreqOfTimeType());
+        }
+        if (modifyParam.getEndRecurOn() != null) {
+            setEndRecurOn(modifyParam.getEndRecurOn()); 
+        }
+        
+        if (modifyParam.isModifyAll()) {
+            setModifyAll(true);
+        }
+        
+        // not doing for TimeSlots
 
         // if (_originalTaskType != _newTaskType) {
         // if (_originalTaskType == TaskType.DEADLINE && _newTaskType ==

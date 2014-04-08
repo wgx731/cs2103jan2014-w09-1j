@@ -423,7 +423,8 @@ public class TaskDataManager {
                     addParameters.setEndDate(currDeadline);
 
                 }
-
+                syncUncompletedTasks(TaskType.DEADLINE);
+                
                 return _recurringTasks.get(recurTag).get(0);
 
             case EVENT :
@@ -448,7 +449,9 @@ public class TaskDataManager {
                     addParameters.setEndDate(currEndDate);
 
                 }
-
+                syncUncompletedTasks(TaskType.EVENT);
+                syncHashMaps();
+                
                 return _recurringTasks.get(recurTag).get(0);
 
             default :
@@ -505,7 +508,9 @@ public class TaskDataManager {
             includeInBlockMap(currEventTask, blockTag);
 
         }
-
+        
+        syncUncompletedTasks(TaskType.EVENT);
+        
         return _blockTasks.get(blockTag).get(0);
     }
 
@@ -539,9 +544,10 @@ public class TaskDataManager {
 
     private Task<?> addTodoTask(DataParameter addParameters) {
         TodoTask newTodoTask = createTodoTask(addParameters);
-
+        newTodoTask.setLastEditedTime(new Date());
+        
         if (_uncompletedTodoTasks.add(newTodoTask)) {
-            syncUncompletedTasks(TaskType.TODO);
+            syncUncompletedTasks(TaskType.TODO);        
 
             return newTodoTask;
         }
@@ -550,6 +556,7 @@ public class TaskDataManager {
 
     private Task<?> addDeadlineTask(DataParameter addParameters) {
         DeadlineTask newDeadlineTask = createDeadlineTask(addParameters);
+        newDeadlineTask.setLastEditedTime(new Date());
 
         if (_uncompletedDeadlineTasks.add(newDeadlineTask)) {
             syncUncompletedTasks(TaskType.DEADLINE);
@@ -561,6 +568,7 @@ public class TaskDataManager {
 
     private Task<?> addEventTask(DataParameter addParameters) {
         EventTask newEventTask = createEventTask(addParameters);
+        newEventTask.setLastEditedTime(new Date());
 
         if (_uncompletedEventTasks.add(newEventTask)) {
             syncUncompletedTasks(TaskType.EVENT);
@@ -637,6 +645,9 @@ public class TaskDataManager {
                 }
                 deleteRegTask(deleteParameters);
             }
+            
+            syncHashMaps();
+            
             return recurTaskToDelete;
         } else {
             return null;
@@ -666,6 +677,8 @@ public class TaskDataManager {
                 }
                 deleteRegTask(deleteParameters);
             }
+            
+            syncHashMaps();
             return blockTaskToDelete;
         } else {
             return null;
@@ -789,28 +802,15 @@ public class TaskDataManager {
         Task<?> returnTask = null;
 
         if (prevTask != null) {
-            if (modifyParameters.getEndDate() != null || modifyParameters
-                    .getTimeType() != null ||
+            if (modifyParameters.getStartDate() != null || modifyParameters
+                    .getEndDate() != null ||
+                    modifyParameters.getTimeType() != null ||
                     modifyParameters.getFreqOfTimeType() != 0) {
                 // modify frequency of task, on top of modify description,
                 // priority ,task type
                 assert (modifyParameters.getNewTaskType() != TaskType.TODO);
 
-                deleteRecurringTasks(modifyParameters);
-
-                modifyParameters.setNewTaskType(modifyParameters
-                        .getNewTaskType() == null ? prevTask.getType()
-                        : modifyParameters.getNewTaskType());
-                modifyParameters.setDescription(modifyParameters
-                        .getDescription() == null ? prevTask.getDescription()
-                        : modifyParameters.getDescription());
-                modifyParameters
-                        .setPriority(modifyParameters.getPriority() != modifyParameters
-                                .getPriority() ? prevTask.getPriority()
-                                : modifyParameters.getPriority());
-
-                returnTask = addRecurringTask(modifyParameters,
-                        prevTask.getTag());
+                returnTask = rearrangeRecurringTasks(modifyParameters, prevTask);
 
             } else {
                 // only modify description, priority ,task type
@@ -819,7 +819,7 @@ public class TaskDataManager {
                 ArrayList<Task<?>> newRecurTaskList = new ArrayList<Task<?>>();
                 ArrayList<Task<?>> prevRecurTaskList = _recurringTasks
                         .get(prevTask.getTag());
-                
+
                 for (int i = 0; i < prevRecurTaskList.size(); i++) {
                     currTask = prevRecurTaskList.get(i);
 
@@ -843,6 +843,71 @@ public class TaskDataManager {
         }
 
         return null;
+    }
+
+    private Task<?> rearrangeRecurringTasks(DataParameter modifyParameters,
+            Task<?> prevTask) {
+        DataParameter newParameters = createNewParameters(modifyParameters,
+                prevTask);
+
+        if (prevTask.getType() == TaskType.DEADLINE && newParameters
+                .getNewTaskType() == TaskType.EVENT) {
+            DeadlineTask prevDeadlineTask = (DeadlineTask) prevTask;
+
+            if (newParameters.getStartDate() == null) {
+                newParameters
+                        .setStartDate(newParameters.getEndDate().compareTo(
+                                prevDeadlineTask.getEndTime()) < 0 ? newParameters
+                                .getEndDate() : prevDeadlineTask.getEndTime());
+                newParameters.setEndDate(newParameters.getEndDate().compareTo(
+                        prevDeadlineTask.getEndTime()) > 0 ? newParameters
+                        .getEndDate() : prevDeadlineTask.getEndTime());
+
+            } else if (newParameters.getEndDate() == null) {
+                newParameters.setEndDate(newParameters.getEndDate().compareTo(
+                        prevDeadlineTask.getEndTime()) > 0 ? newParameters
+                        .getEndDate() : prevDeadlineTask.getEndTime());
+                newParameters
+                        .setStartDate(newParameters.getEndDate().compareTo(
+                                prevDeadlineTask.getEndTime()) < 0 ? newParameters
+                                .getEndDate() : prevDeadlineTask.getEndTime());
+
+            } else {
+                return null;
+
+            }
+
+            if (_recurringTasks.get(prevTask.getTag()).indexOf(prevTask) != 0) {
+                int i = _recurringTasks.get(prevTask.getTag())
+                        .indexOf(prevTask);
+
+                Calendar currStartDate = Calendar.getInstance();
+                Calendar currEndDate = Calendar.getInstance();
+
+                currStartDate.setTime(newParameters.getStartDate());
+                currEndDate.setTime(newParameters.getEndDate());
+
+                while (i-- >= 0) {
+                    newParameters.setStartDate(updateDate(
+                            newParameters.getStartDate(),
+                            newParameters.getTimeType(),
+                            -1 * newParameters.getFreqOfTimeType()));
+                    newParameters.setEndDate(updateDate(
+                            newParameters.getEndDate(),
+                            newParameters.getTimeType(),
+                            -1 * newParameters.getFreqOfTimeType()));
+
+                }
+
+            }
+        }
+
+        newParameters.setTaskObject(prevTask);
+
+        deleteRecurringTasks(newParameters);
+
+        return addRecurringTask(newParameters, prevTask.getTag());
+
     }
 
     private Task<?> modfiyOneRecurringTask(DataParameter modifyParameters) {
@@ -912,7 +977,10 @@ public class TaskDataManager {
                         modifyParameters, prevTask);
                 Task<?> newTask = addRegTask(newSetOfParameters);
                 newTask.setLastEditedTime(new Date());
-
+                
+                syncUncompletedTasks(TaskType.EVENT);
+                syncHashMaps();
+                
                 return newTask;
 
             } else {
@@ -934,7 +1002,10 @@ public class TaskDataManager {
 
                     _blockTasks.get(prevTask.getTag()).set(i, currTask);
                 }
-
+                
+                syncUncompletedTasks(TaskType.EVENT);
+                syncHashMaps();
+                
                 return _blockTasks.get(prevTask.getTag()).get(0);
 
             }
@@ -978,6 +1049,9 @@ public class TaskDataManager {
 
                 _blockTasks.get(prevTask.getTag()).set(prevTaskIndex,
                         newBlockEvent);
+                
+                syncUncompletedTasks(TaskType.EVENT);
+                syncCompletedTasks(TaskType.EVENT);
 
                 return newBlockEvent;
 
@@ -987,6 +1061,8 @@ public class TaskDataManager {
                 _blockTasks.get(prevTask.getTag()).remove(prevTask);
                 prevTask.setTag("");
                 _uncompletedEventTasks.remove(prevTask);
+                
+                syncUncompletedTasks(TaskType.EVENT);
 
                 return addRegTask(newSetOfParameters);
 
@@ -1012,11 +1088,7 @@ public class TaskDataManager {
                     modifyParameters, prevTask);
 
             Task<?> newTask = addRegTask(newSetOfParameters);
-
-            if (newTask != null) {
-                newTask.setLastEditedTime(new Date());
-            }
-
+            
             return newTask;
         }
     }
@@ -1061,81 +1133,105 @@ public class TaskDataManager {
         Task<?> prevTask = completeParameters.getTaskObject();
 
         if (completeParameters.isModifyAll()) {
-            int listSize = _recurringTasks.get(prevTask.getTag()).size();
-
-            Task<?> currTask = null;
-            Task<?> returnTask = null;
-
-            if (prevTask.getType().equals(TaskType.DEADLINE)) {
-                for (int i = 0; i < listSize; i++) {
-                    currTask = _recurringTasks.get(prevTask.getTag()).get(i);
-
-                    _uncompletedDeadlineTasks.remove(currTask);
-
-                    currTask.setCompleted(true);
-                    currTask.setLastEditedTime(new Date());
-
-                    if (i == 0) {
-                        returnTask = currTask;
-
-                    }
-                    _completedDeadlineTasks.add((DeadlineTask) currTask);
-
-                }
-                _recurringTasks.remove(prevTask.getTag());
-
-                return returnTask;
-
-            }
-
-            if (prevTask.getType().equals(TaskType.EVENT)) {
-                for (int i = 0; i < listSize; i++) {
-                    ;
-                    currTask = _recurringTasks.get(prevTask.getTag()).get(i);
-
-                    _uncompletedEventTasks.remove(currTask);
-
-                    currTask.setCompleted(true);
-                    currTask.setLastEditedTime(new Date());
-
-                    if (i == 0) {
-                        returnTask = currTask;
-
-                    }
-
-                    _completedEventTasks.add((EventTask) currTask);
-
-                }
-                _recurringTasks.remove(prevTask.getTag());
-
-                return returnTask;
-
-            }
+            return markAllRecurComplete(prevTask);
 
         } else {
-            Task<?> completedTask = prevTask;
-
-            completedTask.setCompleted(true);
-
-            if (prevTask.getType().equals(TaskType.DEADLINE)) {
-                _completedDeadlineTasks.add((DeadlineTask) completedTask);
-                _recurringTasks.get(prevTask.getTag()).remove(prevTask);
-                _uncompletedDeadlineTasks.remove(prevTask);
-
-                return completedTask;
-            }
-
-            if (prevTask.getType().equals(TaskType.EVENT)) {
-                _completedEventTasks.add((EventTask) completedTask);
-                _recurringTasks.get(prevTask.getTag()).remove(prevTask);
-                _uncompletedEventTasks.remove(prevTask);
-
-                return completedTask;
-            }
+            return markOneRecurComplete(prevTask);
 
         }
 
-        return null;
+    }
+
+    private Task<?> markAllRecurComplete(Task<?> prevTask) {
+        int listSize = _recurringTasks.get(prevTask.getTag()).size();
+
+        Task<?> currTask = null;
+        Task<?> returnTask = null;
+
+        if (prevTask.getType().equals(TaskType.DEADLINE)) {
+            for (int i = 0; i < listSize; i++) {
+                currTask = _recurringTasks.get(prevTask.getTag()).get(i);
+
+                _uncompletedDeadlineTasks.remove(currTask);
+
+                currTask.setCompleted(true);
+                currTask.setLastEditedTime(new Date());
+
+                if (i == 0) {
+                    returnTask = currTask;
+
+                }
+                _completedDeadlineTasks.add((DeadlineTask) currTask);
+                
+                syncCompletedTasks(TaskType.DEADLINE);
+                syncUncompletedTasks(TaskType.DEADLINE);
+
+            }
+            _recurringTasks.remove(prevTask.getTag());
+            syncHashMaps();
+
+            return returnTask;
+
+        } else if (prevTask.getType().equals(TaskType.EVENT)) {
+            for (int i = 0; i < listSize; i++) {
+                ;
+                currTask = _recurringTasks.get(prevTask.getTag()).get(i);
+
+                _uncompletedEventTasks.remove(currTask);
+
+                currTask.setCompleted(true);
+                currTask.setLastEditedTime(new Date());
+
+                if (i == 0) {
+                    returnTask = currTask;
+                    
+                }
+
+                _completedEventTasks.add((EventTask) currTask);
+                
+                syncCompletedTasks(TaskType.EVENT);
+                syncUncompletedTasks(TaskType.EVENT);
+
+            }
+            _recurringTasks.remove(prevTask.getTag());
+            syncHashMaps();
+
+            return returnTask;
+
+        } else {
+            return null;
+            
+        }
+    }
+
+    private Task<?> markOneRecurComplete(Task<?> prevTask) {
+        Task<?> completedTask = prevTask;
+
+        completedTask.setCompleted(true);
+        completedTask.setLastEditedTime(new Date());
+
+        if (prevTask.getType().equals(TaskType.DEADLINE)) {
+            _completedDeadlineTasks.add((DeadlineTask) completedTask);
+            _recurringTasks.get(prevTask.getTag()).remove(prevTask);
+            _uncompletedDeadlineTasks.remove(prevTask);
+            
+            syncCompletedTasks(TaskType.DEADLINE);
+            syncUncompletedTasks(TaskType.DEADLINE);
+
+            return completedTask;
+        } else if (prevTask.getType().equals(TaskType.EVENT)) {
+            _completedEventTasks.add((EventTask) completedTask);
+            _recurringTasks.get(prevTask.getTag()).remove(prevTask);
+            _uncompletedEventTasks.remove(prevTask);
+            
+            syncCompletedTasks(TaskType.EVENT);
+            syncUncompletedTasks(TaskType.EVENT);
+
+            return completedTask;
+        } else {
+            return null;
+            
+        }
     }
 
     private Task<?> markCompletedBlockTask(DataParameter completeParameters) {
@@ -1146,10 +1242,15 @@ public class TaskDataManager {
             Task<?> completedTask = prevTask;
 
             completedTask.setCompleted(true);
+            completedTask.setLastEditedTime(new Date());
 
             _completedEventTasks.add((EventTask) completedTask);
             _blockTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedEventTasks.remove(prevTask);
+            
+            syncCompletedTasks(TaskType.EVENT);
+            syncUncompletedTasks(TaskType.EVENT);
+            syncHashMaps();
 
             return completedTask;
 
@@ -1223,7 +1324,7 @@ public class TaskDataManager {
 
     public Task<?> unblockTaks(DataParameter unblockParameters) {
         Task<?> unblockedTask = unblockParameters.getTaskObject();
-
+        // TODO: unblocking all the other tasks
         return unblockedTask;
     }
 
@@ -1295,6 +1396,68 @@ public class TaskDataManager {
                 System.out.println("Unable to determine Task Type.");
                 return null;
         }
+
+    }
+
+    /**
+     * Takes in all 6 of the Task TreeSets and overwrites them in TDM.
+     * <p>
+     * Used when doing undo.
+     * 
+     * @param newUncompletedTodoTasks
+     * @param newUncompletedDeadlineTasks
+     * @param newUncompletedEventTasks
+     * @param newCompletedTodoTasks
+     * @param newCompletedDeadlineTasks
+     * @param newCompletedEventTasks
+     */
+
+    public void setAllTreeSets(TreeSet<TodoTask> newUncompletedTodoTasks,
+            TreeSet<DeadlineTask> newUncompletedDeadlineTasks,
+            TreeSet<EventTask> newUncompletedEventTasks,
+            TreeSet<TodoTask> newCompletedTodoTasks,
+            TreeSet<DeadlineTask> newCompletedDeadlineTasks,
+            TreeSet<EventTask> newCompletedEventTasks) {
+
+        _uncompletedTodoTasks = newUncompletedTodoTasks;
+        _uncompletedDeadlineTasks = newUncompletedDeadlineTasks;
+        _uncompletedEventTasks = newUncompletedEventTasks;
+        _completedTodoTasks = newCompletedTodoTasks;
+        _completedDeadlineTasks = newCompletedDeadlineTasks;
+        _completedEventTasks = newCompletedEventTasks;
+        
+        syncCompletedTasks(TaskType.TODO);
+        syncUncompletedTasks(TaskType.TODO);
+        
+        syncCompletedTasks(TaskType.DEADLINE);
+        syncUncompletedTasks(TaskType.DEADLINE);
+        
+        syncCompletedTasks(TaskType.EVENT);
+        syncUncompletedTasks(TaskType.EVENT);
+
+    }
+
+    /**
+     * Takes in both of the Recurring and Block HashMaps and overwrites them in
+     * TDM.
+     * <p>
+     * Used when doing undo.
+     * 
+     * @param newRecurringTasks
+     * @param newBlockTasks
+     * @param newMaxRecurTagInt
+     * @param newMaxBlockTagInt
+     */
+    public void setAllHashMaps(
+            HashMap<String, ArrayList<Task<?>>> newRecurringTasks,
+            HashMap<String, ArrayList<EventTask>> newBlockTasks,
+            int newMaxRecurTagInt, int newMaxBlockTagInt) {
+        _recurringTasks = newRecurringTasks;
+        _blockTasks = newBlockTasks;
+        _maxRecurTagInt = newMaxRecurTagInt;
+        _maxBlockTagInt = newMaxBlockTagInt;
+        
+        syncHashMaps();
 
     }
 
