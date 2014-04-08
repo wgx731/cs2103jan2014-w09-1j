@@ -67,7 +67,7 @@ public class MinaGuiUI extends MinaView {
 
 	private Shell _shell;
 	private Display _display;
-	private Image _trayImage;
+	private Image _icon;
 	private Tray _tray;
 
 	private StyledText _helpWindowBorder;
@@ -177,7 +177,7 @@ public class MinaGuiUI extends MinaView {
 	 */
 	private void createTray() {
 		_tray = _display.getSystemTray();
-		_trayImage = new Image(_display, getClass().getResourceAsStream(
+		_icon = new Image(_display, getClass().getResourceAsStream(
 				ConfigHelper.getProperty(ConfigHelper.ICONPATH_KEY)));
 
 		TrayItem item;
@@ -212,7 +212,7 @@ public class MinaGuiUI extends MinaView {
 				}
 			});
 
-			item.setImage(_trayImage);
+			item.setImage(_icon);
 		}
 
 	}
@@ -228,7 +228,7 @@ public class MinaGuiUI extends MinaView {
 		int x = bounds.x + (bounds.width - rect.width) / 2;
 		int y = bounds.y + (bounds.height - rect.height) / 2;
 		_shell.setLocation(x, y);
-
+		_shell.setImage(_icon);
 		logger.log(Level.INFO, "shell set position");
 		_shell.open();
 		_shell.layout();
@@ -471,8 +471,10 @@ public class MinaGuiUI extends MinaView {
 				if (event.keyCode == SWT.F11||(event.stateMask == SWT.CTRL && event.keyCode == 'e')) {
 					if (_isExpanded) {
 						resetPanel();
+						updateLists();
 					} else {
 						expand();
+						updateLists();
 					}
 				}
 				if (event.keyCode == SWT.F1||(event.stateMask == SWT.CTRL && event.keyCode=='h')) {
@@ -500,10 +502,6 @@ public class MinaGuiUI extends MinaView {
 						updatePageFromTaskView();
 					}
 					_userInputTextField.setText(EMPTY_STRING);
-					updatePage();
-					displayOutput();
-					updateLists();
-					updateArrowNavigation();
 					if (_taskView.hasOnlyOneType(TaskType.EVENT)) {
 						_currentTab = 0;
 						expand();
@@ -514,8 +512,20 @@ public class MinaGuiUI extends MinaView {
 						_currentTab = 2;
 						expand();
 					} else {
-						resetPanel();
+						if (!_isExpanded||command.equals("display")){
+							resetPanel();
+							if (command.equals("display")){
+								resetPage();
+							}
+						} else {
+							_currentTab = _taskView.getTabEdited();
+							expand();
+						}
 					}
+					updatePage();
+					displayOutput();
+					updateLists();
+					updateArrowNavigation();
 				}
 				if (event.keyCode == SWT.ARROW_UP) {
 					event.doit = false;
@@ -625,6 +635,13 @@ public class MinaGuiUI extends MinaView {
 		};
 		_userInputTextField.addTraverseListener(_tabListener);
 	}
+	
+	private void resetPage() {
+		_todoPage = 1;
+		_deadlinePage = 1;
+		_eventPage = 1;
+		
+	}
 
 	private void updatePage() {
 		maxPages();
@@ -673,7 +690,7 @@ public class MinaGuiUI extends MinaView {
 	}
 
 	private void addToUnHistory(String text) {
-		if (_commandUnHistory.size() < 5) {
+		if (_commandUnHistory.size() < 100) {
 			_commandUnHistory.addFirst(text);
 		} else {
 			_commandUnHistory.removeLast();
@@ -856,14 +873,14 @@ public class MinaGuiUI extends MinaView {
 				}
 			}
 			String eventStringIndex = "\t" + (i + 1) + ". ";
-			String eventDescription = event.getDescription() + "\n";
+			String eventDescription = getDisplayedText(event.getDescription()) + "\n";
 			String eventTime = "\t\t" + DateUtil.displayTimeOnly(itemStartDate) +
 					" - " +
 					(DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? DateUtil
 							.displayTimeOnly(itemEndDate) : DateUtil
 							.displayDateTime(itemEndDate)) +
 							"\n";
-			String eventCompleted = (event.getTag().contains("BLOCK")?"\t\tBOOKED":"")+(event.getTag().contains("RECUR")?"\t\tRECUR":"")+(event.isCompleted() ? "\t\tdone\n" : "\n");
+			String eventCompleted = (event.getTag().contains("RECUR")?"\t\tRECUR":"")+(event.isCompleted() ? "\t\tdone" : "");
 			_eventListUI.append(eventStringIndex);
 			initialCursorPosition += eventStringIndex.length();
 
@@ -886,6 +903,11 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_eventListUI.setStyleRange(completedStyle);
 			initialCursorPosition += eventCompleted.length();
+			
+			if (eventCompleted.length()>0){
+				_eventListUI.append("\n");
+				initialCursorPosition++;
+			}
 		}
 	}
 
@@ -953,10 +975,10 @@ public class MinaGuiUI extends MinaView {
 				}
 			}
 			String deadlineStringIndex = "\t" + (i + 1) + ". ";
-			String deadlineDescription = deadline.getDescription();
+			String deadlineDescription = getDisplayedText(deadline.getDescription());
 			String deadlineTime = " by " + DateUtil.displayTimeOnly(itemDate) +
 					"\n";
-			String deadlineCompleted = (deadline.getTag().contains("RECUR")?"\t\tRECUR":"")+(deadline.isCompleted() ? "\t\tdone\n": "\n");
+			String deadlineCompleted = (deadline.getTag().contains("RECUR")?"\t\tRECUR":"")+(deadline.isCompleted() ? "\t\tdone": "");
 			_deadlineListUI.append(deadlineStringIndex);
 			initialCursorPosition += deadlineStringIndex.length();
 
@@ -979,6 +1001,11 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_deadlineListUI.setStyleRange(completedStyle);
 			initialCursorPosition += deadlineCompleted.length();
+			
+			if (deadlineCompleted.length()>0){
+				_deadlineListUI.append("\n");
+				initialCursorPosition++;
+			}
 		}
 	}
 
@@ -989,7 +1016,7 @@ public class MinaGuiUI extends MinaView {
 		int initialCursorPosition = 0;
 		for (int i = 0; i < todoList.size(); i++) {
 			TodoTask todo = (TodoTask) todoList.get(i);
-			String todoString = (i + 1) + ". " + todo.getDescription() + "\n";
+			String todoString = (i + 1) + ". " + getDisplayedText(todo.getDescription()) + "\n";
 			_todoListUI.append(todoString);
 			StyleRange todoStyle = new StyleRange();
 			todoStyle.start = initialCursorPosition;
@@ -1014,10 +1041,25 @@ public class MinaGuiUI extends MinaView {
 			completedStyle.start = initialCursorPosition;
 			completedStyle.length = todoCompleted.length();
 			completedStyle.fontStyle = SWT.ITALIC;
+			completedStyle.font = SWTResourceManager.getFont(UI_FONT_2, UI_FONT_SIZE-2, SWT.ITALIC);
 			_todoListUI.setStyleRange(completedStyle);
 			initialCursorPosition += todoCompleted.length();
 		}
-
+	}
+	
+	public String getDisplayedText(String des){
+		String str = des;
+		int limit;
+		if (_isExpanded){
+			limit = 397;
+		} else {
+			limit = 47;
+		}
+		if (str.length()>limit){
+			str = str.substring(0, limit);
+			str = str.concat("...");
+		}
+		return str;
 	}
 
 	private void expand() {
@@ -1331,8 +1373,7 @@ public class MinaGuiUI extends MinaView {
 						_userInputTextField.removeListener(SWT.KeyUp, _helpListener);
 						addAllListeners();
 						_userInputTextField.setText(text);
-						_userInputTextField.setSelection(text.length(),
-								text.length());
+						_userInputTextField.selectAll();
 					}
 				} else if (_helpWindow.getVisible()) {
 					_userInputTextField.setText(EMPTY_STRING);

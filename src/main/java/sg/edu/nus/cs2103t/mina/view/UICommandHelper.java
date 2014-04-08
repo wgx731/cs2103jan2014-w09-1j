@@ -38,10 +38,9 @@ public class UICommandHelper {
 	private final String ADD_TODO_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new todo\n"
 			+ "Default priority for todo task is M(medium)\n\n";
 	
-	private final String ADD_RECURRING_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new recurring task\n\n\n";
-	
-	private final String ADD_BLOCKING_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new blocking task\n\n\n";
-	
+	private final String ADD_RECURRING_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new recurring task\n"
+			+ "If no end date of recurring stated, the recurring tasks will recur until the end of the current year\n\n";
+		
 	private final String DELETE_HELP_MENU_DESCRIPTION = "This menu provides you commands to delete a task\n\n\n";
 	
 	private final String MODIFY_HELP_MENU_DESCRIPTION = "This menu provides you information about modifying a task\n\n\n";
@@ -115,7 +114,6 @@ public class UICommandHelper {
 			add("deadline");
 			add("todo");
 			add("recurring");
-			add("blocking");
 		}
 	};
 	
@@ -149,10 +147,15 @@ public class UICommandHelper {
 		}
 	};
 	
-	private final ArrayList<String> ADD_RECURRING_HELP_MENU = new ArrayList<String>();
-	
-	private final ArrayList<String> ADD_BLOCKING_HELP_MENU = new ArrayList<String>();
-	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_RECURRING_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add [description] -from [date time] -to [date time] -every [hour/day/week/month/year] -until [date time]");
+			add("new [description] -by [date time] -every [hour/day/week/month/year] -until [date time]");
+			add ("create [description -by [date time] -every [hour/day/week/month/year]");
+		}
+	};
+		
 	@SuppressWarnings("serial")
 	private final ArrayList<String> DELETE_HELP_MENU = new ArrayList<String>(){
 		{
@@ -160,7 +163,6 @@ public class UICommandHelper {
 			add("remove [td/d/e][index]");
 			add("rm [td/d/e][index]");
 			add("delete [recurring tasktype] [index] -all");
-			add("resolve [blocking tasktype] [index]");
 		}
 	};
 	
@@ -177,7 +179,10 @@ public class UICommandHelper {
 		{
 			add("modify [task type][index] [new description]");
 			add("edit [task type][index] -priority [new priority H/M/L]");
+			add("edit [task type][index] -end [date time]");
 			add("change [task type][index] -start [date/time] -end [date/time]");
+			add("modify [recurring tasktype] -every [hour/day/week/month/year] -until [date time]");
+			add("change [recurring tasktype] [description] -start [date time] -end [date time] -all");
 		}
 	};
 	
@@ -239,7 +244,7 @@ public class UICommandHelper {
 		LIST_COMMANDS,
 		DATE_FORMAT,
 		ABOUT_MINA,
-		ADD, ADD_EVENT, ADD_DEADLINE, ADD_TODO, ADD_RECURRING, ADD_BLOCKING, 
+		ADD, ADD_EVENT, ADD_DEADLINE, ADD_TODO, ADD_RECURRING,
 		DELETE,
 		MODIFY, MODIFY_NORMAL, MODIFY_CHANGE_TYPE,
 		COMPLETE,
@@ -418,11 +423,6 @@ public class UICommandHelper {
 				case 4:{
 					helperView.set(DISPLAY, ADD_RECURRING_HELP_MENU_DESCRIPTION, ADD_RECURRING_HELP_MENU);
 					_currentMenu = MenuType.ADD_RECURRING;
-					break;
-				}
-				case 5:{
-					helperView.set(DISPLAY, ADD_BLOCKING_HELP_MENU_DESCRIPTION, ADD_BLOCKING_HELP_MENU);
-					_currentMenu = MenuType.ADD_BLOCKING;
 					break;
 				}
 				default: break;	

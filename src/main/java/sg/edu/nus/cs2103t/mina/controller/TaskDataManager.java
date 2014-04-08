@@ -1546,4 +1546,19 @@ public class TaskDataManager {
         _uncompletedEventTasks.clear();
 
     }
+    
+    public void updateTrees(SortedSet<TodoTask> uncompletedTodoTasks, 
+    		SortedSet<DeadlineTask> uncompletedDeadlineTasks,
+    		SortedSet<EventTask> uncompletedEventTasks,
+    		SortedSet<TodoTask> completedTodoTasks,
+    		SortedSet<DeadlineTask> completedDeadlineTasks,
+    		SortedSet<EventTask> completedEventTasks){
+    	_completedTodoTasks = completedTodoTasks;
+    	_completedDeadlineTasks = completedDeadlineTasks;
+    	_completedEventTasks = completedEventTasks;
+    	
+    	_uncompletedTodoTasks = uncompletedTodoTasks;
+    	_uncompletedDeadlineTasks = uncompletedDeadlineTasks;
+    	_uncompletedEventTasks = uncompletedEventTasks;
+    }
 }
