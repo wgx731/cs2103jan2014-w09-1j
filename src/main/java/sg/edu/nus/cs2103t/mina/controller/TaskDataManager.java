@@ -888,9 +888,9 @@ public class TaskDataManager {
 
             }
         }
-        
+
         newParameters.setTaskObject(prevTask);
-        
+
         deleteRecurringTasks(newParameters);
 
         return addRecurringTask(newParameters, prevTask.getTag());
@@ -1347,6 +1347,57 @@ public class TaskDataManager {
                 System.out.println("Unable to determine Task Type.");
                 return null;
         }
+
+    }
+
+    /**
+     * Takes in all 6 of the Task TreeSets and overwrites them in TDM.
+     * <p>
+     * Used when doing undo.
+     * 
+     * @param newUncompletedTodoTasks
+     * @param newUncompletedDeadlineTasks
+     * @param newUncompletedEventTasks
+     * @param newCompletedTodoTasks
+     * @param newCompletedDeadlineTasks
+     * @param newCompletedEventTasks
+     */
+
+    public void setAllTreeSets(TreeSet<TodoTask> newUncompletedTodoTasks,
+            TreeSet<DeadlineTask> newUncompletedDeadlineTasks,
+            TreeSet<EventTask> newUncompletedEventTasks,
+            TreeSet<TodoTask> newCompletedTodoTasks,
+            TreeSet<DeadlineTask> newCompletedDeadlineTasks,
+            TreeSet<EventTask> newCompletedEventTasks) {
+
+        _uncompletedTodoTasks = newUncompletedTodoTasks;
+        _uncompletedDeadlineTasks = newUncompletedDeadlineTasks;
+        _uncompletedEventTasks = newUncompletedEventTasks;
+        _completedTodoTasks = newCompletedTodoTasks;
+        _completedDeadlineTasks = newCompletedDeadlineTasks;
+        _completedEventTasks = newCompletedEventTasks;
+
+    }
+
+    /**
+     * Takes in both of the Recurring and Block HashMaps and overwrites them in
+     * TDM.
+     * <p>
+     * Used when doing undo.
+     * 
+     * @param newRecurringTasks
+     * @param newBlockTasks
+     * @param newMaxRecurTagInt
+     * @param newMaxBlockTagInt
+     */
+    public void setAllHashMaps(
+            HashMap<String, ArrayList<Task<?>>> newRecurringTasks,
+            HashMap<String, ArrayList<EventTask>> newBlockTasks,
+            int newMaxRecurTagInt, int newMaxBlockTagInt) {
+        _recurringTasks = newRecurringTasks;
+        _blockTasks = newBlockTasks;
+        _maxRecurTagInt = newMaxRecurTagInt;
+        _maxBlockTagInt = newMaxBlockTagInt;
 
     }
 
