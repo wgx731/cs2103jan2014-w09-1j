@@ -19,7 +19,7 @@ public class EndKeyword extends StartKeyword {
     
     public EndKeyword(){
         this(SimpleKeyword.END);
-        this.defaultTime = "235959";
+        this._defaultTime = "235959";
     }
     
     @Override

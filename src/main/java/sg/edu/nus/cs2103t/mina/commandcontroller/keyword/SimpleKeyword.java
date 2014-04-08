@@ -13,7 +13,7 @@ public enum SimpleKeyword implements StandardKeyword{
     START("Start"), 
     END("End"), 
 //    RECURRING("Every"), 
-//    UNTIL("Until"), 
+    UNTIL("Until"), 
     PRIORITY("Priority");
     
     private String _keyword;

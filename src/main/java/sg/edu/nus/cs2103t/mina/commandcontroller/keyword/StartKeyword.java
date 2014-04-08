@@ -51,7 +51,7 @@ public class StartKeyword extends Keyword {
     
     protected static final String[] WEEK = {"mon", "tue", "wed", "thur", "fri", "sat", "sun"};
     
-    protected String defaultTime;
+    protected String _defaultTime;
     
     private static Logger logger = LogManager.getLogger(StartKeyword.class
             .getName());
@@ -62,7 +62,7 @@ public class StartKeyword extends Keyword {
     
     public StartKeyword() {
         this(SimpleKeyword.START);
-        defaultTime = "000000";
+        _defaultTime = "000000";
     }
     
     @Override
@@ -222,8 +222,8 @@ public class StartKeyword extends Keyword {
             date = today.format(DateUtil.MILITARY_DATE_FORMAT.toUpperCase());
         }
         if (time==null) {
-            logger.info(this.getClass() + " " + defaultTime);
-            time = defaultTime;
+            logger.info(this.getClass() + " " + _defaultTime);
+            time = _defaultTime;
         }
         
         String dateTime = date + time;
