@@ -30,10 +30,8 @@ public class DescriptionKeyword extends Keyword{
     //Static initalizer to add entry to KeywordFactory. This is only for standard keyword, alias will be added
     //else where.
     static {
-        System.out.println("Initialising");
         DescriptionKeyword newDescript = new DescriptionKeyword();
         KeywordFactory.addAliasEntry(DESCRIPTION.getFormattedKeyword(), newDescript);
-        System.out.println("Done");
     }
     
     public DescriptionKeyword(StandardKeyword type) {
@@ -85,10 +83,6 @@ public class DescriptionKeyword extends Keyword{
         }
         
         String word = tokens.get(currIndex);
-        //Ignore -description flag
-        if(word.equalsIgnoreCase(DESCRIPTION.getFormattedKeyword())) {
-            return descriptBuilder.toString();
-        }
         logger.info("Appending " + word + " to " + oldDescript);
         
         descriptBuilder.append(word);
