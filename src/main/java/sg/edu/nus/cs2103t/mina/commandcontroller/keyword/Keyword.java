@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+//@author A0099151B
 public abstract class Keyword {
     
     protected StandardKeyword _type;

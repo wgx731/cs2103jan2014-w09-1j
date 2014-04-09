@@ -16,7 +16,7 @@ import org.junit.Test;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 
-// @author A0099151B
+//@author A0099151B
 public class CommandParserTest {
 
     private static final int ORDER_EVENT_EDS = 4;
@@ -439,7 +439,7 @@ public class CommandParserTest {
         //filter start date
         variation = "filter -start 12/3/2007 deadline complete";
         result = parser.convertCommand(variation);  
-        assertEquals("display deadline complete -start 12032007", result);
+        assertEquals("display deadline complete -start 12032007000000", result);
         
         /* XXX Boundary Value analysis, intersecting date format,
          * dd/MM/yyyy (another EP) with informal time (one EP) */
@@ -460,7 +460,7 @@ public class CommandParserTest {
         result = parser.convertCommand(variation);  
         resultDate = today.format("DDMMYYYY");
         end = resultDate + "200000";
-        assertEquals("display deadline complete -start 12052007 -end " + end, result);       
+        assertEquals("display deadline complete -start 12052007000000 -end " + end, result);       
         
     }
 
@@ -823,7 +823,7 @@ public class CommandParserTest {
         //checking individual flags
         variation = "modify todo 2 -description change me!";
         result = parser.convertCommand(variation);
-        assertEquals("modify todo 2 -description change me!",
+        assertEquals("modify todo 2 -description -description change me!",
                 result);        
     }
     
@@ -862,6 +862,13 @@ public class CommandParserTest {
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
         assertEquals("modify deadline 5 -totype event -start " + start, result);
+        
+        //For shorten id
+        variation = "modify d5 -changeto event get the -description tag from mina -from tmr 3am";
+        result = parser.convertCommand(variation);     
+        resultDate = tmr.format("DDMMYYYY");
+        start = resultDate + "030000";
+        assertEquals("modify deadline 5 -totype event -description get the -description tag from mina -start " + start, result);
         
         //delete with shorten id
         variation = "delete td1";
@@ -999,22 +1006,6 @@ public class CommandParserTest {
         result = parser.convertCommand(addRecurYearControl);
         assertEquals(addRecurYearControl, result);
         
-    }
-    
-    @Test
-    public void testRecurringKeywords() throws ParseException {
-
-        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -daily -until 23/11/2014";
-        result = parser.convertCommand(variation);
-        assertEquals(addRecurDayControl, result);
-        
-        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -weekly -until 23/11/2014";
-        result = parser.convertCommand(variation);
-        assertEquals(addRecurWeekControl, result);      
-        
-        variation =  "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -yearly -until 23/11/2016";
-        result = parser.convertCommand(variation);
-        assertEquals(addRecurYearControl, result);  
     }
     
     @Test
