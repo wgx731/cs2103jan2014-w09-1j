@@ -226,32 +226,68 @@ public class TaskDataManager {
     }
 
     /* getter methods: uncompleted tasks */
+    /**
+     * Returns the all the uncompleted to-do tasks currently in memory.
+     * 
+     * @return uncompletedTodoTasks
+     */
     public SortedSet<TodoTask> getUncompletedTodoTasks() {
         return _uncompletedTodoTasks;
     }
 
+    /**
+     * Returns the all the uncompleted deadline tasks currently in memory.
+     * 
+     * @return uncompletedDeadlineTasks
+     */
     public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
         return _uncompletedDeadlineTasks;
     }
 
+    /**
+     * Returns the all the uncompleted event tasks currently in memory.
+     * 
+     * @return uncompletedEventTasks
+     */
     public SortedSet<EventTask> getUncompletedEventTasks() {
         return _uncompletedEventTasks;
     }
 
     /* getter methods: completed tasks */
+    /**
+     * Returns the all the completed to-do tasks currently in memory.
+     * 
+     * @return completedTodoTasks
+     */
     public SortedSet<TodoTask> getCompletedTodoTasks() {
         return _completedTodoTasks;
     }
 
+    /**
+     * Returns the all the completed deadline tasks currently in memory.
+     * 
+     * @return completedDeadlineTasks
+     */
     public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
         return _completedDeadlineTasks;
     }
 
+    /**
+     * Returns the all the completed event tasks currently in memory.
+     * 
+     * @return completedEventTasks
+     */
     public SortedSet<EventTask> getCompletedEventTasks() {
         return _completedEventTasks;
     }
 
     /* getter methods: recurring map */
+    /**
+     * Returns the HashMap containing the mapping of all recurring tasks
+     * currently in memory.
+     * 
+     * @return recurringTasks
+     */
     public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
         return _recurringTasks;
     }
@@ -831,28 +867,28 @@ public class TaskDataManager {
     public Task<?> markCompleted(DataParameter completeParameters) {
         if (completeParameters.getTaskObject() != null) {
             if (completeParameters.getTaskObject().getTag().contains("RECUR")) {
-                Task<?> taskToReturn = markCompletedRecurTask(completeParameters); 
-                
+                Task<?> taskToReturn = markCompletedRecurTask(completeParameters);
+
                 syncCompletedTasks(TaskType.DEADLINE);
                 syncUncompletedTasks(TaskType.DEADLINE);
                 syncCompletedTasks(TaskType.EVENT);
                 syncUncompletedTasks(TaskType.EVENT);
-                
+
                 syncHashMaps();
-                
+
                 return taskToReturn;
 
             } else if (completeParameters.getTaskObject().getTag().equals("")) {
                 Task<?> taskToReturn = markCompletedRegTask(completeParameters);
-                
+
                 syncCompletedTasks(TaskType.TODO);
                 syncUncompletedTasks(TaskType.TODO);
                 syncCompletedTasks(TaskType.DEADLINE);
                 syncUncompletedTasks(TaskType.DEADLINE);
                 syncCompletedTasks(TaskType.EVENT);
                 syncUncompletedTasks(TaskType.EVENT);
-                
-                return taskToReturn; 
+
+                return taskToReturn;
 
             } else {
                 return null;
@@ -1007,7 +1043,7 @@ public class TaskDataManager {
                 return null;
         }
     }
-    
+
     /**
      * Takes in all 6 of the Task TreeSets and overwrites them in TDM.
      * <p>
@@ -1132,15 +1168,15 @@ public class TaskDataManager {
                 TaskType.TODO, true));
         allDataList.add(new TaskSetDataParameter(_uncompletedTodoTasks,
                 TaskType.TODO, false));
-        
+
         _syncManager.saveAll(allDataList);
-        
+
         syncHashMaps();
-        
+
     }
 
     /**
-     * only to be used for testing
+     * Clears all the trees in memory. Does not sync with actual data storage.
      */
     public void resetTrees() {
         _completedTodoTasks.clear();
