@@ -1,6 +1,5 @@
 package sg.edu.nus.cs2103t.mina.view;
 
-import java.util.Iterator;
 import java.util.TreeSet;
 
 /**
@@ -14,7 +13,8 @@ import java.util.TreeSet;
 //@author A0099324X
 
 public class AutoCompleteDB {
-    TreeSet<String> proposals;
+    private static final String EMPTY_STRING = "";
+	TreeSet<String> proposals;
 
     public AutoCompleteDB() {
     	proposals = new TreeSet<String>();
@@ -60,14 +60,11 @@ public class AutoCompleteDB {
     }
 
     public String firstMatch(String input) {
-        Iterator<String> iter = proposals.iterator();
-        while (iter.hasNext()) {
-            String str = iter.next();
-            if (str.length() > input.length() && str.substring(0,
-                    input.length()).equals(input)) {
-                return str;
-            }
+        String str = proposals.ceiling(input);
+        if (str.equals(input)||str.contains(input)){
+        	return str;
+        } else {
+        	return EMPTY_STRING;
         }
-        return "";
     }
 }
