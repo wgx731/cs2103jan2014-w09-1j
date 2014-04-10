@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,22 +89,22 @@ public final class DateUtil {
 	      put("^\\d{4}$", "HHmm");
 	      
     	  //HH AM/PM
-    	  put("^\\d{1}(am|pm){1}$", "ha");
-    	  put("^\\d{1,2}(am|pm){1}$", "hha");
+    	  put("^\\d{1}(am|pm|AM|PM){1}$", "ha");
+    	  put("^\\d{1,2}(am|pm|AM|PM){1}$", "hha");
     	  //HH no AM/PM
     	  put("^\\d{1}$", "H");
     	  put("^\\d{1,2}$", "HH");
     	 
     	  //HH:MM:SS AM/PM
-    	  put("^\\d{1,2}:\\d{2}(am|pm){1}", "hh:mma");
-    	  put("^\\d{1,2}:\\d{2}:\\{d2}(am|pm){1}", "hh:mm:ssa");
+    	  put("^\\d{1,2}:\\d{2}(am|pm|AM|PM){1}", "hh:mma");
+    	  put("^\\d{1,2}:\\d{2}:\\{d2}(am|pm|AM|PM){1}", "hh:mm:ssa");
     	  //HH:MM:SS no AM/PM
     	  put("^\\d{1,2}:\\d{2}", "HH:mm");
     	  put("^\\d{1,2}:\\d{2}:\\{d2}", "HH:mm:ss");
     	 
     	  //HH.MM.SS AM/PM
-    	  put("^\\d{1,2}\\.\\d{2}(am|pm){1}", "hh.mma");
-    	  put("^\\d{1,2}\\.\\d{2}\\.\\{d2}(am|pm){1}", "hh.mm.ssa");
+    	  put("^\\d{1,2}\\.\\d{2}(am|pm|AM|PM){1}", "hh.mma");
+    	  put("^\\d{1,2}\\.\\d{2}\\.\\{d2}(am|pm|AM|PM){1}", "hh.mm.ssa");
     	  //HH.MM.SS no AM/PM
     	  put("^\\d{1,2}\\.\\d{2}", "HH.mm");
     	  put("^\\d{1,2}\\.\\d{2}\\.\\{d2}", "HH.mm.ss");  
@@ -265,8 +267,10 @@ public final class DateUtil {
      * @return
      */
     public static String getTimeFormat(String token) {
+
         for(String regex: TIME_FORMAT_REGEX.keySet()) {
             logger.info("Matching " + token + " with " + regex);
+
             if (token.matches(regex)) {
                 logger.info("Matched!");
                 return TIME_FORMAT_REGEX.get(regex);
@@ -310,8 +314,14 @@ public final class DateUtil {
     }
     
     public static String getDateFormat(String token) {
+        
+        Pattern datePattern;
+        Matcher dateMatcher;
+        
         for(String regex: DATE_FORMAT_REGEX.keySet()) {
-            if (token.matches(regex)) {
+            datePattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            dateMatcher = datePattern.matcher(token);
+            if (dateMatcher.find()) {
                 return DATE_FORMAT_REGEX.get(regex);
             }
         }
@@ -335,12 +345,19 @@ public final class DateUtil {
 
     public static String getPartialToken(String token) {
         
+        Pattern partialDatePattern;
+        Matcher partialDateMatcher;
+        
         if(token==null) {
             return null;
         }
         
         for(String regex: PARTIAL_DATE_FORMAT.keySet()) {
-            if (token.matches(regex)) {
+            
+            partialDatePattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            partialDateMatcher = partialDatePattern.matcher(token);
+            
+            if (partialDateMatcher.find()) {
                 return PARTIAL_DATE_FORMAT.get(regex);
             }
         }
