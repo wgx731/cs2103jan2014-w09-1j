@@ -1,5 +1,20 @@
 # MINA CHANGE LOG #
 
+## 0.4 MINA-almost (2014-04-09) ##
+
+#### Features: ####
+
+* recuring task
+* More flexicommand
+* Splash screen
+* Show loading when program is busy
+* undo redo
+
+#### Known issues: ####
+
+* Bugs listed in Google Code Issues
+* Refactor code to production quality
+
 ## 0.3 MINA-ready (2014-04-01) ##
 
 #### Features: ####

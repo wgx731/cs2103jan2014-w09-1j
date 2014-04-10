@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+//@author A0099151B
 public class EveryKeyword extends Keyword {
     
     private static final int EVERY_LOOKAHEAD_LIMIT = 1;

@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
  * @author joannemah
  */
 
+//@author A0099151B
 public class PriorityKeyword extends Keyword {
 
     private static final int PREV = -1;

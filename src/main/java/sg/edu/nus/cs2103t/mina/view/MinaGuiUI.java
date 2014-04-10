@@ -120,7 +120,6 @@ public class MinaGuiUI extends MinaView {
 
 	private LinkedList<String> _commandHistory;
 	private int _positionInCommandHistory;
-	private boolean _isHistoryDirectionUp;
 	
 	private boolean _isExpanded;
 
@@ -269,7 +268,6 @@ public class MinaGuiUI extends MinaView {
 
 		_commandHistory = new LinkedList<String>();
 		_positionInCommandHistory = 0;
-		_isHistoryDirectionUp = true;
 
 		_currentTab = 0;
 
@@ -496,7 +494,10 @@ public class MinaGuiUI extends MinaView {
 				if (event.keyCode == SWT.CR) {
 					showBusyStatus();
 					String command = _userInputTextField.getText();
-					addToHistory(command);
+					if (!command.equals(EMPTY_STRING)){
+						addToHistory(command);
+						_positionInCommandHistory = -1;
+					}
 					if (command.trim().toLowerCase().equals("help") || command
 							.trim().toLowerCase().equals("-h")) {
 						startHelpWindows();
@@ -544,14 +545,10 @@ public class MinaGuiUI extends MinaView {
 				if (event.keyCode == SWT.ARROW_UP) {
 					event.doit = false;
 					if (_commandHistory.size() > 0&&_positionInCommandHistory<_commandHistory.size()-1) {
-						if (!_isHistoryDirectionUp){
-							_positionInCommandHistory++;
-							_isHistoryDirectionUp = true;
-						}
+						_positionInCommandHistory++;
 						String text = _commandHistory.get(_positionInCommandHistory);
 						_userInputTextField.setText(text);
 						_userInputTextField.selectAll();
-						_positionInCommandHistory++;
 					} else if (_commandHistory.size() > 0&&_positionInCommandHistory==_commandHistory.size()-1){
 						String text = _commandHistory.get(_positionInCommandHistory);
 						_userInputTextField.setText(text);
@@ -560,7 +557,6 @@ public class MinaGuiUI extends MinaView {
 				}
 				if (event.keyCode == SWT.ARROW_DOWN) {
 					event.doit = false;
-					_isHistoryDirectionUp = false;
 					if (_commandHistory.size() > 0 && _positionInCommandHistory>0) {
 						_positionInCommandHistory--;
 						String text = _commandHistory.get(_positionInCommandHistory);
@@ -734,7 +730,6 @@ public class MinaGuiUI extends MinaView {
 			_commandHistory.addFirst(text);
 		}
 		_positionInCommandHistory = 0;
-		_isHistoryDirectionUp = true;
 	}
 
 	private void setAutoComplete() {

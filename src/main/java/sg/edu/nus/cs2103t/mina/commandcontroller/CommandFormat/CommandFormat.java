@@ -39,6 +39,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
  * 
  */
 
+//@author A0099151B
 public abstract class CommandFormat{
     
     private static final int DESCRIPT_NOT_FOUND = -1;
@@ -261,6 +262,7 @@ public abstract class CommandFormat{
     }
 
     private String createFormatedWord(String currWord) {
+        currWord = currWord.toLowerCase();
         if (_isWrapped && !currWord.startsWith(StandardKeyword.DELIMITER)) {
             currWord = StandardKeyword.DELIMITER + currWord;
         }
