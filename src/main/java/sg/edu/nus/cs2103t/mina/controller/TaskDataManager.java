@@ -155,36 +155,6 @@ public class TaskDataManager {
 
     }
 
-    /* load methods: uncompleted tasks */
-    public SortedSet<TodoTask> getUncompletedTodoTasks() {
-        return _uncompletedTodoTasks;
-    }
-
-    public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
-        return _uncompletedDeadlineTasks;
-    }
-
-    public SortedSet<EventTask> getUncompletedEventTasks() {
-        return _uncompletedEventTasks;
-    }
-
-    /* load methods: completed tasks */
-    public SortedSet<TodoTask> getCompletedTodoTasks() {
-        return _completedTodoTasks;
-    }
-
-    public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
-        return _completedDeadlineTasks;
-    }
-
-    public SortedSet<EventTask> getCompletedEventTasks() {
-        return _completedEventTasks;
-    }
-
-    public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
-        return _recurringTasks;
-    }
-
     private void updateRecurMap() {
         // loop through deadlines
         Iterator<DeadlineTask> deadlineTaskIterator = _uncompletedDeadlineTasks
@@ -255,10 +225,41 @@ public class TaskDataManager {
         }
     }
 
+    /* getter methods: uncompleted tasks */
+    public SortedSet<TodoTask> getUncompletedTodoTasks() {
+        return _uncompletedTodoTasks;
+    }
+
+    public SortedSet<DeadlineTask> getUncompletedDeadlineTasks() {
+        return _uncompletedDeadlineTasks;
+    }
+
+    public SortedSet<EventTask> getUncompletedEventTasks() {
+        return _uncompletedEventTasks;
+    }
+
+    /* getter methods: completed tasks */
+    public SortedSet<TodoTask> getCompletedTodoTasks() {
+        return _completedTodoTasks;
+    }
+
+    public SortedSet<DeadlineTask> getCompletedDeadlineTasks() {
+        return _completedDeadlineTasks;
+    }
+
+    public SortedSet<EventTask> getCompletedEventTasks() {
+        return _completedEventTasks;
+    }
+
+    /* getter methods: recurring map */
+    public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
+        return _recurringTasks;
+    }
+
     /**
-     * Creates a Task depending on its type and parameters. If changes are
-     * successfully saved by DAO, it returns a Task object to the method which
-     * called it.
+     * Creates a Task depending on its type and parameters, then saves it to
+     * memory and DAO. If changes are successfully saved by DAO, it returns a
+     * Task object.
      * 
      * @param DataParameter addParameters
      * @return added Task
@@ -349,7 +350,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currDeadline);
 
                 }
-                syncUncompletedTasks(TaskType.DEADLINE);
 
                 return _recurringTasks.get(recurTag).get(0);
 
@@ -375,8 +375,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currEndDate);
 
                 }
-                syncUncompletedTasks(TaskType.EVENT);
-                syncHashMaps();
 
                 return _recurringTasks.get(recurTag).get(0);
 
@@ -505,10 +503,21 @@ public class TaskDataManager {
                     .equals(TaskType.EVENT) || deleteParameters.getTaskObject()
                     .getType().equals(TaskType.DEADLINE));
 
-            return deleteRecurringTasks(deleteParameters);
+            Task<?> taskToReturn = deleteRecurringTasks(deleteParameters);
+
+            syncUncompletedTasks(TaskType.DEADLINE);
+            syncUncompletedTasks(TaskType.EVENT);
+
+            return taskToReturn;
 
         } else {
-            return deleteRegTask(deleteParameters);
+            Task<?> taskToReturn = deleteRegTask(deleteParameters);
+
+            syncUncompletedTasks(TaskType.TODO);
+            syncUncompletedTasks(TaskType.DEADLINE);
+            syncUncompletedTasks(TaskType.EVENT);
+
+            return taskToReturn;
 
         }
     }
@@ -549,7 +558,6 @@ public class TaskDataManager {
                 if (!deleteParameters.getTaskObject().isCompleted()) {
                     if (_uncompletedTodoTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.TODO);
 
                         return deleteParameters.getTaskObject();
                     } else {
@@ -558,7 +566,6 @@ public class TaskDataManager {
                 } else {
                     if (_completedTodoTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.TODO);
 
                         return deleteParameters.getTaskObject();
                     } else {
@@ -569,7 +576,6 @@ public class TaskDataManager {
                 if (!deleteParameters.getTaskObject().isCompleted()) {
                     if (_uncompletedDeadlineTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.DEADLINE);
 
                         return deleteParameters.getTaskObject();
 
@@ -579,7 +585,6 @@ public class TaskDataManager {
                 } else {
                     if (_completedDeadlineTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.DEADLINE);
 
                         return deleteParameters.getTaskObject();
 
@@ -592,7 +597,6 @@ public class TaskDataManager {
                 if (!deleteParameters.getTaskObject().isCompleted()) {
                     if (_uncompletedEventTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.EVENT);
 
                         return deleteParameters.getTaskObject();
 
@@ -603,7 +607,6 @@ public class TaskDataManager {
                 } else {
                     if (_completedEventTasks.remove(deleteParameters
                             .getTaskObject())) {
-                        syncUncompletedTasks(TaskType.EVENT);
 
                         return deleteParameters.getTaskObject();
                     } else {
@@ -828,10 +831,28 @@ public class TaskDataManager {
     public Task<?> markCompleted(DataParameter completeParameters) {
         if (completeParameters.getTaskObject() != null) {
             if (completeParameters.getTaskObject().getTag().contains("RECUR")) {
-                return markCompletedRecurTask(completeParameters);
+                Task<?> taskToReturn = markCompletedRecurTask(completeParameters); 
+                
+                syncCompletedTasks(TaskType.DEADLINE);
+                syncUncompletedTasks(TaskType.DEADLINE);
+                syncCompletedTasks(TaskType.EVENT);
+                syncUncompletedTasks(TaskType.EVENT);
+                
+                syncHashMaps();
+                
+                return taskToReturn;
 
             } else if (completeParameters.getTaskObject().getTag().equals("")) {
-                return markCompletedRegTask(completeParameters);
+                Task<?> taskToReturn = markCompletedRegTask(completeParameters);
+                
+                syncCompletedTasks(TaskType.TODO);
+                syncUncompletedTasks(TaskType.TODO);
+                syncCompletedTasks(TaskType.DEADLINE);
+                syncUncompletedTasks(TaskType.DEADLINE);
+                syncCompletedTasks(TaskType.EVENT);
+                syncUncompletedTasks(TaskType.EVENT);
+                
+                return taskToReturn; 
 
             } else {
                 return null;
@@ -877,12 +898,8 @@ public class TaskDataManager {
                 }
                 _completedDeadlineTasks.add((DeadlineTask) currTask);
 
-                syncCompletedTasks(TaskType.DEADLINE);
-                syncUncompletedTasks(TaskType.DEADLINE);
-
             }
             _recurringTasks.remove(prevTask.getTag());
-            syncHashMaps();
 
             return returnTask;
 
@@ -903,12 +920,8 @@ public class TaskDataManager {
 
                 _completedEventTasks.add((EventTask) currTask);
 
-                syncCompletedTasks(TaskType.EVENT);
-                syncUncompletedTasks(TaskType.EVENT);
-
             }
             _recurringTasks.remove(prevTask.getTag());
-            syncHashMaps();
 
             return returnTask;
 
@@ -929,17 +942,11 @@ public class TaskDataManager {
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedDeadlineTasks.remove(prevTask);
 
-            syncCompletedTasks(TaskType.DEADLINE);
-            syncUncompletedTasks(TaskType.DEADLINE);
-
             return completedTask;
         } else if (prevTask.getType().equals(TaskType.EVENT)) {
             _completedEventTasks.add((EventTask) completedTask);
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedEventTasks.remove(prevTask);
-
-            syncCompletedTasks(TaskType.EVENT);
-            syncUncompletedTasks(TaskType.EVENT);
 
             return completedTask;
         } else {
@@ -961,9 +968,6 @@ public class TaskDataManager {
 
                     _completedTodoTasks.add(finTodoTask);
 
-                    syncCompletedTasks(TaskType.TODO);
-                    syncUncompletedTasks(TaskType.TODO);
-
                     return finTodoTask;
                 } else {
                     return null;
@@ -979,9 +983,6 @@ public class TaskDataManager {
 
                     _completedDeadlineTasks.add(finDeadlineTask);
 
-                    syncCompletedTasks(TaskType.DEADLINE);
-                    syncUncompletedTasks(TaskType.DEADLINE);
-
                     return finDeadlineTask;
                 } else {
                     return null;
@@ -996,9 +997,6 @@ public class TaskDataManager {
                     finEventTask.setLastEditedTime(new Date());
 
                     _completedEventTasks.add(finEventTask);
-
-                    syncCompletedTasks(TaskType.EVENT);
-                    syncUncompletedTasks(TaskType.EVENT);
 
                     return finEventTask;
                 } else {
@@ -1205,8 +1203,11 @@ public class TaskDataManager {
                 TaskType.TODO, true));
         allDataList.add(new TaskSetDataParameter(_uncompletedTodoTasks,
                 TaskType.TODO, false));
+        
         _syncManager.saveAll(allDataList);
+        
         syncHashMaps();
+        
     }
 
     /**
