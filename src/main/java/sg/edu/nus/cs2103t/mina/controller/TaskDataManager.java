@@ -424,7 +424,7 @@ public class TaskDataManager {
 
                 }
                 syncUncompletedTasks(TaskType.DEADLINE);
-                
+
                 return _recurringTasks.get(recurTag).get(0);
 
             case EVENT :
@@ -451,7 +451,7 @@ public class TaskDataManager {
                 }
                 syncUncompletedTasks(TaskType.EVENT);
                 syncHashMaps();
-                
+
                 return _recurringTasks.get(recurTag).get(0);
 
             default :
@@ -508,9 +508,9 @@ public class TaskDataManager {
             includeInBlockMap(currEventTask, blockTag);
 
         }
-        
+
         syncUncompletedTasks(TaskType.EVENT);
-        
+
         return _blockTasks.get(blockTag).get(0);
     }
 
@@ -545,9 +545,9 @@ public class TaskDataManager {
     private Task<?> addTodoTask(DataParameter addParameters) {
         TodoTask newTodoTask = createTodoTask(addParameters);
         newTodoTask.setLastEditedTime(new Date());
-        
+
         if (_uncompletedTodoTasks.add(newTodoTask)) {
-            syncUncompletedTasks(TaskType.TODO);        
+            syncUncompletedTasks(TaskType.TODO);
 
             return newTodoTask;
         }
@@ -645,9 +645,9 @@ public class TaskDataManager {
                 }
                 deleteRegTask(deleteParameters);
             }
-            
+
             syncHashMaps();
-            
+
             return recurTaskToDelete;
         } else {
             return null;
@@ -677,7 +677,7 @@ public class TaskDataManager {
                 }
                 deleteRegTask(deleteParameters);
             }
-            
+
             syncHashMaps();
             return blockTaskToDelete;
         } else {
@@ -977,10 +977,10 @@ public class TaskDataManager {
                         modifyParameters, prevTask);
                 Task<?> newTask = addRegTask(newSetOfParameters);
                 newTask.setLastEditedTime(new Date());
-                
+
                 syncUncompletedTasks(TaskType.EVENT);
                 syncHashMaps();
-                
+
                 return newTask;
 
             } else {
@@ -1002,10 +1002,10 @@ public class TaskDataManager {
 
                     _blockTasks.get(prevTask.getTag()).set(i, currTask);
                 }
-                
+
                 syncUncompletedTasks(TaskType.EVENT);
                 syncHashMaps();
-                
+
                 return _blockTasks.get(prevTask.getTag()).get(0);
 
             }
@@ -1049,7 +1049,7 @@ public class TaskDataManager {
 
                 _blockTasks.get(prevTask.getTag()).set(prevTaskIndex,
                         newBlockEvent);
-                
+
                 syncUncompletedTasks(TaskType.EVENT);
                 syncCompletedTasks(TaskType.EVENT);
 
@@ -1061,7 +1061,7 @@ public class TaskDataManager {
                 _blockTasks.get(prevTask.getTag()).remove(prevTask);
                 prevTask.setTag("");
                 _uncompletedEventTasks.remove(prevTask);
-                
+
                 syncUncompletedTasks(TaskType.EVENT);
 
                 return addRegTask(newSetOfParameters);
@@ -1088,7 +1088,7 @@ public class TaskDataManager {
                     modifyParameters, prevTask);
 
             Task<?> newTask = addRegTask(newSetOfParameters);
-            
+
             return newTask;
         }
     }
@@ -1162,7 +1162,7 @@ public class TaskDataManager {
 
                 }
                 _completedDeadlineTasks.add((DeadlineTask) currTask);
-                
+
                 syncCompletedTasks(TaskType.DEADLINE);
                 syncUncompletedTasks(TaskType.DEADLINE);
 
@@ -1184,11 +1184,11 @@ public class TaskDataManager {
 
                 if (i == 0) {
                     returnTask = currTask;
-                    
+
                 }
 
                 _completedEventTasks.add((EventTask) currTask);
-                
+
                 syncCompletedTasks(TaskType.EVENT);
                 syncUncompletedTasks(TaskType.EVENT);
 
@@ -1200,7 +1200,7 @@ public class TaskDataManager {
 
         } else {
             return null;
-            
+
         }
     }
 
@@ -1214,7 +1214,7 @@ public class TaskDataManager {
             _completedDeadlineTasks.add((DeadlineTask) completedTask);
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedDeadlineTasks.remove(prevTask);
-            
+
             syncCompletedTasks(TaskType.DEADLINE);
             syncUncompletedTasks(TaskType.DEADLINE);
 
@@ -1223,14 +1223,14 @@ public class TaskDataManager {
             _completedEventTasks.add((EventTask) completedTask);
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedEventTasks.remove(prevTask);
-            
+
             syncCompletedTasks(TaskType.EVENT);
             syncUncompletedTasks(TaskType.EVENT);
 
             return completedTask;
         } else {
             return null;
-            
+
         }
     }
 
@@ -1247,7 +1247,7 @@ public class TaskDataManager {
             _completedEventTasks.add((EventTask) completedTask);
             _blockTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedEventTasks.remove(prevTask);
-            
+
             syncCompletedTasks(TaskType.EVENT);
             syncUncompletedTasks(TaskType.EVENT);
             syncHashMaps();
@@ -1425,13 +1425,13 @@ public class TaskDataManager {
         _completedTodoTasks = newCompletedTodoTasks;
         _completedDeadlineTasks = newCompletedDeadlineTasks;
         _completedEventTasks = newCompletedEventTasks;
-        
+
         syncCompletedTasks(TaskType.TODO);
         syncUncompletedTasks(TaskType.TODO);
-        
+
         syncCompletedTasks(TaskType.DEADLINE);
         syncUncompletedTasks(TaskType.DEADLINE);
-        
+
         syncCompletedTasks(TaskType.EVENT);
         syncUncompletedTasks(TaskType.EVENT);
 
@@ -1456,7 +1456,7 @@ public class TaskDataManager {
         _blockTasks = newBlockTasks;
         _maxRecurTagInt = newMaxRecurTagInt;
         _maxBlockTagInt = newMaxBlockTagInt;
-        
+
         syncHashMaps();
 
     }
@@ -1546,19 +1546,20 @@ public class TaskDataManager {
         _uncompletedEventTasks.clear();
 
     }
-    
-    public void updateTrees(SortedSet<TodoTask> uncompletedTodoTasks, 
-    		SortedSet<DeadlineTask> uncompletedDeadlineTasks,
-    		SortedSet<EventTask> uncompletedEventTasks,
-    		SortedSet<TodoTask> completedTodoTasks,
-    		SortedSet<DeadlineTask> completedDeadlineTasks,
-    		SortedSet<EventTask> completedEventTasks){
-    	_completedTodoTasks = completedTodoTasks;
-    	_completedDeadlineTasks = completedDeadlineTasks;
-    	_completedEventTasks = completedEventTasks;
-    	
-    	_uncompletedTodoTasks = uncompletedTodoTasks;
-    	_uncompletedDeadlineTasks = uncompletedDeadlineTasks;
-    	_uncompletedEventTasks = uncompletedEventTasks;
+
+    public void updateTrees(SortedSet<TodoTask> uncompletedTodoTasks,
+            SortedSet<DeadlineTask> uncompletedDeadlineTasks,
+            SortedSet<EventTask> uncompletedEventTasks,
+            SortedSet<TodoTask> completedTodoTasks,
+            SortedSet<DeadlineTask> completedDeadlineTasks,
+            SortedSet<EventTask> completedEventTasks) {
+        _completedTodoTasks = completedTodoTasks;
+        _completedDeadlineTasks = completedDeadlineTasks;
+        _completedEventTasks = completedEventTasks;
+
+        _uncompletedTodoTasks = uncompletedTodoTasks;
+        _uncompletedDeadlineTasks = uncompletedDeadlineTasks;
+        _uncompletedEventTasks = uncompletedEventTasks;
+        updateHashMaps();
     }
 }
