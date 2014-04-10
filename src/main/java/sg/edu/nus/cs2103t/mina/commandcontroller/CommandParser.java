@@ -40,12 +40,6 @@ public class CommandParser {
     private static final CommandType ADD = CommandType.ADD;
     private static final CommandType MODIFY = CommandType.MODIFY;
     private static final CommandType COMPLETE = CommandType.COMPLETE;
-    
-    private static final String EVERY_DAY = "day";
-    private static final String EVERY_WEEK = "week";
-    private static final String EVERY_MONTH = "month";
-    private static final String EVERY_YEAR = "year";
-    private static final String EVERY_HOUR = "hour";
 
     private static final int ACTION_INDEX = 0;
     private static final int ARG_INDEX = 1;
@@ -53,8 +47,6 @@ public class CommandParser {
 
     private static final HashMap<String, CommandType> ACTIONS_KEYWORDS = new HashMap<String, CommandType>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
-    private static final HashMap<String, Boolean> RECURRING_KEYWORDS = new HashMap<String, Boolean>();
-    private static final HashMap<String, String> RECURRING_VALUES = new HashMap<String, String>();
     private static final String EMPTY = "";
 
     private static Logger logger = LogManager.getLogger(CommandParser.class
@@ -93,36 +85,6 @@ public class CommandParser {
         SINGLE_ACTION_KEYWORD.put("quit", EXIT.getType());
         SINGLE_ACTION_KEYWORD.put(UNDO.getType(), UNDO.getType());
         SINGLE_ACTION_KEYWORD.put(REDO.getType(), REDO.getType());
-
-        RECURRING_KEYWORDS.put("daily", false);
-        RECURRING_KEYWORDS.put("weekly", false);
-        RECURRING_KEYWORDS.put("monthly", false);
-        RECURRING_KEYWORDS.put("yearly", false);
-        RECURRING_KEYWORDS.put("every", false);
-
-        RECURRING_KEYWORDS.put("-every", true);
-        RECURRING_KEYWORDS.put("-daily", true);
-        RECURRING_KEYWORDS.put("-weekly", true);
-        RECURRING_KEYWORDS.put("-monthly", true);
-        RECURRING_KEYWORDS.put("-yearly", true);
-
-        RECURRING_VALUES.put(EVERY_DAY, EVERY_DAY);
-        RECURRING_VALUES.put(EVERY_WEEK, EVERY_WEEK);
-        RECURRING_VALUES.put(EVERY_MONTH, EVERY_MONTH);
-        RECURRING_VALUES.put(EVERY_YEAR, EVERY_YEAR);
-        RECURRING_VALUES.put(EVERY_HOUR, EVERY_HOUR);
-
-        RECURRING_VALUES.put("daily", EVERY_DAY);
-        RECURRING_VALUES.put("weekly", EVERY_WEEK);
-        RECURRING_VALUES.put("monthly", EVERY_MONTH);
-        RECURRING_VALUES.put("hourly", EVERY_HOUR);
-
-        RECURRING_VALUES.put("yearly", EVERY_YEAR);
-        RECURRING_VALUES.put("-daily", EVERY_DAY);
-        RECURRING_VALUES.put("-weekly", EVERY_WEEK);
-        RECURRING_VALUES.put("-monthly", EVERY_MONTH);
-        RECURRING_VALUES.put("-yearly", EVERY_YEAR);
-        RECURRING_VALUES.put("-hourly", EVERY_HOUR);
     }
 
     public String convertCommand(String userInput) throws NullPointerException,

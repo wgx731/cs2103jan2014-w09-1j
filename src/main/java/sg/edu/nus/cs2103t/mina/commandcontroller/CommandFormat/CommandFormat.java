@@ -2,7 +2,6 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 

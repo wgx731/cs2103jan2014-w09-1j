@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +15,6 @@ public abstract class Keyword {
     protected final static boolean IS_PROTOTYPE = true;
     protected final static boolean IS_NOT_PROTOTYPE = false;
     protected static final int LOOK_AHEAD_LIMIT = 4;
-    
     private static Logger logger = LogManager.getLogger(Keyword.class
             .getName());
     

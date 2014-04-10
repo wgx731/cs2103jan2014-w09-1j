@@ -1,7 +1,6 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.apache.logging.log4j.LogManager;
