@@ -9,6 +9,7 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TimePair;
 
+//@author A0080412W
 public class DataParameter {
     /* for all tasks */
     private String _description;

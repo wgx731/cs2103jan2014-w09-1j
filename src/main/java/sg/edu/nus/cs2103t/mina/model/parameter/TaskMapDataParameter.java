@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 
 public class TaskMapDataParameter implements Serializable {
@@ -12,19 +11,14 @@ public class TaskMapDataParameter implements Serializable {
     private static final long serialVersionUID = -1665500740615897037L;
 
     private HashMap<String, ArrayList<Task<?>>> _recurringTasks;
-    private HashMap<String, ArrayList<EventTask>> _blockTasks;
     private int _maxRecurTagInt;
-    private int _maxBlockTagInt;
 
     public TaskMapDataParameter(
             HashMap<String, ArrayList<Task<?>>> recurringTasks,
-            HashMap<String, ArrayList<EventTask>> blockTasks,
-            int maxRecurTagInt, int maxBlockTagInt) {
+            int maxRecurTagInt) {
         super();
         _recurringTasks = recurringTasks;
-        _blockTasks = blockTasks;
         _maxRecurTagInt = maxRecurTagInt;
-        _maxBlockTagInt = maxBlockTagInt;
     }
 
     public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
@@ -36,28 +30,12 @@ public class TaskMapDataParameter implements Serializable {
         _recurringTasks = recurringTasks;
     }
 
-    public HashMap<String, ArrayList<EventTask>> getBlockTasks() {
-        return _blockTasks;
-    }
-
-    public void setBlockTasks(HashMap<String, ArrayList<EventTask>> blockTasks) {
-        _blockTasks = blockTasks;
-    }
-
     public int getMaxRecurTagInt() {
         return _maxRecurTagInt;
     }
 
     public void setMaxRecurTagInt(int maxRecurTagInt) {
         _maxRecurTagInt = maxRecurTagInt;
-    }
-
-    public int getMaxBlockTagInt() {
-        return _maxBlockTagInt;
-    }
-
-    public void setMaxBlockTagInt(int maxBlockTagInt) {
-        _maxBlockTagInt = maxBlockTagInt;
     }
 
 }

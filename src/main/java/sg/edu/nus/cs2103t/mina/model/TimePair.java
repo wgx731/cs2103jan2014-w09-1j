@@ -2,6 +2,7 @@ package sg.edu.nus.cs2103t.mina.model;
 
 import java.util.Date;
 
+//@author A0080412W
 public class TimePair {
 
 	private final Date _startDate;
