@@ -32,9 +32,9 @@ public class UICommandHelper {
 	private final String LIST_COMMANDS_HELP_MENU_DESCRIPTION = "This menu provides you all commands supported by MINA\n\n\n";
 	
 	private final String GUI_INTERACTION_HELP_DESCRIPTION = "\n\n\nTo select task panel, hold CTRL and press TAB\n"
-			+ "To change page, hold CTRL and press \u2190 or \u2192\n"
+			+ "To change page, hold CTRL and press \u2190 or \u2192\n OR type \"page [number]\" and press Enter"
 			+ "To enable auto complete, hold CTRL and press BACKSPACE\n"
-			+ "To expand a panel, hold CTRL and press F11\n";
+			+ "To expand a panel, press F11 OR hold CTRL and press E\n";
 	
 	private final String ADD_HELP_MENU_DESCRIPTION = "This menu provides you information about adding a new task\n"
 			+ "Please select which type of task you want to add\n\n";
