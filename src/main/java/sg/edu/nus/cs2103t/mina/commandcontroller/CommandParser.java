@@ -9,16 +9,11 @@ package sg.edu.nus.cs2103t.mina.commandcontroller;
  * @author joannemah
  */
 
-
-
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.AddCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandFormat;
@@ -27,6 +22,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.ModifyCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.SearchCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.KeywordFactory;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 //@author A0099151B
 public class CommandParser {
@@ -48,14 +44,12 @@ public class CommandParser {
     private static final HashMap<String, CommandType> ACTIONS_KEYWORDS = new HashMap<String, CommandType>();
     private static final HashMap<String, String> SINGLE_ACTION_KEYWORD = new HashMap<String, String>();
     private static final String EMPTY = "";
-
-    private static Logger logger = LogManager.getLogger(CommandParser.class
-            .getName());
+    private static final String CLASS_NAME = CommandParser.class.getName();
 
     public CommandParser() {
 
         KeywordFactory.initialiseKeywordFactory();
-        
+
         ACTIONS_KEYWORDS.put("add", ADD);
         ACTIONS_KEYWORDS.put("make", ADD);
         ACTIONS_KEYWORDS.put("create", ADD);
@@ -97,13 +91,14 @@ public class CommandParser {
         }
 
         String[] rawTokens = userInput.trim().split(SPACE, 2);
-        logger.info("Distinguishing action: " + Arrays.toString(rawTokens));
-        
-        if(rawTokens.length<2) {
-            String[] newRawTokens = {rawTokens[ACTION_INDEX], ""};
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Distinguishing action: " + Arrays.toString(rawTokens));
+
+        if (rawTokens.length < 2) {
+            String[] newRawTokens = { rawTokens[ACTION_INDEX], "" };
             rawTokens = newRawTokens;
         }
-        
+
         // get action
         String action = rawTokens[ACTION_INDEX].toLowerCase();
         String argument = rawTokens[ARG_INDEX].trim();
@@ -111,21 +106,21 @@ public class CommandParser {
         if (SINGLE_ACTION_KEYWORD.containsKey(action)) {
             return SINGLE_ACTION_KEYWORD.get(action);
         }
-        
+
         // Determine action here
         // Need another factory object?
         CommandType command = ACTIONS_KEYWORDS.get(action);
         CommandFormat currCommand;
-        
-        switch(command){
-            
+
+        switch (command) {
+
             case DISPLAY :
                 currCommand = new DisplayCommand(command, argument);
                 break;
             case ADD :
                 currCommand = new AddCommand(command, argument);
                 break;
-                
+
             case MODIFY :
             case DELETE :
             case COMPLETE :
@@ -133,16 +128,15 @@ public class CommandParser {
                 break;
             case SEARCH :
                 currCommand = new SearchCommand(command, argument);
-                break;                
-            default:
+                break;
+            default :
                 throw new Error("No such action, yet.");
-            
+
         }
-        
+
         // execute commandformat and return
         String translatedCommand = currCommand.parseArgument();
         return translatedCommand;
 
     }
 }
-

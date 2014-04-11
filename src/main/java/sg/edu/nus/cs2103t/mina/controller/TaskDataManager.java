@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -22,6 +21,7 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up
@@ -36,8 +36,8 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
  */
 // @author A0080412W
 public class TaskDataManager {
-    private static Logger logger = LogManager.getLogger(TaskDataManager.class
-            .getName());
+
+    private static final String CLASS_NAME = TaskDataManager.class.getName();
 
     // error messages
     public static final int ERROR_MISSING_TASK_DESCRIPTION = -2;
@@ -101,7 +101,7 @@ public class TaskDataManager {
 
         } catch (IOException e) {
             _uncompletedTodoTasks = new TreeSet<TodoTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -109,7 +109,7 @@ public class TaskDataManager {
             _uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
         } catch (IOException e) {
             _uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -117,7 +117,7 @@ public class TaskDataManager {
             _uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
         } catch (IOException e) {
             _uncompletedEventTasks = new TreeSet<EventTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -125,7 +125,7 @@ public class TaskDataManager {
             _completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
         } catch (IOException e) {
             _completedTodoTasks = new TreeSet<TodoTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -133,7 +133,7 @@ public class TaskDataManager {
             _completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
         } catch (IOException e) {
             _completedDeadlineTasks = new TreeSet<DeadlineTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -141,7 +141,7 @@ public class TaskDataManager {
             _completedEventTasks = (SortedSet<EventTask>) tempTasks;
         } catch (IOException e) {
             _completedEventTasks = new TreeSet<EventTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         TaskMapDataParameter taskMapData = _syncManager.loadTaskMap();
@@ -1194,6 +1194,5 @@ public class TaskDataManager {
         _uncompletedTodoTasks = uncompletedTodoTasks;
         _uncompletedDeadlineTasks = uncompletedDeadlineTasks;
         _uncompletedEventTasks = uncompletedEventTasks;
-        syncHashMaps();
     }
 }

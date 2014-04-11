@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import javax.swing.KeyStroke;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -39,6 +37,7 @@ import sg.edu.nus.cs2103t.mina.model.TaskView;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 import com.tulskiy.keymaster.common.HotKey;
 import com.tulskiy.keymaster.common.HotKeyListener;
@@ -143,8 +142,7 @@ public class MinaGuiUI extends MinaView {
     private final String UI_FONT_2 = "Tahoma";
     private int UI_FONT_SIZE;
 
-    private static Logger logger = LogManager.getLogger(MinaGuiUI.class
-            .getName());
+    private static final String CLASS_NAME = MinaGuiUI.class.getName();
 
     public MinaGuiUI(CommandManager commandController) {
         super(commandController);
@@ -197,7 +195,8 @@ public class MinaGuiUI extends MinaView {
 
         TrayItem item;
         if (_tray == null) {
-            logger.warn("The system tray is not available");
+            LogHelper.log(CLASS_NAME, Level.WARN,
+                    "The system tray is not available");
         } else {
             item = new TrayItem(_tray, SWT.NONE);
             item.setToolTipText(TRAY_TEXT);
@@ -236,7 +235,7 @@ public class MinaGuiUI extends MinaView {
      * Open the window.
      */
     public Shell open() {
-        logger.log(Level.INFO, "shell open");
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell open");
         Monitor primary = _display.getPrimaryMonitor();
         Rectangle bounds = primary.getBounds();
         Rectangle rect = _shell.getBounds();
@@ -244,7 +243,8 @@ public class MinaGuiUI extends MinaView {
         int y = bounds.y + (bounds.height - rect.height) / 2;
         _shell.setLocation(x, y);
         _shell.setImage(_icon);
-        logger.log(Level.INFO, "shell set position");
+
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell set position");
         _shell.open();
         _shell.layout();
         return _shell;
@@ -254,7 +254,7 @@ public class MinaGuiUI extends MinaView {
      * Create contents of the window.
      */
     protected void createContents() {
-        logger.log(Level.INFO, "shell create contents");
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell create contents");
         initializeItems();
         addAllListeners();
     }
@@ -269,7 +269,8 @@ public class MinaGuiUI extends MinaView {
         }
 
         SHELL_HEIGHT = 580;
-        logger.log(Level.INFO, "width" + SHELL_WIDTH);
+
+        LogHelper.log(CLASS_NAME, Level.INFO, "width" + SHELL_WIDTH);
 
         UI_FONT_SIZE = (SHELL_WIDTH == 1096) ? 15 : 14;
 
@@ -607,7 +608,8 @@ public class MinaGuiUI extends MinaView {
                             _statusBar.setBackground(SWTResourceManager
                                     .getColor(247, 150, 70));
                             _statusBar.setText(PAGE_INVALID);
-                            logger.log(Level.ERROR, e.getMessage());
+                            LogHelper.log(CLASS_NAME, Level.ERROR,
+                                    e.getMessage());
                         } finally {
                             _shell.setCursor(_display
                                     .getSystemCursor(SWT.CURSOR_ARROW));
@@ -863,14 +865,15 @@ public class MinaGuiUI extends MinaView {
 
     @Override
     public String getUserInput() {
-        logger.log(Level.INFO,
+
+        LogHelper.log(CLASS_NAME, Level.INFO,
                 "shell get user input: " + _userInputTextField.getText());
         return _userInputTextField.getText();
     }
 
     @Override
     public void displayOutput() {
-        logger.log(Level.INFO, "shell diplay output");
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell diplay output");
         _display.asyncExec(new Runnable() {
             @Override
             public void run() {
@@ -914,7 +917,7 @@ public class MinaGuiUI extends MinaView {
 
     @Override
     public void updateLists() {
-        logger.log(Level.INFO, "shell update lists");
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell update lists");
         updateEventList();
         updateDeadlineList();
         updateTodoList();
@@ -924,7 +927,7 @@ public class MinaGuiUI extends MinaView {
     }
 
     public void loop() {
-        logger.log(Level.INFO, "shell running loop");
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell running loop");
         while (!_shell.isDisposed()) {
             if (!_display.readAndDispatch()) {
                 _display.sleep();

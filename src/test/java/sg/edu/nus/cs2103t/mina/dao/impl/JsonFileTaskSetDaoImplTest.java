@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.SortedSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -18,11 +17,12 @@ import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
 
-    private static Logger logger = LogManager
-            .getLogger(JsonFileTaskSetDaoImplTest.class.getName());
+    private static final String CLASS_NAME = JsonFileTaskSetDaoImplTest.class
+            .getName();
 
     private JsonFileTaskDaoImpl storage;
 
@@ -43,7 +43,7 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         try {
             storage.saveTaskSet(taskSet, taskType, isCompleted);
         } catch (IOException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
         String fileName = null;
         switch (taskType) {
@@ -75,7 +75,7 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         try {
             return storage.loadTaskSet(taskType, isCompleted);
         } catch (IOException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             return null;
         }
     }

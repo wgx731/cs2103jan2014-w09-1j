@@ -93,7 +93,7 @@ public class TaskDataManagerTest {
                             "RecurDeadlineTask every 2 weeks, for 4 months.",
                             'M', null, firstDeadline_1, null,
                             TaskType.DEADLINE, 123, "RECUR", calendar_1
-                                    .getTime(), "WEEK", 2, null)));
+                                    .getTime(), "WEEK", 2)));
             assertEquals(9, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(9, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -117,7 +117,7 @@ public class TaskDataManagerTest {
                     expectedDeadlineTask_2, tdmTest.addTask(new DataParameter(
                             "RecurDeadlineTask every month, forever.", 'M',
                             null, firstDeadline_2, null, TaskType.DEADLINE,
-                            123, "RECUR", null, "MONTH", 1, null)));
+                            123, "RECUR", null, "MONTH", 1)));
             assertEquals(12, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
@@ -131,12 +131,12 @@ public class TaskDataManagerTest {
                     tdmTest.addTask(new DataParameter(
                             "RecurDeadlineTask every month, forever.", 'M',
                             null, null, null, TaskType.DEADLINE, 123, "RECUR",
-                            null, "MONTH", 1, null)));
+                            null, "MONTH", 1)));
             assertNull("Adding a recurring DeadlineTask wrongly.",
                     tdmTest.addTask(new DataParameter(
                             "RecurDeadlineTask every month, forever.", 'M',
                             null, firstDeadline_2, null, null, 123, "RECUR",
-                            null, "MONTH", 1, null)));
+                            null, "MONTH", 1)));
         } catch (Exception e) {
             // e.printStackTrace();
         }
@@ -165,11 +165,11 @@ public class TaskDataManagerTest {
         try {
             assertEquals(
                     "Adding Event Task that reccurs every 8 hours, for 2 weeks.",
-                    expectedEventTask_1, tdmTest.addTask(new DataParameter(
+                    expectedEventTask_1,
+                    tdmTest.addTask(new DataParameter(
                             "RecurEventTask every 8 hours, for 2 weeks.", 'H',
                             firstStartTime_1, firstEndTime_1, null,
-                            TaskType.EVENT, 123, "RECUR", recurUntil, "HOUR",
-                            8, null)));
+                            TaskType.EVENT, 123, "RECUR", recurUntil, "HOUR", 8)));
             assertEquals(43, tdmTest.getUncompletedEventTasks().size());
             assertEquals(43, tdmTest.getRecurringTasks().get("RECUR_3").size());
 
@@ -199,8 +199,7 @@ public class TaskDataManagerTest {
                     expectedEventTask_2, tdmTest.addTask(new DataParameter(
                             "RecurEventTask every month, forever.", 'H',
                             firstStartTime_2, firstEndTime_2, null,
-                            TaskType.EVENT, 123, "RECUR", null, "MONTH", 1,
-                            null)));
+                            TaskType.EVENT, 123, "RECUR", null, "MONTH", 1)));
             assertEquals(46, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_4").size());
 
@@ -295,7 +294,7 @@ public class TaskDataManagerTest {
                     .addTask(new DataParameter("Another assignment..", 'H',
                             null, deadlineRecurTest1.getTime(), null,
                             TaskType.DEADLINE, 21, "RECUR", untilDeadline1
-                                    .getTime(), "WEEK", 1, null));
+                                    .getTime(), "WEEK", 1));
 
             // deleting the 1st recurring task
             assertEquals("Deleting a single recurring deadlineTask.",
@@ -303,7 +302,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(0), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(5, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(5, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -315,7 +314,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(1), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(4, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -327,7 +326,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(2), null, null, 0,
-                            null, null, false)));
+                            null, false)));
 
             // deleting the 2nd recurring task
             deadlineRecurTest1.add(Calendar.WEEK_OF_YEAR, -3);
@@ -337,7 +336,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(0), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(2, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(2, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -349,7 +348,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(0), null, null, 0,
-                            null, null, false)));
+                            null, false)));
 
             // deleting the 5th recurring task
             deadlineRecurTest1.add(Calendar.WEEK_OF_YEAR, 2);
@@ -359,7 +358,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_0").get(0), null, null, 0,
-                            null, null, false)));
+                            null, false)));
 
             // deleting RECUR_0 again (e.g. repeated command)
 
@@ -378,7 +377,7 @@ public class TaskDataManagerTest {
                     .addTask(new DataParameter("Another homework..", 'H', null,
                             deadlineRecurTest2.getTime(), null,
                             TaskType.DEADLINE, 21, "RECUR", untilDeadline2
-                                    .getTime(), "MONTH", 1, null));
+                                    .getTime(), "MONTH", 1));
 
             // deleting all the recurring tasks
             assertEquals("Deleting all recurring deadlineTask.",
@@ -386,7 +385,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_1").get(0), null, null, 0,
-                            null, null, true)));
+                            null, true)));
             assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(0, tdmTest.getRecurringTasks().size());
 
@@ -407,7 +406,7 @@ public class TaskDataManagerTest {
                     .addTask(new DataParameter("Another tutorial..", 'H',
                             startDateRecurTest1.getTime(), endDateRecurTest1
                                     .getTime(), null, TaskType.EVENT, 21,
-                            "RECUR", untilEvent1.getTime(), "WEEK", 2, null));
+                            "RECUR", untilEvent1.getTime(), "WEEK", 2));
 
             // deleting the 3rd recurring event
             startDateRecurTest1.add(Calendar.WEEK_OF_MONTH, 4);
@@ -420,7 +419,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_2").get(2), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(11, tdmTest.getUncompletedEventTasks().size());
             assertEquals(11, tdmTest.getRecurringTasks().get("RECUR_2").size());
 
@@ -435,7 +434,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_2").get(4), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(10, tdmTest.getUncompletedEventTasks().size());
             assertEquals(10, tdmTest.getRecurringTasks().get("RECUR_2").size());
 
@@ -450,7 +449,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_2").get(9), null, null, 0,
-                            null, null, false)));
+                            null, false)));
             assertEquals(9, tdmTest.getUncompletedEventTasks().size());
             assertEquals(9, tdmTest.getRecurringTasks().get("RECUR_2").size());
 
@@ -471,7 +470,7 @@ public class TaskDataManagerTest {
                     .addTask(new DataParameter("Another tutorial..", 'H',
                             startDateRecurTest2.getTime(), endDateRecurTest2
                                     .getTime(), null, TaskType.EVENT, 21,
-                            "RECUR", untilEvent2.getTime(), "MONTH", 1, null));
+                            "RECUR", untilEvent2.getTime(), "MONTH", 1));
 
             // deleting all the recurring tasks
             assertEquals("Deleting all recurring EventTask.",
@@ -479,7 +478,7 @@ public class TaskDataManagerTest {
                     tdmTest.deleteTask(new DataParameter(null, 'M', null, null,
                             null, null, 0, tdmTest.getRecurringTasks()
                                     .get("RECUR_3").get(0), null, null, 0,
-                            null, null, true)));
+                            null, true)));
             assertEquals(9, tdmTest.getUncompletedEventTasks().size());
             assertEquals(1, tdmTest.getRecurringTasks().size());
 
@@ -635,7 +634,7 @@ public class TaskDataManagerTest {
         try {
             tdmTest.addTask(new DataParameter("After lecture quiz.", 'H', null,
                     deadlineRecurTest1.getTime(), null, TaskType.DEADLINE, 21,
-                    "RECUR", untilDeadlineRecur1.getTime(), "WEEK", 1, null));
+                    "RECUR", untilDeadlineRecur1.getTime(), "WEEK", 1));
             assertEquals(6, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(6, tdmTest.getRecurringTasks().get("RECUR_0").size());
             assertEquals(1, tdmTest.getRecurringTasks().size());
@@ -662,14 +661,14 @@ public class TaskDataManagerTest {
                     "After lecture quiz (half done).", 'M', null, null,
                     TaskType.DEADLINE, TaskType.DEADLINE, 1, tdmTest
                             .getRecurringTasks().get("RECUR_0").get(1), null,
-                    null, 0, null, null, false));
+                    null, 0, null, false));
             assertEquals(6, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(5, tdmTest.getRecurringTasks().get("RECUR_0").size());
             tdmTest.modifyTask(new DataParameter(
                     "After lecture quiz (half done).", 'M', null, null,
                     TaskType.DEADLINE, TaskType.DEADLINE, 1, tdmTest
                             .getRecurringTasks().get("RECUR_0").get(1), null,
-                    null, 0, null, null, false));
+                    null, 0, null, false));
 
             // modify deadline task type to event
             Calendar expectedStartCal2 = Calendar.getInstance();
@@ -690,7 +689,7 @@ public class TaskDataManagerTest {
                             expectedStartDate2, expectedEndDate2,
                             TaskType.DEADLINE, TaskType.EVENT, 1, tdmTest
                                     .getRecurringTasks().get("RECUR_0").get(3),
-                            null, null, 0, null, null, false)));
+                            null, null, 0, null, false)));
             assertEquals(5, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(1, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_0").size());
@@ -718,7 +717,7 @@ public class TaskDataManagerTest {
             tdmTest.modifyTask(new DataParameter("After lecture assignment.",
                     'M', null, deadlineRecurTest1.getTime(), null, null, 89,
                     tdmTest.getRecurringTasks().get("RECUR_0").get(1), null,
-                    "DAY", 1, untilDeadlineRecur1.getTime(), null, true));
+                    "DAY", 1, untilDeadlineRecur1.getTime(), true));
 
             assertEquals(13, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -738,7 +737,7 @@ public class TaskDataManagerTest {
         try {
             tdmTest.addTask(new DataParameter("Lab", 'H', startEventRecur1
                     .getTime(), endEventRecur1.getTime(), null, TaskType.EVENT,
-                    21, "RECUR", untilEventRecur1.getTime(), "MONTH", 1, null));
+                    21, "RECUR", untilEventRecur1.getTime(), "MONTH", 1));
             assertEquals(5, tdmTest.getUncompletedEventTasks().size());
 
             startEventRecur1.add(Calendar.MONTH, 2);
@@ -752,7 +751,7 @@ public class TaskDataManagerTest {
                             endEventRecur1.getTime(), startEventRecur1
                                     .getTime(), TaskType.EVENT, null, 90,
                             tdmTest.getRecurringTasks().get("RECUR_1").get(2),
-                            null, null, 0, null, null, false)));
+                            null, null, 0, null, false)));
             assertEquals(5, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
@@ -776,7 +775,7 @@ public class TaskDataManagerTest {
                     startEventRecur1.getTime(), endEventRecur1.getTime(), null,
                     null, 89,
                     tdmTest.getRecurringTasks().get("RECUR_1").get(1), null,
-                    "MONTH", 2, untilEventRecur1.getTime(), null, true));
+                    "MONTH", 2, untilEventRecur1.getTime(), true));
 
             assertEquals(expectedEventRecur1,
                     tdmTest.getRecurringTasks().get("RECUR_1").get(0));
@@ -855,7 +854,7 @@ public class TaskDataManagerTest {
             tdmTest.addTask(new DataParameter(
                     "Completed recurring assignment.", 'L', null,
                     recurDeadlineCal1.getTime(), null, TaskType.DEADLINE, 23,
-                    "RECUR", endRecurDeadlineCal1.getTime(), "WEEK", 1, null));
+                    "RECUR", endRecurDeadlineCal1.getTime(), "WEEK", 1));
             assertEquals(4, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
@@ -875,7 +874,7 @@ public class TaskDataManagerTest {
             // null, null, false)));
             tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
                     null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
-                            .get(2), null, null, 0, null, null, false));
+                            .get(2), null, null, 0, null, false));
 
             assertEquals(3, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_0").size());
@@ -895,7 +894,7 @@ public class TaskDataManagerTest {
 
             tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
                     null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
-                            .get(2), null, null, 0, null, null, true));
+                            .get(2), null, null, 0, null, true));
 
             assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
             assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));
@@ -924,7 +923,7 @@ public class TaskDataManagerTest {
                     "Completed recurring assignment.", 'L', recurStartEventCal1
                             .getTime(), recurEndEventCal1.getTime(), null,
                     TaskType.EVENT, 23, "RECUR", recurUntilEventCal1.getTime(),
-                    "WEEK", 1, null));
+                    "WEEK", 1));
             assertEquals(4, tdmTest.getUncompletedEventTasks().size());
             assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
@@ -949,7 +948,7 @@ public class TaskDataManagerTest {
             // null, null, false)));
             tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
                     null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
-                            .get(2), null, null, 0, null, null, false));
+                            .get(2), null, null, 0, null, false));
 
             assertEquals(3, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
@@ -970,7 +969,7 @@ public class TaskDataManagerTest {
             // null, null, true)));
             tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
                     null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
-                            .get(2), null, null, 0, null, null, true));
+                            .get(2), null, null, 0, null, true));
 
             assertEquals(0, tdmTest.getUncompletedEventTasks().size());
             assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));

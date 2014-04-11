@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.SortedSet;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.rits.cloning.Cloner;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
@@ -26,6 +22,9 @@ import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
+
+import com.rits.cloning.Cloner;
 
 /**
  * Processor class to process user input command
@@ -64,7 +63,7 @@ public class CommandProcessor {
     private static final String UNDO_ERROR_MESSAGE = "Error occured whe system try to undo.";
     private static final String REDO_MESSAGE = "redo completed.";
     private static final String REDO_ERROR_MESSAGE = "Error occured whe system try to redo.";
-    // private static final String TO_BE_DONE = "to be done.";
+    private static final String CLASS_NAME = CommandManager.class.getName();
 
     private int _currentEventPage;
     private int _currentDeadlinePage;
@@ -74,9 +73,6 @@ public class CommandProcessor {
     private TaskDataManager _taskDataManager;
     private TaskFilterManager _taskFilterManager;
     private CommandHistory _commandHistory;
-
-    private static Logger logger = LogManager.getLogger(CommandManager.class
-            .getName());
 
     enum CommandType {
         ADD, DELETE, MODIFY, COMPLETE, UNCOMPLETE, DISPLAY, SEARCH, UNDO, REDO, EXIT, INVALID
@@ -123,7 +119,8 @@ public class CommandProcessor {
     // exit
     public TaskView processUserInput(String userInput, int eventPage,
             int deadlinePage, int todoPage) {
-        logger.log(Level.INFO, "Process Input: \"" + userInput + "\"");
+        LogHelper.log(CLASS_NAME, Level.INFO, "Process Input: \"" + userInput +
+                "\"");
         if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
             return new TaskView(INVALID_COMMAND);
         }
@@ -141,7 +138,7 @@ public class CommandProcessor {
             return _taskView;
         } catch (Exception e) {
             processUserCommand(CommandType.INVALID);
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             return _taskView;
         }
     }
@@ -150,7 +147,7 @@ public class CommandProcessor {
     // inputString
     private CommandType determineCommand() {
         String userCommand = _inputString[COMMAND_POSITION];
-        logger.log(Level.INFO, "command is: " + userCommand);
+        LogHelper.log(CLASS_NAME, Level.INFO, "command is: " + userCommand);
         try {
             return CommandType.valueOf(userCommand.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -600,7 +597,7 @@ public class CommandProcessor {
                     return addParam;
                 }
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         } else if (parameters.contains("-end")) {
             addParam.setNewTaskType(TaskType.DEADLINE);
@@ -613,7 +610,7 @@ public class CommandProcessor {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 addParam.setEndDate(endDate);
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         } else {
             addParam.setNewTaskType(TaskType.TODO);
@@ -646,7 +643,7 @@ public class CommandProcessor {
                 addParam.setEndRecurOn(recurEndDate);
             } catch (Exception e) {
                 addParam = null;
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
         if (addParam.getDescription().equals("")) {
@@ -694,7 +691,7 @@ public class CommandProcessor {
                 parameters.remove(indexOfEndDate);
                 parameters.remove(indexOfEndDate - 1);
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
         if (parameters.contains("-start")) {
@@ -705,7 +702,7 @@ public class CommandProcessor {
                 parameters.remove(indexOfStartDate);
                 parameters.remove(indexOfStartDate - 1);
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
         FilterParameter filterParam = new FilterParameter(parameters);
@@ -788,7 +785,7 @@ public class CommandProcessor {
                 modifyParam.setEndRecurOn(recurEndDate);
             } catch (Exception e) {
                 modifyParam = null;
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
 
@@ -806,7 +803,7 @@ public class CommandProcessor {
                 Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
                 modifyParam.setEndDate(endDate);
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
         // NOTE: this can only detect error when user want to modify both start
@@ -825,7 +822,7 @@ public class CommandProcessor {
                     }
                 }
             } catch (ParseException e) {
-                logger.error(e.getMessage(), e);
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             }
         }
         if (parameters.contains("-description")) {

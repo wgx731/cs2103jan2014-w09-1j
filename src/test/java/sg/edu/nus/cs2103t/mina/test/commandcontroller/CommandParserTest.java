@@ -1,20 +1,19 @@
 package sg.edu.nus.cs2103t.mina.test.commandcontroller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import hirondelle.date4j.DateTime;
 
 import java.text.ParseException;
 import java.util.TimeZone;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.CommandParser;
 import sg.edu.nus.cs2103t.mina.model.FilterType;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 //@author A0099151B
 public class CommandParserTest {
@@ -58,7 +57,7 @@ public class CommandParserTest {
     private static final int HAS_DATE_24_AUG_2014_0900 = 10;
     private static final int HAS_DATE_25_AUG_2014_1200 = 11;
     private static final int HAS_DATE_24_AUG_2014_2133 = 12;
-    
+
     private static final int DEAFULT_END = 0;
     private static final int DUE_END = 1;
     private static final int BY_END = 2;
@@ -66,35 +65,28 @@ public class CommandParserTest {
     private static final int DEFAULT_START = 4;
     private static final int FROM_START = 5;
     private static final int STARTING_START = 6;
-   
-    
+
     private static String addTodoControlLow, addTodoControlMed,
             addTodoControlHigh, addTodoControlNone,
             addDeadlineControlMonthDaySecs, addDeadlineControlMonthDaySame,
             addDeadlineControlNoDate, addDeadlineControlNoDateMorning,
             addDeadlineControlTodayNoTime, addDeadlineControlMonthTimeNoSecs,
             addEventControlADay, addEventControlDays, addEventControlMonths,
-            addEventControlYears, addEventControlToday, addEventControlTomorrow,
-            addRecurDayControl, addRecurWeekControl, addRecurMonthControl,
-            addRecurYearControl;
-    
+            addEventControlYears, addEventControlToday, addRecurDayControl,
+            addRecurWeekControl, addRecurMonthControl, addRecurYearControl;
+
     private static String displayControlType;
-    
-    private static DateTime thisFri, thisWed, thisSunday, 
-                            nextFri, nextWed, nextSunday,
-                            threeDays, fourWeeks, fiveMonths, sixYears;
-    
+
+    private static DateTime thisFri, thisWed, thisSunday, nextFri, nextWed,
+            nextSunday, threeDays, fourWeeks, fiveMonths, sixYears;
+
     private static DateTime today;
-    private static Logger logger;
+    private static final String CLASS_NAME = CommandParserTest.class.getName();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
 
-        CommandParserTest cpt = new CommandParserTest();
-
         today = DateTime.today(TimeZone.getDefault());
-
-        logger = LogManager.getLogger(CommandParserTest.class.getName());
         // Controls for adding todos
         addTodoControlLow = "add CPT_todo1 -priority L";
         addTodoControlMed = "add CPT_todo2 -priority M";
@@ -127,55 +119,59 @@ public class CommandParserTest {
         addEventControlMonths = "add meet friends -start 24082014090000 -end 24092014120000";
         // start: 24th of August 2014 0900 - 24th of September 2017 1200
         addEventControlYears = "add meet friends -start 24082014090000 -end 24092017120000";
-        
-        //start: today 9am - today 9.33pm
-        addEventControlToday = "add meet friends -start " + todayDateString + "090000 -end " + todayDateString + "213300";
-        
-        // start: tomorrow 0900 - tomorrow 2133
-        DateTime tomorrow = today.plusDays(1);
-        String tmrFormat = tomorrow.format("DDMMYYYY");
-        addEventControlTomorrow = "add meet friends -start " + tmrFormat + "090000 -end " + tmrFormat + "213300";
-        
-        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2014
+
+        // start: today 9am - today 9.33pm
+        addEventControlToday = "add meet friends -start " + todayDateString +
+                "090000 -end " +
+                todayDateString +
+                "213300";
+
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur
+        // until 23th November 2014
         addRecurDayControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every day -until 23112014235959";
         addRecurWeekControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every week -until 23112014235959";
         addRecurMonthControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every month -until 23112014235959";
-        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur until 23th November 2016
-        addRecurYearControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every year -until 23112016235959"; 
-        
-        //Basic type
+        // recurring task 24th August 2014 0900 - 24th August 2014 1100. Recur
+        // until 23th November 2016
+        addRecurYearControl = "add CS2103 tutorial -start 24082014090000 -end 24082014110000 -every year -until 23112016235959";
+
+        // Basic type
         displayControlType = "display";
-        
-        for (FilterType filter: FilterType.values()){
-            if(!(filter.equals(FilterType.START) || 
-                    filter.equals(FilterType.END) || 
-                    filter.equals(FilterType.PRIORITY))) {
-                displayControlType+= " " + filter.getType();
+
+        for (FilterType filter : FilterType.values()) {
+            if (!(filter.equals(FilterType.START) || filter
+                    .equals(FilterType.END) || filter
+                        .equals(FilterType.PRIORITY))) {
+                displayControlType += " " + filter.getType();
             }
         }
-        
+
         // Date phrases
-        //wed //sun //fri
+        // wed //sun //fri
         int sun = 7;
         int wed = 3;
         int fri = 5;
         int weekday = (today.getWeekDay() + 6) % 7;
-        thisSunday = today.plusDays(sun-weekday);
-        thisWed = today.plusDays(wed-weekday);
-        thisFri = today.plusDays(fri-weekday);
+        thisSunday = today.plusDays(sun - weekday);
+        thisWed = today.plusDays(wed - weekday);
+        thisFri = today.plusDays(fri - weekday);
         nextSunday = thisSunday.plusDays(7);
         nextWed = thisWed.plusDays(7);
         nextFri = thisFri.plusDays(7);
-        
+
         // Dynamic Date phrases
-        //3 days
-        threeDays = today.plus(0, 0, 3, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
-        //4 weeks
-        fourWeeks = today.plus(0, 0, 4*7, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
-        //5 months
-        fiveMonths = today.plus(0, 5, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
-        //6 years
-        sixYears = today.plus(6, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        // 3 days
+        threeDays = today.plus(0, 0, 3, 0, 0, 0, 0,
+                DateTime.DayOverflow.Spillover);
+        // 4 weeks
+        fourWeeks = today.plus(0, 0, 4 * 7, 0, 0, 0, 0,
+                DateTime.DayOverflow.Spillover);
+        // 5 months
+        fiveMonths = today.plus(0, 5, 0, 0, 0, 0, 0,
+                DateTime.DayOverflow.Spillover);
+        // 6 years
+        sixYears = today.plus(6, 0, 0, 0, 0, 0, 0,
+                DateTime.DayOverflow.Spillover);
     }
 
     @Before
@@ -250,7 +246,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_ONE));
         variationBuild.append(" priority l");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlLow, result);
 
@@ -259,7 +255,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_TWO));
         variationBuild.append(" priority m");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlMed, result);
 
@@ -268,7 +264,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_THREE));
         variationBuild.append(" priority h");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlHigh, result);
 
@@ -280,7 +276,7 @@ public class CommandParserTest {
         variationBuild.append("make ");
         variationBuild.append(TODO_FOUR);
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlNone, result);
 
@@ -288,7 +284,7 @@ public class CommandParserTest {
         variationBuild.append("create ");
         variationBuild.append(TODO_FOUR);
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlNone, result);
 
@@ -296,7 +292,7 @@ public class CommandParserTest {
         variationBuild.append("new ");
         variationBuild.append(TODO_FOUR);
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlNone, result);
 
@@ -304,7 +300,7 @@ public class CommandParserTest {
         variationBuild.append("+ ");
         variationBuild.append(TODO_FOUR);
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlNone, result);
     }
@@ -316,7 +312,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_ONE));
         variationBuild.append(" low priority");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlLow, result);
 
@@ -325,7 +321,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_ONE));
         variationBuild.append(" priority low");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlLow, result);
 
@@ -334,7 +330,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_TWO));
         variationBuild.append(" med priority");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlMed, result);
 
@@ -343,7 +339,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_TWO));
         variationBuild.append(" medium priority");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlMed, result);
 
@@ -352,7 +348,7 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_THREE));
         variationBuild.append(" high priority");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlHigh, result);
 
@@ -361,19 +357,19 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription(TODO_THREE));
         variationBuild.append(" urgent");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(addTodoControlHigh, result);
     }
-    
-    //XXX Exploratory testing 
+
+    // XXX Exploratory testing
     @Test
     public void exploratoryTest() throws Exception {
 
         variationBuild.append("add ");
         variationBuild.append(" urgent request from D");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals("add urgent request from D", result);
 
@@ -382,25 +378,25 @@ public class CommandParserTest {
         variationBuild.append(wrapDescription("urgent request from D"));
         variationBuild.append(" URGENT");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
-        //assertEquals("add urgent request from D -priority H", result);
+        // assertEquals("add urgent request from D -priority H", result);
 
         setUp();
         variationBuild.append("add ");
         variationBuild.append("urgent request from D ");
         variationBuild.append(" -URGENT");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
-        //assertEquals("add urgent request from D -priority H", result);
+        // assertEquals("add urgent request from D -priority H", result);
 
         setUp();
         variationBuild.append("add ");
         variationBuild.append("do priority low queue assignment ");
         variationBuild.append(" -priority high");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals("add do priority low queue assignment -priority H", result);
 
@@ -409,7 +405,7 @@ public class CommandParserTest {
         variationBuild
                 .append("submit homework -due 12/3/2013 so that I could do something ");
         variation = variationBuild.toString();
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals(
                 "add submit homework so that I could do something -end 12032013235959",
@@ -426,42 +422,46 @@ public class CommandParserTest {
         DateTime tmr = today.plusDays(1);
         resultDate = tmr.format("DDMMYYYY");
         assertEquals("add push harder -end " + resultDate + "093000", result);
-    
+
         variation = "add -description what";
         result = parser.convertCommand(variation);
-        //assertEquals("add -description what", result);
+        // assertEquals("add -description what", result);
 
-        //filter no special
+        // filter no special
         variation = "filter deadline complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("display deadline complete", result);
-        
-        //filter start date
+
+        // filter start date
         variation = "filter -start 12/3/2007 deadline complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("display deadline complete -start 12032007000000", result);
-        
-        /* XXX Boundary Value analysis, intersecting date format,
-         * dd/MM/yyyy (another EP) with informal time (one EP) */
-        //filter start date with time
+
+        /*
+         * XXX Boundary Value analysis, intersecting date format, dd/MM/yyyy
+         * (another EP) with informal time (one EP)
+         */
+        // filter start date with time
         variation = "filter -start 12/3/2007 9am deadline complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("display deadline complete -start 12032007090000", result);
-        
-        //filter end date with time
+
+        // filter end date with time
         variation = "filter deadline -by today 2000 complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         resultDate = today.format("DDMMYYYY");
         end = resultDate + "200000";
         assertEquals("display deadline complete -end " + end, result);
 
-        //filter start date and end date with time
+        // filter start date and end date with time
         variation = "filter -from 12/5/2007 deadline -by today 2000 complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         resultDate = today.format("DDMMYYYY");
         end = resultDate + "200000";
-        assertEquals("display deadline complete -start 12052007000000 -end " + end, result);
-        
+        assertEquals(
+                "display deadline complete -start 12052007000000 -end " + end,
+                result);
+
     }
 
     @Test
@@ -494,7 +494,7 @@ public class CommandParserTest {
         variationBuild.append(DEADLINE_DESCRIPTION);
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlMonthDaySecs, result);
 
         setUp();
@@ -503,7 +503,7 @@ public class CommandParserTest {
         variationBuild.append(DEADLINE_DESCRIPTION);
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlMonthTimeNoSecs, result);
 
     }
@@ -558,7 +558,7 @@ public class CommandParserTest {
         variationBuild.append(getTestTime(HAS_NO_SECS, BY_END, true));
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlMonthTimeNoSecs, result);
 
         // before no dash
@@ -568,7 +568,7 @@ public class CommandParserTest {
         variationBuild.append(getTestTime(HAS_NO_SECS, BEFORE_END, !HAS_DASH));
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlMonthTimeNoSecs, result);
 
         // -before
@@ -578,7 +578,7 @@ public class CommandParserTest {
         variationBuild.append(getTestTime(HAS_NO_SECS, BEFORE_END, true));
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlMonthTimeNoSecs, result);
 
     }
@@ -591,7 +591,8 @@ public class CommandParserTest {
     @Test
     public void testDateFormat() throws Exception {
 
-        logger.info("Today's date is: " + today.toString());
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Today's date is: " + today.toString());
 
         // testing today no time
         // no wrap with DD/MM/YYYY format
@@ -601,7 +602,7 @@ public class CommandParserTest {
                 HAS_DASH));
         variation = variationBuild.toString();
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlTodayNoTime, result);
 
         // With wrap
@@ -609,7 +610,7 @@ public class CommandParserTest {
                 getTestTime(HAS_TODAY_NO_TIME_SLASH, BEFORE_END, HAS_DASH),
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlTodayNoTime, result);
 
         // DD.MM.YYYY
@@ -617,7 +618,7 @@ public class CommandParserTest {
                 getTestTime(HAS_TODAY_NO_TIME_DOT, BEFORE_END, HAS_DASH),
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlTodayNoTime, result);
 
         // 'Today' keyword
@@ -625,7 +626,7 @@ public class CommandParserTest {
                 getTestTime(HAS_TODAY_NO_TIME_KEYWORD, BEFORE_END, HAS_DASH),
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlTodayNoTime, result);
 
         // 'Today' with time, 2000
@@ -633,7 +634,7 @@ public class CommandParserTest {
                 getTestTime(HAS_TODAY_TIME, BEFORE_END, HAS_DASH), !IS_REORDER,
                 IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlNoDate, result);
 
         // Today with time, 9am
@@ -641,7 +642,7 @@ public class CommandParserTest {
         variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, testTime,
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlNoDateMorning, result);
 
         // Today with no 'today' stated. Military
@@ -650,7 +651,7 @@ public class CommandParserTest {
         variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, testTime,
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlNoDate, result);
 
         // Today with no 'today' stated. am
@@ -659,94 +660,135 @@ public class CommandParserTest {
         variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, testTime,
                 !IS_REORDER, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
         assertEquals(addDeadlineControlNoDate, result);
-        
-        //Testing implicit today
+
+        // Testing implicit today
         start = "-start today 9am";
         end = "-end 9.33pm";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_DES, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
-        assertEquals(addEventControlToday, result);        
-        
-        //Testing for partial format
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(addEventControlToday, result);
+
+        // Testing for partial format
         String partialFormat = today.format("DD/MM");
-        //String fullFormat = today.format("DDMMYYYY");
+        // String fullFormat = today.format("DDMMYYYY");
         start = "-start " + partialFormat + " 9:00";
-        end =  "-end " + partialFormat + " 21.33";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        end = "-end " + partialFormat + " 21.33";
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_DES, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        logger.info(variation);
-        assertEquals(addEventControlToday, result);   
-        
-        //date phrase this wednesday ORDER_EVENT_SDE
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(addEventControlToday, result);
+
+        // date phrase this wednesday ORDER_EVENT_SDE
         String thisWedStr = thisWed.format("DDMMYYYY");
         String thisFriStr = thisFri.format("DDMMYYYY");
         start = "-from this wednesday 3am";
         end = "-end friday 4am";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SDE, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        String expected = "add " + EVENT_DESCRIPTION + " -start " + thisWedStr + "030000 " + "-end " + thisFriStr + "040000";
-        logger.info(variation);
-        assertEquals(expected, result); 
-        
-        //date phrase next wednesday
+        String expected = "add " + EVENT_DESCRIPTION +
+                " -start " +
+                thisWedStr +
+                "030000 " +
+                "-end " +
+                thisFriStr +
+                "040000";
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(expected, result);
+
+        // date phrase next wednesday
         String nextWedStr = nextWed.format("DDMMYYYY");
         String nextSunStr = nextSunday.format("DDMMYYYY");
         start = "-from next wednesday 11:00am";
         end = "-end next sunday";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SDE, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        expected = "add " + EVENT_DESCRIPTION + " -start " + nextWedStr + "110000 " + "-end " + nextSunStr + "235959";
-        logger.info(variation);
-        assertEquals(expected, result); 
-        
-        //date phrase 3 days
+        expected = "add " + EVENT_DESCRIPTION +
+                " -start " +
+                nextWedStr +
+                "110000 " +
+                "-end " +
+                nextSunStr +
+                "235959";
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(expected, result);
+
+        // date phrase 3 days
         String threeDaysStr = threeDays.format("DDMMYYYY");
         start = "-from next 3 days 11:00pm";
         end = "-end next sunday";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SDE, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        expected = "add " + EVENT_DESCRIPTION + " -start " + threeDaysStr + "230000 " + "-end " + nextSunStr + "235959";
-        logger.info(variation);
-        assertEquals(expected, result);        
-        
-        //date phrase 4 weeks
+        expected = "add " + EVENT_DESCRIPTION +
+                " -start " +
+                threeDaysStr +
+                "230000 " +
+                "-end " +
+                nextSunStr +
+                "235959";
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(expected, result);
+
+        // date phrase 4 weeks
         String fourWeeksStr = fourWeeks.format("DDMMYYYY");
         String nextFriStr = nextFri.format("DDMMYYYY");
         start = "-from next fri 22:39";
         end = "-end next 4 week 0900";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SED, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SED, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        expected = "add " + EVENT_DESCRIPTION + " -start " + nextFriStr + "223900 " + "-end " + fourWeeksStr + "090000";
-        logger.info(variation);
-        assertEquals(expected, result);       
-        
-        //date phrase 5 months
-        //date phrase 6 years
+        expected = "add " + EVENT_DESCRIPTION +
+                " -start " +
+                nextFriStr +
+                "223900 " +
+                "-end " +
+                fourWeeksStr +
+                "090000";
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(expected, result);
+
+        // date phrase 5 months
+        // date phrase 6 years
         String fiveMonthsStr = fiveMonths.format("DDMMYYYY");
         String sixYearsStr = sixYears.format("DDMMYYYY");
         start = "-from next 5 months 10.46am";
         end = "-end next 6 years 9am";
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_EDS, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_EDS, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        expected = "add " + EVENT_DESCRIPTION + " -start " + fiveMonthsStr + "104600 " + "-end " + sixYearsStr + "090000";
-        logger.info(variation);
-        assertEquals(expected, result);   
-        
-        DateTime nextMonth = today.plus(0, 1, 0, 0, 0, 0, 0, DateTime.DayOverflow.Spillover);
+        expected = "add " + EVENT_DESCRIPTION +
+                " -start " +
+                fiveMonthsStr +
+                "104600 " +
+                "-end " +
+                sixYearsStr +
+                "090000";
+        LogHelper.log(CLASS_NAME, Level.INFO, variation);
+        assertEquals(expected, result);
+
+        DateTime nextMonth = today.plus(0, 1, 0, 0, 0, 0, 0,
+                DateTime.DayOverflow.Spillover);
         end = "-end next month 9am";
-        variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, end,
-                                        !IS_REORDER, IS_WRAPPED);
+        variation = getDeadlineAddCmd(DEADLINE_DESCRIPTION, end, !IS_REORDER,
+                IS_WRAPPED);
         result = parser.convertCommand(variation);
-        expected = "add " + DEADLINE_DESCRIPTION + "-end " + nextMonth.format("DDMMYYYY") + "090000";
-        assertEquals(expected, result);   
+        expected = "add " + DEADLINE_DESCRIPTION +
+                "-end " +
+                nextMonth.format("DDMMYYYY") +
+                "090000";
+        assertEquals(expected, result);
     }
 
     @Test
     public void testEventControl() throws ParseException {
-        
+
         assertEquals(addEventControlADay,
                 parser.convertCommand(addEventControlADay));
         assertEquals(addEventControlDays,
@@ -755,339 +797,351 @@ public class CommandParserTest {
                 parser.convertCommand(addEventControlMonths));
         assertEquals(addEventControlYears,
                 parser.convertCommand(addEventControlYears));
-        
+
     }
-    
+
     @Test
     public void testEventKeywords() throws ParseException {
-        
-        //Wrap and unwrapped
-        
-        //-from
+
+        // Wrap and unwrapped
+
+        // -from
         start = getTestTime(HAS_DATE_24_AUG_2014_0900, FROM_START, HAS_DASH);
         end = getTestTime(HAS_DATE_25_AUG_2014_1200, DEAFULT_END, HAS_DASH);
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_DES, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);  
-        
-        //from no dash
+        assertEquals(addEventControlADay, result);
+
+        // from no dash
         start = getTestTime(HAS_DATE_24_AUG_2014_0900, FROM_START, !HAS_DASH);
         end = getTestTime(HAS_DATE_25_AUG_2014_1200, DEAFULT_END, !HAS_DASH);
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_DES, IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);     
-        
+        assertEquals(addEventControlADay, result);
+
     }
-    
+
     @Test
     public void testEventKeywordsReorder() throws ParseException {
-        
-        //descript end start
+
+        // descript end start
         start = getTestTime(HAS_DATE_24_AUG_2014_0900, DEFAULT_START, HAS_DASH);
         end = getTestTime(HAS_DATE_25_AUG_2014_1200, DEAFULT_END, HAS_DASH);
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_DES, !IS_WRAPPED); 
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_DES, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);
-        
-        //start descript end
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SDE, !IS_WRAPPED); 
+        assertEquals(addEventControlADay, result);
+
+        // start descript end
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SDE, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);
-        
-        //start end descript
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_SED, !IS_WRAPPED); 
+        assertEquals(addEventControlADay, result);
+
+        // start end descript
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_SED, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);
-        
-        //end descript start
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_EDS, !IS_WRAPPED); 
+        assertEquals(addEventControlADay, result);
+
+        // end descript start
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_EDS, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);
-        
-        //end start descript
-        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end, ORDER_EVENT_ESD, !IS_WRAPPED); 
+        assertEquals(addEventControlADay, result);
+
+        // end start descript
+        variation = getEventAddCmd(EVENT_DESCRIPTION, start, end,
+                ORDER_EVENT_ESD, !IS_WRAPPED);
         result = parser.convertCommand(variation);
-        assertEquals(addEventControlADay,
-                    result);
-        
+        assertEquals(addEventControlADay, result);
+
     }
-    
+
     @Test
-    public void testModifyControl() throws ParseException{
-        //checking individual flags
+    public void testModifyControl() throws ParseException {
+        // checking individual flags
         variation = "modify todo 2 -description change me!";
         result = parser.convertCommand(variation);
         assertEquals("modify todo 2 -description -description change me!",
-                result);        
+                result);
     }
-    
+
     @Test
-    public void testModify() throws ParseException{
+    public void testModify() throws ParseException {
         variation = "modify todo 1 'whahaha' priority high";
         result = parser.convertCommand(variation);
         assertEquals("modify todo 1 -description whahaha -priority H", result);
-        
+
         variation = "modify event 100 'whahaha' from 7am to 1pm";
         result = parser.convertCommand(variation);
         String resultDate = today.format("DDMMYYYY");
         start = resultDate + "070000";
         end = resultDate + "130000";
         assertEquals("modify event 100 -description whahaha -start " + start +
-                    " -end " + end, result);
-        
-        //For changing task type
+                " -end " +
+                end, result);
+
+        // For changing task type
         variation = "modify deadline 5 changeto event 'whahaha' from tmr 3am";
         result = parser.convertCommand(variation);
         DateTime tmr = today.plusDays(1);
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
-    
-        //For shorten id
+        assertEquals(
+                "modify deadline 5 -totype event -description whahaha -start " + start,
+                result);
+
+        // For shorten id
         variation = "modify d5 changeto event 'whahaha' from tmr 3am";
-        result = parser.convertCommand(variation);     
+        result = parser.convertCommand(variation);
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description whahaha -start " + start, result);
+        assertEquals(
+                "modify deadline 5 -totype event -description whahaha -start " + start,
+                result);
 
-        //For shorten id
+        // For shorten id
         variation = "modify d5 -changeto event -from tmr 3am";
-        result = parser.convertCommand(variation);     
+        result = parser.convertCommand(variation);
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
         assertEquals("modify deadline 5 -totype event -start " + start, result);
-        
-        //For shorten id
+
+        // For shorten id
         variation = "modify d5 -changeto event get the -description tag from mina -from tmr 3am";
-        result = parser.convertCommand(variation);     
+        result = parser.convertCommand(variation);
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
-        assertEquals("modify deadline 5 -totype event -description get the -description tag from mina -start " + start, result);
-        
-        //delete with shorten id
+        assertEquals(
+                "modify deadline 5 -totype event -description get the -description tag from mina -start " + start,
+                result);
+
+        // delete with shorten id
         variation = "delete td1";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("delete todo 1", result);
-        
-        //remove with shorten id
+
+        // remove with shorten id
         variation = "remove td1";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("delete todo 1", result);
-        
-        //complete with shorten id
+
+        // complete with shorten id
         variation = "complete td1";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("complete todo 1", result);
-        
-        //complete with id
+
+        // complete with id
         variation = "complete event 9999";
-        result = parser.convertCommand(variation);  
-        assertEquals("complete event 9999", result);   
-        
+        result = parser.convertCommand(variation);
+        assertEquals("complete event 9999", result);
+
     }
-    
+
     @Test
     public void testSearch() throws ParseException {
-        
+
         variation = "search doors wide open";
         result = parser.convertCommand(variation);
-        assertEquals("search doors//wide//open",
-                result);           
-        
+        assertEquals("search doors//wide//open", result);
+
         variation = "find doors 'wide open' help me please";
         result = parser.convertCommand(variation);
-        assertEquals("search wide open//doors//help//me//please",
-                result);
-        
+        assertEquals("search wide open//doors//help//me//please", result);
+
         variation = "find 'wide open' help 'me please'";
         result = parser.convertCommand(variation);
-        assertEquals("search wide open//me please//help",
-                result);       
-        
+        assertEquals("search wide open//me please//help", result);
+
         variation = "search haha hehe";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("search haha//hehe", result);
-        
+
         variation = "search 'haha hohoh' hehe";
-        result = parser.convertCommand(variation);  
-        assertEquals("search haha hohoh//hehe", result); 
- 
+        result = parser.convertCommand(variation);
+        assertEquals("search haha hohoh//hehe", result);
+
         variation = "search don't don't 'blah don't blah don't'";
         result = parser.convertCommand(variation);
-        assertEquals("search blah don't blah don't//don't//don't", result);  
-        
+        assertEquals("search blah don't blah don't//don't//don't", result);
+
         variation = "search 'hohoho hohoho ' 'sasads dfdf' ' vvvvv '";
-        result = parser.convertCommand(variation);  
-        assertEquals("search hohoho hohoho//sasads dfdf//vvvvv", result);        
-        
-        
+        result = parser.convertCommand(variation);
+        assertEquals("search hohoho hohoho//sasads dfdf//vvvvv", result);
+
     }
-    
+
     @Test
     public void testDisplayControl() throws ParseException {
-        
-        result = parser.convertCommand("display");  
-        assertEquals("display", result);  
-        
-        result = parser.convertCommand(displayControlType);  
-        assertEquals(displayControlType, result);          
+
+        result = parser.convertCommand("display");
+        assertEquals("display", result);
+
+        result = parser.convertCommand(displayControlType);
+        assertEquals(displayControlType, result);
     }
-    
+
     @Test
-    public void testDisplayBasicKeywords() throws ParseException{
-        
+    public void testDisplayBasicKeywords() throws ParseException {
+
         variation = "show deadlines todos events complete +complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals(displayControlType, result);
-        
+
         variation = "filter d td e completed +complete";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals(displayControlType, result);
-        
+
         variation = "filter d td e completed all";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals(displayControlType, result);
     }
-    
+
     @Test
-    public void testDisplayCompositeKeywords() throws ParseException{
-        
+    public void testDisplayCompositeKeywords() throws ParseException {
+
         String todayDate = today.format("DDMMYYYY");
-        
+
         variation = "display deadlines -agendaof today";
-        result = parser.convertCommand(variation);  
-        assertEquals("display deadline -start " + todayDate + "000000" + " -end " + todayDate + "235959",
-                     result);
-        
+        result = parser.convertCommand(variation);
+        assertEquals("display deadline -start " + todayDate +
+                "000000" +
+                " -end " +
+                todayDate +
+                "235959", result);
+
         variation = "display deadlines -agendaof tmr";
         result = parser.convertCommand(variation);
         DateTime tmr = today.plusDays(1);
         String tmrDate = tmr.format("DDMMYYYY");
-        
-        assertEquals("display deadline -start " + tmrDate + "000000" + " -end " + tmrDate + "235959",
-                     result);     
-        
+
+        assertEquals("display deadline -start " + tmrDate +
+                "000000" +
+                " -end " +
+                tmrDate +
+                "235959", result);
+
         variation = "display deadlines -agendaof next 2 weeks";
         result = parser.convertCommand(variation);
         DateTime twoWeeks = today.plusDays(14);
         String twoWeeksDate = twoWeeks.format("DDMMYYYY");
-        
-        assertEquals("display deadline -start " + twoWeeksDate + "000000" + " -end " + twoWeeksDate + "235959",
-                     result);   
-        
+
+        assertEquals("display deadline -start " + twoWeeksDate +
+                "000000" +
+                " -end " +
+                twoWeeksDate +
+                "235959", result);
+
         variation = "display deadlines -agendaof next week";
         result = parser.convertCommand(variation);
         DateTime oneWeeks = today.plusDays(7);
         String oneWeeksDate = oneWeeks.format("DDMMYYYY");
-        
-        assertEquals("display deadline -start " + oneWeeksDate + "000000" + " -end " + oneWeeksDate + "235959",
-                     result);
-        
+
+        assertEquals("display deadline -start " + oneWeeksDate +
+                "000000" +
+                " -end " +
+                oneWeeksDate +
+                "235959", result);
+
     }
-    
+
     @Test
     public void testRecurringKeywordsControl() throws ParseException {
-        
+
         result = parser.convertCommand(addRecurDayControl);
         assertEquals(addRecurDayControl, result);
-        
+
         result = parser.convertCommand(addRecurWeekControl);
         assertEquals(addRecurWeekControl, result);
-        
+
         result = parser.convertCommand(addRecurMonthControl);
         assertEquals(addRecurMonthControl, result);
-        
+
         result = parser.convertCommand(addRecurYearControl);
         assertEquals(addRecurYearControl, result);
-        
+
     }
-    
+
     @Test
     public void testRecurringReorder() throws ParseException {
-        
+
         variation = "add every day until 23/11/2014 'CS2103 tutorial' from 24082014090000 to 24082014110000";
         result = parser.convertCommand(variation);
-        assertEquals(addRecurDayControl, result);        
-        
-    }
-    
-    //XXX test for functions
-    
-    /*EP: updateTaskId()
-     *     1) [action] size = 0 /invalid
-     *     2) [action] [invalid] size = 1 /invalid
-     *     3) [action] [task id] size = 1 /parse with a regex
-     *     4) [action] [task] [id] size = 2 /parse with another regex
-     *          4.1) [action] [invalid] [id] 
-     *          4.2) [action] [task] [invalid]
-     *     5) [action] [task] [id] [the rest] size > 2
-     *     4,5 can be combined.
-     */
-    
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdSizeOneInv() throws ParseException{
-        variation = "delete 1";
-        result =  parser.convertCommand(variation);      
-    }
-    
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdInvalidId() throws ParseException{
-        variation = "delete event opop";
-        result =  parser.convertCommand(variation); 
-    }
-    
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdInvalidTask() throws ParseException{
-        variation = "delete blahs 1";
-        result =  parser.convertCommand(variation); 
-    }
- 
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdInvalidTaskAndId() throws ParseException{
-        variation = "delete blahs lll";
-        result =  parser.convertCommand(variation); 
-    }
-    
-    @Test(expected=ParseException.class)
-    public void testUpdateTaskIdInvalidTaskAndIdTogether() throws ParseException{
-        variation = "delete sdsd3";
-        result =  parser.convertCommand(variation); 
-    }
-    
-    @Test
-    public void testUpdateTaskId() throws ParseException{
+        assertEquals(addRecurDayControl, result);
 
-        //(2)
+    }
+
+    // XXX test for functions
+
+    /*
+     * EP: updateTaskId() 1) [action] size = 0 /invalid 2) [action] [invalid]
+     * size = 1 /invalid 3) [action] [task id] size = 1 /parse with a regex 4)
+     * [action] [task] [id] size = 2 /parse with another regex 4.1) [action]
+     * [invalid] [id] 4.2) [action] [task] [invalid] 5) [action] [task] [id]
+     * [the rest] size > 2 4,5 can be combined.
+     */
+
+    @Test(expected = ParseException.class)
+    public void testUpdateTaskIdSizeOneInv() throws ParseException {
+        variation = "delete 1";
+        result = parser.convertCommand(variation);
+    }
+
+    @Test(expected = ParseException.class)
+    public void testUpdateTaskIdInvalidId() throws ParseException {
+        variation = "delete event opop";
+        result = parser.convertCommand(variation);
+    }
+
+    @Test(expected = ParseException.class)
+    public void testUpdateTaskIdInvalidTask() throws ParseException {
+        variation = "delete blahs 1";
+        result = parser.convertCommand(variation);
+    }
+
+    @Test(expected = ParseException.class)
+    public void testUpdateTaskIdInvalidTaskAndId() throws ParseException {
+        variation = "delete blahs lll";
+        result = parser.convertCommand(variation);
+    }
+
+    @Test(expected = ParseException.class)
+    public void testUpdateTaskIdInvalidTaskAndIdTogether()
+            throws ParseException {
+        variation = "delete sdsd3";
+        result = parser.convertCommand(variation);
+    }
+
+    @Test
+    public void testUpdateTaskId() throws ParseException {
+
+        // (2)
         variation = "delete todo1";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("delete todo 1", result);
-        
+
         variation = "delete td1";
-        result = parser.convertCommand(variation);  
-        assertEquals("delete todo 1", result);    
-        
-        //(3)
+        result = parser.convertCommand(variation);
+        assertEquals("delete todo 1", result);
+
+        // (3)
         variation = "delete todo 3";
-        result = parser.convertCommand(variation);  
+        result = parser.convertCommand(variation);
         assertEquals("delete todo 3", result);
     }
 
-    
     private String getEventAddCmd(String description, String start, String end,
             int reorderType, boolean isWrapped) {
-        
+
         StringBuilder variationBuild = new StringBuilder();
         variationBuild.append("add ");
-        
+
         description = (isWrapped) ? wrapDescription(description) : description;
-        
-        switch(reorderType){
+
+        switch (reorderType) {
             case ORDER_EVENT_DES :
                 variationBuild.append(description + " ");
                 variationBuild.append(end + " ");
@@ -1097,12 +1151,12 @@ public class CommandParserTest {
                 variationBuild.append(start + " ");
                 variationBuild.append(description + " ");
                 variationBuild.append(end);
-                break;                
-            case ORDER_EVENT_SED : 
+                break;
+            case ORDER_EVENT_SED :
                 variationBuild.append(start + " ");
                 variationBuild.append(end + " ");
                 variationBuild.append(description);
-                break;     
+                break;
             case ORDER_EVENT_ESD :
                 variationBuild.append(end + " ");
                 variationBuild.append(start + " ");
@@ -1113,15 +1167,15 @@ public class CommandParserTest {
                 variationBuild.append(description + " ");
                 variationBuild.append(start);
                 break;
-            default:
+            default :
                 variationBuild.append(description + " ");
                 variationBuild.append(start + " ");
                 variationBuild.append(end);
         }
 
-        return variationBuild.toString();        
+        return variationBuild.toString();
     }
-    
+
     /**
      * Get the add deadline command
      * 
@@ -1151,7 +1205,7 @@ public class CommandParserTest {
         }
         return variationBuild.toString();
     }
-    
+
     /**
      * Get the test time
      * 
@@ -1185,21 +1239,27 @@ public class CommandParserTest {
                 return endType + " 8pm";
             case HAS_NO_DATE_BUT_MILITARY_TIME :
                 return endType + " 2000";
-            case HAS_DATE_24_AUG_2014_0900:
+            case HAS_DATE_24_AUG_2014_0900 :
                 return endType + " 24082014090000";
-            case HAS_DATE_25_AUG_2014_1200:
+            case HAS_DATE_25_AUG_2014_1200 :
                 return endType + " 25082014120000";
-            case HAS_DATE_24_AUG_2014_2133:
+            case HAS_DATE_24_AUG_2014_2133 :
                 return endType + " 24082014121330";
-            
-//            // start: 24th of August 2014 0900 - 25th of August 2014 1200
-//            addEventControlADay = "add meet friends -start 24082014090000 -end 25082014120000";
-//            // start: 24th of August 2014 0900 - 31th of August 2014 1200
-//            addEventControlDays = "add meet friends -start 24082014090000 -end 31082014120000";
-//            // start: 24th of August 2014 0900 - 24th of September 2014 1200
-//            addEventControlMonths = "add meet friends -start 24082014090000 -end 24092014120000";
-//            // start: 24th of August 2014 0900 - 24th of September 2017 1200
-//            addEventControlYears = "add meet friends -start 24082014090000 -end 24092017120000";
+
+                // // start: 24th of August 2014 0900 - 25th of August 2014 1200
+                // addEventControlADay =
+                // "add meet friends -start 24082014090000 -end 25082014120000";
+                // // start: 24th of August 2014 0900 - 31th of August 2014 1200
+                // addEventControlDays =
+                // "add meet friends -start 24082014090000 -end 31082014120000";
+                // // start: 24th of August 2014 0900 - 24th of September 2014
+                // 1200
+                // addEventControlMonths =
+                // "add meet friends -start 24082014090000 -end 24092014120000";
+                // // start: 24th of August 2014 0900 - 24th of September 2017
+                // 1200
+                // addEventControlYears =
+                // "add meet friends -start 24082014090000 -end 24092017120000";
             default :
                 return "";
         }

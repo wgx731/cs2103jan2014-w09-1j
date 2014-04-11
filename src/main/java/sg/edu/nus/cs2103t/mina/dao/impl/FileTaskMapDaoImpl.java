@@ -13,17 +13,16 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 public class FileTaskMapDaoImpl implements TaskMapDao {
 
-    private static Logger logger = LogManager
-            .getLogger(FileTaskMapDaoImpl.class.getName());
+    private static final String CLASS_NAME = FileTaskMapDaoImpl.class.getName();
 
     private static final String FILE_EXTENSION = ".ser";
 
@@ -39,8 +38,8 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
             try {
                 f.createNewFile();
             } catch (IOException e) {
-                logger.error("storage file is not created.");
-                logger.error(e, e);
+                LogHelper.log(CLASS_NAME, Level.ERROR,
+                        "storage file is not created: " + e.getMessage());
             }
         }
     }
@@ -78,12 +77,12 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
             input.close();
             return taskMapData;
         } catch (ClassNotFoundException e) {
-            logger.error("task class not found.");
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "task class not found: " + e.getMessage());
             return null;
         } catch (IOException e) {
-            logger.error("empty file.");
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "empty file: " + e.getMessage());
             return null;
         }
     }

@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * 
@@ -17,11 +17,11 @@ import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
  * 
  * @author wgx731
  */
-//@author A0105853H
+// @author A0105853H
 public class FileOperationHelper {
 
-    private static Logger logger = LogManager
-            .getLogger(FileOperationHelper.class.getName());
+    private static final String CLASS_NAME = FileOperationHelper.class
+            .getName();
 
     private Map<TaskType, String> _fileLocationMap;
     private String _completedSuffix;
@@ -64,8 +64,9 @@ public class FileOperationHelper {
             createFileIfNotExist(getFileLocation(TaskType.DEADLINE, false));
             createFileIfNotExist(getFileLocation(TaskType.DEADLINE, true));
         } catch (IOException e) {
-            logger.error("failed to create storage files.");
-            logger.error(e, e);
+
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "failed to create storage files: " + e.getMessage());
             return false;
         }
         return true;
