@@ -7,19 +7,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
-import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
-import sg.edu.nus.cs2103t.mina.model.EventTask;
-import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskView;
-import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * 
@@ -32,18 +25,14 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
  */
 public class ConsoleUI extends MinaView {
 
-    private static Logger logger = LogManager.getLogger(ConsoleUI.class
-            .getName());
+    private static final String CLASS_NAME = ConsoleUI.class.getName();
 
     private BufferedReader _inputReader;
     private BufferedWriter _outputWriter;
     private InputStream _input;
     private OutputStream _output;
 
-    private List<Task<?>> _eventList;
-    private List<Task<?>> _todoList;
-    private List<Task<?>> _deadlineList;
-
+    // TODO: fix console UI
     private TaskView _taskView;
 
     public ConsoleUI(InputStream input, OutputStream output,
@@ -53,9 +42,6 @@ public class ConsoleUI extends MinaView {
         _output = output;
         _inputReader = new BufferedReader(new InputStreamReader(_input));
         _outputWriter = new BufferedWriter(new OutputStreamWriter(_output));
-        _eventList = new ArrayList<Task<?>>();
-        _todoList = new ArrayList<Task<?>>();
-        _deadlineList = new ArrayList<Task<?>>();
         _taskView = _commandController.getTaskView();
     }
 
@@ -64,7 +50,7 @@ public class ConsoleUI extends MinaView {
         try {
             return _inputReader.readLine();
         } catch (IOException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
         return null;
     }
@@ -72,18 +58,17 @@ public class ConsoleUI extends MinaView {
     @Override
     public void displayOutput() {
         try {
-            _outputWriter.write(_taskView.getStatus());
+            _outputWriter.write(_taskView.getStatus() + "\n" +
+                    _taskView.toString());
             _outputWriter.flush();
         } catch (IOException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
     }
 
     @Override
     public void updateLists() {
-		_eventList = _taskView.getEvents();
-		_deadlineList = _taskView.getDeadlines();
-		_todoList = _taskView.getTodos();  	
+        return;
     }
 
     public void loop() {

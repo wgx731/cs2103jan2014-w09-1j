@@ -8,6 +8,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
  * @author wgx731
  * 
  */
+//@author A0105853H
 public interface TaskMapDao {
 
     /**
@@ -16,7 +17,7 @@ public interface TaskMapDao {
      * @param recurringTaskMap given task to be saved
      * @throws IOException
      */
-    public void saveTaskMapData(TaskMapDataParameter taskMapData)
+    public void saveTaskMap(TaskMapDataParameter taskMapData)
             throws IOException;
 
     /**
@@ -24,6 +25,6 @@ public interface TaskMapDao {
      * 
      * @throws IOException
      */
-    public TaskMapDataParameter loadTaskMapData();
+    public TaskMapDataParameter loadTaskMap();
 
 }

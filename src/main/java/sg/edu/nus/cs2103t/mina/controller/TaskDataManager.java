@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -22,6 +21,7 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Task data manager: checks user's input determines the type of tasks breaks up
@@ -36,8 +36,8 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
  */
 // @author A0080412W
 public class TaskDataManager {
-    private static Logger logger = LogManager.getLogger(TaskDataManager.class
-            .getName());
+
+    private static final String CLASS_NAME = TaskDataManager.class.getName();
 
     // error messages
     public static final int ERROR_MISSING_TASK_DESCRIPTION = -2;
@@ -101,7 +101,7 @@ public class TaskDataManager {
 
         } catch (IOException e) {
             _uncompletedTodoTasks = new TreeSet<TodoTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -109,7 +109,7 @@ public class TaskDataManager {
             _uncompletedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
         } catch (IOException e) {
             _uncompletedDeadlineTasks = new TreeSet<DeadlineTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -117,7 +117,7 @@ public class TaskDataManager {
             _uncompletedEventTasks = (SortedSet<EventTask>) tempTasks;
         } catch (IOException e) {
             _uncompletedEventTasks = new TreeSet<EventTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -125,7 +125,7 @@ public class TaskDataManager {
             _completedTodoTasks = (SortedSet<TodoTask>) tempTasks;
         } catch (IOException e) {
             _completedTodoTasks = new TreeSet<TodoTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -133,7 +133,7 @@ public class TaskDataManager {
             _completedDeadlineTasks = (SortedSet<DeadlineTask>) tempTasks;
         } catch (IOException e) {
             _completedDeadlineTasks = new TreeSet<DeadlineTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         try {
@@ -141,7 +141,7 @@ public class TaskDataManager {
             _completedEventTasks = (SortedSet<EventTask>) tempTasks;
         } catch (IOException e) {
             _completedEventTasks = new TreeSet<EventTask>();
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
 
         TaskMapDataParameter taskMapData = _syncManager.loadTaskMap();
@@ -386,7 +386,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currDeadline);
 
                 }
-
                 return _recurringTasks.get(recurTag).get(0);
 
             case EVENT :
@@ -411,7 +410,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currEndDate);
 
                 }
-
                 return _recurringTasks.get(recurTag).get(0);
 
             default :
@@ -480,7 +478,6 @@ public class TaskDataManager {
         newTodoTask.setLastEditedTime(new Date());
 
         if (_uncompletedTodoTasks.add(newTodoTask)) {
-
             return newTodoTask;
         }
         return null;
@@ -817,7 +814,7 @@ public class TaskDataManager {
             DataParameter newSetOfParameters = createNewParameters(
                     modifyParameters, prevTask);
 
-            Task<?> newTask = addTask(newSetOfParameters);
+            Task<?> newTask = addRegTask(newSetOfParameters);
             newTask.setTag("");
             newTask.setLastEditedTime(new Date());
 
@@ -933,7 +930,6 @@ public class TaskDataManager {
 
                 }
                 _completedDeadlineTasks.add((DeadlineTask) currTask);
-
             }
             _recurringTasks.remove(prevTask.getTag());
 
@@ -955,7 +951,6 @@ public class TaskDataManager {
                 }
 
                 _completedEventTasks.add((EventTask) currTask);
-
             }
             _recurringTasks.remove(prevTask.getTag());
 
@@ -977,7 +972,6 @@ public class TaskDataManager {
             _completedDeadlineTasks.add((DeadlineTask) completedTask);
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedDeadlineTasks.remove(prevTask);
-
             return completedTask;
         } else if (prevTask.getType().equals(TaskType.EVENT)) {
             _completedEventTasks.add((EventTask) completedTask);
@@ -987,7 +981,6 @@ public class TaskDataManager {
             return completedTask;
         } else {
             return null;
-
         }
     }
 
@@ -1095,7 +1088,6 @@ public class TaskDataManager {
             int newMaxRecurTagInt) {
         _recurringTasks = newRecurringTasks;
         _maxRecurTagInt = newMaxRecurTagInt;
-
         syncHashMaps();
 
     }
@@ -1186,7 +1178,7 @@ public class TaskDataManager {
         _uncompletedTodoTasks.clear();
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
-
+        _recurringTasks.clear();
     }
 
     public void updateTrees(SortedSet<TodoTask> uncompletedTodoTasks,
@@ -1202,5 +1194,6 @@ public class TaskDataManager {
         _uncompletedTodoTasks = uncompletedTodoTasks;
         _uncompletedDeadlineTasks = uncompletedDeadlineTasks;
         _uncompletedEventTasks = uncompletedEventTasks;
+        updateRecurMap();
     }
 }

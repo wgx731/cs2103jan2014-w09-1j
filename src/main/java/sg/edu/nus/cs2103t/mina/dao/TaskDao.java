@@ -7,14 +7,11 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 
 /**
- * TaskSetDAO for MINA
+ * Task Set Data Access Object for MINA
  * 
  * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
-// @author A0105853H
+//@author A0105853H
 public interface TaskDao {
 
     /**
@@ -29,7 +26,7 @@ public interface TaskDao {
             TaskType taskType, boolean isCompleted) throws IOException;
 
     /**
-     * load task set into memory from storage
+     * load task set from storage
      * 
      * @param taskType the task type to be loaded
      * @param isCompleted whether the task in the set is completed

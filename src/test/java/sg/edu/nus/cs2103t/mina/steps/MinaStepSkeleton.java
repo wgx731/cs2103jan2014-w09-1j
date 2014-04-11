@@ -69,7 +69,7 @@ public abstract class MinaStepSkeleton {
     public void beforeStories() throws InterruptedException,
             BrokenBarrierException {
         if (driver == null) {
-            driver = new MinaDriver();
+            driver = MinaDriver.getMinaDriver();
         }
         if (uiThread == null) {
             initializeUIThread();
