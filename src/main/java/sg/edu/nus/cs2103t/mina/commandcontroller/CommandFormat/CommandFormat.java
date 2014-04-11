@@ -250,14 +250,14 @@ public abstract class CommandFormat{
     private ArrayList<String> processKeyword(ArrayList<String> tokens, int i, String currWord) throws ParseException{
         currWord = createFormatedWord(currWord);
         logger.info("Getting keyword: " + currWord);
-        Keyword newKeyword = KeywordFactory.getInstance().createKeyword(currWord);
+        Keyword newKeyword = KeywordFactory.createKeyword(currWord);
         tokens = newKeyword.processKeyword(tokens, i, _argument);
         return tokens;
     }
 
     private boolean isValidKeyword(String currWord) {
         currWord = createFormatedWord(currWord);
-        return KeywordFactory.getInstance().isKeyword(currWord);
+        return KeywordFactory.isKeyword(currWord);
     }
 
     private String createFormatedWord(String currWord) {

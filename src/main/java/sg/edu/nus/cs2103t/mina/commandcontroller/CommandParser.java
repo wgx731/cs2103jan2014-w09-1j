@@ -54,7 +54,7 @@ public class CommandParser {
 
     public CommandParser() {
 
-        KeywordFactory keywordFactory = KeywordFactory.getInstance();
+        KeywordFactory.initialiseKeywordFactory();
         
         ACTIONS_KEYWORDS.put("add", ADD);
         ACTIONS_KEYWORDS.put("make", ADD);

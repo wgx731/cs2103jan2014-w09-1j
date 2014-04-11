@@ -2,50 +2,45 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
 import java.text.ParseException;
 import java.util.LinkedHashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 //@author A0099151B
-public class KeywordFactory {
+public class KeywordFactory{
 
-    private static KeywordFactory _keywordFactory;
-    private static LinkedHashMap<String, Keyword>  _keywordAliasMap = new LinkedHashMap<String, Keyword>();
+    private static LinkedHashMap<String, Keyword> _keywordAliasMap = new LinkedHashMap<String, Keyword>();
     
     private static final Logger logger = LogManager.getLogger(KeywordFactory.class.getName());
     
     private static final String CLASS_NAME = "sg.edu.nus.cs2103t.mina.commandcontroller.keyword.%1$sKeyword";
     private static final String ERR_CLASS_NOT_FOUND = "Cannot find class: %1$s";
-
-    private KeywordFactory()  {
-        
-        initKeywordClasses(SimpleKeyword.values());
-        initKeywordClasses(CompositeKeyword.values());
-                
+    
+    /**
+     * Initialise the KeywordFactory. This method will create the alias-to-Keyword mapping.
+     */
+    public static void initialiseKeywordFactory() {
+        //Update KeywordFactoryTest's invokeInitClasses() method accordingly if you're going to add new entries here
+        try{
+            initKeywordClasses(SimpleKeyword.values());
+            initKeywordClasses(CompositeKeyword.values());  
+        } catch(ClassNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
     
-    private void initKeywordClasses(StandardKeyword[] values) {
+    private static void initKeywordClasses(StandardKeyword[] values) throws ClassNotFoundException{
         for (StandardKeyword type : values) {
             String className = String.format(CLASS_NAME, type.getFilePrefix());
+            
             try {
                 Class.forName(className);
             } catch (ClassNotFoundException e) {
                 String classNotFoundErr = String.format(ERR_CLASS_NOT_FOUND, className);
-                logger.error(classNotFoundErr);
+                throw new ClassNotFoundException(classNotFoundErr);
             }
         }
-        
     }
-
-    public static KeywordFactory getInstance() {
-        if (_keywordFactory == null) {
-            _keywordFactory = new KeywordFactory();
-            return _keywordFactory;
-        } else {
-            return _keywordFactory;
-        }
-    }
-
+    
     /**
      * Add a standard keyword entry into the KeywordFactory. Note: this method
      * should be invoked only under static initializer of keyword
@@ -66,7 +61,7 @@ public class KeywordFactory {
      * @param keyword the alias found e
      * @return The specific keyword object
      */
-    public Keyword createKeyword(String alias) throws ParseException{
+    public static Keyword createKeyword(String alias) throws ParseException{
         logger.info(alias + " " + _keywordAliasMap.toString());
         Keyword prototype = _keywordAliasMap.get(alias);
         if(prototype==null) {
@@ -75,8 +70,16 @@ public class KeywordFactory {
         return prototype.createKeyword();
     }
     
-    public boolean isKeyword(String token) {
+    public static boolean isKeyword(String token) {
         return _keywordAliasMap.containsKey(token);
+    }
+    
+    /**
+     * For testing purpose only. Would need reflection to make it public
+     * @return
+     */
+    private static LinkedHashMap<String, Keyword> getAliasMap() {
+        return _keywordAliasMap;
     }
     
 }

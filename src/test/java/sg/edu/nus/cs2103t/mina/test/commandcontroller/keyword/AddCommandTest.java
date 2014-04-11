@@ -19,7 +19,7 @@ public class AddCommandTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        KeywordFactory.getInstance();
+        KeywordFactory.initialiseKeywordFactory();
     }
 
     @Before
