@@ -1178,7 +1178,7 @@ public class TaskDataManager {
         _uncompletedTodoTasks.clear();
         _uncompletedDeadlineTasks.clear();
         _uncompletedEventTasks.clear();
-
+        _recurringTasks.clear();
     }
 
     public void updateTrees(SortedSet<TodoTask> uncompletedTodoTasks,
@@ -1194,5 +1194,6 @@ public class TaskDataManager {
         _uncompletedTodoTasks = uncompletedTodoTasks;
         _uncompletedDeadlineTasks = uncompletedDeadlineTasks;
         _uncompletedEventTasks = uncompletedEventTasks;
+        updateRecurMap();
     }
 }
