@@ -5,14 +5,14 @@ package sg.edu.nus.cs2103t.mina.dao.impl;
 
 import java.io.IOException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * @author wgx731
@@ -20,8 +20,8 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
  */
 public class MemoryDataObserverImp implements MemoryDataObserver {
 
-    private static Logger logger = LogManager
-            .getLogger(MemoryDataObserverImp.class.getName());
+    private static final String CLASS_NAME = MemoryDataObserverImp.class
+            .getName();
 
     private TaskDao _taskDao;
     private TaskMapDao _taskMapDao;
@@ -34,10 +34,10 @@ public class MemoryDataObserverImp implements MemoryDataObserver {
     @Override
     public void updateTaskMap(TaskMapDataParameter changedTaskMapData) {
         try {
-            _taskMapDao.saveTaskMapData(changedTaskMapData);
+            _taskMapDao.saveTaskMap(changedTaskMapData);
         } catch (IOException e) {
-            logger.error(e, e);
-            logger.error("can't save task map data");
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "can't save task map data: " + e.getMessage());
         }
     }
 
@@ -52,8 +52,8 @@ public class MemoryDataObserverImp implements MemoryDataObserver {
             _taskDao.saveTaskSet(changedData.getTaskSet(),
                     changedData.getTaskType(), changedData.isCompleted());
         } catch (IOException e) {
-            logger.error("can't save task set data");
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "can't save task set data: " + e.getMessage());
         }
     }
 

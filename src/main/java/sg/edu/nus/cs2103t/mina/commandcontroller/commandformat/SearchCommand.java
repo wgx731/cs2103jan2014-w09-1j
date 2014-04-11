@@ -1,21 +1,20 @@
-package sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat;
+package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 //@author A0099151B
 public class SearchCommand extends CommandFormat {
 
-    private static Logger logger = LogManager
-            .getLogger(SearchCommand.class.getName());
+    private static final String CLASS_NAME = SearchCommand.class.getName();
 
     private static final String SEARCH_DELIMIT = "//";
 
@@ -33,10 +32,10 @@ public class SearchCommand extends CommandFormat {
     }
 
     private String processSearchToken(StringBuilder argBuilder) {
-      int lastDelimiter = argBuilder.lastIndexOf(SEARCH_DELIMIT);
-      String result = argBuilder.toString().substring(0, lastDelimiter);
-      logger.info(result);
-      return result;
+        int lastDelimiter = argBuilder.lastIndexOf(SEARCH_DELIMIT);
+        String result = argBuilder.toString().substring(0, lastDelimiter);
+        LogHelper.log(CLASS_NAME, Level.INFO, result);
+        return result;
     }
 
     private StringBuilder extractSearchTokens(StringBuilder argBuilder) {
@@ -46,12 +45,13 @@ public class SearchCommand extends CommandFormat {
         Matcher phraseMatcher = phrasePattern.matcher(argBuilder.toString());
 
         ArrayList<String> phrases = new ArrayList<String>();
-        logger.info("Match count: " + phraseMatcher.groupCount());
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Match count: " + phraseMatcher.groupCount());
 
         while (phraseMatcher.find()) {
             String match = phraseMatcher.group();
             phrases.add(match);
-            logger.info(match);
+            LogHelper.log(CLASS_NAME, Level.INFO, match);
             int matchIndex = argBuilder.indexOf(match);
             argBuilder.delete(matchIndex + 1, matchIndex + match.length());
             argBuilder.insert(0, " ");
@@ -75,7 +75,7 @@ public class SearchCommand extends CommandFormat {
                 searchArg.append(SEARCH_DELIMIT);
             }
         }
-        
+
         return searchArg;
     }
 

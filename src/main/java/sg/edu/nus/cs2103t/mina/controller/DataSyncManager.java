@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.SortedSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
@@ -15,20 +14,17 @@ import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Sync memory data to storage on predefined interval
  * 
  * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 // @author A0105853H
 public class DataSyncManager {
 
-    private static Logger logger = LogManager.getLogger(DataSyncManager.class
-            .getName());
+    private static final String CLASS_NAME = DataSyncManager.class.getName();
 
     private TaskDao _taskDao;
     private TaskMapDao _taskMapDao;
@@ -45,8 +41,7 @@ public class DataSyncManager {
         _taskMapDao = taskMapDao;
         _dataOberserver = new MemoryDataObserverImp(taskDao, taskMapDao);
     }
-    
-   
+
     public MemoryDataObserver getDataOberserver() {
         return _dataOberserver;
     }
@@ -62,8 +57,8 @@ public class DataSyncManager {
                 _taskDao.saveTaskSet(changedData.getTaskSet(),
                         changedData.getTaskType(), changedData.isCompleted());
             } catch (IOException e) {
-                logger.error("can't save task set data");
-                logger.error(e, e);
+                LogHelper.log(CLASS_NAME, Level.ERROR,
+                        "save task set failed: " + e.getMessage());
                 return false;
             }
         }
@@ -78,11 +73,11 @@ public class DataSyncManager {
 
     public void saveTaskMap(TaskMapDataParameter taskMapData)
             throws IOException {
-        _taskMapDao.saveTaskMapData(taskMapData);
+        _taskMapDao.saveTaskMap(taskMapData);
     }
 
     public TaskMapDataParameter loadTaskMap() {
-        return _taskMapDao.loadTaskMapData();
+        return _taskMapDao.loadTaskMap();
     }
 
 }

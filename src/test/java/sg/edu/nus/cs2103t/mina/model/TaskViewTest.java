@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.SortedSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 public class TaskViewTest {
 
@@ -23,8 +23,7 @@ public class TaskViewTest {
     TaskFilterManager tfm = new TaskFilterManager(tdmStub);
     TaskView taskView;
 
-    private static Logger logger = LogManager.getLogger(TaskViewTest.class
-            .getName());
+    private static final String CLASS_NAME = TaskViewTest.class.getName();
 
     public void intiTaskView() {
         ArrayList<String> filters = new ArrayList<String>();
@@ -53,11 +52,10 @@ public class TaskViewTest {
                 .getUncompletedDeadlineTasks());
         boolean isSame = true;
 
-        logger.info(expected);
+        LogHelper.log(CLASS_NAME, Level.INFO, expected.toString());
+        LogHelper.log(CLASS_NAME, Level.INFO, currPage.toString());
 
         for (int i = startPage, j = 0; i < endPage && j < currPage.size(); i++, j++) {
-            logger.info(expected.get(i));
-            logger.info(currPage.get(j));
             if (!expected.get(i).equals(currPage.get(j))) {
                 isSame = false;
                 break;

@@ -3,8 +3,7 @@ package sg.edu.nus.cs2103t.mina;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -17,35 +16,76 @@ import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
 import sg.edu.nus.cs2103t.mina.view.MinaView;
 import sg.edu.nus.cs2103t.mina.view.SplashScreen;
 
 /**
- * Start driver for MINA
+ * Driver class for MINA
  * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * This is start point of MINA, it contains main method.
+ * 
  */
 public class MinaDriver {
 
+    private static final int ERROR_EXIT = -1;
     private static final int DEFAULT_TASK_LIST_SIZE = 4;
 
-    private static Logger logger = LogManager.getLogger(MinaDriver.class
-            .getName());
-
+    private static final String CLASS_NAME = MinaDriver.class.getName();
     private static final String GUI = "gui";
     private static final String CONSOLE = "console";
-    private static final String UNKOWN_TYPE_ERROR = "unkown type";
+    private static final String UNKOWN_TYPE_ERROR = "unkown";
 
-    private static CommandManager commandManager;
-    private static TaskDataManager taskDataManager;
-    private static TaskFilterManager taskFilterManager;
-    private static MinaView uiView;
-    private static DataSyncManager dataSyncManager;
+    private CommandManager commandManager;
+    private TaskDataManager taskDataManager;
+    private TaskFilterManager taskFilterManager;
+    private MinaView uiView;
+    private DataSyncManager dataSyncManager;
+
+    private MinaDriver() {
+        super();
+    }
+
+    public static MinaDriver getMinaDriver() {
+        MinaDriver driver = new MinaDriver();
+        driver.showSplashScreen();
+        driver.showMinaView();
+        return driver;
+    }
+
+    CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    void setCommandManager(CommandManager commandManager) {
+        this.commandManager = commandManager;
+    }
+
+    TaskDataManager getTaskDataManager() {
+        return taskDataManager;
+    }
+
+    void setTaskDataManager(TaskDataManager taskDataManager) {
+        this.taskDataManager = taskDataManager;
+    }
+
+    TaskFilterManager getTaskFilterManager() {
+        return taskFilterManager;
+    }
+
+    void setTaskFilterManager(TaskFilterManager taskFilterManager) {
+        this.taskFilterManager = taskFilterManager;
+    }
+
+    DataSyncManager getDataSyncManager() {
+        return dataSyncManager;
+    }
+
+    void setDataSyncManager(DataSyncManager dataSyncManager) {
+        this.dataSyncManager = dataSyncManager;
+    }
 
     void initDao() {
         TaskDao taskDao = new JsonFileTaskDaoImpl();
@@ -92,60 +132,62 @@ public class MinaDriver {
     }
 
     public void cleanUp() {
-        taskDataManager.resetTrees();
+        if (taskDataManager != null) {
+            taskDataManager.resetTrees();
+        }
     }
 
     public void processLoop() {
-        uiView.displayOutput();
-        uiView.loop();
+        if (uiView != null) {
+            uiView.displayOutput();
+            uiView.loop();
+        }
     }
 
-    private static void showSplashScreen(final MinaDriver driver) {
-        List<Runnable> tasks = createTaskList(driver);
+    private void showSplashScreen() {
+        List<Runnable> tasks = createTaskList();
         SplashScreen screen = SplashScreen.getInstance(Display.getDefault(),
                 tasks);
         screen.open();
     }
 
-    private static List<Runnable> createTaskList(final MinaDriver driver) {
+    private List<Runnable> createTaskList() {
         List<Runnable> tasks = new ArrayList<Runnable>(DEFAULT_TASK_LIST_SIZE);
         tasks.add(new Runnable() {
             @Override
             public void run() {
-                driver.initDao();
+                initDao();
             }
         });
         tasks.add(new Runnable() {
             @Override
             public void run() {
-                driver.initTDM();
+                initTDM();
             }
         });
         tasks.add(new Runnable() {
             @Override
             public void run() {
-                driver.initTFM();
+                initTFM();
             }
         });
         tasks.add(new Runnable() {
             @Override
             public void run() {
-                driver.initCC();
+                initCC();
             }
         });
         return tasks;
     }
 
     public static void main(String[] args) {
+        MinaDriver driver = MinaDriver.getMinaDriver();
         try {
-            MinaDriver driver = new MinaDriver();
-            showSplashScreen(driver);
-            driver.showMinaView();
             driver.processLoop();
         } catch (Exception e) {
-            logger.error(e, e);
-            taskDataManager.saveAllTasks();
-            System.exit(-1);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+            driver.getTaskDataManager().saveAllTasks();
+            System.exit(ERROR_EXIT);
         }
     }
 }
