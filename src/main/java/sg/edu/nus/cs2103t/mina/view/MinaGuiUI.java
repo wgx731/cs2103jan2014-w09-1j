@@ -268,6 +268,10 @@ public class MinaGuiUI extends MinaView {
 		logger.log(Level.INFO, "shell create contents");
 		initializeItems();
 		addAllListeners();
+		startTimer();
+	}
+
+	private void startTimer() {
 		_dayPrev = Calendar.getInstance();
 		_timer = new Timer();
 		_timer.scheduleAtFixedRate(new TimerTask() {
