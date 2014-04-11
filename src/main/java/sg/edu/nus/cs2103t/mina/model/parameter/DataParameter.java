@@ -17,18 +17,16 @@ public class DataParameter {
     private TaskType _originalTaskType;
     private TaskType _newTaskType;
     private int _taskID;
-
-    /* for recurring and block tasks */
-    private String _tag; // either 'RECUR' or 'BLOCK'
-    private boolean _modifyAll;
-
+    private Task<?> _taskObject;
+    
     /* for RECURRING Tasks */
+    private String _tag; // either "RECUR" or ""
+    private boolean _modifyAll;
+  
     private String _timeType; // refer to field values of CALENDAR
     private int _freqOfTimeType;
 
     private Date _endRecurOn;
-
-    private Task<?> _taskObject;
 
     /**
      * Constructors for DataParameter
@@ -55,7 +53,7 @@ public class DataParameter {
 
     }
 
-    // if task is not recurring or block, for adding task
+    // if task is not recurring, for adding task
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id) {
         setDescription(des);
@@ -77,7 +75,7 @@ public class DataParameter {
         setTaskObject(null);
     }
 
-    // if task is not recurring or block, for deleting, modifying, marking tasks
+    // if task is not recurring, for deleting, modifying, marking tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj) {
         setDescription(des);
@@ -112,7 +110,7 @@ public class DataParameter {
 
     }
 
-    // for adding recurring or block tasks
+    // for adding recurring tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, String tag,
             Date endRecurOn, String timeType, int freqOfTimeType)
@@ -130,7 +128,7 @@ public class DataParameter {
 
     }
 
-    // for modifying or deleting recurring or block tasks
+    // for modifying or deleting recurring tasks
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
             String tag, String timeType, int freqOfTimeType, Date endRecurOn,
