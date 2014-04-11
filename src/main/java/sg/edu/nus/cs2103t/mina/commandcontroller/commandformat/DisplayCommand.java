@@ -1,4 +1,4 @@
-package sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat;
+package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
 
 import java.text.ParseException;
 import java.util.ArrayList;

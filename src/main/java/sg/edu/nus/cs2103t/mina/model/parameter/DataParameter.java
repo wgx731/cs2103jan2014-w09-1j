@@ -310,27 +310,6 @@ public class DataParameter {
         if (modifyParam.isModifyAll()) {
             setModifyAll(true);
         }
-
-        // not doing for TimeSlots
-
-        // if (_originalTaskType != _newTaskType) {
-        // if (_originalTaskType == TaskType.DEADLINE && _newTaskType ==
-        // TaskType.TODO) {
-        // // _description += (" by " + _end);
-        // // _end = null;
-        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
-        // TaskType.TODO) {
-        // // _description += (" from " + _start + " to " + _end);
-        // // _start = null;
-        // // _end = null;
-        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
-        // TaskType.DEADLINE) {
-        // // _end = _start;
-        // // _start = null;
-        // }
-        //
-        // _originalTaskType = _newTaskType;
-        // }
     }
 
     @Override

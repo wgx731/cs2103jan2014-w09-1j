@@ -15,11 +15,11 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.Level;
 
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.AddCommand;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.CommandFormat;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.DisplayCommand;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.ModifyCommand;
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.SearchCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.AddCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.CommandFormat;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.DisplayCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.ModifyCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.SearchCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.KeywordFactory;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;

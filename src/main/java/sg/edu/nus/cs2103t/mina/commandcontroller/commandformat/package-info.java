@@ -4,4 +4,4 @@
  * @author duzhiyuan
  * @author joannemah
  */
-package sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat;
+package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
