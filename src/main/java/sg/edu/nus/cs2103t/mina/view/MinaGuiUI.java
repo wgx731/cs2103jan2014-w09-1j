@@ -3,6 +3,8 @@ package sg.edu.nus.cs2103t.mina.view;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.KeyStroke;
 
@@ -67,6 +69,9 @@ public class MinaGuiUI extends MinaView {
     private static final String SUCCESS = "Operation completed.";
     private static final String PAGE_INVALID = "Invalid page number.";
     private static final String PAGE_SUCCESS = "Page changed.";
+    private static final String HELP_OPEN = "Help opened.";
+    private static final String HELP_CLOSE = "Help closed.";
+    private static final String HELP_INSTRUCTION = "Press F1 for Help.";
 
     private TaskView _taskView;
 
@@ -84,6 +89,12 @@ public class MinaGuiUI extends MinaView {
     private StyledText _helpWindowBorder;
     private StyledText _helpWindow;
     private UICommandHelper _help;
+
+    private Timer _timer;
+    private Calendar _dayPrev;
+    private Calendar _dayCur;
+    private final int _timerRate = 5000;
+    private String _statusPrev = "";
 
     private Text _userInputTextField;
     private Label _statusBar;
@@ -243,7 +254,6 @@ public class MinaGuiUI extends MinaView {
         int y = bounds.y + (bounds.height - rect.height) / 2;
         _shell.setLocation(x, y);
         _shell.setImage(_icon);
-
         LogHelper.log(CLASS_NAME, Level.INFO, "shell set position");
         _shell.open();
         _shell.layout();
@@ -257,6 +267,39 @@ public class MinaGuiUI extends MinaView {
         LogHelper.log(CLASS_NAME, Level.INFO, "shell create contents");
         initializeItems();
         addAllListeners();
+        startTimer();
+    }
+
+    private void startTimer() {
+        _dayPrev = Calendar.getInstance();
+        _timer = new Timer();
+        _timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                _display.asyncExec(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        _dayCur = Calendar.getInstance();
+                        if (!DateUtil.isSameDateCalendar(_dayPrev, _dayCur)) {
+                            updateLists();
+                            _dayPrev = _dayCur;
+                        }
+                        if (_statusBar.getText().contains("Welcome") || _statusBar
+                                .getText().equals(INVALID_COMMAND) ||
+                                _statusBar.getText().equals(PAGE_INVALID) ||
+                                _statusBar.getText().equals(ERROR)) {
+                            _statusPrev = _statusBar.getText();
+                            _statusBar.setText(HELP_INSTRUCTION);
+                        } else if (_statusBar.getText()
+                                .equals(HELP_INSTRUCTION)) {
+                            _statusBar.setText(_statusPrev);
+                        }
+                    }
+
+                });
+            }
+        }, 0, _timerRate);
     }
 
     private void initializeItems() {
@@ -269,7 +312,6 @@ public class MinaGuiUI extends MinaView {
         }
 
         SHELL_HEIGHT = 580;
-
         LogHelper.log(CLASS_NAME, Level.INFO, "width" + SHELL_WIDTH);
 
         UI_FONT_SIZE = (SHELL_WIDTH == 1096) ? 15 : 14;
@@ -281,11 +323,7 @@ public class MinaGuiUI extends MinaView {
 
         _currentTab = 0;
 
-        _today = Calendar.getInstance();
-        _tomorrow = Calendar.getInstance();
-        _tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-        _yesterday = Calendar.getInstance();
-        _yesterday.add(Calendar.DAY_OF_YEAR, -1);
+        updateCalendar();
 
         _taskView = _commandController.getTaskView();
 
@@ -300,7 +338,19 @@ public class MinaGuiUI extends MinaView {
         initializeStatusBar();
         initializeUserInputTextField();
         initializeMainPanel();
+
         resetPanel();
+    }
+
+    /**
+     * 
+     */
+    private void updateCalendar() {
+        _today = Calendar.getInstance();
+        _tomorrow = Calendar.getInstance();
+        _tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+        _yesterday = Calendar.getInstance();
+        _yesterday.add(Calendar.DAY_OF_YEAR, -1);
     }
 
     private void initializeShell() {
@@ -340,6 +390,8 @@ public class MinaGuiUI extends MinaView {
         _statusBar.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _statusBar.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _statusBar.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 540,
+                (SHELL_WIDTH - 16) / 3, 36);
     }
 
     private void initializeUserInputTextField() {
@@ -348,6 +400,9 @@ public class MinaGuiUI extends MinaView {
                 .setForeground(SWTResourceManager.getColor(0, 51, 0));
         _userInputTextField.setFont(SWTResourceManager.getFont(UI_FONT,
                 UI_FONT_SIZE, SWT.NORMAL));
+        _userInputTextField.setBounds(4, 540, (SHELL_WIDTH - 16) / 3 * 2 + 4,
+                36);
+
     }
 
     private void initializeMainPanel() {
@@ -364,10 +419,6 @@ public class MinaGuiUI extends MinaView {
         showEvent();
         positionBackgroundBox();
         showBackgroundBox();
-        _statusBar.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 540,
-                (SHELL_WIDTH - 16) / 3, 36);
-        _userInputTextField.setBounds(4, 540, (SHELL_WIDTH - 16) / 3 * 2 + 4,
-                36);
         _isExpanded = false;
     }
 
@@ -578,8 +629,6 @@ public class MinaGuiUI extends MinaView {
                     }
                     if (command.trim().toLowerCase().equals("help") || command
                             .trim().toLowerCase().equals("-h")) {
-                        _shell.setCursor(_display
-                                .getSystemCursor(SWT.CURSOR_ARROW));
                         startHelpWindows();
                     } else if (command.length() >= 5 && command.substring(0, 5)
                             .equals("page ")) {
@@ -601,12 +650,12 @@ public class MinaGuiUI extends MinaView {
                                 _statusBar.setText(PAGE_SUCCESS);
                             } else {
                                 _statusBar.setBackground(SWTResourceManager
-                                        .getColor(247, 150, 70));
+                                        .getColor(217, 83, 79));
                                 _statusBar.setText(PAGE_INVALID);
                             }
                         } catch (Exception e) {
                             _statusBar.setBackground(SWTResourceManager
-                                    .getColor(247, 150, 70));
+                                    .getColor(217, 83, 79));
                             _statusBar.setText(PAGE_INVALID);
                             LogHelper.log(CLASS_NAME, Level.ERROR,
                                     e.getMessage());
@@ -865,7 +914,6 @@ public class MinaGuiUI extends MinaView {
 
     @Override
     public String getUserInput() {
-
         LogHelper.log(CLASS_NAME, Level.INFO,
                 "shell get user input: " + _userInputTextField.getText());
         return _userInputTextField.getText();
@@ -918,6 +966,7 @@ public class MinaGuiUI extends MinaView {
     @Override
     public void updateLists() {
         LogHelper.log(CLASS_NAME, Level.INFO, "shell update lists");
+        updateCalendar();
         updateEventList();
         updateDeadlineList();
         updateTodoList();
@@ -1240,9 +1289,15 @@ public class MinaGuiUI extends MinaView {
             _todoPrevPage.setText(LEFT_ARROW);
         }
         maxPages();
-        _todoPageLabel.setText(_todoPage + "/" + _todoMaxPage);
-        _deadlinePageLabel.setText(_deadlinePage + "/" + _deadlineMaxPage);
-        _eventPageLabel.setText(_eventPage + "/" + _eventMaxPage);
+        _todoPageLabel
+                .setText(((_todoPage <= 9999) ? _todoPage : "\u221E") + "/" +
+                        ((_todoMaxPage <= 9999) ? _todoMaxPage : "\u221E"));
+        _deadlinePageLabel.setText(((_deadlinePage <= 9999) ? _deadlinePage
+                : "\u221E") + "/" +
+                ((_deadlineMaxPage <= 9999) ? _deadlineMaxPage : "\u221E"));
+        _eventPageLabel
+                .setText(((_eventPage <= 9999) ? _eventPage : "\u221E") + "/" +
+                        ((_eventMaxPage <= 9999) ? _eventMaxPage : "\u221E"));
     }
 
     private void maxPages() {
@@ -1367,7 +1422,7 @@ public class MinaGuiUI extends MinaView {
             _eventNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
             _eventPageLabel.setBounds(x_coordinate + width / 2 - 50,
-                    y_coordinate + height - 36, 100, 36);
+                    y_coordinate + height - 36, 125, 36);
             _eventListUI.setVisible(true);
             _eventPrevPage.setVisible(true);
             _eventNextPage.setVisible(true);
@@ -1390,7 +1445,7 @@ public class MinaGuiUI extends MinaView {
             _deadlineNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
             _deadlinePageLabel.setBounds(x_coordinate + width / 2 - 50,
-                    y_coordinate + height - 36, 100, 36);
+                    y_coordinate + height - 36, 125, 36);
             _deadlineListUI.setVisible(true);
             _deadlinePrevPage.setVisible(true);
             _deadlineNextPage.setVisible(true);
@@ -1412,7 +1467,7 @@ public class MinaGuiUI extends MinaView {
             _todoNextPage.setBounds(x_coordinate + width - 84,
                     y_coordinate + height - 36, 84, 36);
             _todoPageLabel.setBounds(x_coordinate + width / 2 - 50,
-                    y_coordinate + height - 36, 100, 36);
+                    y_coordinate + height - 36, 125, 36);
             _todoListUI.setVisible(true);
             _todoPrevPage.setVisible(true);
             _todoNextPage.setVisible(true);
@@ -1426,6 +1481,8 @@ public class MinaGuiUI extends MinaView {
     }
 
     private void startHelpWindows() {
+        _statusBar.setBackground(SWTResourceManager.getColor(92, 184, 92));
+        _statusBar.setText(HELP_OPEN);
         _helpWindowBorder.setVisible(true);
         _helpWindow.setVisible(true);
         _userInputTextField.setEditable(false);
@@ -1466,6 +1523,7 @@ public class MinaGuiUI extends MinaView {
                     _userInputTextField.setEditable(true);
                     _userInputTextField
                             .removeListener(SWT.KeyUp, _helpListener);
+                    _statusBar.setText(HELP_CLOSE);
                     addAllListeners();
                 }
                 if (event.keyCode > '0' && event.keyCode <= '9') {
@@ -1496,6 +1554,7 @@ public class MinaGuiUI extends MinaView {
                         _userInputTextField.setEditable(true);
                         _userInputTextField.removeListener(SWT.KeyUp,
                                 _helpListener);
+                        _statusBar.setText(HELP_CLOSE);
                         addAllListeners();
                         _userInputTextField.setText(text);
                         _userInputTextField.selectAll();

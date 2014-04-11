@@ -814,7 +814,7 @@ public class TaskDataManager {
             DataParameter newSetOfParameters = createNewParameters(
                     modifyParameters, prevTask);
 
-            Task<?> newTask = addTask(newSetOfParameters);
+            Task<?> newTask = addRegTask(newSetOfParameters);
             newTask.setTag("");
             newTask.setLastEditedTime(new Date());
 
