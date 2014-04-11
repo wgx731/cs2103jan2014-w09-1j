@@ -306,15 +306,7 @@ public class CommandProcessor {
     }
 
     private void performComplete() {
-        _commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
-                _taskDataManager.getUncompletedDeadlineTasks(),
-                _taskDataManager.getUncompletedEventTasks(),
-                _taskDataManager.getCompletedTodoTasks(),
-                _taskDataManager.getCompletedDeadlineTasks(),
-                _taskDataManager.getCompletedEventTasks(),
-                _commandHistory.getLatestFilter(), _taskView.getTabSelected(),
-                _taskView.getEventPage(), _taskView.getDeadlinePage(),
-                _taskView.getTodoPage());
+        updateUndo();
         DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
         Task<?> task = _taskDataManager.markCompleted(completeParameter);
         if (task == null) {
@@ -325,10 +317,7 @@ public class CommandProcessor {
                     task.getDescription());
             _taskView = updatedTaskView(output, task);
             postUpdateTaskView(task);
-            _commandHistory.clearRedo();
-            _commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
-                    _taskView.getTabSelected(), _taskView.getEventPage(),
-                    _taskView.getDeadlinePage(), _taskView.getTodoPage());
+            updateUndoAfter();
         }
     }
 
@@ -364,15 +353,7 @@ public class CommandProcessor {
     }
 
     private void performModify() {
-        _commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
-                _taskDataManager.getUncompletedDeadlineTasks(),
-                _taskDataManager.getUncompletedEventTasks(),
-                _taskDataManager.getCompletedTodoTasks(),
-                _taskDataManager.getCompletedDeadlineTasks(),
-                _taskDataManager.getCompletedEventTasks(),
-                _commandHistory.getLatestFilter(), _taskView.getTabSelected(),
-                _taskView.getEventPage(), _taskView.getDeadlinePage(),
-                _taskView.getTodoPage());
+        updateUndo();
         DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
         if (modifyParameter == null) {
             _taskView = errorCommandReturn(CommandType.INVALID);
@@ -388,23 +369,12 @@ public class CommandProcessor {
             _taskView = updatedTaskView(output, task);
             postUpdateTaskView(modifyParameter.getTaskObject());
             postUpdateTaskView(task);
-            _commandHistory.clearRedo();
-            _commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
-                    _taskView.getTabSelected(), _taskView.getEventPage(),
-                    _taskView.getDeadlinePage(), _taskView.getTodoPage());
+            updateUndoAfter();
         }
     }
 
     private void performDelete() {
-        _commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
-                _taskDataManager.getUncompletedDeadlineTasks(),
-                _taskDataManager.getUncompletedEventTasks(),
-                _taskDataManager.getCompletedTodoTasks(),
-                _taskDataManager.getCompletedDeadlineTasks(),
-                _taskDataManager.getCompletedEventTasks(),
-                _commandHistory.getLatestFilter(), _taskView.getTabSelected(),
-                _taskView.getEventPage(), _taskView.getDeadlinePage(),
-                _taskView.getTodoPage());
+        updateUndo();
         DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
         Task<?> task = _taskDataManager.deleteTask(deleteParameter);
         if (task == null) {
@@ -415,23 +385,12 @@ public class CommandProcessor {
                     task.getDescription());
             _taskView = updatedTaskView(output, task);
             postUpdateTaskView(task);
-            _commandHistory.clearRedo();
-            _commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
-                    _taskView.getTabSelected(), _taskView.getEventPage(),
-                    _taskView.getDeadlinePage(), _taskView.getTodoPage());
+            updateUndoAfter();
         }
     }
 
     private void performAdd() {
-        _commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
-                _taskDataManager.getUncompletedDeadlineTasks(),
-                _taskDataManager.getUncompletedEventTasks(),
-                _taskDataManager.getCompletedTodoTasks(),
-                _taskDataManager.getCompletedDeadlineTasks(),
-                _taskDataManager.getCompletedEventTasks(),
-                _commandHistory.getLatestFilter(), _taskView.getTabSelected(),
-                _taskView.getEventPage(), _taskView.getDeadlinePage(),
-                _taskView.getTodoPage());
+        updateUndo();
         DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
         if (addParameter == null) {
             _taskView = errorCommandReturn(CommandType.INVALID);
@@ -446,12 +405,28 @@ public class CommandProcessor {
                     task.getDescription());
             _taskView = updatedTaskView(output, task);
             postUpdateTaskView(task);
-            _commandHistory.clearRedo();
-            _commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
-                    _taskView.getTabSelected(), _taskView.getEventPage(),
-                    _taskView.getDeadlinePage(), _taskView.getTodoPage());
+            updateUndoAfter();
         }
     }
+
+	private void updateUndoAfter() {
+		_commandHistory.clearRedo();
+		_commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
+		        _taskView.getTabSelected(), _taskView.getEventPage(),
+		        _taskView.getDeadlinePage(), _taskView.getTodoPage());
+	}
+
+	private void updateUndo() {
+		_commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
+                _taskDataManager.getUncompletedDeadlineTasks(),
+                _taskDataManager.getUncompletedEventTasks(),
+                _taskDataManager.getCompletedTodoTasks(),
+                _taskDataManager.getCompletedDeadlineTasks(),
+                _taskDataManager.getCompletedEventTasks(),
+                _commandHistory.getLatestFilter(), _taskView.getTabSelected(),
+                _taskView.getEventPage(), _taskView.getDeadlinePage(),
+                _taskView.getTodoPage());
+	}
 
     private void postUpdateTaskView(Task<?> task) {
         if (task.getType() == TaskType.EVENT) {
