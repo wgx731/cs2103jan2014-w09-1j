@@ -386,7 +386,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currDeadline);
 
                 }
-
                 return _recurringTasks.get(recurTag).get(0);
 
             case EVENT :
@@ -411,7 +410,6 @@ public class TaskDataManager {
                     addParameters.setEndDate(currEndDate);
 
                 }
-
                 return _recurringTasks.get(recurTag).get(0);
 
             default :
@@ -480,7 +478,6 @@ public class TaskDataManager {
         newTodoTask.setLastEditedTime(new Date());
 
         if (_uncompletedTodoTasks.add(newTodoTask)) {
-
             return newTodoTask;
         }
         return null;
@@ -933,7 +930,6 @@ public class TaskDataManager {
 
                 }
                 _completedDeadlineTasks.add((DeadlineTask) currTask);
-
             }
             _recurringTasks.remove(prevTask.getTag());
 
@@ -955,7 +951,6 @@ public class TaskDataManager {
                 }
 
                 _completedEventTasks.add((EventTask) currTask);
-
             }
             _recurringTasks.remove(prevTask.getTag());
 
@@ -977,7 +972,6 @@ public class TaskDataManager {
             _completedDeadlineTasks.add((DeadlineTask) completedTask);
             _recurringTasks.get(prevTask.getTag()).remove(prevTask);
             _uncompletedDeadlineTasks.remove(prevTask);
-
             return completedTask;
         } else if (prevTask.getType().equals(TaskType.EVENT)) {
             _completedEventTasks.add((EventTask) completedTask);
@@ -987,7 +981,6 @@ public class TaskDataManager {
             return completedTask;
         } else {
             return null;
-
         }
     }
 
@@ -1095,7 +1088,6 @@ public class TaskDataManager {
             int newMaxRecurTagInt) {
         _recurringTasks = newRecurringTasks;
         _maxRecurTagInt = newMaxRecurTagInt;
-
         syncHashMaps();
 
     }
@@ -1202,5 +1194,6 @@ public class TaskDataManager {
         _uncompletedTodoTasks = uncompletedTodoTasks;
         _uncompletedDeadlineTasks = uncompletedDeadlineTasks;
         _uncompletedEventTasks = uncompletedEventTasks;
+        syncHashMaps();
     }
 }
