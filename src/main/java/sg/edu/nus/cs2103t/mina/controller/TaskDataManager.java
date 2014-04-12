@@ -24,14 +24,9 @@ import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
- * Task data manager: checks user's input determines the type of tasks breaks up
+ * Checks user's input determines the type of tasks breaks up
  * parameters for the tasks passes tasks to DAO to retrieve data from files.
- * <p>
- * Existing functions related to MINA: addTask(), deleteTask()
  * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
  * @author joannemah
  */
 // @author A0080412W
@@ -86,6 +81,14 @@ public class TaskDataManager {
         _syncManager = null;
     }
 
+    /**
+     * Creates a new TaskDataManager, loads 6 TreeSets containing completed and
+     * uncompleted TodoTasks, Deadline Tasks and EventTasks, 1 HashMap
+     * containing all recurring tasks. These maps are then added to dataObserver
+     * in syncManager.
+     * 
+     * @param syncManager
+     */
     @SuppressWarnings("unchecked")
     public TaskDataManager(DataSyncManager syncManager) {
         SortedSet<? extends Task<?>> tempTasks = null;

@@ -2,13 +2,26 @@ package sg.edu.nus.cs2103t.mina.model.parameter;
 
 import java.util.Date;
 
+import org.apache.logging.log4j.Level;
+
+import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
-//@author A0080412W
+/**
+ * Stores variables of a new task that a user will want to add or delete, or
+ * modified variables of an existing task that a user will want to modify.
+ * 
+ * @author joannemah
+ */
+// @author A0080412W
 public class DataParameter {
+
+    private static final String CLASS_NAME = TaskDataManager.class.getName();
+
     /* for all tasks */
     private String _description;
     private char _priority;
@@ -18,20 +31,19 @@ public class DataParameter {
     private TaskType _newTaskType;
     private int _taskID;
     private Task<?> _taskObject;
-    
+
     /* for RECURRING Tasks */
     private String _tag; // either "RECUR" or ""
     private boolean _modifyAll;
-  
+
     private String _timeType; // refer to field values of CALENDAR
     private int _freqOfTimeType;
 
     private Date _endRecurOn;
 
     /**
-     * Constructors for DataParameter
+     * Creates a DataParameter with all values set to their default.
      */
-    // default constructor
     public DataParameter() {
         setDescription(null);
         setPriority('M');
@@ -53,7 +65,17 @@ public class DataParameter {
 
     }
 
-    // if task is not recurring, for adding task
+    /**
+     * Creates a DataParameter to hold variables for a new non-recurring task.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id) {
         setDescription(des);
@@ -75,7 +97,21 @@ public class DataParameter {
         setTaskObject(null);
     }
 
-    // if task is not recurring, for deleting, modifying, marking tasks
+    /**
+     * Creates a DataParameter to hold variables for modifying or deleting an
+     * existing non-recurring task.
+     * <p>
+     * Returns null if the taskObj does not exist.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param taskObj
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj) {
         setDescription(des);
@@ -110,7 +146,24 @@ public class DataParameter {
 
     }
 
-    // for adding recurring tasks
+    /**
+     * Creates a DataParameter to hold variables for a new recurring task.
+     * <p>
+     * A recurring task can only be of TaskType DEADLINE or EVENT.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param tag
+     * @param endRecurOn
+     * @param timeType
+     * @param freqOfTimeType
+     * @throws Exception
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, String tag,
             Date endRecurOn, String timeType, int freqOfTimeType)
@@ -123,12 +176,34 @@ public class DataParameter {
                     id, tag, timeType, freqOfTimeType, endRecurOn);
 
         } else {
+            LogHelper.log(CLASS_NAME, Level.ERROR, "tag: " + tag);
+
             throw new Exception("invalid tag used");
         }
 
     }
 
-    // for modifying or deleting recurring tasks
+    /**
+     * Creates a DataParameter to hold variables for modifying or deleting an
+     * existing recurring task.
+     * <p>
+     * A recurring task can only be of TaskType DEADLINE or EVENT.
+     * <p>
+     * Returns null if the taskObj does not exist.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param tag
+     * @param endRecurOn
+     * @param timeType
+     * @param freqOfTimeType
+     * @throws Exception
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
             String tag, String timeType, int freqOfTimeType, Date endRecurOn,
@@ -143,9 +218,11 @@ public class DataParameter {
                     isModifyAll);
 
         } else {
-            System.out.println("task obj: " + taskObj);
-            System.out.println("tag: " + taskObj.getTag());
-            throw new Exception("invalid tag used by CC");
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "invalid tag: " + taskObj.getTag());
+
+            throw new Exception("invalid tag used");
+
         }
 
     }
@@ -263,9 +340,8 @@ public class DataParameter {
     }
 
     /**
-     * For the modify function. Call this function after you call
-     * loadOldTask(Task taskToModify).Takes in the values that user wants to
-     * modify, and adds it onto existing values.
+     * Takes in the values that user wants to modify from another DataParameter
+     * variable, and adds it onto existing values.
      */
     public void loadNewParameters(DataParameter modifyParam) {
         if (modifyParam.getDescription() != null) {
