@@ -953,7 +953,7 @@ public class TaskDataManager {
     }
 
     private boolean isForRecurring(String tag) {
-        return tag != null && tag.equals("RECUR");
+        return tag != null && tag.contains("RECUR");
     }
 
     private boolean isValidRecurType(TaskType taskType) {
