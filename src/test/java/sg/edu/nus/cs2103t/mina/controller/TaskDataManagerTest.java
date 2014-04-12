@@ -706,7 +706,7 @@ public class TaskDataManagerTest {
         }
 
         /* Modify all recurring DeadlineTasks */
-        // modify start deadline and frequency, description and priority
+        // modify description and priority
         deadlineRecurTest1.set(2014, 2, 25, 21, 59);
         untilDeadlineRecur1.set(2014, 3, 6, 21, 59);
         DeadlineTask expectedDeadlineRecur1 = new DeadlineTask(
@@ -725,6 +725,8 @@ public class TaskDataManagerTest {
             e1.printStackTrace();
 
         }
+
+        // modify start deadline and frequency, description and priority
 
         /* Modify a single recurring EventTask */
         Calendar startEventRecur1 = Calendar.getInstance();
@@ -779,8 +781,6 @@ public class TaskDataManagerTest {
 
             assertEquals(expectedEventRecur1,
                     tdmTest.getRecurringTasks().get("RECUR_1").get(0));
-            // note: 01 Jun old Lab not deleted, cos it was previously modified
-            // above
             assertEquals(4, tdmTest.getUncompletedEventTasks().size());
             assertEquals(2, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
@@ -789,10 +789,12 @@ public class TaskDataManagerTest {
 
         }
 
+        // modify start deadline and frequency, description and priority
+
     }
 
     @Test
-    public void markCompleted() {
+    public void markRegCompleted() {
         TaskDataManager tdmTest = new TaskDataManager();
         Long currDateMilliSec = System.currentTimeMillis();
 
@@ -834,6 +836,7 @@ public class TaskDataManagerTest {
         EventTask expectedEvent = new EventTask("Mark this EventTask complete",
                 new Date(currDateMilliSec), new Date(currDateMilliSec), 'M');
         expectedEvent.setCompleted(true);
+
         assertEquals("Mark Event completed", expectedEvent,
                 tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
                         TaskType.EVENT, null, 1, testMarkEvent1)));
@@ -841,66 +844,61 @@ public class TaskDataManagerTest {
         assertEquals(1, tdmTest.getCompletedEventTasks().size());
 
         tdmTest.resetTrees();
+    }
+
+    @Test
+    public void markRecurCompleted() {
+        TaskDataManager tdmTest = new TaskDataManager();
 
         /* Mark recurring tasks as completed */
-        // Partition: recurring deadline tasks, until a certain date
+        // Partition: recurring deadline tasks
 
-        Calendar recurDeadlineCal1 = Calendar.getInstance();
-        Calendar endRecurDeadlineCal1 = Calendar.getInstance();
-        recurDeadlineCal1.set(2014, 2, 23, 23, 59);
-        endRecurDeadlineCal1.set(2014, 3, 13, 23, 59);
+        Calendar recurDeadlineCal = Calendar.getInstance();
+        Calendar endRecurDeadlineCal = Calendar.getInstance();
+        recurDeadlineCal.set(2014, 2, 23, 23, 59);
+        endRecurDeadlineCal.set(2014, 3, 13, 23, 59);
 
         try {
             tdmTest.addTask(new DataParameter(
                     "Completed recurring assignment.", 'L', null,
-                    recurDeadlineCal1.getTime(), null, TaskType.DEADLINE, 23,
-                    "RECUR", endRecurDeadlineCal1.getTime(), "WEEK", 1));
+                    recurDeadlineCal.getTime(), null, TaskType.DEADLINE, 23,
+                    "RECUR", endRecurDeadlineCal.getTime(), "WEEK", 1));
             assertEquals(4, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_0").size());
 
-            Calendar expectedCompletedDeadline1 = Calendar.getInstance();
-            expectedCompletedDeadline1.set(2014, 3, 6, 23, 59);
-            DeadlineTask expectedCompleteDeadlineRecur1 = new DeadlineTask(
-                    "Completed recurring assignment",
-                    expectedCompletedDeadline1.getTime(), 'L');
-            expectedCompleteDeadlineRecur1.setTag("RECUR_0");
-            expectedCompleteDeadlineRecur1.setCompleted(true);
+            recurDeadlineCal.set(2014, 3, 6, 23, 59);
+            DeadlineTask expectedCompleteDeadline1 = new DeadlineTask(
+                    "Completed recurring assignment.",
+                    recurDeadlineCal.getTime(), 'L');
+            expectedCompleteDeadline1.setTag("RECUR_0");
+            expectedCompleteDeadline1.setCompleted(true);
 
-            // TODO: something wrong with comparing deadlineTasks
-            // assertEquals(expectedCompleteDeadlineRecur1,
-            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
-            // null, null, null, 231, tdmTest.getRecurringTasks()
-            // .get("RECUR_0").get(2), null, null, 0,
-            // null, null, false)));
-            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
-                            .get(2), null, null, 0, null, false));
+            assertEquals(expectedCompleteDeadline1,
+                    tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                            null, null, null, 231, tdmTest.getRecurringTasks()
+                                    .get("RECUR_0").get(2), null, null, 0,
+                            null, false)));
 
             assertEquals(3, tdmTest.getUncompletedDeadlineTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_0").size());
             assertEquals(1, tdmTest.getCompletedDeadlineTasks().size());
 
-            DeadlineTask expectedCompleteDeadlineRecur2 = new DeadlineTask(
-                    "Completed recurring assignment",
-                    recurDeadlineCal1.getTime(), 'L');
-            expectedCompleteDeadlineRecur2.setTag("RECUR_0");
-            expectedCompleteDeadlineRecur2.setCompleted(true);
+            recurDeadlineCal.set(2014, 2, 23, 23, 59);
+            DeadlineTask expectedCompleteDeadline2 = new DeadlineTask(
+                    "Completed recurring assignment.",
+                    recurDeadlineCal.getTime(), 'L');
+            expectedCompleteDeadline2.setTag("RECUR_0");
+            expectedCompleteDeadline2.setCompleted(true);
 
-            // assertEquals(expectedCompleteDeadlineRecur2,
-            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
-            // null, null, null, 231, tdmTest.getRecurringTasks()
-            // .get("RECUR_0").get(2), null, null, 0,
-            // null, null, true)));
-
-            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_0")
-                            .get(2), null, null, 0, null, true));
+            assertEquals(expectedCompleteDeadline2,
+                    tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                            null, null, null, 231, tdmTest.getRecurringTasks()
+                                    .get("RECUR_0").get(2), null, null, 0,
+                            null, true)));
 
             assertEquals(0, tdmTest.getUncompletedDeadlineTasks().size());
             assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));
             assertEquals(4, tdmTest.getCompletedDeadlineTasks().size());
-
-            // Partition: recurring deadline tasks, forever
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -910,73 +908,60 @@ public class TaskDataManagerTest {
         /* Mark recurring event tasks as completed */
         // Partition: recurring event tasks, until a certain date
         // Partition: recurring event tasks, forever
-        Calendar recurStartEventCal1 = Calendar.getInstance();
-        Calendar recurEndEventCal1 = Calendar.getInstance();
-        Calendar recurUntilEventCal1 = Calendar.getInstance();
+        Calendar recurStartEventCal = Calendar.getInstance();
+        Calendar recurEndEventCal = Calendar.getInstance();
+        Calendar recurUntilEventCal = Calendar.getInstance();
 
-        recurStartEventCal1.set(2014, 2, 23, 20, 59);
-        recurEndEventCal1.set(2014, 2, 23, 23, 59);
-        recurUntilEventCal1.set(2014, 3, 13, 23, 59);
+        recurStartEventCal.set(2014, 2, 23, 20, 59);
+        recurEndEventCal.set(2014, 2, 23, 23, 59);
+        recurUntilEventCal.set(2014, 3, 13, 23, 59);
 
         try {
             tdmTest.addTask(new DataParameter(
-                    "Completed recurring assignment.", 'L', recurStartEventCal1
-                            .getTime(), recurEndEventCal1.getTime(), null,
-                    TaskType.EVENT, 23, "RECUR", recurUntilEventCal1.getTime(),
+                    "Completed recurring assignment.", 'L', recurStartEventCal
+                            .getTime(), recurEndEventCal.getTime(), null,
+                    TaskType.EVENT, 23, "RECUR", recurUntilEventCal.getTime(),
                     "WEEK", 1));
             assertEquals(4, tdmTest.getUncompletedEventTasks().size());
             assertEquals(4, tdmTest.getRecurringTasks().get("RECUR_1").size());
 
-            Calendar recurStartEventCal1c = Calendar.getInstance();
-            Calendar recurEndEventCal1c = Calendar.getInstance();
-
-            recurStartEventCal1c.set(2014, 3, 6, 20, 59);
-            recurEndEventCal1c.set(2014, 3, 6, 23, 59);
-
+            recurStartEventCal.set(2014, 3, 6, 20, 59);
+            recurEndEventCal.set(2014, 3, 6, 23, 59);
             EventTask expectedCompleteEventRecur1 = new EventTask(
-                    "Completed recurring assignment",
-                    recurStartEventCal1c.getTime(),
-                    recurEndEventCal1c.getTime(), 'L');
+                    "Completed recurring assignment.",
+                    recurStartEventCal.getTime(),
+                    recurEndEventCal.getTime(), 'L');
             expectedCompleteEventRecur1.setTag("RECUR_1");
             expectedCompleteEventRecur1.setCompleted(true);
 
-            // TODO: something wrong
-            // assertEquals(expectedCompleteEventRecur1,
-            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
-            // null, null, null, 231, tdmTest.getRecurringTasks()
-            // .get("RECUR_1").get(2), null, null, 0,
-            // null, null, false)));
-            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
-                            .get(2), null, null, 0, null, false));
+            assertEquals(expectedCompleteEventRecur1,
+                    tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                            null, null, null, 231, tdmTest.getRecurringTasks()
+                                    .get("RECUR_1").get(2), null, null, 0,
+                            null, false)));
 
             assertEquals(3, tdmTest.getUncompletedEventTasks().size());
             assertEquals(3, tdmTest.getRecurringTasks().get("RECUR_1").size());
             assertEquals(1, tdmTest.getCompletedEventTasks().size());
-
+            
+            recurStartEventCal.set(2014, 2, 23, 20, 59);
+            recurEndEventCal.set(2014, 2, 23, 23, 59);
             EventTask expectedCompleteEventRecur2 = new EventTask(
-                    "Completed recurring assignment",
-                    recurStartEventCal1.getTime(), recurEndEventCal1.getTime(),
+                    "Completed recurring assignment.",
+                    recurStartEventCal.getTime(), recurEndEventCal.getTime(),
                     'L');
             expectedCompleteEventRecur2.setTag("RECUR_1");
             expectedCompleteEventRecur2.setCompleted(true);
 
-            // TODO: something wrong
-            // assertEquals(expectedCompleteEventRecur2,
-            // tdmTest.markCompleted(new DataParameter(null, 'M', null,
-            // null, null, null, 231, tdmTest.getRecurringTasks()
-            // .get("RECUR_1").get(2), null, null, 0,
-            // null, null, true)));
-            tdmTest.markCompleted(new DataParameter(null, 'M', null, null,
-                    null, null, 231, tdmTest.getRecurringTasks().get("RECUR_1")
-                            .get(2), null, null, 0, null, true));
+            assertEquals(expectedCompleteEventRecur2,
+                    tdmTest.markCompleted(new DataParameter(null, 'M', null,
+                            null, null, null, 231, tdmTest.getRecurringTasks()
+                                    .get("RECUR_1").get(2), null, null, 0,
+                            null, true)));
 
             assertEquals(0, tdmTest.getUncompletedEventTasks().size());
             assertNull(tdmTest.getRecurringTasks().get("RECUR_0"));
             assertEquals(4, tdmTest.getCompletedEventTasks().size());
-
-            // Partition: recurring deadline tasks, forever
-
         } catch (Exception e) {
             e.printStackTrace();
 

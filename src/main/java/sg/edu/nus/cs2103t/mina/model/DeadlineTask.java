@@ -39,7 +39,7 @@ public class DeadlineTask extends Task<DeadlineTask> implements
     }
 
     public int compareTo(DeadlineTask otherTask) {
-        Date currDeadlineEnd = this._endTime;
+        Date currDeadlineEnd = _endTime;
         Date otherDeadlineEnd = otherTask.getEndTime();
 
         if (currDeadlineEnd.before(otherDeadlineEnd)) {
