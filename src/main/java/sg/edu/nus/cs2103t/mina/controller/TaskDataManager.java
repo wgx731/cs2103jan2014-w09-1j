@@ -545,7 +545,6 @@ public class TaskDataManager {
 
     private Task<?> deleteRecurringTasks(DataParameter deleteParameters) {
         Task<?> recurTaskToDelete = deleteParameters.getTaskObject();
-        boolean taskToDeleteIsComplete = recurTaskToDelete.isCompleted();
 
         if (_recurringTasks.containsKey(recurTaskToDelete.getTag())) {
             @SuppressWarnings("unchecked")
@@ -559,17 +558,22 @@ public class TaskDataManager {
                 for (int i = 0; i < sizeOfList; i++) {
                     currTask = _recurringTasks.get(recurTaskToDelete.getTag())
                             .get(i);
-                    if (currTask.isCompleted() == taskToDeleteIsComplete) {
+                    if (currTask.isCompleted() == recurTaskToDelete
+                            .isCompleted()) {
                         listOfRecTasks.remove(currTask);
                         deleteParameters.setTaskObject(currTask);
-                        
+
                         deleteRegTask(deleteParameters);
                     } // else, leave the task there
                 }
-
-                _recurringTasks.put(recurTaskToDelete.getTag(), listOfRecTasks);
+                if (listOfRecTasks.size() > 0) {
+                    _recurringTasks.put(recurTaskToDelete.getTag(), listOfRecTasks);
+                } else {
+                    _recurringTasks.remove(recurTaskToDelete.getTag());
+                }
             } else {
                 listOfRecTasks.remove(recurTaskToDelete);
+
                 if (listOfRecTasks.size() > 0) {
                     _recurringTasks.put(recurTaskToDelete.getTag(),
                             listOfRecTasks);
