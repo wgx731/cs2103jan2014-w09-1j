@@ -461,7 +461,7 @@ public final class DateUtil {
     }
 
     // Comparator
-
+    //@author A0099324X
     /**
      * Determine whether two Calendar instances are on the same date (time can
      * be different)
