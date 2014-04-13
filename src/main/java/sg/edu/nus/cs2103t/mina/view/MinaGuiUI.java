@@ -632,6 +632,8 @@ public class MinaGuiUI extends MinaView {
                     if (command.trim().toLowerCase().equals("help") || command
                             .trim().toLowerCase().equals("-h")) {
                         startHelpWindows();
+                        _shell.setCursor(_display
+                                .getSystemCursor(SWT.CURSOR_ARROW));
                     } else if (command.length() >= 5 && command.substring(0, 5)
                             .equals("page ")) {
                         String[] commands = command.split(" ");
