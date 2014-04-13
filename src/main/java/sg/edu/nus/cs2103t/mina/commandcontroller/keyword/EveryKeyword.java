@@ -64,9 +64,11 @@ public class EveryKeyword extends Keyword {
         return tokens;
     }
 
-    private void updateArgument(String everyKeyword, Argument argument) {
+    private void updateArgument(String everyKeyword, Argument argument) throws ParseException {
         if(!hasExistingKeywordValue(argument)){
             argument.setKeywordValue(_type, everyKeyword);
+        } else {
+            throw new ParseException(getExistingFlagErr(), 0);
         }
     }
 

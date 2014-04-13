@@ -1,9 +1,11 @@
 package sg.edu.nus.cs2103t.mina.test.commandcontroller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import hirondelle.date4j.DateTime;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
 import org.apache.logging.log4j.Level;
@@ -148,13 +150,14 @@ public class CommandParserTest {
 
         // Date phrases
         // wed //sun //fri
-        int sun = 7;
-        int wed = 3;
-        int fri = 5;
-        int weekday = (today.getWeekDay() + 6) % 7;
+        int sun = 6;
+        int wed = 2;
+        int fri = 4;
+        int weekday = (today.getWeekDay() - 1 + 6) % 7;
         thisSunday = today.plusDays(sun - weekday);
         thisWed = today.plusDays(wed - weekday);
         thisFri = today.plusDays(fri - weekday);
+
         nextSunday = thisSunday.plusDays(7);
         nextWed = thisWed.plusDays(7);
         nextFri = thisFri.plusDays(7);
@@ -399,13 +402,7 @@ public class CommandParserTest {
         LogHelper.log(CLASS_NAME, Level.INFO, variation);
         result = parser.convertCommand(variation);
         assertEquals("add do priority low queue assignment -priority H", result);
-        
-        setUp();
-        variation = "add 'no more priorities' urgent priority L";
-        result = parser.convertCommand(variation);
-        assertEquals("add no more priorities -priority H", result);
-        
-        
+
         setUp();
         variationBuild.append("add ");
         variationBuild
@@ -416,7 +413,7 @@ public class CommandParserTest {
         assertEquals(
                 "add submit homework so that I could do something -end 12032013235959",
                 result);
-        
+
         variation = "add today -end 0800 today tomorrow yesterday";
         result = parser.convertCommand(variation);
         String resultDate = today.format("DDMMYYYY");
@@ -431,7 +428,7 @@ public class CommandParserTest {
 
         variation = "add -description what";
         result = parser.convertCommand(variation);
-        assertEquals("add -description what", result);
+        assertEquals("add \u2010description what", result);
 
         // filter no special
         variation = "filter deadline complete";
@@ -467,6 +464,54 @@ public class CommandParserTest {
         assertEquals(
                 "display deadline complete -start 12052007000000 -end " + end,
                 result);
+
+    }
+
+    @Test
+    public void testDuplicatedFlag() {
+        ArrayList<String> duplicates = new ArrayList<String>() {
+            private static final long serialVersionUID = 9L;
+            {
+                add("add what -start today -end tmr -start tmr");
+                add("add 'what -start' start today end tmr start tmr");
+                add("add -every day recurring task -every hour until tmr");
+                add("add every day 'recurring task' every hour until tmr");
+                add("add every day 'recurring task' every hour until tmr");
+                add("modify td 23 haha -taskid td34");
+                add("modify td 23 haha -totype deadline -end tmr -totype event");
+                add("modify td 23 haha -totype deadline -end tmr -totype event");
+                add("add what -priority H -priority L");
+                add("add 'what' -urgent -priority L");
+                add("display -agendaof tmr deadline -start today");
+            }
+        };
+        int expected = duplicates.size();
+        boolean[] correctResult = new boolean[expected];
+        int correctCount = 0;
+        
+        for(int i=0; i< expected; i++) {
+            String err = duplicates.get(i);
+            try{
+                result = parser.convertCommand(err);
+            } catch(ParseException e) {
+                if(e.getMessage().startsWith("Duplicated")){
+                    correctResult[i] = true;
+                    correctCount++;
+                }
+            }
+        }
+        
+        if(correctCount!=expected) {
+            StringBuilder incorrectResult = new StringBuilder();
+            for(int i=0; i<correctResult.length; i++) {
+                if(!correctResult[i]) {
+                    incorrectResult.append(duplicates.get(i));
+                    incorrectResult.append("\n");
+                }
+            }
+            fail("Incorrect results: \n" + 
+                    incorrectResult.toString());
+        }
 
     }
 
@@ -871,7 +916,7 @@ public class CommandParserTest {
         // checking individual flags
         variation = "modify todo 2 -description change me!";
         result = parser.convertCommand(variation);
-        assertEquals("modify todo 2 -description -description change me!",
+        assertEquals("modify todo 2 -description \u2010description change me!",
                 result);
     }
 
@@ -922,7 +967,7 @@ public class CommandParserTest {
         resultDate = tmr.format("DDMMYYYY");
         start = resultDate + "030000";
         assertEquals(
-                "modify deadline 5 -totype event -description get the -description tag from mina -start " + start,
+                "modify deadline 5 -totype event -description get the \u2010description tag from mina -start " + start,
                 result);
 
         // delete with shorten id

@@ -43,8 +43,6 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 public abstract class CommandFormat {
 
     private static final int DESCRIPT_NOT_FOUND = -1;
-    protected HashMap<String, CommandType> _commandValues;
-    protected HashSet<CommandType> _acceptedCommands;
     protected CommandType _commandType;
     protected String _argumentStr;
     protected Argument _argument;
@@ -106,10 +104,6 @@ public abstract class CommandFormat {
         String keyValue = String.format(KEYWORD_VALUE_PAIR, key, value);
 
         return appendWord(properCommand, keyValue);
-    }
-
-    protected void addAcceptedCommand(CommandType type) {
-        _acceptedCommands.add(type);
     }
 
     /**
@@ -174,41 +168,7 @@ public abstract class CommandFormat {
     }
 
     protected void initValues() {
-
-        _commandValues = new HashMap<String, CommandType>();
-
-        _commandValues.put(CommandType.ADD.getType(), CommandType.ADD);
-        _commandValues.put("make", CommandType.ADD);
-        _commandValues.put("create", CommandType.ADD);
-        _commandValues.put("new", CommandType.ADD);
-        _commandValues.put("+", CommandType.ADD);
-
-        _commandValues.put(CommandType.MODIFY.getType(), CommandType.MODIFY);
-        _commandValues.put("change", CommandType.MODIFY);
-        _commandValues.put("edit", CommandType.MODIFY);
-
-        _commandValues.put("remove", CommandType.DELETE);
-        _commandValues.put("rm", CommandType.DELETE);
-        _commandValues.put("-", CommandType.DELETE);
-        _commandValues.put(CommandType.DELETE.getType(), CommandType.DELETE);
-
-        _commandValues.put(CommandType.SEARCH.getType(), CommandType.SEARCH);
-        _commandValues.put("find", CommandType.SEARCH);
-
-        _commandValues.put(CommandType.DISPLAY.getType(), CommandType.DISPLAY);
-        _commandValues.put("filter", CommandType.DISPLAY);
-        _commandValues.put("show", CommandType.DISPLAY);
-
-        _commandValues
-                .put(CommandType.COMPLETE.getType(), CommandType.COMPLETE);
-        _commandValues.put("finish", CommandType.COMPLETE);
-
-        _commandValues.put(CommandType.EXIT.getType(), CommandType.EXIT);
-        _commandValues.put("quit", CommandType.EXIT);
-
-        _commandValues.put(CommandType.UNDO.getType(), CommandType.UNDO);
-        _commandValues.put(CommandType.REDO.getType(), CommandType.REDO);
-
+        return;
     }
 
     /**
@@ -224,9 +184,7 @@ public abstract class CommandFormat {
     public String parseArgument() throws ParseException {
 
         preProcessArgument();
-        ArrayList<String> tokens = processKeywordValuePairs();
-        postProcessing(tokens);
-
+        processKeywordValuePairs();
         return getProperCommand();
     }
 
@@ -258,11 +216,16 @@ public abstract class CommandFormat {
 
     private ArrayList<String> processKeyword(ArrayList<String> tokens, int i,
             String currWord) throws ParseException {
-        currWord = createFormatedWord(currWord);
-        LogHelper.log(CLASS_NAME, Level.INFO, "Creating keyword: " + currWord);
-        Keyword newKeyword = KeywordFactory.createKeyword(currWord);
+        
+        Keyword newKeyword = createKeyword(currWord);        
         tokens = newKeyword.processKeyword(tokens, i, _argument);
         return tokens;
+    }
+
+    private Keyword createKeyword(String currWord) throws ParseException {
+        currWord = createFormatedWord(currWord);
+        LogHelper.log(CLASS_NAME, Level.INFO, "Creating keyword: " + currWord);
+        return KeywordFactory.createKeyword(currWord);
     }
 
     private boolean isValidKeyword(String currWord) {
@@ -324,8 +287,5 @@ public abstract class CommandFormat {
 
     // functions that need to be created
     protected abstract void preProcessArgument() throws ParseException;
-
-    protected abstract void postProcessing(ArrayList<String> tokens);
-
     protected abstract String getProperArgument(String properCommand);
 }

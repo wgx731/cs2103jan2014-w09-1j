@@ -21,10 +21,9 @@ public class PriorityCompositeKeyword extends Keyword {
     }
 
     private HashMap<String, ArrayList<String>> _priorityCompositeValues;
-    private static final int LOOK_AHEAD_LIMIT = 1;
     private static final String CLASS_NAME = PriorityCompositeKeyword.class
             .getName();
-    
+        
     public PriorityCompositeKeyword(StandardKeyword type) {
         super(type);
     }

@@ -25,7 +25,6 @@ public class TaskIdKeyword extends Keyword {
     static {
         TaskIdKeyword newTaskId = new TaskIdKeyword(SimpleKeyword.TASKID);
         KeywordFactory.addAliasEntry("-taskid", newTaskId);
-        KeywordFactory.addAliasEntry("-block", newTaskId);
     }
 
     public TaskIdKeyword(StandardKeyword type) {
@@ -163,11 +162,10 @@ public class TaskIdKeyword extends Keyword {
 
         if (taskId == null) {
             throw new ParseException("Not a valid task id", 0);
+        } else if(hasExistingKeywordValue(argument)) {
+            throw new ParseException(getExistingFlagErr(), 0);
         }
-        
-        if (!hasExistingKeywordValue(argument)) {
-            argument.setKeywordValue(_type, taskId);
-        }
+        argument.setKeywordValue(_type, taskId);
     }
 
     @Override

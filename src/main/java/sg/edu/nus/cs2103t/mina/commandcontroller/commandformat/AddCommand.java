@@ -69,8 +69,4 @@ public class AddCommand extends CommandFormat {
         _argumentStr = extractWrappedDescription(_argumentStr);
     }
 
-    @Override
-    protected void postProcessing(ArrayList<String> tokens) {
-        return;
-    }
 }

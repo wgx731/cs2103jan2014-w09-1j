@@ -27,7 +27,7 @@ public class DescriptionKeyword extends Keyword {
 
     private static final StandardKeyword DESCRIPTION = SimpleKeyword.DESCRIPTION;
     private static final String CLASS_NAME = DescriptionKeyword.class.getName();
-
+    private static final String DELIMITER_ESCAPE =  "\u2010";
     // Static initalizer to add entry to KeywordFactory. This is only for
     // standard keyword, alias will be added
     // else where.
@@ -89,6 +89,11 @@ public class DescriptionKeyword extends Keyword {
         }
 
         String word = tokens.get(currIndex);
+        
+        if(word.startsWith(StandardKeyword.DELIMITER)) {
+            word = word.replace(StandardKeyword.DELIMITER, DELIMITER_ESCAPE);
+        }
+        
         LogHelper.log(CLASS_NAME, Level.INFO, "Appending " + word +
                 " to " +
                 oldDescript);

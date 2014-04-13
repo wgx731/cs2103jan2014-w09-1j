@@ -159,7 +159,7 @@ public class StartKeyword extends Keyword {
         if (hasJoinedDateTime(lookahead)) {
             String firstToken = getFirstToken(lookahead);
             String dateTime = getJointDateTime(firstToken);
-            updateArgument(argument, dateTime);
+            updateActualArgument(argument, dateTime);
             return nullifyTokens(tokens, currIndex, 1);
         } else {
             LogHelper.log(CLASS_NAME, Level.INFO,
@@ -234,7 +234,7 @@ public class StartKeyword extends Keyword {
         return tokens;
     }
 
-    protected void updateArgument(Argument argument, String date, String time) {
+    protected void updateArgument(Argument argument, String date, String time) throws ParseException{
 
         assert (argument != null);
 
@@ -248,13 +248,15 @@ public class StartKeyword extends Keyword {
         }
 
         String dateTime = date + time;
-        updateArgument(argument, dateTime);
+        updateActualArgument(argument, dateTime);
     }
 
-    private void updateArgument(Argument argument, String dateTime) {
+    private void updateActualArgument(Argument argument, String dateTime) throws ParseException {
         
         if(!hasExistingKeywordValue(argument)){
             argument.setKeywordValue(_type, dateTime.trim());
+        } else {
+            throw new ParseException(getExistingFlagErr(), 0);
         }
     }
 

@@ -98,9 +98,12 @@ public class PriorityKeyword extends Keyword {
         return tokens;
     }
     
-    private void updateArgument(String value, Argument arguments) {
-        
-        arguments.setKeywordValue(_type, value);
+    private void updateArgument(String value, Argument arguments) throws ParseException {
+        if(!hasExistingKeywordValue(arguments)){
+            arguments.setKeywordValue(_type, value);
+        } else {
+            throw new ParseException(getExistingFlagErr(), 0);
+        }
     }
     /**
      * Update the priority value and

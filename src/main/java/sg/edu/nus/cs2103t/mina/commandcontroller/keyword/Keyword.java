@@ -11,7 +11,8 @@ public abstract class Keyword {
     protected final static boolean IS_PROTOTYPE = true;
     protected final static boolean IS_NOT_PROTOTYPE = false;
     protected static final int LOOK_AHEAD_LIMIT = 4;
-
+    protected static final String ERR_DUPLICATED_FLAG = "Duplicated flag: %1$s";
+    
     public Keyword(StandardKeyword type) {
         _type = type;
         initValues();
@@ -34,6 +35,10 @@ public abstract class Keyword {
     
     protected boolean hasExistingKeywordValue(Argument arguments) {
         return arguments.hasValue(_type);
+    }
+    
+    protected String getExistingFlagErr() {
+        return String.format(ERR_DUPLICATED_FLAG, _type.getFormattedKeyword());
     }
     
     //Functions that need to be implemented

@@ -33,11 +33,6 @@ public class ModifyCommand extends CommandFormat {
     }
 
     @Override
-    protected void postProcessing(ArrayList<String> tokens) {
-        return;
-    }
-
-    @Override
     protected String getProperArgument(String properCommand) {
         String log = _argument.getKeywordValueView();
         StringBuilder commandBuilder = new StringBuilder(properCommand);

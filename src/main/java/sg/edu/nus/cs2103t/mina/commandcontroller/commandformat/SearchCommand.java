@@ -90,11 +90,6 @@ public class SearchCommand extends CommandFormat {
     }
 
     @Override
-    protected void postProcessing(ArrayList<String> tokens) {
-        return;
-    }
-
-    @Override
     protected String getProperArgument(String properCommand) {
         String value = _argument.getKeywordValue(SimpleKeyword.DESCRIPTION);
         return properCommand + value;
