@@ -53,7 +53,7 @@ import com.tulskiy.keymaster.common.Provider;
  * @author duzhiyuan
  * @author joannemah
  */
-// @author A0099324X
+//@author A0099324X
 
 public class MinaGuiUI extends MinaView {
 
