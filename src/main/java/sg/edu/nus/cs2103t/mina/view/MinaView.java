@@ -2,15 +2,11 @@ package sg.edu.nus.cs2103t.mina.view;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 
-/**
- * 
- * Method of possible view components for MINA
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+/** 
+ * Skeleton class for MINA view
  */
+//@author A0105853H
+
 public abstract class MinaView {
     
     protected CommandManager _commandController;
@@ -28,19 +24,16 @@ public abstract class MinaView {
 
     /**
      * Display output to user
-     * 
-     * @param message output message to be displayed
      */
     public abstract void displayOutput();
 
     /**
      * Update List Data in UI
-     * 
-     * @param eventList the event task list
-     * @param deadlineList the deadline task list
-     * @param todoList the todo task list
      */
     public abstract void updateLists();
 
+    /**
+     * wait user input in loop
+     */
     public abstract void loop();
 }

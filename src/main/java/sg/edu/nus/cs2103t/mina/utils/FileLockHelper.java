@@ -8,6 +8,11 @@ import java.nio.channels.OverlappingFileLockException;
 
 import org.apache.logging.log4j.Level;
 
+/**
+ * Helper class create lock file to prevent multiple instance running
+ */
+//@author A0105853H
+
 public class FileLockHelper {
 
     private static final String FILE_MODE = "rw";

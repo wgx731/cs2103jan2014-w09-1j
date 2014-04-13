@@ -4,8 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.SortedSet;
 
@@ -17,9 +21,19 @@ import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
+import sg.edu.nus.cs2103t.mina.utils.JsonHelper;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
+/**
+ * Actual test cases for task set dao
+ */
+// @author A0105853H
+
 public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
+
+    private static final String EMPTY_STRING = "";
+
+    private static final String WHITE_SPACES = "\\s+";
 
     private static final String CLASS_NAME = JsonFileTaskSetDaoImplTest.class
             .getName();
@@ -80,10 +94,35 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         }
     }
 
-    private void checkSavedFile(File savedFile) {
+    @SuppressWarnings("resource")
+    private String readFileContent(File file) {
+        BufferedReader reader = null;
+        StringBuffer sb = new StringBuffer();
+        String line = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(file)));
+
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (FileNotFoundException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+        return sb.toString();
+    }
+
+    private void checkSavedFile(File savedFile, String json) {
         assertTrue(savedFile.exists());
         assertTrue(savedFile.isFile());
         assertTrue(savedFile.length() > 0);
+        String fileContent = readFileContent(savedFile);
+        assertTrue(fileContent.replaceAll(WHITE_SPACES, EMPTY_STRING).equals(
+                json.replaceAll(WHITE_SPACES, EMPTY_STRING)));
     }
 
     @SuppressWarnings("unchecked")
@@ -113,7 +152,8 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
     @Test
     public void testUnCompletedTodo() {
         File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO, false);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
         checkLoadedSet(loadTaskSet(TaskType.TODO, false), TaskType.TODO);
     }
 
@@ -126,14 +166,16 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         sampleTodoTaskSet.add(task);
 
         File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO, true);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
         checkLoadedSet(loadTaskSet(TaskType.TODO, true), TaskType.TODO);
     }
 
     @Test
     public void testUnCompletedEvent() {
         File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT, false);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
         checkLoadedSet(loadTaskSet(TaskType.EVENT, false), TaskType.EVENT);
     }
 
@@ -146,7 +188,8 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
         sampleEventTaskSet.add(task);
 
         File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT, true);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
         checkLoadedSet(loadTaskSet(TaskType.EVENT, true), TaskType.EVENT);
     }
 
@@ -154,7 +197,8 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
     public void testUnCompletedDeadline() {
         File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
                 false);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile, JsonHelper.taskSetToJson(
+                sampleDeadlineTaskSet, TaskType.DEADLINE));
         checkLoadedSet(loadTaskSet(TaskType.DEADLINE, false), TaskType.DEADLINE);
     }
 
@@ -168,7 +212,8 @@ public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
 
         File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
                 true);
-        checkSavedFile(savedFile);
+        checkSavedFile(savedFile, JsonHelper.taskSetToJson(
+                sampleDeadlineTaskSet, TaskType.DEADLINE));
         checkLoadedSet(loadTaskSet(TaskType.DEADLINE, true), TaskType.DEADLINE);
     }
 

@@ -20,12 +20,9 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
 /**
  * Template class for File Dao test
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0105853H
+
 public abstract class FileTaskSetDaoImplTest {
 
     protected static final String TODO_DESCRIPTION = "This is a todo task.";

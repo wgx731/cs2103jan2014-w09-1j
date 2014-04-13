@@ -8,12 +8,9 @@ import org.apache.logging.log4j.Level;
 
 /**
  * Helper class to read properties from config file for MINA
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0105853H
+
 public class ConfigHelper {
 
     // KEYS

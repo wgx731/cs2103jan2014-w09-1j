@@ -23,11 +23,11 @@ import sg.edu.nus.cs2103t.mina.view.MinaView;
 import sg.edu.nus.cs2103t.mina.view.SplashScreen;
 
 /**
- * Driver class for MINA
- * 
- * This is start point of MINA, it contains main method.
+ * This is the start point of MINA which links all component and start the
+ * application
  * 
  */
+//@author A0105853H
 public class MinaDriver {
 
     private static final String MINA_ALREADY_STARTED = "MINA already started.";
@@ -36,54 +36,55 @@ public class MinaDriver {
 
     private static final String CLASS_NAME = MinaDriver.class.getName();
 
-    private static MinaDriver driver;
+    private static MinaDriver _driver;
 
-    private CommandManager commandManager;
-    private TaskDataManager taskDataManager;
-    private TaskFilterManager taskFilterManager;
-    private MinaView uiView;
-    private DataSyncManager dataSyncManager;
+    private CommandManager _commandManager;
+    private TaskDataManager _taskDataManager;
+    private TaskFilterManager _taskFilterManager;
+    private MinaView _uiView;
+    private DataSyncManager _dataSyncManager;
 
     private MinaDriver() {
+    
     }
 
     public static MinaDriver getMinaDriver() {
-        if (driver == null) {
-            driver = new MinaDriver();
+        if (_driver == null) {
+            _driver = new MinaDriver();
         }
-        return driver;
+        return _driver;
     }
 
     CommandManager getCommandManager() {
-        return commandManager;
+        return _commandManager;
     }
 
     void setCommandManager(CommandManager commandManager) {
-        this.commandManager = commandManager;
+        this._commandManager = commandManager;
     }
 
     TaskDataManager getTaskDataManager() {
-        return taskDataManager;
+        return _taskDataManager;
     }
 
     void setTaskDataManager(TaskDataManager taskDataManager) {
-        this.taskDataManager = taskDataManager;
+        this._taskDataManager = taskDataManager;
     }
 
     TaskFilterManager getTaskFilterManager() {
-        return taskFilterManager;
+        return _taskFilterManager;
     }
 
     void setTaskFilterManager(TaskFilterManager taskFilterManager) {
-        this.taskFilterManager = taskFilterManager;
+        this._taskFilterManager = taskFilterManager;
     }
 
     DataSyncManager getDataSyncManager() {
-        return dataSyncManager;
+        return _dataSyncManager;
     }
 
     void setDataSyncManager(DataSyncManager dataSyncManager) {
-        this.dataSyncManager = dataSyncManager;
+        this._dataSyncManager = dataSyncManager;
     }
 
     void initDao() {
@@ -93,26 +94,26 @@ public class MinaDriver {
                 FileTaskMapDaoImpl.getFileExtension());
         TaskDao taskDao = new JsonFileTaskDaoImpl(fileOperationHelper);
         TaskMapDao taskMapDao = new FileTaskMapDaoImpl(fileOperationHelper);
-        dataSyncManager = new DataSyncManager(taskDao, taskMapDao);
+        _dataSyncManager = new DataSyncManager(taskDao, taskMapDao);
     }
 
     void initTDM() {
-        taskDataManager = new TaskDataManager(dataSyncManager);
+        _taskDataManager = new TaskDataManager(_dataSyncManager);
     }
 
     void initTFM() {
-        taskFilterManager = new TaskFilterManager(taskDataManager);
+        _taskFilterManager = new TaskFilterManager(_taskDataManager);
     }
 
     void initCC() {
-        commandManager = new CommandManager(taskDataManager, taskFilterManager);
+        _commandManager = new CommandManager(_taskDataManager, _taskFilterManager);
     }
 
     void showMinaView() {
-        MinaGuiUI gui = new MinaGuiUI(commandManager);
+        MinaGuiUI gui = new MinaGuiUI(_commandManager);
         gui.open();
-        uiView = gui;
-        uiView.updateLists();
+        _uiView = gui;
+        _uiView.updateLists();
     }
 
     public Shell guiTestSetUp() {
@@ -120,21 +121,21 @@ public class MinaDriver {
         initTDM();
         initTFM();
         initCC();
-        MinaGuiUI gui = new MinaGuiUI(commandManager);
+        MinaGuiUI gui = new MinaGuiUI(_commandManager);
         gui.updateLists();
         return gui.open();
     }
 
     public void cleanUp() {
-        if (taskDataManager != null) {
-            taskDataManager.resetTrees();
+        if (_taskDataManager != null) {
+            _taskDataManager.resetTrees();
         }
     }
 
     public void processLoop() {
-        if (uiView != null) {
-            uiView.displayOutput();
-            uiView.loop();
+        if (_uiView != null) {
+            _uiView.displayOutput();
+            _uiView.loop();
         }
     }
 
@@ -177,6 +178,7 @@ public class MinaDriver {
     public static void main(String[] args) {
         FileLockHelper fileLockHelper = FileLockHelper
                 .getFileLockHelperInstance();
+        // Prevent multiple instances running
         if (!fileLockHelper.isAppActive()) {
             MinaDriver driver = MinaDriver.getMinaDriver();
             try {

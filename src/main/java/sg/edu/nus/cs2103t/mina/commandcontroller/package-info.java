@@ -1,8 +1,4 @@
 /**
- * 
- */
-/**
- * @author viettrung9012
- *
+ * command parser and processor
  */
 package sg.edu.nus.cs2103t.mina.commandcontroller;

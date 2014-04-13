@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
  * It helps simply the logging process such that only class name, message and
  * level are needed.
  */
+//@author A0105853H
+
 public class LogHelper {
 
     private static final boolean isLoggerEnabled = Boolean.valueOf(ConfigHelper

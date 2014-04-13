@@ -1,9 +1,4 @@
 /**
- * Driver classes for MINA
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * Start point of MINA
  */
 package sg.edu.nus.cs2103t.mina;
