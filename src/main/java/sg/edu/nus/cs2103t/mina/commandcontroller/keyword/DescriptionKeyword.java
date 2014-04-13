@@ -90,7 +90,7 @@ public class DescriptionKeyword extends Keyword {
 
         String word = tokens.get(currIndex);
         
-        if(word.startsWith(StandardKeyword.DELIMITER)) {
+        if(word.startsWith(StandardKeyword.DELIMITER) && !word.equalsIgnoreCase("-all")) {
             word = word.replace(StandardKeyword.DELIMITER, DELIMITER_ESCAPE);
         }
         
