@@ -56,8 +56,6 @@ public class MinaDriver {
     public static MinaDriver getMinaDriver() {
         if (driver == null) {
             driver = new MinaDriver();
-            driver.showSplashScreen();
-            driver.showMinaView();
         }
         return driver;
     }
@@ -197,6 +195,8 @@ public class MinaDriver {
         if (!fileLockHelper.isAppActive()) {
             MinaDriver driver = MinaDriver.getMinaDriver();
             try {
+                driver.showSplashScreen();
+                driver.showMinaView();
                 driver.processLoop();
             } catch (Exception e) {
                 LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
