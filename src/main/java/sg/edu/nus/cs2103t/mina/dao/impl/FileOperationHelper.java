@@ -51,18 +51,18 @@ public class FileOperationHelper {
         _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
     }
 
-    public void cleanAll() {
+    public synchronized void cleanAll() {
         cleanTaskMapDao();
         cleanTaskSetDao();
     }
 
-    public boolean setUpAll() {
+    public synchronized boolean setUpAll() {
         boolean isTaskSetCreated = createTaskSetDaoFiles();
         boolean isTaskMapCreated = createTaskMapDaoFiles();
         return isTaskMapCreated && isTaskSetCreated;
     }
 
-    void cleanTaskSetDao() {
+    synchronized void cleanTaskSetDao() {
         new File(getTaskSetFileLocation(TaskType.TODO, UNCOMPLETED)).delete();
         new File(getTaskSetFileLocation(TaskType.TODO, COMPLETED)).delete();
         new File(getTaskSetFileLocation(TaskType.EVENT, UNCOMPLETED)).delete();
@@ -72,11 +72,11 @@ public class FileOperationHelper {
         new File(getTaskSetFileLocation(TaskType.DEADLINE, COMPLETED)).delete();
     }
 
-    void cleanTaskMapDao() {
+    synchronized void cleanTaskMapDao() {
         new File(getTaskMapFileLocation()).delete();
     }
 
-    boolean createTaskSetDaoFiles() {
+    synchronized boolean createTaskSetDaoFiles() {
         try {
             createFileIfNotExist(getTaskSetFileLocation(TaskType.TODO,
                     UNCOMPLETED));
@@ -101,7 +101,7 @@ public class FileOperationHelper {
         return true;
     }
 
-    boolean createTaskMapDaoFiles() {
+    synchronized boolean createTaskMapDaoFiles() {
         try {
             createFileIfNotExist(getTaskMapFileLocation());
         } catch (IOException e) {

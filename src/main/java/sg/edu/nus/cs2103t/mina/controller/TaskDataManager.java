@@ -13,7 +13,6 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
-import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -22,14 +21,13 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.DataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskSetDataParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Checks user's input determines the type of tasks breaks up parameters for the
  * tasks passes tasks to DAO to retrieve data from files.
- * 
- * @author joannemah
  */
-// @author A0080412W
+//@author A0080412W
 public class TaskDataManager {
 
     private static final String CLASS_NAME = TaskDataManager.class.getName();
@@ -170,6 +168,7 @@ public class TaskDataManager {
                 checkRecur(currDeadlineTask);
                 currDeadlineTask = deadlineTaskIterator.next();
             }
+            checkRecur(currDeadlineTask);
         }
     }
 
@@ -183,6 +182,7 @@ public class TaskDataManager {
                 checkRecur(currEventTask);
                 currEventTask = eventTaskIterator.next();
             }
+            checkRecur(currEventTask);
         }
     }
 
@@ -1079,4 +1079,5 @@ public class TaskDataManager {
         _uncompletedEventTasks.clear();
         _recurringTasks.clear();
     }
+    
 }

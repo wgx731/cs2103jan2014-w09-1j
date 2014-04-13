@@ -10,10 +10,16 @@ import org.apache.logging.log4j.Level;
 
 public class FileLockHelper {
 
+    private static final String FILE_MODE = "rw";
+
+    private static final String LOCK_FILE_EXTENSION = ".lock";
+
+    private static final String USER_HOME = "user.home";
+
     private static final String CLASS_NAME = FileLockHelper.class.getName();
 
     private static FileLockHelper instance;
-    
+
     private String lockFileName;
     private File lockFile;
     private FileChannel channel;
@@ -32,11 +38,11 @@ public class FileLockHelper {
         return instance;
     }
 
-    public boolean isAppActive() {
+    public synchronized boolean isAppActive() {
         try {
-            lockFile = new File(System.getProperty("user.home"),
-                    lockFileName + ".lock");
-            channel = new RandomAccessFile(lockFile, "rw").getChannel();
+            lockFile = new File(System.getProperty(USER_HOME),
+                    lockFileName + LOCK_FILE_EXTENSION);
+            channel = new RandomAccessFile(lockFile, FILE_MODE).getChannel();
             try {
                 lock = channel.tryLock();
             } catch (OverlappingFileLockException e) {
@@ -69,8 +75,8 @@ public class FileLockHelper {
             lock.release();
             channel.close();
         } catch (Exception e) {
-            LogHelper.log(CLASS_NAME, Level.ERROR,
-                    "close lock failed: " + e.getMessage());
+            LogHelper.log(CLASS_NAME, Level.ERROR, "close lock failed: " + e
+                    .getStackTrace().toString());
         }
     }
 
@@ -79,7 +85,7 @@ public class FileLockHelper {
             lockFile.delete();
         } catch (Exception e) {
             LogHelper.log(CLASS_NAME, Level.ERROR,
-                    "delete lock file failed: " + e.getMessage());
+                    "delete lock file failed: " + e.getStackTrace().toString());
         }
     }
 }
