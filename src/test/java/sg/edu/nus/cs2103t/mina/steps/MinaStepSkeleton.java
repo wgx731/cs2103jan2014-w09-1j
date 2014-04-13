@@ -21,6 +21,11 @@ import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 
+/**
+ * Template class jbehave steps definition
+ */
+//@author A0105853H
+
 public abstract class MinaStepSkeleton {
 
     protected static final int INPUT_TEXT_INDEX = 0;

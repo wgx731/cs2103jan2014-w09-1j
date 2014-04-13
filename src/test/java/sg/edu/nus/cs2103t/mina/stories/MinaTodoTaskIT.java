@@ -14,6 +14,11 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 
 import sg.edu.nus.cs2103t.mina.steps.MinaTodoTaskSteps;
 
+/**
+ * Mina todo task integration test case
+ */
+//@author A0105853H
+
 public class MinaTodoTaskIT extends JUnitStory {
 
     public MinaTodoTaskIT() {

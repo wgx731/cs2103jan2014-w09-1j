@@ -25,7 +25,7 @@ import sg.edu.nus.cs2103t.mina.utils.JsonHelper;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
- * Actual test cases for task set dao
+ * Actual test cases for task set Dao
  */
 // @author A0105853H
 

@@ -6,6 +6,11 @@ import org.jbehave.core.annotations.AfterScenario;
 
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
+/**
+ * Mina todo tasks test steps definition
+ */
+//@author A0105853H
+
 public class MinaTodoTaskSteps extends MinaStepSkeleton {
 
     private static final String CLASS_NAME = MinaTodoTaskSteps.class.getName();
