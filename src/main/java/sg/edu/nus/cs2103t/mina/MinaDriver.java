@@ -16,10 +16,8 @@ import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
-import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.utils.FileLockHelper;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
-import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
 import sg.edu.nus.cs2103t.mina.view.MinaView;
 import sg.edu.nus.cs2103t.mina.view.SplashScreen;
@@ -37,9 +35,6 @@ public class MinaDriver {
     private static final int DEFAULT_TASK_LIST_SIZE = 4;
 
     private static final String CLASS_NAME = MinaDriver.class.getName();
-    private static final String GUI = "gui";
-    private static final String CONSOLE = "console";
-    private static final String UNKOWN_TYPE_ERROR = "unkown";
 
     private static MinaDriver driver;
 
@@ -50,7 +45,6 @@ public class MinaDriver {
     private DataSyncManager dataSyncManager;
 
     private MinaDriver() {
-        super();
     }
 
     public static MinaDriver getMinaDriver() {
@@ -115,18 +109,9 @@ public class MinaDriver {
     }
 
     void showMinaView() {
-        switch (ConfigHelper.getProperty(ConfigHelper.VIEW_TYPE_KEY)) {
-            case GUI :
-                MinaGuiUI gui = new MinaGuiUI(commandManager);
-                gui.open();
-                uiView = gui;
-                break;
-            case CONSOLE :
-                uiView = new ConsoleUI(System.in, System.out, commandManager);
-                break;
-            default :
-                throw new Error(UNKOWN_TYPE_ERROR);
-        }
+        MinaGuiUI gui = new MinaGuiUI(commandManager);
+        gui.open();
+        uiView = gui;
         uiView.updateLists();
     }
 

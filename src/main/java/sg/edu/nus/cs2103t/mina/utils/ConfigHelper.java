@@ -23,7 +23,6 @@ public class ConfigHelper {
     public static final String EVENT_KEY = "event";
     public static final String DEADLINE_KEY = "deadline";
     public static final String TASK_MAP_KEY = "taskmap";
-    public static final String VIEW_TYPE_KEY = "viewtype";
     public static final String LOGGER_KEY = "logger";
     public static final String LOCK_KEY = "lockfilename";
 
