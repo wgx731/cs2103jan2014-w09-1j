@@ -72,6 +72,18 @@ public class MinaGuiUI extends MinaView {
     private static final String HELP_OPEN = "Help opened.";
     private static final String HELP_CLOSE = "Help closed.";
     private static final String HELP_INSTRUCTION = "Press F1 for Help.";
+    
+    private static final String CLASS_NAME = MinaGuiUI.class.getName();
+    
+    private final int _timerRate = 5000;
+    
+    private final int MIN_PAGE = 1;
+    
+    private final String UI_FONT = "Trebuchet MS";
+    private final String UI_FONT_2 = "Tahoma";
+    
+    private final String RIGHT_ARROW = "\u2192";
+    private final String LEFT_ARROW = "\u2190";
 
     private TaskView _taskView;
 
@@ -93,7 +105,6 @@ public class MinaGuiUI extends MinaView {
     private Timer _timer;
     private Calendar _dayPrev;
     private Calendar _dayCur;
-    private final int _timerRate = 5000;
     private String _statusPrev = "";
 
     private Text _userInputTextField;
@@ -127,11 +138,6 @@ public class MinaGuiUI extends MinaView {
     private Label _todoPrevPage;
     private Label _todoNextPage;
 
-    private final int MIN_PAGE = 1;
-
-    private final String RIGHT_ARROW = "\u2192";
-    private final String LEFT_ARROW = "\u2190";
-
     private LinkedList<String> _commandHistory;
     private int _positionInCommandHistory;
 
@@ -149,11 +155,7 @@ public class MinaGuiUI extends MinaView {
     private int SHELL_WIDTH;
     private int SHELL_HEIGHT;
 
-    private final String UI_FONT = "Trebuchet MS";
-    private final String UI_FONT_2 = "Tahoma";
     private int UI_FONT_SIZE;
-
-    private static final String CLASS_NAME = MinaGuiUI.class.getName();
 
     public MinaGuiUI(CommandManager commandController) {
         super(commandController);
@@ -422,13 +424,6 @@ public class MinaGuiUI extends MinaView {
         _isExpanded = false;
     }
 
-    private void initializeBackGroundBox() {
-        _backgroundBox = new StyledText(_shell, SWT.NONE);
-        _backgroundBox.setDoubleClickEnabled(false);
-        _backgroundBox.setEnabled(false);
-        _backgroundBox.setEditable(false);
-    }
-
     private void initializeTodoPanel() {
         initializeTodoLabel();
         initializeTodoPage();
@@ -589,6 +584,13 @@ public class MinaGuiUI extends MinaView {
                 SWT.BOLD));
         _lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
         _lblEvent.setText("Events(e)");
+    }
+
+    private void initializeBackGroundBox() {
+        _backgroundBox = new StyledText(_shell, SWT.NONE);
+        _backgroundBox.setDoubleClickEnabled(false);
+        _backgroundBox.setEnabled(false);
+        _backgroundBox.setEditable(false);
     }
 
     private void addAllListeners() {
