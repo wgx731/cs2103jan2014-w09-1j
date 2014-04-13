@@ -10,6 +10,50 @@
 	<packaging>jar</packaging>
 	<url>https://code.google.com/p/cs2103jan2014-w09-1j</url>
 
+	<developers>
+		<developer>
+			<id>wgx731</id>
+			<name>Wang Gaoxiang</name>
+			<email>wgx731@gmail.com</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>joannemah.j.w</id>
+			<name>Joanne Mah</name>
+			<email>joannemah.j.w@gmail.com</email>
+			<roles>
+				<role>designer</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>Ud.Connexus</id>
+			<name>Du Zhiyuan</name>
+			<email>Ud.Connexus@gmail.com</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>viettrung9012</id>
+			<name>Truong Viet Trung</name>
+			<email>viettrung9012@gmail.com</email>
+			<roles>
+				<role>tester</role>
+				<role>video editor</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
+
 	<issueManagement>
 		<url>https://code.google.com/p/cs2103jan2014-w09-1j/issues/list</url>
 		<system>Google Code</system>
@@ -57,6 +101,7 @@
 		<gson.version>2.2.4</gson.version>
 		<jkeymaster.version>1.1</jkeymaster.version>
 	</properties>
+
 	<repositories>
 		<repository>
 			<id>swt-repo</id>
@@ -67,6 +112,7 @@
 			<url>https://neptuno.uca.es/nexus/content/groups/release-repos</url>
 		</repository>
 	</repositories>
+
 	<profiles>
 		<profile>
 			<id>Linux-x86</id>
@@ -248,6 +294,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>${maven.jar.plugin.version}</version>
 				<configuration>
+					<finalName>${project.build.finalName}-${project.activeProfiles[0].id}</finalName>
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
