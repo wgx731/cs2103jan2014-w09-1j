@@ -8,7 +8,7 @@
 	<Appenders>
 		<Appender type="File" name="FILE" fileName="${filename}">
 			<Layout type="PatternLayout">
-				<Pattern>======%nTime: %d %nClass: %C{1.} [%t]%nMessage:[%p] %m%n======%n</Pattern>
+				<Pattern>======%nTime: %d [%t]%nClass: %logger{36}%nMessage: [%p] %m%n======%n</Pattern>
 			</Layout>
 		</Appender>
 	</Appenders>

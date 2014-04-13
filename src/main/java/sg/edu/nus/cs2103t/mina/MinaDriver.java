@@ -17,6 +17,7 @@ import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
+import sg.edu.nus.cs2103t.mina.utils.FileLockHelper;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 import sg.edu.nus.cs2103t.mina.view.ConsoleUI;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
@@ -31,6 +32,7 @@ import sg.edu.nus.cs2103t.mina.view.SplashScreen;
  */
 public class MinaDriver {
 
+    private static final String MINA_ALREADY_STARTED = "MINA already started.";
     private static final int ERROR_EXIT = -1;
     private static final int DEFAULT_TASK_LIST_SIZE = 4;
 
@@ -38,6 +40,8 @@ public class MinaDriver {
     private static final String GUI = "gui";
     private static final String CONSOLE = "console";
     private static final String UNKOWN_TYPE_ERROR = "unkown";
+
+    private static MinaDriver driver;
 
     private CommandManager commandManager;
     private TaskDataManager taskDataManager;
@@ -50,9 +54,11 @@ public class MinaDriver {
     }
 
     public static MinaDriver getMinaDriver() {
-        MinaDriver driver = new MinaDriver();
-        driver.showSplashScreen();
-        driver.showMinaView();
+        if (driver == null) {
+            driver = new MinaDriver();
+            driver.showSplashScreen();
+            driver.showMinaView();
+        }
         return driver;
     }
 
@@ -186,13 +192,21 @@ public class MinaDriver {
     }
 
     public static void main(String[] args) {
-        MinaDriver driver = MinaDriver.getMinaDriver();
-        try {
-            driver.processLoop();
-        } catch (Exception e) {
-            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
-            driver.getTaskDataManager().saveAllTasks();
-            System.exit(ERROR_EXIT);
+        FileLockHelper fileLockHelper = FileLockHelper
+                .getFileLockHelperInstance();
+        if (!fileLockHelper.isAppActive()) {
+            MinaDriver driver = MinaDriver.getMinaDriver();
+            try {
+                driver.processLoop();
+            } catch (Exception e) {
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+                driver.getTaskDataManager().saveAllTasks();
+                System.exit(ERROR_EXIT);
+            }
+        } else {
+            LogHelper.log(CLASS_NAME, Level.WARN, MINA_ALREADY_STARTED);
+            System.out.println(MINA_ALREADY_STARTED);
         }
     }
+
 }

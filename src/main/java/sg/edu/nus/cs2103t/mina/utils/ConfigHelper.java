@@ -25,6 +25,7 @@ public class ConfigHelper {
     public static final String TASK_MAP_KEY = "taskmap";
     public static final String VIEW_TYPE_KEY = "viewtype";
     public static final String LOGGER_KEY = "logger";
+    public static final String LOCK_KEY = "lockfilename";
 
     private static final String CLASS_NAME = ConfigHelper.class.getName();
 
