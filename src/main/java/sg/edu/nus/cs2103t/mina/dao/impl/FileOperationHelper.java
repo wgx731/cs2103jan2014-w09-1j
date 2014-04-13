@@ -44,6 +44,13 @@ public class FileOperationHelper {
         _taskMapfileExtension = taskMapFileExtension;
     }
 
+    FileOperationHelper(Map<TaskType, String> storageMap) {
+        _fileLocationMap = storageMap;
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
+    }
+
     public void cleanAll() {
         cleanTaskMapDao();
         cleanTaskSetDao();

@@ -18,11 +18,6 @@ import com.google.gson.JsonSyntaxException;
 /**
  * 
  * File based implementation for TaskSetDao
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 // @author A0105853H
 public class JsonFileTaskDaoImpl implements TaskDao {
@@ -49,9 +44,8 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         _fileOperationHelper.createTaskSetDaoFiles();
     }
 
-    JsonFileTaskDaoImpl(FileOperationHelper fileOperationHelper,
-            Map<TaskType, String> storageMap) {
-        _fileOperationHelper = fileOperationHelper;
+    JsonFileTaskDaoImpl(Map<TaskType, String> storageMap) {
+        _fileOperationHelper = new FileOperationHelper(storageMap);
         _fileOperationHelper.createTaskSetDaoFiles();
     }
 
