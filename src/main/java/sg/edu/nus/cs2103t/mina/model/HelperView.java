@@ -4,11 +4,6 @@ import java.util.ArrayList;
 
 /**
  * View class uses for help display
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 //@author A0099324X
 

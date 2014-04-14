@@ -161,13 +161,9 @@ public class TaskDataManager {
     private void updateFromDeadlineTasksSet() {
         Iterator<DeadlineTask> deadlineTaskIterator = _uncompletedDeadlineTasks
                 .iterator();
-
-        if (deadlineTaskIterator.hasNext()) {
-            DeadlineTask currDeadlineTask = deadlineTaskIterator.next();
-            while (deadlineTaskIterator.hasNext()) {
-                checkRecur(currDeadlineTask);
-                currDeadlineTask = deadlineTaskIterator.next();
-            }
+        DeadlineTask currDeadlineTask;
+        while (deadlineTaskIterator.hasNext()) {
+            currDeadlineTask = deadlineTaskIterator.next();
             checkRecur(currDeadlineTask);
         }
     }
@@ -175,13 +171,9 @@ public class TaskDataManager {
     private void updateFromEventTasksSet() {
         Iterator<EventTask> eventTaskIterator = _uncompletedEventTasks
                 .iterator();
-
-        if (eventTaskIterator.hasNext()) {
-            EventTask currEventTask = eventTaskIterator.next();
-            while (eventTaskIterator.hasNext()) {
-                checkRecur(currEventTask);
-                currEventTask = eventTaskIterator.next();
-            }
+        EventTask currEventTask;
+        while (eventTaskIterator.hasNext()) {
+            currEventTask = eventTaskIterator.next();
             checkRecur(currEventTask);
         }
     }
@@ -567,7 +559,8 @@ public class TaskDataManager {
                     } // else, leave the task there
                 }
                 if (listOfRecTasks.size() > 0) {
-                    _recurringTasks.put(recurTaskToDelete.getTag(), listOfRecTasks);
+                    _recurringTasks.put(recurTaskToDelete.getTag(),
+                            listOfRecTasks);
                 } else {
                     _recurringTasks.remove(recurTaskToDelete.getTag());
                 }
@@ -1079,5 +1072,5 @@ public class TaskDataManager {
         _uncompletedEventTasks.clear();
         _recurringTasks.clear();
     }
-    
+
 }

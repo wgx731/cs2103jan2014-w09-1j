@@ -29,7 +29,7 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  */
 // @author A0105853H
 
-public class JsonFileTaskSetDaoImplTest extends FileTaskSetDaoImplTest {
+public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
 
     private static final String EMPTY_STRING = "";
 

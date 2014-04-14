@@ -1,6 +1,7 @@
 package sg.edu.nus.cs2103t.mina.dao.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.junit.rules.TemporaryFolder;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
+import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 
@@ -23,7 +25,7 @@ import sg.edu.nus.cs2103t.mina.model.TodoTask;
  */
 //@author A0105853H
 
-public abstract class FileTaskSetDaoImplTest {
+public abstract class FileDaoImplTest {
 
     protected static final String TODO_DESCRIPTION = "This is a todo task.";
     protected static final String TODO_FILE_NAME = "todo";
@@ -38,6 +40,7 @@ public abstract class FileTaskSetDaoImplTest {
     protected SortedSet<TodoTask> sampleTodoTaskSet;
     protected SortedSet<EventTask> sampleEventTaskSet;
     protected SortedSet<DeadlineTask> sampleDeadlineTaskSet;
+    protected HashMap<String, ArrayList<Task<?>>> sampleTaskMap;
     protected Map<TaskType, String> storageMap;
 
     @Rule
@@ -65,6 +68,7 @@ public abstract class FileTaskSetDaoImplTest {
         sampleDeadlineTaskSet = new TreeSet<DeadlineTask>();
         sampleDeadlineTaskSet.add(new DeadlineTask(DEADLINE_DESCRIPTION,
                 endDate));
+        sampleTaskMap = new HashMap<String, ArrayList<Task<?>>>();
     }
 
     @After

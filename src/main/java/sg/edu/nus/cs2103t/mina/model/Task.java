@@ -6,13 +6,9 @@ import java.util.UUID;
 
 /**
  * Abstract model for Task
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  * @param <T>
  */
+//@author A0080412W
 public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final long serialVersionUID = 7038530852821069011L;
@@ -167,8 +163,6 @@ public abstract class Task<T> implements Comparable<T>, Serializable {
         sb.append(_priority);
         sb.append(", completed: ");
         sb.append(_isCompleted ? "yes)" : "no)");
-        // sb.append(" last modified: ");
-        // sb.append(_lastEditedTime);
         return sb.toString();
     }
 

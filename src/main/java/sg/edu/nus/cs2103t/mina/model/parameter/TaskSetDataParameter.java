@@ -8,11 +8,6 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 /**
  * 
  * Parameters for TaskDAO
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 
 public class TaskSetDataParameter {
