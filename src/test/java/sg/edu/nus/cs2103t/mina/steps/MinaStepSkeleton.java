@@ -211,5 +211,14 @@ public abstract class MinaStepSkeleton {
         Assert.assertNotEquals(UNKOWN_INDEX, listIndex);
         return bot.styledText(listIndex);
     }
-
+    
+    @Then("the <type> list at line number <dateline> should be <date>")
+    public void checkDate(@Named("type") String type, @Named("dateline") int dateLine, @Named("date") String date) {
+        date = date.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        date = date.replace(TAB, TAB_SEPARATOR);
+        SWTBotStyledText list = getList(type);
+        dateLine-=1;
+        Assert.assertNotNull(list);
+        Assert.assertEquals(list.getTextOnLine(dateLine), date);
+    }
 }
