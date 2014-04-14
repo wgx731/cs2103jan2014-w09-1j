@@ -42,9 +42,11 @@ public class AllKeyword extends Keyword {
         tokens.set(currIndex, null);
         return tokens;
     }
+    
     private void updateArgument(Argument argument) {
         argument.setKeywordValue(SimpleKeyword.ALL, EMPTY_DEFAULT);
     }
+    
     @Override
     public Map<String, String> getKeywordValues() {
         return null;
