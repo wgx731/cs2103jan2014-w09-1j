@@ -90,6 +90,7 @@ public class KeywordFactory {
      * 
      * @return
      */
+    @SuppressWarnings("unused")
     private static LinkedHashMap<String, Keyword> getAliasMap() {
         return _keywordAliasMap;
     }
