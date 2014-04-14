@@ -29,11 +29,6 @@ import com.rits.cloning.Cloner;
 
 /**
  * Processor class to process user input command
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 //@author A0099324X
 

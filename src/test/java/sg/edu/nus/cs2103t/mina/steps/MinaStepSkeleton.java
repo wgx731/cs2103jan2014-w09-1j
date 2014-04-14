@@ -5,10 +5,12 @@ import java.util.concurrent.CyclicBarrier;
 
 import org.apache.logging.log4j.Level;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
+import org.eclipse.wb.swt.SWTResourceManager;
 import org.jbehave.core.annotations.AfterStories;
 import org.jbehave.core.annotations.BeforeStories;
 import org.jbehave.core.annotations.Given;
@@ -26,9 +28,14 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 /**
  * Template class jbehave steps definition
  */
-//@author A0105853H
+// @author A0105853H
 
 public abstract class MinaStepSkeleton {
+
+    private static final String TAB_SEPARATOR = "\t";
+    private static final String LINE_SEPARATOR = "line.separator";
+    private static final String TAB = "\\t";
+    private static final String NEXT_LINE = "\\n";
 
     private static final String CLASS_NAME = MinaStepSkeleton.class.getName();
 
@@ -38,6 +45,9 @@ public abstract class MinaStepSkeleton {
     protected static final int EVENT_LIST_INDEX = 0;
     protected static final int DEADLINE_LIST_INDEX = 1;
     protected static final int TODO_LIST_INDEX = 2;
+    protected static final String TODO_TYPE = "todo";
+    protected static final String EVENT_TYPE = "event";
+    protected static final String DEADLINE_TYPE = "deadline";
 
     protected static final String EMPTY_COMMAND = "";
 
@@ -124,23 +134,59 @@ public abstract class MinaStepSkeleton {
         Assert.assertEquals(feedback, bot.label(FEEDBACK_LABEL_INDEX).getText());
     }
 
-    @Then("the <type> list should contains <task>")
+    @Then("the <type> list should contains <task> at line number <line>")
     public void listContains(@Named("type") String type,
-            @Named("task") String task) {
+            @Named("task") String task, @Named("line") int line) {
         // NOTE: replace new line and tab
-        task = task.replace("\\n", System.getProperty("line.separator"));
-        task = task.replace("\\t", "\t");
+        task = task.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        task = task.replace(TAB, TAB_SEPARATOR);
+        int lineNum = line - 1;
         SWTBotStyledText list = getList(type);
         Assert.assertNotNull(list);
-        Assert.assertTrue(list.getText().contains(task));
+        Assert.assertEquals(list.getTextOnLine(lineNum), task);
+    }
+
+    @Then("the <type> list at line number <line> should be in <color> color")
+    public void listContains(@Named("type") String type,
+            @Named("line") int line, @Named("color") String color) {
+        int lineNum = line - 1;
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Color colorCode = getColorCode(color);
+        Assert.assertEquals(colorCode, list.getStyle(lineNum, list
+                .getTextOnLine(lineNum).length() - 1).foreground);
+    }
+
+    private Color getColorCode(String color) throws Error {
+        Color colorCode;
+        switch (color) {
+            case "gray" :
+                colorCode = SWTResourceManager.getColor(192, 192, 192);
+                break;
+            case "orange" :
+                colorCode = SWTResourceManager.getColor(247, 150, 70);
+                break;
+            case "yellow" :
+                colorCode = SWTResourceManager.getColor(225, 212, 113);
+                break;
+            case "white" :
+                colorCode = SWTResourceManager.getColor(255, 255, 255);
+                break;
+            case "green" :
+                colorCode = SWTResourceManager.getColor(155, 187, 89);
+                break;
+            default :
+                throw new Error("Unkown color");
+        }
+        return colorCode;
     }
 
     @Then("the <type> list should not contains <task>")
     public void listNotContains(@Named("type") String type,
             @Named("task") String task) {
         // NOTE: replace new line and tab
-        task = task.replace("\\n", System.getProperty("line.separator"));
-        task = task.replace("\\t", "\t");
+        task = task.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        task = task.replace(TAB, TAB_SEPARATOR);
         SWTBotStyledText list = getList(type);
         Assert.assertNotNull(list);
         Assert.assertFalse(list.getText().contains(task));
@@ -149,13 +195,13 @@ public abstract class MinaStepSkeleton {
     private SWTBotStyledText getList(String type) {
         int listIndex = UNKOWN_INDEX;
         switch (type) {
-            case "todo" :
+            case TODO_TYPE :
                 listIndex = TODO_LIST_INDEX;
                 break;
-            case "event" :
+            case EVENT_TYPE :
                 listIndex = EVENT_LIST_INDEX;
                 break;
-            case "deadline" :
+            case DEADLINE_TYPE :
                 listIndex = DEADLINE_LIST_INDEX;
                 break;
             default :
