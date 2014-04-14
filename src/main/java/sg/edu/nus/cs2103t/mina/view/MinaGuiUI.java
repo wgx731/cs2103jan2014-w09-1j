@@ -14,6 +14,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -57,7 +58,19 @@ import com.tulskiy.keymaster.common.Provider;
 
 public class MinaGuiUI extends MinaView {
 
-    private static final String MENU_EXIT = "Exit";
+    private static final Color COLOR_SELECTION_BOX_YELLOW = SWTResourceManager.getColor(153, 153, 51);
+	private static final Color COLOR_TEXT_YELLOW = SWTResourceManager.getColor(225, 212, 113);
+	private static final Color COLOR_TEXT_GRAY = SWTResourceManager.getColor(SWT.COLOR_GRAY);
+	private static final Color COLOR_STATUS_BLUE = SWTResourceManager.getColor(91, 192, 222);
+	private static final Color COLOR_AUTOCOMPLETE_YELLOW = SWTResourceManager.getColor(247, 150, 70);
+	private static final Color COLOR_AUTOCOMPLETE_GREEN = SWTResourceManager.getColor(155, 187, 89);
+	private static final Color COLOR_STATUS_ORANGE = SWTResourceManager.getColor(217, 83, 79);
+	private static final Color COLOR_STATUS_GREEN = SWTResourceManager.getColor(92, 184, 92);
+	private static final Color COLOR_INPUT_DARKGREEN = SWTResourceManager.getColor(0, 51, 0);
+	private static final Color COLOR_WHITE = SWTResourceManager.getColor(SWT.COLOR_WHITE);
+	private static final Color COLOR_BLACK = SWTResourceManager.getColor(SWT.COLOR_BLACK);
+	private static final Color COLOR_BACKGROUND_GRAY = SWTResourceManager.getColor(89, 89, 89);
+	private static final String MENU_EXIT = "Exit";
     private static final String MENU_OPEN = "Open";
     private static final String HIDE_SHOW_HOT_KEY = "alt F12";
     private static final String EMPTY_STRING = "";
@@ -344,9 +357,6 @@ public class MinaGuiUI extends MinaView {
         resetPanel();
     }
 
-    /**
-     * 
-     */
     private void updateCalendar() {
         _today = Calendar.getInstance();
         _tomorrow = Calendar.getInstance();
@@ -357,7 +367,7 @@ public class MinaGuiUI extends MinaView {
 
     private void initializeShell() {
         _shell = new Shell(_display, SWT.NO_TRIM);
-        _shell.setBackground(SWTResourceManager.getColor(0, 0, 0));
+        _shell.setBackground(COLOR_BLACK);
         _shell.setSize(SHELL_WIDTH, SHELL_HEIGHT);
         _shell.setText("MINA");
     }
@@ -367,17 +377,16 @@ public class MinaGuiUI extends MinaView {
         _helpWindow.setDoubleClickEnabled(false);
         _helpWindow.setEnabled(false);
         _helpWindow.setEditable(false);
-        _helpWindow.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _helpWindow.setForeground(COLOR_WHITE);
         _helpWindow.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
-        _helpWindow.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _helpWindow.setBackground(COLOR_BACKGROUND_GRAY);
 
         _helpWindowBorder = new StyledText(_shell, SWT.NONE);
         _helpWindowBorder.setDoubleClickEnabled(false);
         _helpWindowBorder.setEnabled(false);
         _helpWindowBorder.setEditable(false);
-        _helpWindowBorder.setBackground(SWTResourceManager
-                .getColor(SWT.COLOR_BLACK));
+        _helpWindowBorder.setBackground(COLOR_BLACK);
 
         _helpWindowBorder.setBounds(0, 0, SHELL_WIDTH, SHELL_HEIGHT - 40);
         _helpWindow.setBounds(5, 5, SHELL_WIDTH - 10, SHELL_HEIGHT - 50);
@@ -391,7 +400,7 @@ public class MinaGuiUI extends MinaView {
         _statusBar = new Label(_shell, SWT.NONE);
         _statusBar.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
-        _statusBar.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _statusBar.setBackground(COLOR_WHITE);
         _statusBar.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 540,
                 (SHELL_WIDTH - 16) / 3, 36);
     }
@@ -399,7 +408,7 @@ public class MinaGuiUI extends MinaView {
     private void initializeUserInputTextField() {
         _userInputTextField = new Text(_shell, SWT.NONE);
         _userInputTextField
-                .setForeground(SWTResourceManager.getColor(0, 51, 0));
+                .setForeground(COLOR_INPUT_DARKGREEN);
         _userInputTextField.setFont(SWTResourceManager.getFont(UI_FONT,
                 UI_FONT_SIZE, SWT.NORMAL));
         _userInputTextField.setBounds(4, 540, (SHELL_WIDTH - 16) / 3 * 2 + 4,
@@ -434,45 +443,42 @@ public class MinaGuiUI extends MinaView {
         _todoListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
         _todoListUI.setEnabled(false);
         _todoListUI.setEditable(false);
-        _todoListUI.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _todoListUI.setForeground(COLOR_WHITE);
         _todoListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
-        _todoListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _todoListUI.setBackground(COLOR_BACKGROUND_GRAY);
     }
 
     private void initializeTodoPage() {
         _todoNextPage = new Label(_shell, SWT.NONE);
-        _todoNextPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _todoNextPage.setForeground(COLOR_WHITE);
         _todoNextPage
                 .setFont(SWTResourceManager.getFont(UI_FONT, 20, SWT.BOLD));
-        _todoNextPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _todoNextPage.setBackground(COLOR_BACKGROUND_GRAY);
         _todoNextPage.setAlignment(SWT.CENTER);
 
         _todoPrevPage = new Label(_shell, SWT.NONE);
-        _todoPrevPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _todoPrevPage.setForeground(COLOR_WHITE);
         _todoPrevPage
                 .setFont(SWTResourceManager.getFont(UI_FONT, 20, SWT.BOLD));
-        _todoPrevPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _todoPrevPage.setBackground(COLOR_BACKGROUND_GRAY);
         _todoPrevPage.setAlignment(SWT.CENTER);
 
         _todoPageLabel = new Label(_shell, SWT.NONE);
-        _todoPageLabel.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _todoPageLabel.setForeground(COLOR_WHITE);
         _todoPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.NORMAL));
-        _todoPageLabel.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _todoPageLabel.setBackground(COLOR_BACKGROUND_GRAY);
         _todoPageLabel.setAlignment(SWT.CENTER);
     }
 
     private void initializeTodoLabel() {
         _lblTodo = new Label(_shell, SWT.NONE);
         _lblTodo.setAlignment(SWT.CENTER);
-        _lblTodo.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _lblTodo.setForeground(COLOR_WHITE);
         _lblTodo.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
-        _lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
         _lblTodo.setText("To-do(td)");
     }
 
@@ -486,39 +492,34 @@ public class MinaGuiUI extends MinaView {
         _deadlineListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
         _deadlineListUI.setEnabled(false);
         _deadlineListUI.setEditable(false);
-        _deadlineListUI.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _deadlineListUI.setForeground(COLOR_WHITE);
         _deadlineListUI.setFont(SWTResourceManager.getFont(UI_FONT,
                 UI_FONT_SIZE, SWT.NORMAL));
-        _deadlineListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _deadlineListUI.setBackground(COLOR_BACKGROUND_GRAY);
     }
 
     private void initializeDeadlinePage() {
         _deadlinePrevPage = new Label(_shell, SWT.NONE);
-        _deadlinePrevPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _deadlinePrevPage.setForeground(COLOR_WHITE);
         _deadlinePrevPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _deadlinePrevPage
-                .setBackground(SWTResourceManager.getColor(89, 89, 89));
+                .setBackground(COLOR_BACKGROUND_GRAY);
         _deadlinePrevPage.setAlignment(SWT.CENTER);
 
         _deadlineNextPage = new Label(_shell, SWT.NONE);
-        _deadlineNextPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _deadlineNextPage.setForeground(COLOR_WHITE);
         _deadlineNextPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
         _deadlineNextPage
-                .setBackground(SWTResourceManager.getColor(89, 89, 89));
+                .setBackground(COLOR_BACKGROUND_GRAY);
         _deadlineNextPage.setAlignment(SWT.CENTER);
 
         _deadlinePageLabel = new Label(_shell, SWT.NONE);
-        _deadlinePageLabel.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _deadlinePageLabel.setForeground(COLOR_WHITE);
         _deadlinePageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.NORMAL));
-        _deadlinePageLabel.setBackground(SWTResourceManager
-                .getColor(89, 89, 89));
+        _deadlinePageLabel.setBackground(COLOR_BACKGROUND_GRAY);
         _deadlinePageLabel.setAlignment(SWT.CENTER);
     }
 
@@ -526,10 +527,10 @@ public class MinaGuiUI extends MinaView {
         _lblDeadline = new Label(_shell, SWT.NONE);
         _lblDeadline.setAlignment(SWT.CENTER);
         _lblDeadline
-                .setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+                .setForeground(COLOR_WHITE);
         _lblDeadline.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
-        _lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
         _lblDeadline.setText("Deadlines(d)");
     }
 
@@ -544,45 +545,42 @@ public class MinaGuiUI extends MinaView {
         _eventListUI.setEnabled(false);
         _eventListUI.setEditable(false);
         _eventListUI
-                .setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+                .setForeground(COLOR_WHITE);
         _eventListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
-        _eventListUI.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _eventListUI.setBackground(COLOR_BACKGROUND_GRAY);
     }
 
     private void initializeEventPage() {
         _eventPrevPage = new Label(_shell, SWT.NONE);
-        _eventPrevPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _eventPrevPage.setForeground(COLOR_WHITE);
         _eventPrevPage.setFont(SWTResourceManager
                 .getFont(UI_FONT, 20, SWT.BOLD));
-        _eventPrevPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _eventPrevPage.setBackground(COLOR_BACKGROUND_GRAY);
         _eventPrevPage.setAlignment(SWT.CENTER);
 
         _eventNextPage = new Label(_shell, SWT.NONE);
-        _eventNextPage.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _eventNextPage.setForeground(COLOR_WHITE);
         _eventNextPage.setFont(SWTResourceManager
                 .getFont(UI_FONT, 20, SWT.BOLD));
-        _eventNextPage.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _eventNextPage.setBackground(COLOR_BACKGROUND_GRAY);
         _eventNextPage.setAlignment(SWT.CENTER);
 
         _eventPageLabel = new Label(_shell, SWT.NONE);
-        _eventPageLabel.setForeground(SWTResourceManager
-                .getColor(SWT.COLOR_WHITE));
+        _eventPageLabel.setForeground(COLOR_WHITE);
         _eventPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.NORMAL));
-        _eventPageLabel.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _eventPageLabel.setBackground(COLOR_BACKGROUND_GRAY);
         _eventPageLabel.setAlignment(SWT.CENTER);
     }
 
     private void initializeEventLabel() {
         _lblEvent = new Label(_shell, SWT.NONE);
         _lblEvent.setAlignment(SWT.CENTER);
-        _lblEvent.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        _lblEvent.setForeground(COLOR_WHITE);
         _lblEvent.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
-        _lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
         _lblEvent.setText("Events(e)");
     }
 
@@ -649,17 +647,14 @@ public class MinaGuiUI extends MinaView {
                             }
                             if (MIN_PAGE <= page && page <= maxPage) {
                                 setPage(page);
-                                _statusBar.setBackground(SWTResourceManager
-                                        .getColor(92, 184, 92));
+                                _statusBar.setBackground(COLOR_STATUS_GREEN);
                                 _statusBar.setText(PAGE_SUCCESS);
                             } else {
-                                _statusBar.setBackground(SWTResourceManager
-                                        .getColor(217, 83, 79));
+                                _statusBar.setBackground(COLOR_STATUS_ORANGE);
                                 _statusBar.setText(PAGE_INVALID);
                             }
                         } catch (Exception e) {
-                            _statusBar.setBackground(SWTResourceManager
-                                    .getColor(217, 83, 79));
+                            _statusBar.setBackground(COLOR_STATUS_ORANGE);
                             _statusBar.setText(PAGE_INVALID);
                             LogHelper.log(CLASS_NAME, Level.ERROR,
                                     e.getMessage());
@@ -898,10 +893,10 @@ public class MinaGuiUI extends MinaView {
     private void setAutoComplete() {
         _isAutoComplete ^= true;
         if (_isAutoComplete) {
-            _statusBar.setBackground(SWTResourceManager.getColor(155, 187, 89));
+            _statusBar.setBackground(COLOR_AUTOCOMPLETE_GREEN);
             _statusBar.setText("\tAutoComplete Enabled");
         } else {
-            _statusBar.setBackground(SWTResourceManager.getColor(247, 150, 70));
+            _statusBar.setBackground(COLOR_AUTOCOMPLETE_YELLOW);
             _statusBar.setText("\tAutoComplete Disabled");
         }
     }
@@ -932,16 +927,13 @@ public class MinaGuiUI extends MinaView {
                 String outputMessage = _taskView.getStatus();
                 _shell.setCursor(_display.getSystemCursor(SWT.CURSOR_ARROW));
                 if (outputMessage.contains("Error")) {
-                    _statusBar.setBackground(SWTResourceManager.getColor(217,
-                            83, 79));
+                    _statusBar.setBackground(COLOR_STATUS_ORANGE);
                     _statusBar.setText(ERROR);
                 } else if (outputMessage.contains("Invalid")) {
-                    _statusBar.setBackground(SWTResourceManager.getColor(247,
-                            150, 70));
+                    _statusBar.setBackground(COLOR_AUTOCOMPLETE_YELLOW);
                     _statusBar.setText(INVALID_COMMAND);
                 } else {
-                    _statusBar.setBackground(SWTResourceManager.getColor(92,
-                            184, 92));
+                    _statusBar.setBackground(COLOR_STATUS_GREEN);
                     if (outputMessage.contains("Welcome")) {
                         _statusBar.setText(outputMessage);
                     } else {
@@ -958,8 +950,7 @@ public class MinaGuiUI extends MinaView {
             @Override
             public void run() {
                 _statusBar.setText(BUSY);
-                _statusBar.setBackground(SWTResourceManager.getColor(91, 192,
-                        222));
+                _statusBar.setBackground(COLOR_STATUS_BLUE);
                 _shell.setCursor(_display.getSystemCursor(SWT.CURSOR_WAIT));
                 _display.update();
             }
@@ -1010,8 +1001,7 @@ public class MinaGuiUI extends MinaView {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
                     eventStyle.length = currentDateString.length();
-                    eventStyle.foreground = SWTResourceManager
-                            .getColor(SWT.COLOR_GRAY);
+                    eventStyle.foreground = COLOR_TEXT_GRAY;
                     _eventListUI.append(currentDateString);
                     _eventListUI.setStyleRange(eventStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1019,8 +1009,7 @@ public class MinaGuiUI extends MinaView {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = "Yesterday\n";
                     eventStyle.length = currentDateString.length();
-                    eventStyle.foreground = SWTResourceManager
-                            .getColor(SWT.COLOR_GRAY);
+                    eventStyle.foreground = COLOR_TEXT_GRAY;
                     _eventListUI.append(currentDateString);
                     _eventListUI.setStyleRange(eventStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1028,8 +1017,7 @@ public class MinaGuiUI extends MinaView {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = "Today\n";
                     eventStyle.length = currentDateString.length();
-                    eventStyle.foreground = SWTResourceManager.getColor(247,
-                            150, 70);
+                    eventStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
                     _eventListUI.append(currentDateString);
                     _eventListUI.setStyleRange(eventStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1037,8 +1025,7 @@ public class MinaGuiUI extends MinaView {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = "Tomorrow\n";
                     eventStyle.length = currentDateString.length();
-                    eventStyle.foreground = SWTResourceManager.getColor(225,
-                            212, 113);
+                    eventStyle.foreground = COLOR_TEXT_YELLOW;
                     _eventListUI.append(currentDateString);
                     _eventListUI.setStyleRange(eventStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1046,8 +1033,7 @@ public class MinaGuiUI extends MinaView {
                     eventStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
                     eventStyle.length = currentDateString.length();
-                    eventStyle.foreground = SWTResourceManager.getColor(155,
-                            187, 89);
+                    eventStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
                     _eventListUI.append(currentDateString);
                     _eventListUI.setStyleRange(eventStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1114,8 +1100,7 @@ public class MinaGuiUI extends MinaView {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
                     deadlineStyle.length = currentDateString.length();
-                    deadlineStyle.foreground = SWTResourceManager
-                            .getColor(SWT.COLOR_GRAY);
+                    deadlineStyle.foreground = COLOR_TEXT_GRAY;
                     _deadlineListUI.append(currentDateString);
                     _deadlineListUI.setStyleRange(deadlineStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1123,8 +1108,7 @@ public class MinaGuiUI extends MinaView {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = "Yesterday\n";
                     deadlineStyle.length = currentDateString.length();
-                    deadlineStyle.foreground = SWTResourceManager
-                            .getColor(SWT.COLOR_GRAY);
+                    deadlineStyle.foreground = COLOR_TEXT_GRAY;
                     _deadlineListUI.append(currentDateString);
                     _deadlineListUI.setStyleRange(deadlineStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1132,8 +1116,7 @@ public class MinaGuiUI extends MinaView {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = "Today\n";
                     deadlineStyle.length = currentDateString.length();
-                    deadlineStyle.foreground = SWTResourceManager.getColor(247,
-                            150, 70);
+                    deadlineStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
                     _deadlineListUI.append(currentDateString);
                     _deadlineListUI.setStyleRange(deadlineStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1141,8 +1124,7 @@ public class MinaGuiUI extends MinaView {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = "Tomorrow\n";
                     deadlineStyle.length = currentDateString.length();
-                    deadlineStyle.foreground = SWTResourceManager.getColor(225,
-                            212, 113);
+                    deadlineStyle.foreground = COLOR_TEXT_YELLOW;
                     _deadlineListUI.append(currentDateString);
                     _deadlineListUI.setStyleRange(deadlineStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1150,8 +1132,7 @@ public class MinaGuiUI extends MinaView {
                     deadlineStyle.start = initialCursorPosition;
                     currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
                     deadlineStyle.length = currentDateString.length();
-                    deadlineStyle.foreground = SWTResourceManager.getColor(155,
-                            187, 89);
+                    deadlineStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
                     _deadlineListUI.append(currentDateString);
                     _deadlineListUI.setStyleRange(deadlineStyle);
                     initialCursorPosition += currentDateString.length();
@@ -1210,14 +1191,11 @@ public class MinaGuiUI extends MinaView {
             todoStyle.start = initialCursorPosition;
             todoStyle.length = todoString.length();
             if (todo.getPriority() == 'H') {
-                todoStyle.foreground = SWTResourceManager
-                        .getColor(247, 150, 70);
+                todoStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
             } else if (todo.getPriority() == 'M') {
-                todoStyle.foreground = SWTResourceManager.getColor(225, 212,
-                        113);
+                todoStyle.foreground = COLOR_TEXT_YELLOW;
             } else {
-                todoStyle.foreground = SWTResourceManager
-                        .getColor(155, 187, 89);
+                todoStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
             }
             _todoListUI.setStyleRange(todoStyle);
             initialCursorPosition += todoString.length();
@@ -1321,20 +1299,20 @@ public class MinaGuiUI extends MinaView {
 
     private void showEvent() {
         _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 36);
-        _lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
         setEventPanelSize(4, 40, (SHELL_WIDTH - 16) / 3, 496);
     }
 
     private void hideEvent() {
         _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 32);
-        _lblEvent.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+        _lblEvent.setBackground(COLOR_BLACK);
         setEventPanelSize(4, 40, (SHELL_WIDTH - 16) / 3, 0);
     }
 
     private void showDeadline() {
         _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
                 (SHELL_WIDTH - 16) / 3, 36);
-        _lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
         setDeadlinePanelSize((SHELL_WIDTH - 16) / 3 + 8, 40,
                 (SHELL_WIDTH - 16) / 3, 496);
     }
@@ -1343,7 +1321,7 @@ public class MinaGuiUI extends MinaView {
         _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
                 (SHELL_WIDTH - 16) / 3, 32);
         _lblDeadline
-                .setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+                .setBackground(COLOR_BLACK);
         setDeadlinePanelSize((SHELL_WIDTH - 16) / 3 + 8, 40,
                 (SHELL_WIDTH - 16) / 3, 0);
     }
@@ -1351,7 +1329,7 @@ public class MinaGuiUI extends MinaView {
     private void showTodo() {
         _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
                 (SHELL_WIDTH - 16) / 3, 36);
-        _lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
         setTodoPanelSize((SHELL_WIDTH - 16) / 3 * 2 + 12, 40,
                 (SHELL_WIDTH - 16) / 3, 496);
     }
@@ -1359,7 +1337,7 @@ public class MinaGuiUI extends MinaView {
     private void hideTodo() {
         _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
                 (SHELL_WIDTH - 16) / 3, 32);
-        _lblTodo.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+        _lblTodo.setBackground(COLOR_BLACK);
         setTodoPanelSize((SHELL_WIDTH - 16) / 3 * 2 + 12, 40,
                 (SHELL_WIDTH - 16) / 3, 0);
     }
@@ -1377,19 +1355,18 @@ public class MinaGuiUI extends MinaView {
     }
 
     private void hideBackgroundBox() {
-        _backgroundBox.setBackground(SWTResourceManager
-                .getColor(SWT.COLOR_BLACK));
+        _backgroundBox.setBackground(COLOR_BLACK);
     }
 
     private void showBackgroundBox() {
-        _backgroundBox.setBackground(SWTResourceManager.getColor(153, 153, 51));
+        _backgroundBox.setBackground(COLOR_SELECTION_BOX_YELLOW);
     }
 
     private void expandEvent() {
         hideDeadline();
         hideTodo();
         _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 36);
-        _lblEvent.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
         setEventPanelSize(4, 40, SHELL_WIDTH - 8, 496);
         hideBackgroundBox();
         _isExpanded = true;
@@ -1400,7 +1377,7 @@ public class MinaGuiUI extends MinaView {
         hideTodo();
         _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
                 (SHELL_WIDTH - 16) / 3, 36);
-        _lblDeadline.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
         setDeadlinePanelSize(4, 40, SHELL_WIDTH - 8, 496);
         hideBackgroundBox();
         _isExpanded = true;
@@ -1411,7 +1388,7 @@ public class MinaGuiUI extends MinaView {
         hideEvent();
         _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
                 (SHELL_WIDTH - 16) / 3, 36);
-        _lblTodo.setBackground(SWTResourceManager.getColor(89, 89, 89));
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
         setTodoPanelSize(4, 40, SHELL_WIDTH - 8, 496);
         hideBackgroundBox();
         _isExpanded = true;
@@ -1485,7 +1462,7 @@ public class MinaGuiUI extends MinaView {
     }
 
     private void startHelpWindows() {
-        _statusBar.setBackground(SWTResourceManager.getColor(92, 184, 92));
+        _statusBar.setBackground(COLOR_STATUS_GREEN);
         _statusBar.setText(HELP_OPEN);
         _helpWindowBorder.setVisible(true);
         _helpWindow.setVisible(true);

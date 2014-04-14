@@ -700,6 +700,17 @@ public class CommandProcessor {
 		for (String word : parameterString.split(" ")) {
 			parameters.add(word);
 		}
+		if (parameters.size()==2){
+			modifyParam = null;
+			return modifyParam;
+		}
+		boolean isContainModifyTags = parameters.contains("-description")||
+				parameters.contains("-totype")||parameters.contains("-end")||
+				parameters.contains("-start")||parameters.contains("-priority");
+		if (!isContainModifyTags){
+			modifyParam = null;
+			return modifyParam;
+		}
 		TaskType original = processTaskTypeFromString(parameters
 				.get(FISRT_ARRAY_INDEX));
 		modifyParam.setOriginalTaskType(original);
@@ -730,9 +741,17 @@ public class CommandProcessor {
 		if (modifyTask.getTag().contains("RECUR")) {
 			modifyParam.setTag("RECUR");
 		}
-
+		
+		boolean isContainOnlyDescription = parameters.contains("-description")&&
+				!parameters.contains("-totype")&&!parameters.contains("-end")&&
+				!parameters.contains("-start")&&!parameters.contains("-priority");
 		if (parameters.contains("-all")) {
-			modifyParam.setModifyAll(true);
+			if (isContainOnlyDescription){
+				modifyParam.setModifyAll(true);
+			} else {
+				modifyParam = null;
+				return modifyParam;
+			}
 		}
 
 		if (parameters.contains("-every")) {

@@ -30,6 +30,16 @@ public class FileTaskMapDaoImpTest extends FileDaoImplTest {
     public void setUp() throws Exception {
         super.setUp();
         _storage = new FileTaskMapDaoImpl();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        _storage.getFileOperationHelper().cleanTaskMapDao();
+        _storage = null;
+    }
+
+    private void saveTestData() {
         try {
             _storage.saveTaskMap(new TaskMapDataParameter(sampleTaskMap,
                     MAX_RECUR_INT));
@@ -40,15 +50,9 @@ public class FileTaskMapDaoImpTest extends FileDaoImplTest {
         }
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        _storage.getFileOperationHelper().cleanTaskMapDao();
-        _storage = null;
-    }
-
     @Test
     public void testLoadTaskMapNormal() {
+        saveTestData();
         TaskMapDataParameter loadedData;
         loadedData = _storage.loadTaskMap();
         Assert.assertNotNull(loadedData);
@@ -58,6 +62,7 @@ public class FileTaskMapDaoImpTest extends FileDaoImplTest {
 
     @Test
     public void testLoadCorruptedTaskMapFile() {
+        saveTestData();
         rewriteFile(new File(_storage.getFileOperationHelper()
                 .getTaskMapFileLocation()));
         TaskMapDataParameter loadedTaskMap = _storage.loadTaskMap();
@@ -78,7 +83,6 @@ public class FileTaskMapDaoImpTest extends FileDaoImplTest {
 
     @Override
     public void testLoadEmptyFile() {
-        _storage.getFileOperationHelper().cleanTaskMapDao();
         TaskMapDataParameter loadedTaskMap = _storage.loadTaskMap();
         Assert.assertNull(loadedTaskMap);
     }
