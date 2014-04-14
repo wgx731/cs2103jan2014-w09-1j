@@ -186,8 +186,7 @@ public class UICommandHelper {
 			add("edit [task type][index] -priority [new priority H/M/L]");
 			add("edit [task type][index] -end [date time]");
 			add("change [task type][index] -start [date/time] -end [date/time]");
-			add("modify [recurring tasktype] -every [hour/day/week/month/year] -until [date time]");
-			add("change [recurring tasktype] [description] -start [date time] -end [date time] -all");
+			add("change [recurring tasktype] [description] -all");
 		}
 	};
 	
