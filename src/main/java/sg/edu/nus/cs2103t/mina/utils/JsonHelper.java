@@ -25,13 +25,10 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Helper class to translate between json and java objects
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * Helper class convert between json and task tree set
  */
+//@author A0105853H
+
 public class JsonHelper {
 
     private static final String KEY_ID = "_id";
@@ -43,12 +40,14 @@ public class JsonHelper {
     private static final String KEY_LAST_EDITED_TIME = "_lastEditedTime";
     private static final String KEY_START_TIME = "_startTime";
     private static final String KEY_END_TIME = "_endTime";
+    private static final String RECUR_TAG = "RECUR";
+    private static final String DEFAULT_TAG = "";
+    private static final String EMPTY_STRING = "";
 
     private static final String DATE_FORMAT = "EEEE, dd/MM/yyyy/HH:mm:ss.SSS";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(
             DATE_FORMAT);
 
-    private static final String EMPTY_STRING = "";
 
     private static class EventTaskDeserializer implements
             JsonDeserializer<EventTask> {
@@ -62,6 +61,9 @@ public class JsonHelper {
             TaskType taskType = TaskType.EVENT;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
             String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;
@@ -102,6 +104,9 @@ public class JsonHelper {
             TaskType taskType = TaskType.DEADLINE;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
             String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;
@@ -139,6 +144,9 @@ public class JsonHelper {
             TaskType taskType = TaskType.TODO;
             String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
             String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
             char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
             if (!Task.isValidPriority(priority)) {
                 isValidJson = false;

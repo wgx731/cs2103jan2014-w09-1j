@@ -16,10 +16,17 @@ import org.eclipse.swt.widgets.Shell;
 
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 
+/**
+ * This is the splash screen to be shown during application start time
+ */
+//@author A0105853H
+
 public class SplashScreen {
 
     private final int SPLASH_MAX = 100;
     private final int SPLASH_MIN = 0;
+
+    private static SplashScreen _splashScreen;
 
     private int _progress;
     private Display _display;
@@ -66,7 +73,10 @@ public class SplashScreen {
     }
 
     public static SplashScreen getInstance(Display display, List<Runnable> tasks) {
-        return new SplashScreen(display, tasks);
+        if (_splashScreen == null) {
+            _splashScreen = new SplashScreen(display, tasks);
+        }
+        return _splashScreen;
     }
 
     public void open() {

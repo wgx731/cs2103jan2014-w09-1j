@@ -7,11 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.junit.Test;
 
-import sg.edu.nus.cs2103t.mina.controller.TaskFilterManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
@@ -19,15 +17,17 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
-//@author Du Zhiyuan
+//@author A0099151B
+
 public class TaskFilterManagerSearchTest {
 
     private TaskDataManagerStub tdmStub = new TaskDataManagerStub();
     private TaskFilterManager tfmTest = new TaskFilterManager(tdmStub);
-    private static Logger logger = LogManager
-            .getLogger(TaskFilterManagerSearchTest.class.getName());
-       
+    private static final String CLASS_NAME = TaskFilterManagerSearchTest.class
+            .getName();
+
     @Test
     public void testEmptySearch() {
         // TODO Splitting by " " may have unintended effects,
@@ -61,8 +61,8 @@ public class TaskFilterManagerSearchTest {
     public void testTwoWordsAndMore() {
 
         ArrayList<Task<?>> test = getResult("deadline event");
-        int expectedSize = tdmStub.getUncompletedDeadlineTasks().size()
-                + tdmStub.getUncompletedEventTasks().size();
+        int expectedSize = tdmStub.getUncompletedDeadlineTasks().size() + tdmStub
+                .getUncompletedEventTasks().size();
         assertTrue("Must contain deadline and event",
                 test.size() == expectedSize && compareToActualTasks(test));
 
@@ -135,16 +135,19 @@ public class TaskFilterManagerSearchTest {
 
         for (Task<?> task : test) {
             if (task instanceof TodoTask && !todos.contains((TodoTask) task)) {
-                logger.info((TodoTask) task);
+                LogHelper.log(CLASS_NAME, Level.INFO,
+                        ((TodoTask) task).toString());
                 return false;
             }
             if (task instanceof EventTask && !events.contains((EventTask) task)) {
-                logger.info((EventTask) task);
+                LogHelper.log(CLASS_NAME, Level.INFO,
+                        ((EventTask) task).toString());
                 return false;
             }
-            if (task instanceof DeadlineTask
-                    && !deadlines.contains((DeadlineTask) task)) {
-                logger.info((DeadlineTask) task);
+            if (task instanceof DeadlineTask && !deadlines
+                    .contains((DeadlineTask) task)) {
+                LogHelper.log(CLASS_NAME, Level.INFO,
+                        ((DeadlineTask) task).toString());
                 return false;
             }
 
@@ -166,14 +169,15 @@ public class TaskFilterManagerSearchTest {
         }
 
         searchParam = new SearchParameter(keywords);
-        HashMap<TaskType, ArrayList<Task<?>>> resultMap = tfmTest.searchTasks(searchParam);
-        
+        HashMap<TaskType, ArrayList<Task<?>>> resultMap = tfmTest
+                .searchTasks(searchParam);
+
         ArrayList<Task<?>> result = new ArrayList<Task<?>>();
-        
-        for(TaskType type: resultMap.keySet()) {
+
+        for (TaskType type : resultMap.keySet()) {
             result.addAll(resultMap.get(type));
         }
-        
+
         return result;
 
     }

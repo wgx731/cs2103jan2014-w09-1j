@@ -4,12 +4,9 @@ import java.util.Date;
 
 /**
  * Task without restriction
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0080412W
+
 public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
 
     private static final long serialVersionUID = -6501529436053212805L;

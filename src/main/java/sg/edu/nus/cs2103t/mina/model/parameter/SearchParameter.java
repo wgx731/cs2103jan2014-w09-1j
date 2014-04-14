@@ -2,6 +2,8 @@ package sg.edu.nus.cs2103t.mina.model.parameter;
 
 import java.util.ArrayList;
 
+//@author A0099151B
+
 public class SearchParameter {
 
 	private ArrayList<String> _keywords;

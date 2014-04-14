@@ -4,17 +4,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 /**
  * Helper class to read properties from config file for MINA
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0105853H
+
 public class ConfigHelper {
 
     // KEYS
@@ -24,10 +20,11 @@ public class ConfigHelper {
     public static final String EVENT_KEY = "event";
     public static final String DEADLINE_KEY = "deadline";
     public static final String TASK_MAP_KEY = "taskmap";
-    public static final String VIEW_TYPE_KEY = "viewtype";
+    public static final String LOGGER_KEY = "logger";
+    public static final String LOCK_KEY = "lockfilename";
+    public static final String TIMER_KEY = "timer";
 
-    private static Logger logger = LogManager.getLogger(ConfigHelper.class
-            .getName());
+    private static final String CLASS_NAME = ConfigHelper.class.getName();
 
     private static final String CONFIG_FILE_PATH = "/config.properties";
 
@@ -38,9 +35,9 @@ public class ConfigHelper {
         try {
             prop.load(ConfigHelper.class.getResourceAsStream(CONFIG_FILE_PATH));
         } catch (FileNotFoundException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         } catch (IOException e) {
-            logger.error(e, e);
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
         return prop;
     }

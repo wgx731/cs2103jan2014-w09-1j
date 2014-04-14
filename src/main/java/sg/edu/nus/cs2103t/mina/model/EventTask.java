@@ -6,12 +6,9 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 /**
  * Appointment task
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0080412W
+
 public class EventTask extends Task<EventTask> implements Comparable<EventTask> {
 
     private static final long serialVersionUID = 5531321810458646971L;
@@ -42,11 +39,17 @@ public class EventTask extends Task<EventTask> implements Comparable<EventTask> 
 
     public int compareTo(EventTask otherTask) {
         Date currEventStart = _startTime;
-        Date otherEventStart = otherTask._startTime;
+        Date otherEventStart = otherTask.getStartTime();
+        Date currEventEnd = _endTime;
+        Date otherEventEnd = otherTask.getEndTime();
 
         if (currEventStart.before(otherEventStart)) {
             return -1;
         } else if (currEventStart.after(otherEventStart)) {
+            return 1;
+        } else if (currEventEnd.before(otherEventEnd)) {
+            return -1;
+        } else if (currEventEnd.after(otherEventEnd)) {
             return 1;
         } else {
             return super.compareTo((Task<?>) otherTask);

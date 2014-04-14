@@ -1,0 +1,2183 @@
+//@author: a0105853h
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\controller\DataSyncManager.java
+	 */
+
+public class DataSyncManager {
+
+    private static final String CLASS_NAME = DataSyncManager.class.getName();
+
+    private TaskDao _taskDao;
+    private TaskMapDao _taskMapDao;
+    private MemoryDataObserver _dataObserver;
+
+    /**
+     * Create a new DataSyncManager instance
+     * 
+     * @param taskDao DAO for task tree set
+     * @param taskMapDao DAO for recurring task map
+     */
+    public DataSyncManager(TaskDao taskDao, TaskMapDao taskMapDao) {
+        _taskDao = taskDao;
+        _taskMapDao = taskMapDao;
+        _dataObserver = new MemoryDataObserverImpl(taskDao, taskMapDao);
+    }
+
+    /**
+     * Getter for data observer
+     * 
+     * @return the data observer
+     */
+    public MemoryDataObserver getDataObserver() {
+        return _dataObserver;
+    }
+
+    /**
+     * Save all the changed data from the given list of tree set data to storage
+     * 
+     * @param changedDataList the list of tree set data to be saved
+     */
+    public boolean saveAll(List<TaskSetDataParameter> changedDataList) {
+        for (TaskSetDataParameter changedData : changedDataList) {
+            try {
+                _taskDao.saveTaskSet(changedData.getTaskSet(),
+                        changedData.getTaskType(), changedData.isCompleted());
+            } catch (IOException e) {
+                LogHelper.log(CLASS_NAME, Level.ERROR,
+                        "save task set failed: " + e.getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Save specific type of tree set data to storage
+     * 
+     * @param taskType the task type of the tree set
+     * @param isCompleted whether the task in the tree set is completed
+     */
+    public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) throws IOException {
+        return (SortedSet<? extends Task<?>>) _taskDao.loadTaskSet(taskType,
+                isCompleted);
+    }
+
+    /**
+     * Save task map data to storage
+     * 
+     * @param taskMapData the task map data to be saved
+     */
+    public void saveTaskMap(TaskMapDataParameter taskMapData)
+            throws IOException {
+        _taskMapDao.saveTaskMap(taskMapData);
+    }
+
+    /**
+     * Load task map data from storage
+     * 
+     * @return the task map data to be loaded
+     */
+    public TaskMapDataParameter loadTaskMap() {
+        return _taskMapDao.loadTaskMap();
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\controller\DataSyncManager.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\FileOperationHelper.java
+	 */
+
+
+public class FileOperationHelper {
+
+    private static final String CLASS_NAME = FileOperationHelper.class
+            .getName();
+    private static final boolean COMPLETED = true;
+    private static final boolean UNCOMPLETED = false;
+
+    private Map<TaskType, String> _fileLocationMap;
+    private String _taskSetCompletedSuffix;
+    private String _taskSetfileExtension;
+    private String _taskMapfileExtension;
+
+    public FileOperationHelper(String completedSuffix,
+            String taskSetFileExtension, String taskMapFileExtension) {
+        _fileLocationMap = new HashMap<TaskType, String>();
+        _fileLocationMap.put(TaskType.TODO,
+                ConfigHelper.getProperty(ConfigHelper.TODO_KEY));
+        _fileLocationMap.put(TaskType.EVENT,
+                ConfigHelper.getProperty(ConfigHelper.EVENT_KEY));
+        _fileLocationMap.put(TaskType.DEADLINE,
+                ConfigHelper.getProperty(ConfigHelper.DEADLINE_KEY));
+        _taskSetCompletedSuffix = completedSuffix;
+        _taskSetfileExtension = taskSetFileExtension;
+        _taskMapfileExtension = taskMapFileExtension;
+    }
+
+    FileOperationHelper(Map<TaskType, String> storageMap) {
+        _fileLocationMap = storageMap;
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
+    }
+    
+    FileOperationHelper() {
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
+    }
+
+    public synchronized void cleanAll() {
+        cleanTaskSetDao();
+        cleanTaskMapDao();
+    }
+
+    public synchronized boolean setUpAll() {
+        boolean isTaskSetCreated = createTaskSetDaoFiles();
+        boolean isTaskMapCreated = createTaskMapDaoFiles();
+        return isTaskMapCreated && isTaskSetCreated;
+    }
+
+    synchronized void cleanTaskSetDao() {
+        new File(getTaskSetFileLocation(TaskType.TODO, UNCOMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.TODO, COMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.EVENT, UNCOMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.EVENT, COMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.DEADLINE, UNCOMPLETED))
+                .delete();
+        new File(getTaskSetFileLocation(TaskType.DEADLINE, COMPLETED)).delete();
+    }
+
+    synchronized void cleanTaskMapDao() {
+        new File(getTaskMapFileLocation()).delete();
+    }
+
+    synchronized boolean createTaskSetDaoFiles() {
+        try {
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.TODO,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.TODO,
+                    COMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.EVENT,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.EVENT,
+                    COMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.DEADLINE,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.DEADLINE,
+                    COMPLETED));
+        } catch (IOException e) {
+            LogHelper.log(
+                    CLASS_NAME,
+                    Level.ERROR,
+                    "failed to create task set storage files: " + e
+                            .getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    synchronized boolean createTaskMapDaoFiles() {
+        try {
+            createFileIfNotExist(getTaskMapFileLocation());
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME,
+                            Level.ERROR,
+                            "failed to create task map storage file: " + e
+                                    .getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    String getTaskSetFileLocation(TaskType taskType, boolean isCompleted) {
+        String fileLocation = _fileLocationMap.get(taskType);
+        if (isCompleted) {
+            fileLocation += _taskSetCompletedSuffix;
+        }
+        fileLocation += _taskSetfileExtension;
+        return fileLocation;
+    }
+
+    String getTaskMapFileLocation() {
+        return ConfigHelper.getProperty(ConfigHelper.TASK_MAP_KEY) + _taskMapfileExtension;
+    }
+
+    private void createFileIfNotExist(String fileName) throws IOException {
+        File f = new File(fileName);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\FileOperationHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\FileTaskMapDaoImpl.java
+	 */
+
+
+public class FileTaskMapDaoImpl implements TaskMapDao {
+
+    private static final String CLASS_NAME = FileTaskMapDaoImpl.class.getName();
+
+    private static final String FILE_EXTENSION = ".ser";
+
+    public static String getFileExtension() {
+        return FILE_EXTENSION;
+    }
+
+    private FileOperationHelper _fileOperationHelper;
+
+    public FileTaskMapDaoImpl(FileOperationHelper fileOperationHelper) {
+        _fileOperationHelper = fileOperationHelper;
+        _fileOperationHelper.createTaskMapDaoFiles();
+    }
+
+    FileTaskMapDaoImpl() {
+        _fileOperationHelper = new FileOperationHelper();
+        _fileOperationHelper.createTaskMapDaoFiles();
+    }
+    
+    FileOperationHelper getFileOperationHelper() {
+        return _fileOperationHelper;
+    }
+
+    private ObjectOutput getOutputWriter() throws IOException {
+        OutputStream file;
+        file = new FileOutputStream(
+                _fileOperationHelper.getTaskMapFileLocation());
+        OutputStream buffer = new BufferedOutputStream(file);
+        return new ObjectOutputStream(buffer);
+    }
+
+    private ObjectInput getInputReader() throws IOException {
+        InputStream file;
+        file = new FileInputStream(
+                _fileOperationHelper.getTaskMapFileLocation());
+        InputStream buffer = new BufferedInputStream(file);
+        return new ObjectInputStream(buffer);
+    }
+
+    @Override
+    public void saveTaskMap(TaskMapDataParameter taskMapData)
+            throws IOException {
+        ObjectOutput output = getOutputWriter();
+        output.writeObject(taskMapData);
+        output.close();
+    }
+
+    @Override
+    public TaskMapDataParameter loadTaskMap() {
+        try {
+            ObjectInput input = getInputReader();
+            Object object = input.readObject();
+            TaskMapDataParameter taskMapData = (TaskMapDataParameter) object;
+            input.close();
+            return taskMapData;
+        } catch (ClassNotFoundException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "task class not found: " + e.getMessage());
+            return null;
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "empty file: " + e.getMessage());
+            return null;
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\FileTaskMapDaoImpl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\JsonFileTaskDaoImpl.java
+	 */
+
+
+public class JsonFileTaskDaoImpl implements TaskDao {
+
+    private static final String COMPLETED_SUFFIX = "-compl";
+    private static final String FILE_EXTENSION = ".json";
+    private static final String EMPTY_FILE_ERROR = "can't load storage file content.";
+
+    public static String getCompletedSuffix() {
+        return COMPLETED_SUFFIX;
+    }
+
+    public static String getFileExtension() {
+        return FILE_EXTENSION;
+    }
+
+    private FileOperationHelper _fileOperationHelper;
+
+    /**
+     * Create a new json file task dao instance and initialize required files
+     */
+    public JsonFileTaskDaoImpl(FileOperationHelper fileOperationHelper) {
+        _fileOperationHelper = fileOperationHelper;
+        _fileOperationHelper.createTaskSetDaoFiles();
+    }
+
+    JsonFileTaskDaoImpl(Map<TaskType, String> storageMap) {
+        _fileOperationHelper = new FileOperationHelper(storageMap);
+        _fileOperationHelper.createTaskSetDaoFiles();
+    }
+    
+    FileOperationHelper getFileOperationHelper() {
+        return _fileOperationHelper;
+    }
+
+    private BufferedWriter getOutputWriter(String fileName) throws IOException {
+        FileWriter fileWriter = new FileWriter(fileName);
+        return new BufferedWriter(fileWriter);
+    }
+
+    private BufferedReader getInputReader(String fileName) throws IOException {
+        FileReader fileReader = new FileReader(fileName);
+        return new BufferedReader(fileReader);
+    }
+
+    @Override
+    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) throws IOException {
+        assert taskType != TaskType.UNKNOWN;
+        assert taskSet != null;
+        if (!taskSet.isEmpty()) {
+            assert taskSet.first().getType() == taskType;
+        }
+        String json = JsonHelper.taskSetToJson(taskSet, taskType);
+        BufferedWriter writer = getOutputWriter(_fileOperationHelper
+                .getTaskSetFileLocation(taskType, isCompleted));
+        writer.write(json);
+        writer.close();
+    }
+
+    @Override
+    public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) throws IOException {
+        assert taskType != TaskType.UNKNOWN;
+        BufferedReader reader = getInputReader(_fileOperationHelper
+                .getTaskSetFileLocation(taskType, isCompleted));
+        StringBuffer sb = new StringBuffer();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        SortedSet<? extends Task<?>> taskSet;
+        try {
+            taskSet = JsonHelper.jsonToTaskSet(sb.toString(), taskType);
+        } catch (JsonSyntaxException e) {
+            taskSet = null;
+        }
+        if (taskSet == null) {
+            throw new IOException(EMPTY_FILE_ERROR);
+        }
+        return taskSet;
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\JsonFileTaskDaoImpl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\MemoryDataObserverImpl.java
+	 */
+
+
+public class MemoryDataObserverImpl implements MemoryDataObserver {
+
+    private static final String CLASS_NAME = MemoryDataObserverImpl.class
+            .getName();
+
+    private TaskDao _taskDao;
+    private TaskMapDao _taskMapDao;
+
+    public MemoryDataObserverImpl(TaskDao taskDao, TaskMapDao taskMapDao) {
+        _taskDao = taskDao;
+        _taskMapDao = taskMapDao;
+    }
+
+    MemoryDataObserverImpl(FileOperationHelper fileOperationHelper) {
+        _taskDao = new JsonFileTaskDaoImpl(fileOperationHelper);
+        _taskMapDao = new FileTaskMapDaoImpl(fileOperationHelper);
+    }
+
+    TaskDao getTaskDao() {
+        return _taskDao;
+    }
+
+    TaskMapDao getTaskMapDao() {
+        return _taskMapDao;
+    }
+
+    @Override
+    public void updateTaskMap(TaskMapDataParameter changedTaskMapData) {
+        try {
+            _taskMapDao.saveTaskMap(changedTaskMapData);
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "can't save task map data: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateTaskSet(TaskSetDataParameter changedData) {
+        assert changedData != null : changedData;
+        saveChangedData(changedData);
+    }
+
+    private void saveChangedData(TaskSetDataParameter changedData) {
+        try {
+            _taskDao.saveTaskSet(changedData.getTaskSet(),
+                    changedData.getTaskType(), changedData.isCompleted());
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "can't save task set data: " + e.getMessage());
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\impl\MemoryDataObserverImpl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\MemoryDataObserver.java
+	 */
+
+public interface MemoryDataObserver {
+
+    /**
+     * notify observer task set change
+     * 
+     * @param changedTaskSetData changed task set data
+     */
+    public void updateTaskSet(TaskSetDataParameter changedTaskSetData);
+
+    /**
+     * notify observer task map change
+     * 
+     * @param changedTaskMapData changed task map data
+     */
+    public void updateTaskMap(TaskMapDataParameter changedTaskMapData);
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\MemoryDataObserver.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\TaskDao.java
+	 */
+
+public interface TaskDao {
+
+    /**
+     * Save task set into storage
+     * 
+     * @param taskSet given task to be saved
+     * @param taskType the task type to be saved
+     * @param isCompleted whether the task in the set is completed
+     * @throws IOException if save operation failed
+     */
+    public void saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) throws IOException;
+
+    /**
+     * load task set from storage
+     * 
+     * @param taskType the task type to be loaded
+     * @param isCompleted whether the task in the set is completed
+     * @return loaded task set
+     * @throws IOException if load operation failed
+     */
+    public SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) throws IOException;
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\TaskDao.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\TaskMapDao.java
+	 */
+
+public interface TaskMapDao {
+
+    /**
+     * Save task map data into storage
+     * 
+     * @param recurringTaskMap given task to be saved
+     * @throws IOException if save operation failed
+     */
+    public void saveTaskMap(TaskMapDataParameter taskMapData)
+            throws IOException;
+
+    /**
+     * Load task map from storage
+     * 
+     * @return loaded task map, if the file has been modified or changed, return
+     * null
+     */
+    public TaskMapDataParameter loadTaskMap();
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\dao\TaskMapDao.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\MinaDriver.java
+	 */
+
+
+public class MinaDriver {
+
+    private static final String MINA_ALREADY_STARTED = "MINA already started.";
+    private static final int ERROR_EXIT = -1;
+    private static final int DEFAULT_TASK_LIST_SIZE = 4;
+
+    private static final String CLASS_NAME = MinaDriver.class.getName();
+
+    static MinaDriver _driver;
+
+    private CommandManager _commandManager;
+    private TaskDataManager _taskDataManager;
+    private TaskFilterManager _taskFilterManager;
+    private MinaView _uiView;
+    private DataSyncManager _dataSyncManager;
+
+    MinaDriver() {
+    
+    }
+
+    public static MinaDriver getMinaDriver() {
+        if (_driver == null) {
+            _driver = new MinaDriver();
+        }
+        return _driver;
+    }
+
+    CommandManager getCommandManager() {
+        return _commandManager;
+    }
+
+    void setCommandManager(CommandManager commandManager) {
+        this._commandManager = commandManager;
+    }
+
+    TaskDataManager getTaskDataManager() {
+        return _taskDataManager;
+    }
+
+    void setTaskDataManager(TaskDataManager taskDataManager) {
+        this._taskDataManager = taskDataManager;
+    }
+
+    TaskFilterManager getTaskFilterManager() {
+        return _taskFilterManager;
+    }
+
+    void setTaskFilterManager(TaskFilterManager taskFilterManager) {
+        this._taskFilterManager = taskFilterManager;
+    }
+
+    DataSyncManager getDataSyncManager() {
+        return _dataSyncManager;
+    }
+
+    void setDataSyncManager(DataSyncManager dataSyncManager) {
+        this._dataSyncManager = dataSyncManager;
+    }
+
+    MinaView getUiView() {
+        return _uiView;
+    }
+
+    void setUiView(MinaView uiView) {
+        _uiView = uiView;
+    }
+
+    void initDao() {
+        FileOperationHelper fileOperationHelper = new FileOperationHelper(
+                JsonFileTaskDaoImpl.getCompletedSuffix(),
+                JsonFileTaskDaoImpl.getFileExtension(),
+                FileTaskMapDaoImpl.getFileExtension());
+        TaskDao taskDao = new JsonFileTaskDaoImpl(fileOperationHelper);
+        TaskMapDao taskMapDao = new FileTaskMapDaoImpl(fileOperationHelper);
+        _dataSyncManager = new DataSyncManager(taskDao, taskMapDao);
+    }
+
+    void initTDM() {
+        _taskDataManager = new TaskDataManager(_dataSyncManager);
+    }
+
+    void initTFM() {
+        _taskFilterManager = new TaskFilterManager(_taskDataManager);
+    }
+
+    void initCC() {
+        _commandManager = new CommandManager(_taskDataManager, _taskFilterManager);
+    }
+
+    void showMinaView() {
+        MinaGuiUI gui = new MinaGuiUI(_commandManager);
+        gui.open();
+        _uiView = gui;
+        _uiView.updateLists();
+    }
+
+    public void processLoop() {
+        if (_uiView != null) {
+            _uiView.displayOutput();
+            _uiView.loop();
+        }
+    }
+
+    private void showSplashScreen() {
+        List<Runnable> tasks = createTaskList();
+        SplashScreen screen = SplashScreen.getInstance(Display.getDefault(),
+                tasks);
+        screen.open();
+    }
+
+    private List<Runnable> createTaskList() {
+        List<Runnable> tasks = new ArrayList<Runnable>(DEFAULT_TASK_LIST_SIZE);
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                initDao();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                initTDM();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                initTFM();
+            }
+        });
+        tasks.add(new Runnable() {
+            @Override
+            public void run() {
+                initCC();
+            }
+        });
+        return tasks;
+    }
+
+    public static void main(String[] args) {
+        FileLockHelper fileLockHelper = FileLockHelper
+                .getFileLockHelperInstance();
+        // Prevent multiple instances running
+        if (!fileLockHelper.isAppActive()) {
+            MinaDriver driver = MinaDriver.getMinaDriver();
+            try {
+                driver.showSplashScreen();
+                driver.showMinaView();
+                driver.processLoop();
+            } catch (Exception e) {
+                LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+                driver.getTaskDataManager().saveAllTasks();
+                System.exit(ERROR_EXIT);
+            }
+        } else {
+            LogHelper.log(CLASS_NAME, Level.WARN, MINA_ALREADY_STARTED);
+            System.out.println(MINA_ALREADY_STARTED);
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\MinaDriver.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\parameter\TaskMapDataParameter.java
+	 */
+
+
+public class TaskMapDataParameter implements Serializable {
+
+    private static final long serialVersionUID = -1665500740615897037L;
+
+    private HashMap<String, ArrayList<Task<?>>> _recurringTasks;
+    private int _maxRecurTagInt;
+
+    public TaskMapDataParameter(
+            HashMap<String, ArrayList<Task<?>>> recurringTasks,
+            int maxRecurTagInt) {
+        super();
+        _recurringTasks = recurringTasks;
+        _maxRecurTagInt = maxRecurTagInt;
+    }
+
+    public HashMap<String, ArrayList<Task<?>>> getRecurringTasks() {
+        return _recurringTasks;
+    }
+
+    public void setRecurringTasks(
+            HashMap<String, ArrayList<Task<?>>> recurringTasks) {
+        _recurringTasks = recurringTasks;
+    }
+
+    public int getMaxRecurTagInt() {
+        return _maxRecurTagInt;
+    }
+
+    public void setMaxRecurTagInt(int maxRecurTagInt) {
+        _maxRecurTagInt = maxRecurTagInt;
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\parameter\TaskMapDataParameter.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\parameter\TaskSetDataParameter.java
+	 */
+
+
+public class TaskSetDataParameter {
+
+    private SortedSet<? extends Task<?>> _taskSet;
+    private TaskType _taskType;
+    private boolean _isCompleted;
+
+    public TaskSetDataParameter(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) {
+        _taskSet = taskSet;
+        _taskType = taskType;
+        _isCompleted = isCompleted;
+    }
+
+    public SortedSet<? extends Task<?>> getTaskSet() {
+        return _taskSet;
+    }
+
+    public TaskType getTaskType() {
+        return _taskType;
+    }
+
+    public boolean isCompleted() {
+        return _isCompleted;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TaskSetDataParameter other = (TaskSetDataParameter) obj;
+        if (_isCompleted != other._isCompleted)
+            return false;
+        if (_taskType != other._taskType)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SyncDataParameter [_taskSet=" + _taskSet + ", _taskType="
+                + _taskType + ", _isCompleted=" + _isCompleted + "]";
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\parameter\TaskSetDataParameter.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\ConfigHelper.java
+	 */
+
+
+public class ConfigHelper {
+
+    // KEYS
+    public static final String ICONPATH_KEY = "iconpath";
+    public static final String SPLASHPATH_KEY = "splashscreenpath";
+    public static final String TODO_KEY = "todo";
+    public static final String EVENT_KEY = "event";
+    public static final String DEADLINE_KEY = "deadline";
+    public static final String TASK_MAP_KEY = "taskmap";
+    public static final String LOGGER_KEY = "logger";
+    public static final String LOCK_KEY = "lockfilename";
+    public static final String TIMER_KEY = "timer";
+
+    private static final String CLASS_NAME = ConfigHelper.class.getName();
+
+    private static final String CONFIG_FILE_PATH = "/config.properties";
+
+    private static Properties prop = null;
+
+    private static Properties setUp() {
+        prop = new Properties();
+        try {
+            prop.load(ConfigHelper.class.getResourceAsStream(CONFIG_FILE_PATH));
+        } catch (FileNotFoundException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+        }
+        return prop;
+    }
+
+    public static String getProperty(String key) {
+        if (prop == null) {
+            prop = setUp();
+        }
+        return prop.getProperty(key);
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\ConfigHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\FileLockHelper.java
+	 */
+
+
+public class FileLockHelper {
+
+    private static final String FILE_MODE = "rw";
+
+    private static final String LOCK_FILE_EXTENSION = ".lock";
+
+    private static final String USER_HOME = "user.home";
+
+    private static final String CLASS_NAME = FileLockHelper.class.getName();
+
+    private static FileLockHelper instance;
+
+    private String lockFileName;
+    private File lockFile;
+    private FileChannel channel;
+    private FileLock lock;
+
+    private FileLockHelper(String appName) {
+        this.lockFileName = appName;
+    }
+
+    public static FileLockHelper getFileLockHelperInstance() {
+        if (instance == null) {
+            instance = new FileLockHelper(
+                    ConfigHelper.getProperty(ConfigHelper.LOCK_KEY));
+            return instance;
+        }
+        return instance;
+    }
+
+    public synchronized boolean isAppActive() {
+        try {
+            lockFile = new File(System.getProperty(USER_HOME),
+                    lockFileName + LOCK_FILE_EXTENSION);
+            channel = new RandomAccessFile(lockFile, FILE_MODE).getChannel();
+            try {
+                lock = channel.tryLock();
+            } catch (OverlappingFileLockException e) {
+                // already locked
+                closeLock();
+                return true;
+            }
+
+            if (lock == null) {
+                closeLock();
+                return true;
+            }
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                // destroy the lock when the JVM is closing
+                public void run() {
+                    closeLock();
+                    deleteFile();
+                }
+            });
+            return false;
+        } catch (Exception e) {
+            closeLock();
+            return true;
+        }
+    }
+
+    private void closeLock() {
+        try {
+            lock.release();
+            channel.close();
+        } catch (Exception e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR, "close lock failed: " + e
+                    .getStackTrace().toString());
+        }
+    }
+
+    private void deleteFile() {
+        try {
+            lockFile.delete();
+        } catch (Exception e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "delete lock file failed: " + e.getStackTrace().toString());
+        }
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\FileLockHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\JsonHelper.java
+	 */
+
+
+public class JsonHelper {
+
+    private static final String KEY_ID = "_id";
+    private static final String KEY_DESCRIPTION = "_description";
+    private static final String KEY_TAG = "_tag";
+    private static final String KEY_PRIORITY = "_priority";
+    private static final String KEY_COMPLETED = "_isCompleted";
+    private static final String KEY_CREATED_TIME = "_createdTime";
+    private static final String KEY_LAST_EDITED_TIME = "_lastEditedTime";
+    private static final String KEY_START_TIME = "_startTime";
+    private static final String KEY_END_TIME = "_endTime";
+    private static final String RECUR_TAG = "RECUR";
+    private static final String DEFAULT_TAG = "";
+    private static final String EMPTY_STRING = "";
+
+    private static final String DATE_FORMAT = "EEEE, dd/MM/yyyy/HH:mm:ss.SSS";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat(
+            DATE_FORMAT);
+
+
+    private static class EventTaskDeserializer implements
+            JsonDeserializer<EventTask> {
+
+        @Override
+        public EventTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.EVENT;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null, start = null, end = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+                start = formatter.parse(jsonObject.get(KEY_START_TIME)
+                        .getAsString());
+                end = formatter.parse(jsonObject.get(KEY_END_TIME)
+                        .getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new EventTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted, start, end,
+                        tag);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class DeadlineTaskDeserializer implements
+            JsonDeserializer<DeadlineTask> {
+
+        @Override
+        public DeadlineTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.DEADLINE;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null, end = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+                end = formatter.parse(jsonObject.get(KEY_END_TIME)
+                        .getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new DeadlineTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted, end, tag);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class TodoTaskDeserializer implements
+            JsonDeserializer<TodoTask> {
+
+        @Override
+        public TodoTask deserialize(JsonElement jsonElement, Type type,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            boolean isValidJson = true;
+            String id = jsonObject.get(KEY_ID).getAsString();
+            TaskType taskType = TaskType.TODO;
+            String description = jsonObject.get(KEY_DESCRIPTION).getAsString();
+            String tag = jsonObject.get(KEY_TAG).getAsString();
+            if (tag == null || !tag.contains(RECUR_TAG)) {
+                tag = DEFAULT_TAG;
+            }
+            char priority = jsonObject.get(KEY_PRIORITY).getAsCharacter();
+            if (!Task.isValidPriority(priority)) {
+                isValidJson = false;
+            }
+            boolean isCompleted = jsonObject.get(KEY_COMPLETED).getAsBoolean();
+            Date createdTime = null, lastEditedTime = null;
+            try {
+                createdTime = formatter.parse(jsonObject.get(KEY_CREATED_TIME)
+                        .getAsString());
+                lastEditedTime = formatter.parse(jsonObject.get(
+                        KEY_LAST_EDITED_TIME).getAsString());
+            } catch (ParseException e) {
+                isValidJson = false;
+            }
+            if (isValidJson) {
+                return new TodoTask(taskType, description, id, priority,
+                        createdTime, lastEditedTime, isCompleted, tag);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static Gson gson = null;
+
+    private static final Type TODO_TREESET_TYPE = new TypeToken<TreeSet<TodoTask>>() {
+    }.getType();
+    private static final Type EVENT_TREESET_TYPE = new TypeToken<TreeSet<EventTask>>() {
+    }.getType();
+    private static final Type DEADLINE_TREESET_TYPE = new TypeToken<TreeSet<DeadlineTask>>() {
+    }.getType();
+
+    private static Gson setUp() {
+        return new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .serializeNulls()
+                .registerTypeAdapter(EventTask.class,
+                        new EventTaskDeserializer())
+                .registerTypeAdapter(DeadlineTask.class,
+                        new DeadlineTaskDeserializer())
+                .registerTypeAdapter(TodoTask.class, new TodoTaskDeserializer())
+                .setDateFormat(DATE_FORMAT)
+                .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+                .setPrettyPrinting().create();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String taskSetToJson(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType) {
+        if (gson == null) {
+            gson = setUp();
+        }
+        switch (taskType) {
+            case TODO :
+                return gson.toJson((SortedSet<TodoTask>) taskSet,
+                        TODO_TREESET_TYPE);
+            case DEADLINE :
+                return gson.toJson((SortedSet<DeadlineTask>) taskSet,
+                        DEADLINE_TREESET_TYPE);
+            case EVENT :
+                return gson.toJson((SortedSet<EventTask>) taskSet,
+                        EVENT_TREESET_TYPE);
+            default :
+                return null;
+        }
+    }
+
+    public static SortedSet<? extends Task<?>> jsonToTaskSet(String json,
+            TaskType taskType) throws JsonSyntaxException {
+        if (gson == null) {
+            gson = setUp();
+        }
+        switch (taskType) {
+            case TODO :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<TodoTask>();
+                }
+                return gson.fromJson(json, TODO_TREESET_TYPE);
+            case DEADLINE :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<DeadlineTask>();
+                }
+                return gson.fromJson(json, DEADLINE_TREESET_TYPE);
+            case EVENT :
+                if (json.trim().equals(EMPTY_STRING)) {
+                    return new TreeSet<EventTask>();
+                }
+                return gson.fromJson(json, EVENT_TREESET_TYPE);
+            default :
+                return null;
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\JsonHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\LogHelper.java
+	 */
+
+
+public class LogHelper {
+
+    private static final boolean isLoggerEnabled = Boolean.valueOf(ConfigHelper
+            .getProperty(ConfigHelper.LOGGER_KEY));
+
+    private static Map<String, Logger> loggers = new HashMap<String, Logger>();
+
+    public static void log(String className, Level level, String msg) {
+        if (isLoggerEnabled) {
+            if (loggers.containsKey(className)) {
+                loggers.get(className).log(level, msg);
+            } else {
+                Logger logger = LogManager.getLogger(className);
+                logger.log(level, msg);
+                loggers.put(className, logger);
+            }
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\LogHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\MinaView.java
+	 */
+
+
+public abstract class MinaView {
+    
+    protected CommandManager _commandController;
+    
+    public MinaView(CommandManager commandController) {
+        _commandController = commandController;
+    }
+
+    /**
+     * Get user input
+     * 
+     * @return user input string
+     */
+    public abstract String getUserInput();
+
+    /**
+     * Display output to user
+     */
+    public abstract void displayOutput();
+
+    /**
+     * Update List Data in UI
+     */
+    public abstract void updateLists();
+
+    /**
+     * wait user input in loop
+     */
+    public abstract void loop();
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\MinaView.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\SplashScreen.java
+	 */
+
+
+public class SplashScreen {
+
+    private final int SPLASH_MAX = 100;
+    private final int SPLASH_MIN = 0;
+
+    private static SplashScreen _splashScreen;
+
+    private int _progress;
+    private Display _display;
+    private Image _image;
+    private Shell _splashShell;
+    private ProgressBar _progressBar;
+    private List<Runnable> _tasks;
+
+    private SplashScreen(Display display, List<Runnable> tasks) {
+        _tasks = tasks;
+        _progress = SPLASH_MIN;
+        _display = display;
+        _image = new Image(display, getClass().getResourceAsStream(
+                ConfigHelper.getProperty(ConfigHelper.SPLASHPATH_KEY)));
+
+        _splashShell = new Shell(SWT.ON_TOP);
+        _progressBar = new ProgressBar(_splashShell, SWT.NONE);
+        _progressBar.setMaximum(SPLASH_MAX);
+
+        Label label = new Label(_splashShell, SWT.NONE);
+        label.setImage(_image);
+
+        FormLayout layout = new FormLayout();
+        _splashShell.setLayout(layout);
+
+        FormData labelData = new FormData();
+        labelData.right = new FormAttachment(100, 0);
+        labelData.bottom = new FormAttachment(100, 0);
+        label.setLayoutData(labelData);
+
+        FormData progressData = new FormData();
+        progressData.left = new FormAttachment(0, -5);
+        progressData.right = new FormAttachment(100, 0);
+        progressData.bottom = new FormAttachment(100, 0);
+        _progressBar.setLayoutData(progressData);
+        _splashShell.pack();
+
+        Rectangle splashRect = _splashShell.getBounds();
+        Rectangle displayRect = display.getBounds();
+        int x = (displayRect.width - splashRect.width) / 2;
+        int y = (displayRect.height - splashRect.height) / 2;
+        _splashShell.setLocation(x, y);
+
+    }
+
+    public static SplashScreen getInstance(Display display, List<Runnable> tasks) {
+        if (_splashScreen == null) {
+            _splashScreen = new SplashScreen(display, tasks);
+        }
+        return _splashScreen;
+    }
+
+    public void open() {
+        _splashShell.setCursor(new Cursor(_display, SWT.CURSOR_APPSTARTING));
+        _splashShell.open();
+        _display.asyncExec(new Runnable() {
+            public void run() {
+                int totalTaskSize = _tasks.size();
+                int taskProgress = SPLASH_MAX / totalTaskSize;
+                for (int i = 0; i < totalTaskSize; i++) {
+                    updateProgress(_progress + taskProgress / 2);
+                    _tasks.get(i).run();
+                    updateProgress(_progress + taskProgress / 2);
+                }
+                updateProgress(SPLASH_MAX);
+                close();
+            }
+        });
+        while (_progress != SPLASH_MAX) {
+            if (!_display.readAndDispatch()) {
+                _display.sleep();
+            }
+        }
+    }
+
+    private void updateProgress(int progress) {
+        _progress = progress;
+        _progressBar.setSelection(_progress);
+    }
+
+    private void close() {
+        _splashShell.setCursor(new Cursor(_display, SWT.CURSOR_ARROW));
+        _splashShell.close();
+        _image.dispose();
+    }
+
+}
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\SplashScreen.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\FileDaoImplTest.java
+	 */
+
+
+public abstract class FileDaoImplTest {
+
+    private static final int TASK_MAP_LIST_DEFAULT_SIZE = 4;
+    protected static final String TODO_DESCRIPTION = "This is a todo task.";
+    protected static final String TODO_FILE_NAME = "todo";
+    protected static final String EVENT_DESCRIPTION = "This is an event task";
+    protected static final String EVENT_FILE_NAME = "event";
+    protected static final String DEADLINE_DESCRIPTION = "This is an deadline task";
+    protected static final String DEADLINE_FILE_NAME = "deadline";
+    protected static final String RECUR_DEADLINE_DESCRIPTION = "This is an recurring deadline task";
+    protected static final String TEST_RECUR_TAG = "RECUR_0";
+    protected static final boolean COMPLETED = true;
+    protected static final boolean UNCOMPLETED = false;
+
+    protected static final int MAX_RECUR_INT = 0;
+
+    protected static final Date startDate = new Date(1393243200);
+    protected static final Date endDate = new Date(1393333200);
+
+    protected static final Date recurDeadlineDateOne = new Date(1393333300);
+    protected static final Date recurDeadlineDateTwo = new Date(1393333400);
+
+    protected SortedSet<TodoTask> sampleTodoTaskSet;
+    protected SortedSet<EventTask> sampleEventTaskSet;
+    protected SortedSet<DeadlineTask> sampleDeadlineTaskSet;
+    protected HashMap<String, ArrayList<Task<?>>> sampleTaskMap;
+    protected ArrayList<Task<?>> sampleTaskMapList;
+    protected Map<TaskType, String> storageMap;
+
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+
+    private static String getAbsoluteName(File file) {
+        return file.getAbsolutePath();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        storageMap = new HashMap<TaskType, String>();
+        storageMap.put(TaskType.TODO,
+                getAbsoluteName(testFolder.newFile(TODO_FILE_NAME)));
+        storageMap.put(TaskType.EVENT,
+                getAbsoluteName(testFolder.newFile(EVENT_FILE_NAME)));
+        storageMap.put(TaskType.DEADLINE,
+                getAbsoluteName(testFolder.newFile(DEADLINE_FILE_NAME)));
+
+        sampleTodoTaskSet = new TreeSet<TodoTask>();
+        sampleTodoTaskSet.add(new TodoTask(TODO_DESCRIPTION));
+        sampleEventTaskSet = new TreeSet<EventTask>();
+        sampleEventTaskSet.add(new EventTask(EVENT_DESCRIPTION, startDate,
+                endDate));
+        sampleDeadlineTaskSet = new TreeSet<DeadlineTask>();
+        sampleDeadlineTaskSet.add(new DeadlineTask(DEADLINE_DESCRIPTION,
+                endDate));
+        sampleTaskMap = new HashMap<String, ArrayList<Task<?>>>();
+        sampleTaskMapList = new ArrayList<Task<?>>(TASK_MAP_LIST_DEFAULT_SIZE);
+        sampleTaskMapList.add(new DeadlineTask(DEADLINE_DESCRIPTION,
+                recurDeadlineDateOne));
+        sampleTaskMapList.add(new DeadlineTask(DEADLINE_DESCRIPTION,
+                recurDeadlineDateTwo));
+        sampleTaskMap.put(TEST_RECUR_TAG, sampleTaskMapList);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        storageMap = null;
+        sampleTodoTaskSet = null;
+        sampleEventTaskSet = null;
+        sampleDeadlineTaskSet = null; 
+    }
+
+    @Test
+    public abstract void testLoadEmptyFile();
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\FileDaoImplTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\FileTaskMapDaoImpTest.java
+	 */
+
+
+public class FileTaskMapDaoImpTest extends FileDaoImplTest {
+
+    private static final String CLASS_NAME = FileTaskMapDaoImpTest.class
+            .getName();
+
+    private static final String CORRUPTED_DATA = "Corrupted file.";
+    private static final String SAVE_ERROR = "Test data not saved.";
+
+    private FileTaskMapDaoImpl _storage;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        _storage = new FileTaskMapDaoImpl();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        _storage.getFileOperationHelper().cleanTaskMapDao();
+        _storage = null;
+    }
+
+    private void saveTestData() {
+        try {
+            _storage.saveTaskMap(new TaskMapDataParameter(sampleTaskMap,
+                    MAX_RECUR_INT));
+        } catch (IOException e) {
+            Assert.fail(SAVE_ERROR);
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+    }
+
+    @Test
+    public void testLoadTaskMapNormal() {
+        saveTestData();
+        TaskMapDataParameter loadedData;
+        loadedData = _storage.loadTaskMap();
+        Assert.assertNotNull(loadedData);
+        Assert.assertEquals(sampleTaskMap, loadedData.getRecurringTasks());
+        Assert.assertEquals(MAX_RECUR_INT, loadedData.getMaxRecurTagInt());
+    }
+
+    @Test
+    public void testLoadCorruptedTaskMapFile() {
+        saveTestData();
+        rewriteFile(new File(_storage.getFileOperationHelper()
+                .getTaskMapFileLocation()));
+        TaskMapDataParameter loadedTaskMap = _storage.loadTaskMap();
+        Assert.assertNull(loadedTaskMap);
+    }
+
+    private void rewriteFile(File file) {
+        FileWriter writer;
+        try {
+            writer = new FileWriter(file);
+            writer.write(CORRUPTED_DATA);
+            writer.close();
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+    }
+
+    @Override
+    public void testLoadEmptyFile() {
+        TaskMapDataParameter loadedTaskMap = _storage.loadTaskMap();
+        Assert.assertNull(loadedTaskMap);
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\FileTaskMapDaoImpTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\JsonFileTaskSetDaoImplTest.java
+	 */
+
+
+public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
+
+    private static final String EMPTY_STRING = "";
+    private static final String WHITE_SPACES = "\\s+";
+    private static final String CLASS_NAME = JsonFileTaskSetDaoImplTest.class
+            .getName();
+
+    private JsonFileTaskDaoImpl _storage;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        _storage = new JsonFileTaskDaoImpl(storageMap);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        _storage.getFileOperationHelper().cleanTaskSetDao();
+        _storage = null;
+    }
+
+    private File saveTaskSet(SortedSet<? extends Task<?>> taskSet,
+            TaskType taskType, boolean isCompleted) {
+        try {
+            _storage.saveTaskSet(taskSet, taskType, isCompleted);
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+        }
+        String fileName = null;
+        switch (taskType) {
+            case TODO :
+                fileName = TODO_FILE_NAME;
+                break;
+            case EVENT :
+                fileName = EVENT_FILE_NAME;
+                break;
+            case DEADLINE :
+                fileName = DEADLINE_FILE_NAME;
+                break;
+            default :
+                fileName = null;
+                break;
+        }
+        String fileFullName = testFolder.getRoot() + "/";
+        if (isCompleted) {
+            fileFullName += fileName + JsonFileTaskDaoImpl.getCompletedSuffix() +
+                    JsonFileTaskDaoImpl.getFileExtension();
+        } else {
+            fileFullName += fileName + JsonFileTaskDaoImpl.getFileExtension();
+        }
+        return new File(fileFullName);
+    }
+
+    private SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
+            boolean isCompleted) {
+        try {
+            return _storage.loadTaskSet(taskType, isCompleted);
+        } catch (IOException e) {
+            LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+            return null;
+        }
+    }
+
+    @SuppressWarnings("resource")
+    private String readFileContent(File file) {
+        BufferedReader reader = null;
+        StringBuffer sb = new StringBuffer();
+        String line = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(file)));
+
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (FileNotFoundException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+        return sb.toString();
+    }
+
+    private void checkSavedFile(File savedFile, String json) {
+        Assert.assertTrue(savedFile.exists());
+        Assert.assertTrue(savedFile.isFile());
+        Assert.assertTrue(savedFile.length() > 0);
+        String fileContent = readFileContent(savedFile);
+        Assert.assertTrue(fileContent.replaceAll(WHITE_SPACES, EMPTY_STRING)
+                .equals(json.replaceAll(WHITE_SPACES, EMPTY_STRING)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void checkLoadedSet(SortedSet<? extends Task<?>> loadedSet,
+            TaskType taskType) {
+        switch (taskType) {
+            case TODO :
+                SortedSet<TodoTask> todoTaskSet = (SortedSet<TodoTask>) loadedSet;
+                Assert.assertNotNull(todoTaskSet);
+                Assert.assertEquals(sampleTodoTaskSet, todoTaskSet);
+                break;
+            case EVENT :
+                SortedSet<EventTask> eventTaskSet = (SortedSet<EventTask>) loadedSet;
+                Assert.assertNotNull(eventTaskSet);
+                Assert.assertEquals(sampleEventTaskSet, eventTaskSet);
+                break;
+            case DEADLINE :
+                SortedSet<DeadlineTask> deadlineTaskSet = (SortedSet<DeadlineTask>) loadedSet;
+                Assert.assertNotNull(deadlineTaskSet);
+                Assert.assertEquals(sampleDeadlineTaskSet, deadlineTaskSet);
+                break;
+            default :
+                break;
+        }
+    }
+
+    @Test
+    public void testUnCompletedTodo() {
+        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO,
+                UNCOMPLETED);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
+        checkLoadedSet(loadTaskSet(TaskType.TODO, UNCOMPLETED), TaskType.TODO);
+    }
+
+    @Test
+    public void testCompletedTodo() {
+        Iterator<TodoTask> iterator = sampleTodoTaskSet.iterator();
+        TodoTask task = iterator.next();
+        sampleTodoTaskSet.remove(task);
+        task.setCompleted(COMPLETED);
+        sampleTodoTaskSet.add(task);
+
+        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO,
+                COMPLETED);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
+        checkLoadedSet(loadTaskSet(TaskType.TODO, COMPLETED), TaskType.TODO);
+    }
+
+    @Test
+    public void testUnCompletedEvent() {
+        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT,
+                UNCOMPLETED);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
+        checkLoadedSet(loadTaskSet(TaskType.EVENT, UNCOMPLETED), TaskType.EVENT);
+    }
+
+    @Test
+    public void testCompletedEvent() {
+        Iterator<EventTask> iterator = sampleEventTaskSet.iterator();
+        EventTask task = iterator.next();
+        sampleEventTaskSet.remove(task);
+        task.setCompleted(COMPLETED);
+        sampleEventTaskSet.add(task);
+
+        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT,
+                COMPLETED);
+        checkSavedFile(savedFile,
+                JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
+        checkLoadedSet(loadTaskSet(TaskType.EVENT, COMPLETED), TaskType.EVENT);
+    }
+
+    @Test
+    public void testUnCompletedDeadline() {
+        File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
+                UNCOMPLETED);
+        checkSavedFile(savedFile, JsonHelper.taskSetToJson(
+                sampleDeadlineTaskSet, TaskType.DEADLINE));
+        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, UNCOMPLETED),
+                TaskType.DEADLINE);
+    }
+
+    @Test
+    public void testCompletedDeadline() {
+        Iterator<DeadlineTask> iterator = sampleDeadlineTaskSet.iterator();
+        DeadlineTask task = iterator.next();
+        sampleDeadlineTaskSet.remove(task);
+        task.setCompleted(COMPLETED);
+        sampleDeadlineTaskSet.add(task);
+
+        File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
+                COMPLETED);
+        checkSavedFile(savedFile, JsonHelper.taskSetToJson(
+                sampleDeadlineTaskSet, TaskType.DEADLINE));
+        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, COMPLETED),
+                TaskType.DEADLINE);
+    }
+
+    /* This is a boundary case for the ‘empty file’ partition */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void testLoadEmptyFile() {
+        SortedSet<DeadlineTask> deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(
+                TaskType.DEADLINE, UNCOMPLETED);
+        Assert.assertTrue(deadlineSet.isEmpty());
+        deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.DEADLINE,
+                COMPLETED);
+        Assert.assertTrue(deadlineSet.isEmpty());
+        SortedSet<DeadlineTask> eventSet = (SortedSet<DeadlineTask>) loadTaskSet(
+                TaskType.EVENT, UNCOMPLETED);
+        Assert.assertTrue(eventSet.isEmpty());
+        eventSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.EVENT,
+                COMPLETED);
+        Assert.assertTrue(eventSet.isEmpty());
+        SortedSet<TodoTask> todoSet = (SortedSet<TodoTask>) loadTaskSet(
+                TaskType.TODO, UNCOMPLETED);
+        Assert.assertTrue(todoSet.isEmpty());
+        todoSet = (SortedSet<TodoTask>) loadTaskSet(TaskType.TODO, COMPLETED);
+        Assert.assertTrue(todoSet.isEmpty());
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\JsonFileTaskSetDaoImplTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\MemoryDataObserverImplTest.java
+	 */
+
+
+public class MemoryDataObserverImplTest extends FileDaoImplTest {
+
+    private static final String CLASS_NAME = MemoryDataObserverImplTest.class
+            .getName();
+
+    private MemoryDataObserverImpl _observer;
+    private FileOperationHelper _fileOperationHelper;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        _fileOperationHelper = new FileOperationHelper(storageMap);
+        _observer = new MemoryDataObserverImpl(_fileOperationHelper);
+        _fileOperationHelper.cleanAll();
+        _fileOperationHelper.setUpAll();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        _fileOperationHelper.cleanAll();
+        _observer = null;
+    }
+
+    @Test
+    public void testUpdateTaskMap() {
+        _observer.updateTaskMap(new TaskMapDataParameter(sampleTaskMap,
+                MAX_RECUR_INT));
+        TaskMapDataParameter loadedData = _observer.getTaskMapDao()
+                .loadTaskMap();
+        Assert.assertNotNull(loadedData);
+        Assert.assertEquals(sampleTaskMap, loadedData.getRecurringTasks());
+        Assert.assertEquals(MAX_RECUR_INT, loadedData.getMaxRecurTagInt());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testUpdateTaskSet() {
+        _observer.updateTaskSet(new TaskSetDataParameter(sampleTodoTaskSet,
+                TaskType.TODO, UNCOMPLETED));
+        SortedSet<TodoTask> loadedTaskSet = null;
+        try {
+            loadedTaskSet = (SortedSet<TodoTask>) _observer.getTaskDao()
+                    .loadTaskSet(TaskType.TODO, UNCOMPLETED);
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+        Assert.assertNotNull(loadedTaskSet);
+        Assert.assertEquals(sampleTodoTaskSet, loadedTaskSet);
+    }
+
+    @Override
+    @Ignore
+    public void testLoadEmptyFile() {
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\dao\impl\MemoryDataObserverImplTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\MinaTestDriver.java
+	 */
+
+
+public class MinaTestDriver extends MinaDriver {
+
+    private static MinaTestDriver _driver;
+
+    public static MinaTestDriver getMinaTestDriver() {
+        _driver = new MinaTestDriver();
+        return _driver;
+    }
+
+    public Shell guiTestSetUp() {
+        _driver.initDao();
+        _driver.initTDM();
+        _driver.initTFM();
+        _driver.initCC();
+        MinaGuiUI gui = new MinaGuiUI(_driver.getCommandManager());
+        gui.updateLists();
+        return gui.open();
+    }
+
+    public void cleanUp() {
+        TaskDataManager taskDataManager = _driver.getTaskDataManager();
+        if (taskDataManager != null) {
+            taskDataManager.resetTrees();
+        }
+    }
+
+    public void updateLists() {
+        MinaView view = _driver.getUiView();
+        if (view != null) {
+            view.updateLists();
+        }
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\MinaTestDriver.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\steps\MinaStepSkeleton.java
+	 */
+
+
+public abstract class MinaStepSkeleton {
+
+    protected static final String TAB_SEPARATOR = "\t";
+    protected static final String LINE_SEPARATOR = "line.separator";
+    protected static final String TAB = "\\t";
+    protected static final String NEXT_LINE = "\\n";
+
+    private static final String CLASS_NAME = MinaStepSkeleton.class.getName();
+
+    protected static final int INPUT_TEXT_INDEX = 0;
+    protected static final int FEEDBACK_LABEL_INDEX = 0;
+    protected static final int UNKOWN_INDEX = -1;
+    protected static final int EVENT_LIST_INDEX = 0;
+    protected static final int DEADLINE_LIST_INDEX = 1;
+    protected static final int TODO_LIST_INDEX = 2;
+    protected static final String TODO_TYPE = "todo";
+    protected static final String EVENT_TYPE = "event";
+    protected static final String DEADLINE_TYPE = "deadline";
+
+    protected static final String EMPTY_COMMAND = "";
+
+    private static CyclicBarrier swtBarrier = new CyclicBarrier(2);
+
+    protected static SWTBot bot;
+    protected static MinaTestDriver driver;
+    private static Thread uiThread;
+    private static Shell appShell;
+
+    private static FileOperationHelper fileOperationHelper = new FileOperationHelper(
+            JsonFileTaskDaoImpl.getCompletedSuffix(),
+            JsonFileTaskDaoImpl.getFileExtension(),
+            FileTaskMapDaoImpl.getFileExtension());
+
+    private void initializeUIThread() {
+        uiThread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (true) {
+                        final Display display = Display.getDefault();
+                        appShell = createShell();
+                        bot = new SWTBot(appShell);
+                        swtBarrier.await();
+                        while (!appShell.isDisposed()) {
+                            if (!display.readAndDispatch()) {
+                                display.sleep();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LogHelper.log(CLASS_NAME, Level.ERROR, e.getStackTrace()
+                            .toString());
+                }
+            }
+        });
+        uiThread.setDaemon(true);
+    }
+
+    @BeforeStories
+    public void beforeStories() {
+        try {
+            if (uiThread == null) {
+                driver = MinaTestDriver.getMinaTestDriver();
+                initializeUIThread();
+                uiThread.start();
+                swtBarrier.await();
+            }
+        } catch (Exception e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+    }
+
+    @AfterStories
+    public void afterStories() {
+        try {
+            driver.cleanUp();
+            driver.updateLists();
+            fileOperationHelper.cleanAll();
+        } catch (Exception e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
+    }
+
+    /**
+     * This method must be overridden by users. It should return the
+     * {@link Shell} to be tested, after being opened and laid out. This class
+     * will take care of running its event loop afterwards, until the test ends:
+     * at this point, this class will close the {@link Shell} automatically.
+     */
+    protected abstract Shell createShell();
+
+    @Given("empty command input field")
+    public void givenEmptyCommand() {
+        Assert.assertEquals(EMPTY_COMMAND, bot.text(INPUT_TEXT_INDEX).getText());
+    }
+
+    @When("I enter <command>")
+    public void enterCommand(@Named("command") String command) {
+        bot.text(INPUT_TEXT_INDEX).typeText(command + SWT.CR);
+    }
+
+    @Then("the status bar should show <feedback>")
+    public void statusBarShow(@Named("feedback") String feedback) {
+        Assert.assertEquals(feedback, bot.label(FEEDBACK_LABEL_INDEX).getText());
+    }
+
+    @Then("the <type> list should contains <task> at line number <line>")
+    public void listContains(@Named("type") String type,
+            @Named("task") String task, @Named("line") int line) {
+        // NOTE: replace new line and tab
+        task = task.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        task = task.replace(TAB, TAB_SEPARATOR);
+        int lineNum = line - 1;
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Assert.assertEquals(list.getTextOnLine(lineNum), task);
+    }
+
+    @Then("the <type> list at line number <colorline> should be in <color> color")
+    public void listContains(@Named("type") String type,
+            @Named("colorline") int line, @Named("color") String color) {
+        int lineNum = line - 1;
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Color colorCode = getColorCode(color);
+        Assert.assertEquals(colorCode, list.getStyle(lineNum, list
+                .getTextOnLine(lineNum).length() - 1).foreground);
+    }
+
+    private Color getColorCode(String color) throws Error {
+        Color colorCode;
+        switch (color) {
+            case "gray" :
+                colorCode = SWTResourceManager.getColor(192, 192, 192);
+                break;
+            case "orange" :
+                colorCode = SWTResourceManager.getColor(247, 150, 70);
+                break;
+            case "yellow" :
+                colorCode = SWTResourceManager.getColor(225, 212, 113);
+                break;
+            case "white" :
+                colorCode = SWTResourceManager.getColor(255, 255, 255);
+                break;
+            case "green" :
+                colorCode = SWTResourceManager.getColor(155, 187, 89);
+                break;
+            default :
+                throw new Error("Unkown color");
+        }
+        return colorCode;
+    }
+
+    @Then("the <type> list should not contains <task>")
+    public void listNotContains(@Named("type") String type,
+            @Named("task") String task) {
+        // NOTE: replace new line and tab
+        task = task.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        task = task.replace(TAB, TAB_SEPARATOR);
+        SWTBotStyledText list = getList(type);
+        Assert.assertNotNull(list);
+        Assert.assertFalse(list.getText().contains(task));
+    }
+
+    protected SWTBotStyledText getList(String type) {
+        int listIndex = UNKOWN_INDEX;
+        switch (type) {
+            case TODO_TYPE :
+                listIndex = TODO_LIST_INDEX;
+                break;
+            case EVENT_TYPE :
+                listIndex = EVENT_LIST_INDEX;
+                break;
+            case DEADLINE_TYPE :
+                listIndex = DEADLINE_LIST_INDEX;
+                break;
+            default :
+                listIndex = UNKOWN_INDEX;
+                break;
+        }
+        Assert.assertNotEquals(UNKOWN_INDEX, listIndex);
+        return bot.styledText(listIndex);
+    }
+
+    @Then("the <type> list at line number <dateline> should be <date>")
+    public void checkDate(@Named("type") String type,
+            @Named("dateline") int dateLine, @Named("date") String date) {
+        date = date.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
+        date = date.replace(TAB, TAB_SEPARATOR);
+        SWTBotStyledText list = getList(type);
+        dateLine -= 1;
+        Assert.assertNotNull(list);
+        Assert.assertEquals(list.getTextOnLine(dateLine), date);
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\steps\MinaStepSkeleton.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\steps\MinaTodoTaskSteps.java
+	 */
+
+
+public class MinaTodoTaskSteps extends MinaStepSkeleton {
+    
+    @Override
+    protected Shell createShell() {
+        return driver.guiTestSetUp();
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\steps\MinaTodoTaskSteps.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\stories\MinaITConstant.java
+	 */
+
+
+public class MinaITConstant {
+
+    public static final int THREAD_NUM = 1;
+    public static final int TIME_OUT_IN_SECONDS = 60;
+    
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\stories\MinaITConstant.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\stories\MinaTodoTaskIT.java
+	 */
+
+
+public class MinaTodoTaskIT extends JUnitStory {
+
+    public MinaTodoTaskIT() {
+        configuredEmbedder().embedderControls()
+                .doGenerateViewAfterStories(true)
+                .doIgnoreFailureInStories(false).doIgnoreFailureInView(false)
+                .useThreads(MinaITConstant.THREAD_NUM)
+                .useStoryTimeoutInSecs(MinaITConstant.TIME_OUT_IN_SECONDS);
+    }
+
+    @Override
+    public Configuration configuration() {
+        return new MostUsefulConfiguration()
+                .useStoryReporterBuilder(new StoryReporterBuilder()
+                        .withDefaultFormats().withFormats(CONSOLE, TXT,
+                                IDE_CONSOLE, HTML));
+    }
+
+    @Override
+    public InjectableStepsFactory stepsFactory() {
+        return new InstanceStepsFactory(configuration(), new MinaTodoTaskSteps());
+    }
+}
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\stories\MinaTodoTaskIT.java
+
+
+
+
+

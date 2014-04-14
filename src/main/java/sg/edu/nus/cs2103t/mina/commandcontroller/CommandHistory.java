@@ -12,11 +12,6 @@ import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 
 /**
  * History class uses for Undo/Redo
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 //@author A0099324X
 
@@ -38,18 +33,15 @@ public class CommandHistory {
 	private LinkedList<SortedSet<DeadlineTask>> _redoDeadlineCompletedSet;
 	private LinkedList<SortedSet<EventTask>> _redoEventCompletedSet;
 	
-	private LinkedList<FilterParameter> _undoFilterParameter;
-	private LinkedList<FilterParameter> _redoFilterParameter;
+	private LinkedList<FilterParameter> _undoFilterParameterBefore;
+	private LinkedList<FilterParameter> _undoFilterParameterAfter;
+	private LinkedList<FilterParameter> _redoFilterParameterBefore;
+	private LinkedList<FilterParameter> _redoFilterParameterAfter;
 	
 	private LinkedList<Integer> _undoTabSelectedBefore;
 	private LinkedList<Integer> _undoTabSelectedAfter;
 	private LinkedList<Integer> _redoTabSelectedBefore;
 	private LinkedList<Integer> _redoTabSelectedAfter;
-	
-	private LinkedList<boolean[]> _undoTypeChangedBefore;
-	private LinkedList<boolean[]> _undoTypeChangedAfter;
-	private LinkedList<boolean[]> _redoTypeChangedBefore;
-	private LinkedList<boolean[]> _redoTypeChangedAfter;
 	
 	private LinkedList<int[]> _undoPageChangedBefore;
 	private LinkedList<int[]> _undoPageChangedAfter;
@@ -78,18 +70,15 @@ public class CommandHistory {
 		
 		_latestFilter = new FilterParameter();
 		
-		_undoFilterParameter = new LinkedList<FilterParameter>();
-		_redoFilterParameter = new LinkedList<FilterParameter>();
+		_undoFilterParameterBefore = new LinkedList<FilterParameter>();
+		_undoFilterParameterAfter = new LinkedList<FilterParameter>();
+		_redoFilterParameterBefore = new LinkedList<FilterParameter>();
+		_redoFilterParameterAfter = new LinkedList<FilterParameter>();
 		
 		_undoTabSelectedBefore = new LinkedList<Integer>();
 		_undoTabSelectedAfter = new LinkedList<Integer>();
 		_redoTabSelectedBefore = new LinkedList<Integer>();
 		_redoTabSelectedAfter = new LinkedList<Integer>();
-		
-		_undoTypeChangedBefore = new LinkedList<boolean[]>();
-		_undoTypeChangedAfter = new LinkedList<boolean[]>();
-		_redoTypeChangedBefore = new LinkedList<boolean[]>();
-		_redoTypeChangedAfter = new LinkedList<boolean[]>();
 		
 		_undoPageChangedBefore = new LinkedList<int[]>();
 		_undoPageChangedAfter = new LinkedList<int[]>();
@@ -98,11 +87,14 @@ public class CommandHistory {
 	}
     
 	public void updateLatestFilter(FilterParameter filterParam){
-		_latestFilter = filterParam;
+		Cloner cloner = new Cloner();
+		_latestFilter = cloner.deepClone(filterParam);
 	}
 	
 	public FilterParameter getLatestFilter(){
-		return _latestFilter;
+		Cloner cloner = new Cloner();
+		FilterParameter cloneFilter = cloner.deepClone(_latestFilter);
+		return cloneFilter;
 	}
 	
     public void addUndo(SortedSet<TodoTask> uncompletedTodoTasks, 
@@ -113,7 +105,6 @@ public class CommandHistory {
     		SortedSet<EventTask> completedEventTasks,
     		FilterParameter filterParam,
     		int tabSelected,
-    		boolean isEventChange, boolean isDeadlineChange, boolean isTodoChange,
     		int eventPage, int deadlinePage, int todoPage){
     	
     	Cloner cloner = new Cloner();
@@ -127,7 +118,6 @@ public class CommandHistory {
     	
     	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
     	
-    	boolean[] typeChanges = new boolean[]{isEventChange, isDeadlineChange, isTodoChange};
     	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
     	
     	_undoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
@@ -138,16 +128,15 @@ public class CommandHistory {
     	_undoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
     	_undoEventCompletedSet.addFirst(cloneCompletedEventTasks);
     	
-    	_undoFilterParameter.addFirst(cloneFilterParam);
+    	_undoFilterParameterBefore.addFirst(cloneFilterParam);
     	_undoTabSelectedBefore.addFirst(tabSelected);
-    	_undoTypeChangedBefore.addFirst(typeChanges);
     	_undoPageChangedBefore.addFirst(pageNumbers);
     	
     	if (_undoTodoUncompletedSet.size()==6&&_undoDeadlineUncompletedSet.size()==6&&
     			_undoEventUncompletedSet.size()==6&&_undoTodoCompletedSet.size()==6&&
     			_undoDeadlineCompletedSet.size()==6&&_undoEventCompletedSet.size()==6&&
-    			_undoFilterParameter.size()==6&&_undoTabSelectedBefore.size()==6&&
-    			_undoTypeChangedBefore.size()==6&&_undoPageChangedBefore.size()==6){
+    			_undoFilterParameterBefore.size()==6&&_undoTabSelectedBefore.size()==6&&
+    			_undoPageChangedBefore.size()==6){
     		
     		_undoTodoUncompletedSet.removeLast();
         	_undoDeadlineUncompletedSet.removeLast();
@@ -157,25 +146,26 @@ public class CommandHistory {
         	_undoDeadlineCompletedSet.removeLast();
         	_undoEventCompletedSet.removeLast();
         	
-        	_undoFilterParameter.removeLast();
+        	_undoFilterParameterBefore.removeLast();
         	_undoTabSelectedBefore.removeLast();
-        	_undoTypeChangedBefore.removeLast();
         	_undoPageChangedBefore.removeLast();
     	}
     }
     
-    public void addUndoAfter(int tabSelected,
-    		boolean isEventChange, boolean isDeadlineChange, boolean isTodoChange,
+    public void addUndoAfter(FilterParameter filterParam, int tabSelected,
     		int eventPage, int deadlinePage, int todoPage){
-    	boolean[] typeChanges = new boolean[]{isEventChange, isDeadlineChange, isTodoChange};
     	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	Cloner cloner = new Cloner();
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	_undoFilterParameterAfter.addFirst(cloneFilterParam);
     	_undoTabSelectedAfter.addFirst(tabSelected);
-    	_undoTypeChangedAfter.addFirst(typeChanges);
     	_undoPageChangedAfter.addFirst(pageNumbers);
-    	if (_undoTabSelectedAfter.size()==6&&
-    			_undoTypeChangedAfter.size()==6&&_undoPageChangedAfter.size()==6){
+    	if (_undoFilterParameterAfter.size()==6&&
+    		_undoTabSelectedAfter.size()==6&&
+    		_undoPageChangedAfter.size()==6){
+    		_undoFilterParameterAfter.removeLast();
     		_undoTabSelectedAfter.removeLast();
-        	_undoTypeChangedAfter.removeLast();
         	_undoPageChangedAfter.removeLast();
     	}
     }
@@ -189,10 +179,9 @@ public class CommandHistory {
     	_undoDeadlineCompletedSet.removeFirst();
     	_undoEventCompletedSet.removeFirst();
     	
-    	_undoFilterParameter.removeFirst();
-    	_undoTabSelectedBefore.removeLast();
-    	_undoTypeChangedBefore.removeLast();
-    	_undoPageChangedBefore.removeLast();
+    	_undoFilterParameterBefore.removeFirst();
+    	_undoTabSelectedBefore.removeFirst();
+    	_undoPageChangedBefore.removeFirst();
     }
     
     public void removeLatestRedo(){
@@ -204,10 +193,9 @@ public class CommandHistory {
     	_redoDeadlineCompletedSet.removeFirst();
     	_redoEventCompletedSet.removeFirst();
     	
-    	_redoFilterParameter.removeFirst();
-    	_redoTabSelectedBefore.removeLast();
-    	_redoTypeChangedBefore.removeLast();
-    	_redoPageChangedBefore.removeLast();
+    	_redoFilterParameterBefore.removeFirst();
+    	_redoTabSelectedBefore.removeFirst();
+    	_redoPageChangedBefore.removeFirst();
     }
     
     public SortedSet<TodoTask> getUndoTodoUncompleted(){
@@ -235,27 +223,23 @@ public class CommandHistory {
     }
     
     public FilterParameter getUndoFilterParameter(){
-    	return _undoFilterParameter.removeFirst();
+    	return _undoFilterParameterBefore.removeFirst();
     }
     
     public int getUndoTabSelected(){
     	return _undoTabSelectedBefore.removeFirst();
     }
     
-    public boolean[] getUndoTypeChanged(){
-    	return _undoTypeChangedBefore.removeFirst();
-    }
-    
     public int[] getUndoPageChanged(){
     	return _undoPageChangedBefore.removeFirst();
     }
     
-    public int getUndoTabSelectedAfter(){
-    	return _undoTabSelectedAfter.removeFirst();
+    public FilterParameter getUndoFilterParameterAfter(){
+    	return _undoFilterParameterAfter.removeFirst();
     }
     
-    public boolean[] getUndoTypeChangedAfter(){
-    	return _undoTypeChangedAfter.removeFirst();
+    public int getUndoTabSelectedAfter(){
+    	return _undoTabSelectedAfter.removeFirst();
     }
     
     public int[] getUndoPageChangedAfter(){
@@ -270,7 +254,6 @@ public class CommandHistory {
     		SortedSet<EventTask> completedEventTasks,
     		FilterParameter filterParam,
     		int tabSelected,
-    		boolean isEventChange, boolean isDeadlineChange, boolean isTodoChange,
     		int eventPage, int deadlinePage, int todoPage){
     	
     	Cloner cloner = new Cloner();
@@ -284,7 +267,6 @@ public class CommandHistory {
     	
     	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
     	
-    	boolean[] typeChanges = new boolean[]{isEventChange, isDeadlineChange, isTodoChange};
     	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
     	
     	_redoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
@@ -295,19 +277,19 @@ public class CommandHistory {
     	_redoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
     	_redoEventCompletedSet.addFirst(cloneCompletedEventTasks); 
     	
-    	_redoFilterParameter.addFirst(cloneFilterParam);
+    	_redoFilterParameterBefore.addFirst(cloneFilterParam);
     	_redoTabSelectedBefore.addFirst(tabSelected);
-    	_redoTypeChangedBefore.addFirst(typeChanges);
     	_redoPageChangedBefore.addFirst(pageNumbers);
     }
     
-    public void addRedoAfter(int tabSelected,
-    		boolean isEventChange, boolean isDeadlineChange, boolean isTodoChange,
+    public void addRedoAfter(FilterParameter filterParam, int tabSelected,
     		int eventPage, int deadlinePage, int todoPage){
-    	boolean[] typeChanges = new boolean[]{isEventChange, isDeadlineChange, isTodoChange};
     	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	Cloner cloner = new Cloner();
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	_redoFilterParameterAfter.addFirst(cloneFilterParam);
     	_redoTabSelectedAfter.addFirst(tabSelected);
-    	_redoTypeChangedAfter.addFirst(typeChanges);
     	_redoPageChangedAfter.addFirst(pageNumbers);
     }
     
@@ -336,27 +318,23 @@ public class CommandHistory {
     }
     
     public FilterParameter getRedoFilterParameter(){
-    	return _redoFilterParameter.removeFirst();
+    	return _redoFilterParameterBefore.removeFirst();
     }
     
     public int getRedoTabSelected(){
     	return _redoTabSelectedBefore.removeFirst();
     }
     
-    public boolean[] getRedoTypeChanged(){
-    	return _redoTypeChangedBefore.removeFirst();
-    }
-    
     public int[] getRedoPageChanged(){
     	return _redoPageChangedBefore.removeFirst();
     }
     
-    public int getRedoTabSelectedAfter(){
-    	return _redoTabSelectedAfter.removeFirst();
+    public FilterParameter getRedoFilterParameterAfter(){
+    	return _redoFilterParameterAfter.removeFirst();
     }
     
-    public boolean[] getRedoTypeChangedAfter(){
-    	return _redoTypeChangedAfter.removeFirst();
+    public int getRedoTabSelectedAfter(){
+    	return _redoTabSelectedAfter.removeFirst();
     }
     
     public int[] getRedoPageChangedAfter(){
@@ -372,10 +350,13 @@ public class CommandHistory {
     	_redoDeadlineCompletedSet.clear();
     	_redoEventCompletedSet.clear(); 
     	
-    	_redoFilterParameter.clear();
+    	_redoFilterParameterBefore.clear();
     	_redoTabSelectedBefore.clear();
-    	_redoTypeChangedBefore.clear();
     	_redoPageChangedBefore.clear();
+    	
+    	_redoFilterParameterAfter.clear();
+    	_redoTabSelectedAfter.clear();
+    	_redoPageChangedAfter.clear();
     }
 
     public boolean isEmptyUndo(){
@@ -385,12 +366,11 @@ public class CommandHistory {
     			_undoTodoCompletedSet.isEmpty()&&
     			_undoDeadlineCompletedSet.isEmpty()&&
     			_undoEventCompletedSet.isEmpty()&&
-    			_undoFilterParameter.isEmpty()&&
+    			_undoFilterParameterBefore.isEmpty()&&
     			_undoTabSelectedBefore.isEmpty()&&
-    	    	_undoTypeChangedBefore.isEmpty()&&
     	    	_undoPageChangedBefore.isEmpty()&&
+    	    	_undoFilterParameterAfter.isEmpty()&&
     			_undoTabSelectedAfter.isEmpty()&&
-    	    	_undoTypeChangedAfter.isEmpty()&&
     	    	_undoPageChangedAfter.isEmpty();
     }
 
@@ -401,12 +381,11 @@ public class CommandHistory {
     			_redoTodoCompletedSet.isEmpty()&&
     			_redoDeadlineCompletedSet.isEmpty()&&
     			_redoEventCompletedSet.isEmpty()&&
-    			_redoFilterParameter.isEmpty()&&
+    			_redoFilterParameterBefore.isEmpty()&&
     			_redoTabSelectedBefore.isEmpty()&&
-    	    	_redoTypeChangedBefore.isEmpty()&&
     	    	_redoPageChangedBefore.isEmpty()&&
+    			_redoFilterParameterAfter.isEmpty()&&
     			_redoTabSelectedAfter.isEmpty()&&
-    	    	_redoTypeChangedAfter.isEmpty()&&
     	    	_redoPageChangedAfter.isEmpty();
     }
 }

@@ -6,12 +6,9 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 
 /**
  * Task with deadline
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0080412W
+
 public class DeadlineTask extends Task<DeadlineTask> implements
         Comparable<DeadlineTask> {
 
@@ -39,7 +36,7 @@ public class DeadlineTask extends Task<DeadlineTask> implements
     }
 
     public int compareTo(DeadlineTask otherTask) {
-        Date currDeadlineEnd = this._endTime;
+        Date currDeadlineEnd = _endTime;
         Date otherDeadlineEnd = otherTask.getEndTime();
 
         if (currDeadlineEnd.before(otherDeadlineEnd)) {

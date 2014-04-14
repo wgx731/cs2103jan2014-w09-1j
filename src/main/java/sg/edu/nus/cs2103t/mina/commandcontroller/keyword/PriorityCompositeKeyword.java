@@ -5,28 +5,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
+
+//@author A0099151B
 public class PriorityCompositeKeyword extends Keyword {
-    
+
     static {
-        PriorityCompositeKeyword priorityComposite = new PriorityCompositeKeyword(CompositeKeyword.PRIORITY);
+        PriorityCompositeKeyword priorityComposite = new PriorityCompositeKeyword(
+                CompositeKeyword.PRIORITY);
         KeywordFactory.addAliasEntry("-urgent", priorityComposite);
         KeywordFactory.addAliasEntry("-trivial", priorityComposite);
         KeywordFactory.addAliasEntry("-unimportant", priorityComposite);
     }
-    
+
     private HashMap<String, ArrayList<String>> _priorityCompositeValues;
-    
-    private static Logger logger = LogManager.getLogger(PriorityCompositeKeyword.class
-            .getName());
-    
-    
+    private static final String CLASS_NAME = PriorityCompositeKeyword.class
+            .getName();
+        
     public PriorityCompositeKeyword(StandardKeyword type) {
         super(type);
     }
-    
+
     public PriorityCompositeKeyword() {
         super(CompositeKeyword.PRIORITY);
     }
@@ -38,7 +39,7 @@ public class PriorityCompositeKeyword extends Keyword {
 
     @Override
     protected void initValues() {
-        _priorityCompositeValues = new HashMap<String,  ArrayList<String>>();
+        _priorityCompositeValues = new HashMap<String, ArrayList<String>>();
         _priorityCompositeValues.put("-urgent", getAliasValue("h"));
         _priorityCompositeValues.put("-trivial", getAliasValue("l"));
         _priorityCompositeValues.put("-unimportant", getAliasValue("l"));
@@ -53,13 +54,14 @@ public class PriorityCompositeKeyword extends Keyword {
 
     @Override
     public ArrayList<String> processKeyword(ArrayList<String> tokens,
-                                            int currIndex, Argument argument) throws ParseException {
-        
+            int currIndex, Argument argument) throws ParseException {
+
         String composite = getComposite(tokens.get(currIndex));
-        if(_priorityCompositeValues.containsKey(composite)) {
+        if (_priorityCompositeValues.containsKey(composite)) {
             return replaceSimpleKeyword(tokens, currIndex, composite);
         } else {
-            throw new ParseException("No Such priority composite keyword", currIndex);
+            throw new ParseException("No Such priority composite keyword",
+                    currIndex);
         }
     }
 
@@ -72,9 +74,9 @@ public class PriorityCompositeKeyword extends Keyword {
     }
 
     private ArrayList<String> replaceSimpleKeyword(ArrayList<String> tokens,
-                                                    int currIndex, String composite) {
-        
-        logger.info(tokens + " " + _priorityCompositeValues.get(composite));
+            int currIndex, String composite) {
+        LogHelper.log(CLASS_NAME, Level.INFO, tokens + " " +
+                _priorityCompositeValues.get(composite));
         tokens.set(currIndex, null);
         tokens.addAll(currIndex + 1, _priorityCompositeValues.get(composite));
         return tokens;
@@ -82,11 +84,11 @@ public class PriorityCompositeKeyword extends Keyword {
 
     @Override
     public Map<String, String> getKeywordValues() {
-        
+
         HashMap<String, String> priorityValues = new HashMap<String, String>();
         ArrayList<String> valueArr;
-        
-        for(String key: _priorityCompositeValues.keySet()) {
+
+        for (String key : _priorityCompositeValues.keySet()) {
             valueArr = _priorityCompositeValues.get(key);
             priorityValues.put(key, toString(valueArr));
         }
@@ -95,7 +97,7 @@ public class PriorityCompositeKeyword extends Keyword {
 
     private String toString(ArrayList<String> value) {
         StringBuilder strBuild = new StringBuilder();
-        for(String token: value) {
+        for (String token : value) {
             strBuild.append(token);
             strBuild.append(" ");
         }

@@ -1,0 +1,4534 @@
+//@author: a0099324x
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\commandcontroller\CommandHistory.java
+	 */
+
+
+public class CommandHistory {
+	
+	private LinkedList<SortedSet<TodoTask>> _undoTodoUncompletedSet;
+	private LinkedList<SortedSet<DeadlineTask>> _undoDeadlineUncompletedSet;
+	private LinkedList<SortedSet<EventTask>> _undoEventUncompletedSet;
+	
+	private LinkedList<SortedSet<TodoTask>> _undoTodoCompletedSet;
+	private LinkedList<SortedSet<DeadlineTask>> _undoDeadlineCompletedSet;
+	private LinkedList<SortedSet<EventTask>> _undoEventCompletedSet;
+	
+	private LinkedList<SortedSet<TodoTask>> _redoTodoUncompletedSet;
+	private LinkedList<SortedSet<DeadlineTask>> _redoDeadlineUncompletedSet;
+	private LinkedList<SortedSet<EventTask>> _redoEventUncompletedSet;
+	
+	private LinkedList<SortedSet<TodoTask>> _redoTodoCompletedSet;
+	private LinkedList<SortedSet<DeadlineTask>> _redoDeadlineCompletedSet;
+	private LinkedList<SortedSet<EventTask>> _redoEventCompletedSet;
+	
+	private LinkedList<FilterParameter> _undoFilterParameterBefore;
+	private LinkedList<FilterParameter> _undoFilterParameterAfter;
+	private LinkedList<FilterParameter> _redoFilterParameterBefore;
+	private LinkedList<FilterParameter> _redoFilterParameterAfter;
+	
+	private LinkedList<Integer> _undoTabSelectedBefore;
+	private LinkedList<Integer> _undoTabSelectedAfter;
+	private LinkedList<Integer> _redoTabSelectedBefore;
+	private LinkedList<Integer> _redoTabSelectedAfter;
+	
+	private LinkedList<int[]> _undoPageChangedBefore;
+	private LinkedList<int[]> _undoPageChangedAfter;
+	private LinkedList<int[]> _redoPageChangedBefore;
+	private LinkedList<int[]> _redoPageChangedAfter;
+	
+	private FilterParameter _latestFilter;
+		
+	public CommandHistory(){
+		
+		_undoTodoUncompletedSet = new LinkedList<SortedSet<TodoTask>>();
+		_undoDeadlineUncompletedSet = new LinkedList<SortedSet<DeadlineTask>>();
+		_undoEventUncompletedSet = new LinkedList<SortedSet<EventTask>>();
+		
+		_undoTodoCompletedSet = new LinkedList<SortedSet<TodoTask>>();
+		_undoDeadlineCompletedSet = new LinkedList<SortedSet<DeadlineTask>>();
+		_undoEventCompletedSet = new LinkedList<SortedSet<EventTask>>();
+		
+		_redoTodoUncompletedSet = new LinkedList<SortedSet<TodoTask>>();
+		_redoDeadlineUncompletedSet = new LinkedList<SortedSet<DeadlineTask>>();
+		_redoEventUncompletedSet = new LinkedList<SortedSet<EventTask>>();
+		
+		_redoTodoCompletedSet = new LinkedList<SortedSet<TodoTask>>();
+		_redoDeadlineCompletedSet = new LinkedList<SortedSet<DeadlineTask>>();
+		_redoEventCompletedSet = new LinkedList<SortedSet<EventTask>>();
+		
+		_latestFilter = new FilterParameter();
+		
+		_undoFilterParameterBefore = new LinkedList<FilterParameter>();
+		_undoFilterParameterAfter = new LinkedList<FilterParameter>();
+		_redoFilterParameterBefore = new LinkedList<FilterParameter>();
+		_redoFilterParameterAfter = new LinkedList<FilterParameter>();
+		
+		_undoTabSelectedBefore = new LinkedList<Integer>();
+		_undoTabSelectedAfter = new LinkedList<Integer>();
+		_redoTabSelectedBefore = new LinkedList<Integer>();
+		_redoTabSelectedAfter = new LinkedList<Integer>();
+		
+		_undoPageChangedBefore = new LinkedList<int[]>();
+		_undoPageChangedAfter = new LinkedList<int[]>();
+		_redoPageChangedBefore = new LinkedList<int[]>();
+		_redoPageChangedAfter = new LinkedList<int[]>();
+	}
+    
+	public void updateLatestFilter(FilterParameter filterParam){
+		Cloner cloner = new Cloner();
+		_latestFilter = cloner.deepClone(filterParam);
+	}
+	
+	public FilterParameter getLatestFilter(){
+		Cloner cloner = new Cloner();
+		FilterParameter cloneFilter = cloner.deepClone(_latestFilter);
+		return cloneFilter;
+	}
+	
+    public void addUndo(SortedSet<TodoTask> uncompletedTodoTasks, 
+    		SortedSet<DeadlineTask> uncompletedDeadlineTasks,
+    		SortedSet<EventTask> uncompletedEventTasks,
+    		SortedSet<TodoTask> completedTodoTasks,
+    		SortedSet<DeadlineTask> completedDeadlineTasks,
+    		SortedSet<EventTask> completedEventTasks,
+    		FilterParameter filterParam,
+    		int tabSelected,
+    		int eventPage, int deadlinePage, int todoPage){
+    	
+    	Cloner cloner = new Cloner();
+    	SortedSet<TodoTask> cloneUncompletedTodoTasks = cloner.deepClone(uncompletedTodoTasks);
+    	SortedSet<DeadlineTask> cloneUncompletedDeadlineTasks = cloner.deepClone(uncompletedDeadlineTasks);
+    	SortedSet<EventTask> cloneUncompletedEventTasks = cloner.deepClone(uncompletedEventTasks);
+
+    	SortedSet<TodoTask> cloneCompletedTodoTasks = cloner.deepClone(completedTodoTasks);
+    	SortedSet<DeadlineTask> cloneCompletedDeadlineTasks = cloner.deepClone(completedDeadlineTasks);
+    	SortedSet<EventTask> cloneCompletedEventTasks = cloner.deepClone(completedEventTasks);
+    	
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	
+    	_undoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
+    	_undoDeadlineUncompletedSet.addFirst(cloneUncompletedDeadlineTasks);
+    	_undoEventUncompletedSet.addFirst(cloneUncompletedEventTasks);
+    	
+    	_undoTodoCompletedSet.addFirst(cloneCompletedTodoTasks);
+    	_undoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
+    	_undoEventCompletedSet.addFirst(cloneCompletedEventTasks);
+    	
+    	_undoFilterParameterBefore.addFirst(cloneFilterParam);
+    	_undoTabSelectedBefore.addFirst(tabSelected);
+    	_undoPageChangedBefore.addFirst(pageNumbers);
+    	
+    	if (_undoTodoUncompletedSet.size()==6&&_undoDeadlineUncompletedSet.size()==6&&
+    			_undoEventUncompletedSet.size()==6&&_undoTodoCompletedSet.size()==6&&
+    			_undoDeadlineCompletedSet.size()==6&&_undoEventCompletedSet.size()==6&&
+    			_undoFilterParameterBefore.size()==6&&_undoTabSelectedBefore.size()==6&&
+    			_undoPageChangedBefore.size()==6){
+    		
+    		_undoTodoUncompletedSet.removeLast();
+        	_undoDeadlineUncompletedSet.removeLast();
+        	_undoEventUncompletedSet.removeLast();
+        	
+        	_undoTodoCompletedSet.removeLast();
+        	_undoDeadlineCompletedSet.removeLast();
+        	_undoEventCompletedSet.removeLast();
+        	
+        	_undoFilterParameterBefore.removeLast();
+        	_undoTabSelectedBefore.removeLast();
+        	_undoPageChangedBefore.removeLast();
+    	}
+    }
+    
+    public void addUndoAfter(FilterParameter filterParam, int tabSelected,
+    		int eventPage, int deadlinePage, int todoPage){
+    	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	Cloner cloner = new Cloner();
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	_undoFilterParameterAfter.addFirst(cloneFilterParam);
+    	_undoTabSelectedAfter.addFirst(tabSelected);
+    	_undoPageChangedAfter.addFirst(pageNumbers);
+    	if (_undoFilterParameterAfter.size()==6&&
+    		_undoTabSelectedAfter.size()==6&&
+    		_undoPageChangedAfter.size()==6){
+    		_undoFilterParameterAfter.removeLast();
+    		_undoTabSelectedAfter.removeLast();
+        	_undoPageChangedAfter.removeLast();
+    	}
+    }
+    
+    public void removeLatestUndo(){
+    	_undoTodoUncompletedSet.removeFirst();
+    	_undoDeadlineUncompletedSet.removeFirst();
+    	_undoEventUncompletedSet.removeFirst();
+    	
+    	_undoTodoCompletedSet.removeFirst();
+    	_undoDeadlineCompletedSet.removeFirst();
+    	_undoEventCompletedSet.removeFirst();
+    	
+    	_undoFilterParameterBefore.removeFirst();
+    	_undoTabSelectedBefore.removeFirst();
+    	_undoPageChangedBefore.removeFirst();
+    }
+    
+    public void removeLatestRedo(){
+    	_redoTodoUncompletedSet.removeFirst();
+    	_redoDeadlineUncompletedSet.removeFirst();
+    	_redoEventUncompletedSet.removeFirst();
+    	
+    	_redoTodoCompletedSet.removeFirst();
+    	_redoDeadlineCompletedSet.removeFirst();
+    	_redoEventCompletedSet.removeFirst();
+    	
+    	_redoFilterParameterBefore.removeFirst();
+    	_redoTabSelectedBefore.removeFirst();
+    	_redoPageChangedBefore.removeFirst();
+    }
+    
+    public SortedSet<TodoTask> getUndoTodoUncompleted(){
+    	return _undoTodoUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<DeadlineTask> getUndoDeadlineUncompleted(){
+    	return _undoDeadlineUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<EventTask> getUndoEventUncompleted(){
+    	return _undoEventUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<TodoTask> getUndoTodoCompleted(){
+    	return _undoTodoCompletedSet.removeFirst();
+    }
+    
+    public SortedSet<DeadlineTask> getUndoDeadlineCompleted(){
+    	return _undoDeadlineCompletedSet.removeFirst();
+    }
+    
+    public SortedSet<EventTask> getUndoEventCompleted(){
+    	return _undoEventCompletedSet.removeFirst();
+    }
+    
+    public FilterParameter getUndoFilterParameter(){
+    	return _undoFilterParameterBefore.removeFirst();
+    }
+    
+    public int getUndoTabSelected(){
+    	return _undoTabSelectedBefore.removeFirst();
+    }
+    
+    public int[] getUndoPageChanged(){
+    	return _undoPageChangedBefore.removeFirst();
+    }
+    
+    public FilterParameter getUndoFilterParameterAfter(){
+    	return _undoFilterParameterAfter.removeFirst();
+    }
+    
+    public int getUndoTabSelectedAfter(){
+    	return _undoTabSelectedAfter.removeFirst();
+    }
+    
+    public int[] getUndoPageChangedAfter(){
+    	return _undoPageChangedAfter.removeFirst();
+    }
+    
+    public void addRedo(SortedSet<TodoTask> uncompletedTodoTasks, 
+    		SortedSet<DeadlineTask> uncompletedDeadlineTasks,
+    		SortedSet<EventTask> uncompletedEventTasks,
+    		SortedSet<TodoTask> completedTodoTasks,
+    		SortedSet<DeadlineTask> completedDeadlineTasks,
+    		SortedSet<EventTask> completedEventTasks,
+    		FilterParameter filterParam,
+    		int tabSelected,
+    		int eventPage, int deadlinePage, int todoPage){
+    	
+    	Cloner cloner = new Cloner();
+    	SortedSet<TodoTask> cloneUncompletedTodoTasks = cloner.deepClone(uncompletedTodoTasks);
+    	SortedSet<DeadlineTask> cloneUncompletedDeadlineTasks = cloner.deepClone(uncompletedDeadlineTasks);
+    	SortedSet<EventTask> cloneUncompletedEventTasks = cloner.deepClone(uncompletedEventTasks);
+
+    	SortedSet<TodoTask> cloneCompletedTodoTasks = cloner.deepClone(completedTodoTasks);
+    	SortedSet<DeadlineTask> cloneCompletedDeadlineTasks = cloner.deepClone(completedDeadlineTasks);
+    	SortedSet<EventTask> cloneCompletedEventTasks = cloner.deepClone(completedEventTasks);
+    	
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	
+    	_redoTodoUncompletedSet.addFirst(cloneUncompletedTodoTasks);
+    	_redoDeadlineUncompletedSet.addFirst(cloneUncompletedDeadlineTasks);
+    	_redoEventUncompletedSet.addFirst(cloneUncompletedEventTasks);
+    	
+    	_redoTodoCompletedSet.addFirst(cloneCompletedTodoTasks);
+    	_redoDeadlineCompletedSet.addFirst(cloneCompletedDeadlineTasks);
+    	_redoEventCompletedSet.addFirst(cloneCompletedEventTasks); 
+    	
+    	_redoFilterParameterBefore.addFirst(cloneFilterParam);
+    	_redoTabSelectedBefore.addFirst(tabSelected);
+    	_redoPageChangedBefore.addFirst(pageNumbers);
+    }
+    
+    public void addRedoAfter(FilterParameter filterParam, int tabSelected,
+    		int eventPage, int deadlinePage, int todoPage){
+    	int[] pageNumbers = new int[]{eventPage, deadlinePage, todoPage};
+    	Cloner cloner = new Cloner();
+    	FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+    	
+    	_redoFilterParameterAfter.addFirst(cloneFilterParam);
+    	_redoTabSelectedAfter.addFirst(tabSelected);
+    	_redoPageChangedAfter.addFirst(pageNumbers);
+    }
+    
+    public SortedSet<TodoTask> getRedoTodoUncompleted(){
+    	return _redoTodoUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<DeadlineTask> getRedoDeadlineUncompleted(){
+    	return _redoDeadlineUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<EventTask> getRedoEventUncompleted(){
+    	return _redoEventUncompletedSet.removeFirst();
+    }
+    
+    public SortedSet<TodoTask> getRedoTodoCompleted(){
+    	return _redoTodoCompletedSet.removeFirst();
+    }
+    
+    public SortedSet<DeadlineTask> getRedoDeadlineCompleted(){
+    	return _redoDeadlineCompletedSet.removeFirst();
+    }
+    
+    public SortedSet<EventTask> getRedoEventCompleted(){
+    	return _redoEventCompletedSet.removeFirst();
+    }
+    
+    public FilterParameter getRedoFilterParameter(){
+    	return _redoFilterParameterBefore.removeFirst();
+    }
+    
+    public int getRedoTabSelected(){
+    	return _redoTabSelectedBefore.removeFirst();
+    }
+    
+    public int[] getRedoPageChanged(){
+    	return _redoPageChangedBefore.removeFirst();
+    }
+    
+    public FilterParameter getRedoFilterParameterAfter(){
+    	return _redoFilterParameterAfter.removeFirst();
+    }
+    
+    public int getRedoTabSelectedAfter(){
+    	return _redoTabSelectedAfter.removeFirst();
+    }
+    
+    public int[] getRedoPageChangedAfter(){
+    	return _redoPageChangedAfter.removeFirst();
+    }
+    
+    public void clearRedo(){
+    	_redoTodoUncompletedSet.clear();
+    	_redoDeadlineUncompletedSet.clear();
+    	_redoEventUncompletedSet.clear();
+    	
+    	_redoTodoCompletedSet.clear();
+    	_redoDeadlineCompletedSet.clear();
+    	_redoEventCompletedSet.clear(); 
+    	
+    	_redoFilterParameterBefore.clear();
+    	_redoTabSelectedBefore.clear();
+    	_redoPageChangedBefore.clear();
+    	
+    	_redoFilterParameterAfter.clear();
+    	_redoTabSelectedAfter.clear();
+    	_redoPageChangedAfter.clear();
+    }
+
+    public boolean isEmptyUndo(){
+    	return _undoTodoUncompletedSet.isEmpty()&&
+    			_undoDeadlineUncompletedSet.isEmpty()&&
+    			_undoEventUncompletedSet.isEmpty()&&    	
+    			_undoTodoCompletedSet.isEmpty()&&
+    			_undoDeadlineCompletedSet.isEmpty()&&
+    			_undoEventCompletedSet.isEmpty()&&
+    			_undoFilterParameterBefore.isEmpty()&&
+    			_undoTabSelectedBefore.isEmpty()&&
+    	    	_undoPageChangedBefore.isEmpty()&&
+    	    	_undoFilterParameterAfter.isEmpty()&&
+    			_undoTabSelectedAfter.isEmpty()&&
+    	    	_undoPageChangedAfter.isEmpty();
+    }
+
+    public boolean isEmptyRedo(){
+    	return _redoTodoUncompletedSet.isEmpty()&&
+    			_redoDeadlineUncompletedSet.isEmpty()&&
+    			_redoEventUncompletedSet.isEmpty()&&    	
+    			_redoTodoCompletedSet.isEmpty()&&
+    			_redoDeadlineCompletedSet.isEmpty()&&
+    			_redoEventCompletedSet.isEmpty()&&
+    			_redoFilterParameterBefore.isEmpty()&&
+    			_redoTabSelectedBefore.isEmpty()&&
+    	    	_redoPageChangedBefore.isEmpty()&&
+    			_redoFilterParameterAfter.isEmpty()&&
+    			_redoTabSelectedAfter.isEmpty()&&
+    	    	_redoPageChangedAfter.isEmpty();
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\commandcontroller\CommandHistory.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\commandcontroller\CommandProcessor.java
+	 */
+
+
+public class CommandProcessor {
+
+	private static final String DISPLAYING_SEARCHES = "Displaying searches!";
+	private static final String RESULTS_DISPLAYED = "Results displayed";
+	private static final int MAX_INPUT_ARRAY_SIZE = 2;
+	private static final int COMMAND_POSITION = 0;
+	private static final int PARAMETER_POSITION = 1;
+	private static final int FISRT_ARRAY_INDEX = 0;
+
+	private static final String WELCOME_MESSAGE = "Welcome to MINA!";
+	private static final String INVALID_COMMAND = "Invalid command.";
+	private static final String EMPTY_STRING = "";
+	private static final String SPACE = " ";
+	private static final String ADDED_MESSAGE = "%1$s task %2$s has been added.";
+	private static final String ADD_ERROR_MESSAGE = "Error occured when system try to add new task.";
+	private static final String DELETED_MESSAGE = "%1$s task %2$s has been deleted.";
+	private static final String DELETE_ERROR_MESSAGE = "Error occured when system try to delete task.";
+	private static final String MODIFIED_MESSAGE = "Modified. %1$s task %2$s.";
+	private static final String MODIFY_ERROR_MESSAGE = "Error occured when system try to modify task.";
+	private static final String COMPLETED_MESSAGE = "%1$s task %2$s has been makred as completed.";
+	private static final String COMPLETE_ERROR_MESSAGE = "Error occured when system try to mark task as completed.";
+	private static final String SEARCH_NOT_FOUND = "Search cannot find any result.";
+	private static final String UNDO_MESSAGE = "undo completed.";
+	private static final String UNDO_ERROR_MESSAGE = "Error occured when system try to undo.";
+	private static final String REDO_MESSAGE = "redo completed.";
+	private static final String REDO_ERROR_MESSAGE = "Error occured when system try to redo.";
+	private static final String CLASS_NAME = CommandManager.class.getName();
+
+	private String[] _inputString;
+	
+	private int _currentEventPage;
+	private int _currentDeadlinePage;
+	private int _currentTodoPage;
+
+	private TaskView _taskView;
+	private TaskDataManager _taskDataManager;
+	private TaskFilterManager _taskFilterManager;
+	private CommandHistory _commandHistory;
+
+	// Constructor
+	public CommandProcessor() {
+		_taskDataManager = new TaskDataManager();
+		_taskFilterManager = new TaskFilterManager(_taskDataManager);
+		_commandHistory = new CommandHistory();
+	      initializeTaskView();
+	}
+
+	public CommandProcessor(TaskDataManager taskDataManager,
+			TaskFilterManager taskFilterManager) {
+		_taskDataManager = taskDataManager;
+		_taskFilterManager = taskFilterManager;
+		_commandHistory = new CommandHistory();
+		initializeTaskView();
+	}
+
+	public TaskView getTaskView() {
+		return _taskView;
+	}
+
+	public void initializeTaskView() {
+		FilterParameter defaultFilter = new FilterParameter();
+		_commandHistory.updateLatestFilter(defaultFilter);
+		_taskView = new TaskView(WELCOME_MESSAGE,
+				_taskFilterManager.filterTask(defaultFilter));
+	}
+
+	// This operation is used to get input from the user and execute it till
+	// exit
+	public TaskView processUserInput(String userInput, int eventPage,
+			int deadlinePage, int todoPage) {
+		LogHelper.log(CLASS_NAME, Level.INFO, "Process Input: \"" + userInput
+				+ "\"");
+		if (userInput == null || userInput.trim().equals(EMPTY_STRING)) {
+			return new TaskView(INVALID_COMMAND);
+		}
+		_currentEventPage = eventPage;
+		_currentDeadlinePage = deadlinePage;
+		_currentTodoPage = todoPage;
+		_inputString = userInput.split(SPACE, MAX_INPUT_ARRAY_SIZE);
+		if (_inputString.length == 1) {
+			_inputString = (userInput + " ").split(SPACE, MAX_INPUT_ARRAY_SIZE);
+		}
+		CommandType command;
+		command = determineCommand();
+		try {
+			processUserCommand(command);
+			return _taskView;
+		} catch (Exception e) {
+			processUserCommand(CommandType.INVALID);
+			LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			return _taskView;
+		}
+	}
+
+	// This operation is used to get the user input and extract the command from
+	// inputString
+	private CommandType determineCommand() {
+		String userCommand = _inputString[COMMAND_POSITION];
+		LogHelper.log(CLASS_NAME, Level.INFO, "command is: " + userCommand);
+		try {
+			return CommandType.valueOf(userCommand.trim().toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return CommandType.INVALID;
+		}
+	}
+
+	// This operation is used to process the extracted command and call the
+	// respective functions
+	private void processUserCommand(CommandType command) {
+		switch (command) {
+		case ADD: {
+			performAdd();
+			break;
+		}
+		case DELETE: {
+			performDelete();
+			break;
+		}
+		case MODIFY: {
+			performModify();
+			break;
+		}
+		case DISPLAY: {
+			performDisplay();
+			break;
+		}
+		case SEARCH: {
+			performSearch();
+			break;
+		}
+		case COMPLETE: {
+			performComplete();
+			break;
+		}
+		case UNDO: {
+			performUndo();
+			break;
+		}
+		case REDO: {
+			performRedo();
+			break;
+		}
+		case EXIT: {
+			_taskDataManager.saveAllTasks();
+			System.exit(0);
+			break;
+		}
+		case INVALID: {
+			_taskView = errorCommandReturn(CommandType.INVALID);
+			break;
+		}
+		default: {
+			_taskView = errorCommandReturn(CommandType.INVALID);
+			break;
+		}
+		}
+	}
+
+	private void performAdd() {
+		updateUndo();
+		DataParameter addParameter = processAddParameter(_inputString[PARAMETER_POSITION]);
+		if (addParameter == null) {
+			_taskView = errorCommandReturn(CommandType.INVALID);
+			_commandHistory.removeLatestUndo();
+		}
+		Task<?> task = _taskDataManager.addTask(addParameter);
+		if (task == null) {
+			_taskView = errorCommandReturn(CommandType.ADD);
+			_commandHistory.removeLatestUndo();
+		} else {
+			String output = String.format(ADDED_MESSAGE, task.getType(),
+					task.getDescription());
+			_taskView = updatedTaskView(output, task);
+			postUpdateTaskView(task);
+			updateUndoAfter();
+		}
+	}
+
+	private void performDelete() {
+		updateUndo();
+		DataParameter deleteParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
+		Task<?> task = _taskDataManager.deleteTask(deleteParameter);
+		if (task == null) {
+			_taskView = errorCommandReturn(CommandType.DELETE);
+			_commandHistory.removeLatestUndo();
+		} else {
+			String output = String.format(DELETED_MESSAGE, task.getType(),
+					task.getDescription());
+			_taskView = updatedTaskView(output, task);
+			postUpdateTaskView(task);
+			updateUndoAfter();
+		}
+	}
+
+	private void performModify() {
+		updateUndo();
+		DataParameter modifyParameter = processModifyParameter(_inputString[PARAMETER_POSITION]);
+		if (modifyParameter == null) {
+			_taskView = errorCommandReturn(CommandType.INVALID);
+			_commandHistory.removeLatestUndo();
+		}
+		Task<?> task = _taskDataManager.modifyTask(modifyParameter);
+		if (task == null) {
+			_taskView = errorCommandReturn(CommandType.MODIFY);
+			_commandHistory.removeLatestUndo();
+		} else {
+			String output = String.format(MODIFIED_MESSAGE, task.getType(),
+					task.getDescription());
+			_taskView = updatedTaskView(output, task);
+			postUpdateTaskView(modifyParameter.getTaskObject());
+			postUpdateTaskView(task);
+			updateUndoAfter();
+		}
+	}
+
+	private void performDisplay() {
+		String filterParameterString = _inputString[PARAMETER_POSITION];
+		FilterParameter filterParam;
+		if (!filterParameterString.isEmpty()) {
+			filterParam = processFilterParameter(filterParameterString);
+		} else {
+			filterParam = new FilterParameter();
+		}
+		HashMap<TaskType, ArrayList<Task<?>>> filterResult;
+		filterResult = _taskFilterManager.filterTask(filterParam);
+		_taskView = new TaskView(RESULTS_DISPLAYED, filterResult);
+		_commandHistory
+				.updateLatestFilter(processFilterParameter(filterParameterString));
+	}
+
+	private void performSearch() {
+		SearchParameter searchParameter = processSearchParameter(_inputString[PARAMETER_POSITION]);
+
+		HashMap<TaskType, ArrayList<Task<?>>> searchResult;
+		searchResult = _taskFilterManager.searchTasks(searchParameter);
+
+		String output;
+
+		if (searchResult.size() == 0) {
+			output = SEARCH_NOT_FOUND;
+		} else {
+			output = DISPLAYING_SEARCHES;
+		}
+		_taskView = new TaskView(output, searchResult);
+	}
+
+	private void performComplete() {
+		updateUndo();
+		DataParameter completeParameter = processMarkDeleteParameter(_inputString[PARAMETER_POSITION]);
+		Task<?> task = _taskDataManager.markCompleted(completeParameter);
+		if (task == null) {
+			_taskView = errorCommandReturn(CommandType.COMPLETE);
+			_commandHistory.removeLatestUndo();
+		} else {
+			String output = String.format(COMPLETED_MESSAGE, task.getType(),
+					task.getDescription());
+			_taskView = updatedTaskView(output, task);
+			postUpdateTaskView(task);
+			updateUndoAfter();
+		}
+	}
+
+	private void performUndo() {
+		if (_commandHistory.isEmptyUndo()) {
+			_taskView = errorCommandReturn(CommandType.UNDO);
+		} else {
+			int[] pageChangedAfter = _commandHistory.getUndoPageChangedAfter();
+			_commandHistory.addRedo(_taskDataManager.getUncompletedTodoTasks(),
+					_taskDataManager.getUncompletedDeadlineTasks(),
+					_taskDataManager.getUncompletedEventTasks(),
+					_taskDataManager.getCompletedTodoTasks(),
+					_taskDataManager.getCompletedDeadlineTasks(),
+					_taskDataManager.getCompletedEventTasks(),
+					_commandHistory.getUndoFilterParameterAfter(),
+					_commandHistory.getUndoTabSelectedAfter(),
+					pageChangedAfter[0], pageChangedAfter[1],
+					pageChangedAfter[2]);
+
+			SortedSet<TodoTask> uncompletedTodoTasks = _commandHistory
+					.getUndoTodoUncompleted();
+			SortedSet<DeadlineTask> uncompletedDeadlineTasks = _commandHistory
+					.getUndoDeadlineUncompleted();
+			SortedSet<EventTask> uncompletedEventTasks = _commandHistory
+					.getUndoEventUncompleted();
+			SortedSet<TodoTask> completedTodoTasks = _commandHistory
+					.getUndoTodoCompleted();
+			SortedSet<DeadlineTask> completedDeadlineTasks = _commandHistory
+					.getUndoDeadlineCompleted();
+			SortedSet<EventTask> completedEventTasks = _commandHistory
+					.getUndoEventCompleted();
+			FilterParameter filterParam = _commandHistory
+					.getUndoFilterParameter();
+			int tabSelected = _commandHistory.getUndoTabSelected();
+			int[] pageChanged = _commandHistory.getUndoPageChanged();
+			Cloner cloner = new Cloner();
+			FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+			_commandHistory.updateLatestFilter(cloneFilterParam);
+			_taskDataManager.updateTrees(uncompletedTodoTasks,
+					uncompletedDeadlineTasks, uncompletedEventTasks,
+					completedTodoTasks, completedDeadlineTasks,
+					completedEventTasks);
+			String output = UNDO_MESSAGE;
+			_taskView = updatedTaskView(output);
+			_taskView.setTabSelected(tabSelected);
+			_taskView.setEventPage(pageChanged[0]);
+			_taskView.setDeadlinePage(pageChanged[1]);
+			_taskView.setTodoPage(pageChanged[2]);
+			_commandHistory.addRedoAfter(filterParam,
+					_taskView.getTabSelected(), _taskView.getEventPage(),
+					_taskView.getDeadlinePage(), _taskView.getTodoPage());
+		}
+	}
+
+	private void performRedo() {
+		if (_commandHistory.isEmptyRedo()) {
+			_taskView = errorCommandReturn(CommandType.REDO);
+		} else {
+			int[] pageChangedAfter = _commandHistory.getRedoPageChangedAfter();
+			_commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
+					_taskDataManager.getUncompletedDeadlineTasks(),
+					_taskDataManager.getUncompletedEventTasks(),
+					_taskDataManager.getCompletedTodoTasks(),
+					_taskDataManager.getCompletedDeadlineTasks(),
+					_taskDataManager.getCompletedEventTasks(),
+					_commandHistory.getRedoFilterParameterAfter(),
+					_commandHistory.getRedoTabSelectedAfter(),
+					pageChangedAfter[0], pageChangedAfter[1],
+					pageChangedAfter[2]);
+
+			SortedSet<TodoTask> uncompletedTodoTasks = _commandHistory
+					.getRedoTodoUncompleted();
+			SortedSet<DeadlineTask> uncompletedDeadlineTasks = _commandHistory
+					.getRedoDeadlineUncompleted();
+			SortedSet<EventTask> uncompletedEventTasks = _commandHistory
+					.getRedoEventUncompleted();
+			SortedSet<TodoTask> completedTodoTasks = _commandHistory
+					.getRedoTodoCompleted();
+			SortedSet<DeadlineTask> completedDeadlineTasks = _commandHistory
+					.getRedoDeadlineCompleted();
+			SortedSet<EventTask> completedEventTasks = _commandHistory
+					.getRedoEventCompleted();
+			FilterParameter filterParam = _commandHistory
+					.getRedoFilterParameter();
+			int tabSelected = _commandHistory.getRedoTabSelected();
+			int[] pageChanged = _commandHistory.getRedoPageChanged();
+			Cloner cloner = new Cloner();
+			FilterParameter cloneFilterParam = cloner.deepClone(filterParam);
+			_commandHistory.updateLatestFilter(cloneFilterParam);
+			_taskDataManager.updateTrees(uncompletedTodoTasks,
+					uncompletedDeadlineTasks, uncompletedEventTasks,
+					completedTodoTasks, completedDeadlineTasks,
+					completedEventTasks);
+			String output = REDO_MESSAGE;
+			_taskView = updatedTaskView(output);
+			_taskView.setTabSelected(tabSelected);
+			_taskView.setEventPage(pageChanged[0]);
+			_taskView.setDeadlinePage(pageChanged[1]);
+			_taskView.setTodoPage(pageChanged[2]);
+			_commandHistory.addUndoAfter(filterParam,
+					_taskView.getTabSelected(), _taskView.getEventPage(),
+					_taskView.getDeadlinePage(), _taskView.getTodoPage());
+		}
+	}
+
+	private void updateUndoAfter() {
+		_commandHistory.clearRedo();
+		_commandHistory.addUndoAfter(_commandHistory.getLatestFilter(),
+				_taskView.getTabSelected(), _taskView.getEventPage(),
+				_taskView.getDeadlinePage(), _taskView.getTodoPage());
+	}
+
+	private void updateUndo() {
+		_commandHistory.addUndo(_taskDataManager.getUncompletedTodoTasks(),
+				_taskDataManager.getUncompletedDeadlineTasks(),
+				_taskDataManager.getUncompletedEventTasks(),
+				_taskDataManager.getCompletedTodoTasks(),
+				_taskDataManager.getCompletedDeadlineTasks(),
+				_taskDataManager.getCompletedEventTasks(),
+				_commandHistory.getLatestFilter(), _taskView.getTabSelected(),
+				_taskView.getEventPage(), _taskView.getDeadlinePage(),
+				_taskView.getTodoPage());
+	}
+
+	private void postUpdateTaskView(Task<?> task) {
+		if (task.getType() == TaskType.EVENT) {
+			_taskView.setTabSelected(0);
+			if (_taskView.getEvents().contains(task)) {
+				int page = _taskView.getEvents().indexOf(task)
+						/ _taskView.eventPageSize() + 1;
+				_taskView.setEventPage(page);
+			}
+		} else if (task.getType() == TaskType.DEADLINE) {
+			_taskView.setTabSelected(1);
+			if (_taskView.getDeadlines().contains(task)) {
+				int page = _taskView.getDeadlines().indexOf(task)
+						/ _taskView.deadlinePageSize() + 1;
+				_taskView.setDeadlinePage(page);
+			}
+		} else {
+			_taskView.setTabSelected(2);
+			if (_taskView.getTodos().contains(task)) {
+				int page = _taskView.getTodos().indexOf(task)
+						/ _taskView.todoPageSize() + 1;
+				_taskView.setTodoPage(page);
+			}
+		}
+	}
+
+	private TaskView updatedTaskView(String statusMessage) {
+		return new TaskView(
+				statusMessage,
+				_taskFilterManager.filterTask(_commandHistory.getLatestFilter()));
+	}
+
+	private TaskView updatedTaskView(String statusMessage, Task<?> task) {
+		FilterParameter taskViewFilter = _commandHistory.getLatestFilter();
+		boolean filterContainsOnlyTodo = taskViewFilter
+				.contains(FilterType.TODO)
+				&& !taskViewFilter.contains(FilterType.EVENT)
+				&& !taskViewFilter.contains(FilterType.DEADLINE);
+		boolean filterContainsOnlyDeadline = taskViewFilter
+				.contains(FilterType.DEADLINE)
+				&& !taskViewFilter.contains(FilterType.EVENT)
+				&& !taskViewFilter.contains(FilterType.TODO);
+		boolean filterContainsOnlyEvent = taskViewFilter
+				.contains(FilterType.EVENT)
+				&& !taskViewFilter.contains(FilterType.DEADLINE)
+				&& !taskViewFilter.contains(FilterType.TODO);
+		if (filterContainsOnlyTodo && task.getType() != TaskType.TODO) {
+			taskViewFilter.remove(FilterType.TODO);
+			if (task.getType() == TaskType.EVENT) {
+				taskViewFilter.addFilter(FilterType.EVENT);
+			} else if (task.getType() == TaskType.DEADLINE) {
+				taskViewFilter.addFilter(FilterType.DEADLINE);
+			}
+		} else if (filterContainsOnlyDeadline
+				&& task.getType() != TaskType.DEADLINE) {
+			taskViewFilter.remove(FilterType.DEADLINE);
+			if (task.getType() == TaskType.EVENT) {
+				taskViewFilter.addFilter(FilterType.EVENT);
+			} else if (task.getType() == TaskType.TODO) {
+				taskViewFilter.addFilter(FilterType.TODO);
+			}
+		} else if (filterContainsOnlyEvent && task.getType() != TaskType.EVENT) {
+			taskViewFilter.remove(FilterType.EVENT);
+			if (task.getType() == TaskType.DEADLINE) {
+				taskViewFilter.addFilter(FilterType.DEADLINE);
+			} else if (task.getType() == TaskType.TODO) {
+				taskViewFilter.addFilter(FilterType.TODO);
+			}
+		}
+		_commandHistory.updateLatestFilter(taskViewFilter);
+		return new TaskView(statusMessage,
+				_taskFilterManager.filterTask(taskViewFilter));
+	}
+
+	private TaskView errorCommandReturn(CommandType type) {
+		switch (type) {
+		case ADD:
+			return new TaskView(ADD_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case DELETE:
+			return new TaskView(DELETE_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case MODIFY:
+			return new TaskView(MODIFY_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case COMPLETE:
+			return new TaskView(COMPLETE_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case UNDO:
+			return new TaskView(UNDO_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case REDO:
+			return new TaskView(REDO_ERROR_MESSAGE,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		case INVALID:
+			return new TaskView(INVALID_COMMAND,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		default:
+			return new TaskView(INVALID_COMMAND,
+					_taskFilterManager.filterTask(_commandHistory
+							.getLatestFilter()));
+		}
+	}
+
+	// This method process add parameter into a DataParameter instance
+	// @param parameterString
+	// string contains parameter data
+	// @return addParam
+	// DataParameter instance contains parameter for add method
+
+	public DataParameter processAddParameter(String parameterString) {
+		DataParameter addParam = new DataParameter();
+		ArrayList<String> parameters = new ArrayList<String>();
+		for (String word : parameterString.split(SPACE)) {
+			parameters.add(word);
+		}
+		if (parameters.contains("-start")) {
+			addParam.setNewTaskType(TaskType.EVENT);
+			int endIndexOfDescription = parameterString.indexOf("-");
+			String description = parameterString.substring(0,
+					endIndexOfDescription).trim();
+			addParam.setDescription(description);
+			int indexOfStartDate = parameters.indexOf("-start") + 1;
+			int indexOfEndDate = parameters.indexOf("-end") + 1;
+			if (indexOfEndDate == 0) {
+				addParam = null;
+				return addParam;
+			}
+			try {
+				Date startDate = DateUtil.parse(parameters
+						.get(indexOfStartDate));
+				Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+				if (startDate.before(endDate)) {
+					addParam.setStartDate(startDate);
+					addParam.setEndDate(endDate);
+				} else {
+					addParam = null;
+					return addParam;
+				}
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		} else if (parameters.contains("-end")) {
+			addParam.setNewTaskType(TaskType.DEADLINE);
+			int endIndexOfDescription = parameterString.indexOf("-");
+			String description = parameterString.substring(0,
+					endIndexOfDescription).trim();
+			addParam.setDescription(description);
+			int indexOfEndDate = parameters.indexOf("-end") + 1;
+			try {
+				Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+				addParam.setEndDate(endDate);
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		} else {
+			addParam.setNewTaskType(TaskType.TODO);
+			int endIndexOfDescription = parameterString.indexOf("-");
+			String description;
+			if (endIndexOfDescription != -1) {
+				description = parameterString.substring(0,
+						endIndexOfDescription).trim();
+			} else {
+				description = parameterString;
+			}
+			addParam.setDescription(description);
+		}
+		if (parameters.contains("-priority")) {
+			int indexOfPriority = parameters.indexOf("-priority") + 1;
+			char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
+			addParam.setPriority(priority);
+		}
+		if (parameters.contains("-every")) {
+			String timeType = parameters.get(parameters.indexOf("-every") + 1)
+					.toUpperCase();
+			addParam.setTimeType(timeType);
+			addParam.setFreqOfTimeType(1);
+			addParam.setTag("RECUR");
+		}
+		if (parameters.contains("-until")) {
+			try {
+				Date recurEndDate = DateUtil.parse(parameters.get(parameters
+						.indexOf("-until") + 1));
+				addParam.setEndRecurOn(recurEndDate);
+			} catch (Exception e) {
+				addParam = null;
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+		if (addParam.getDescription().equals("")) {
+			addParam = null;
+		}
+		return addParam;
+	}
+
+	// This method process search parameter into a SearchParameter instance
+	// @param parameterString
+	// string contains parameter data
+	// @return searchParam
+	// SearchParameter instance contains parameter for search method
+
+	public SearchParameter processSearchParameter(String parameterString) {
+		ArrayList<String> parameters = new ArrayList<String>();
+		for (String word : parameterString.split("//")) {
+			parameters.add(word);
+		}
+		SearchParameter searchParam = new SearchParameter(parameters);
+		return searchParam;
+	}
+
+	// This method process filter parameter into a FilterParameter instance
+	// @param parameterString
+	// string contains parameter data
+	// @return filterParam
+	// FilterParameter instance contains parameter for filter method
+
+	public FilterParameter processFilterParameter(String parameterString) {
+		ArrayList<String> parameters = new ArrayList<String>();
+		for (String word : parameterString.split(SPACE)) {
+			parameters.add(word);
+		}
+		Date startDate = null;
+		Date endDate = null;
+		boolean hasStartTime = false;
+		boolean hasEndTime = false;
+
+		if (parameters.contains("-end")) {
+			int indexOfEndDate = parameters.indexOf("-end") + 1;
+			try {
+				endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+				hasEndTime = hasTime(parameters.get(indexOfEndDate));
+				parameters.remove(indexOfEndDate);
+				parameters.remove(indexOfEndDate - 1);
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+		if (parameters.contains("-start")) {
+			int indexOfStartDate = parameters.indexOf("-start") + 1;
+			try {
+				startDate = DateUtil.parse(parameters.get(indexOfStartDate));
+				hasStartTime = hasTime(parameters.get(indexOfStartDate));
+				parameters.remove(indexOfStartDate);
+				parameters.remove(indexOfStartDate - 1);
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+		FilterParameter filterParam = new FilterParameter(parameters);
+		filterParam.setStart(startDate);
+		filterParam.setEnd(endDate);
+		filterParam.setStartTime(hasStartTime);
+		filterParam.setEndTime(hasEndTime);
+		if (filterParam.getStart() != null && filterParam.getEnd() != null) {
+			if (filterParam.getStart().after(filterParam.getEnd())) {
+				filterParam = null;
+				return filterParam;
+			}
+		}
+		return filterParam;
+	}
+
+	// This method process modify parameter into a DataParameter instance
+	// @param parameterString
+	// string contains parameter data
+	// @return modifyParam
+	// DataParameter instance contains parameter for modify method
+
+	private boolean hasTime(String date) {
+		String format = DateUtil.determineDateFormat(date);
+		return format.contains("HH");
+	}
+
+	public DataParameter processModifyParameter(String parameterString) {
+		DataParameter modifyParam = new DataParameter();
+		ArrayList<String> parameters = new ArrayList<String>();
+		for (String word : parameterString.split(" ")) {
+			parameters.add(word);
+		}
+		if (parameters.size()==2){
+			modifyParam = null;
+			return modifyParam;
+		}
+		boolean isContainModifyTags = parameters.contains("-description")||
+				parameters.contains("-totype")||parameters.contains("-end")||
+				parameters.contains("-start")||parameters.contains("-priority");
+		if (!isContainModifyTags){
+			modifyParam = null;
+			return modifyParam;
+		}
+		TaskType original = processTaskTypeFromString(parameters
+				.get(FISRT_ARRAY_INDEX));
+		modifyParam.setOriginalTaskType(original);
+		int userfriendlyTaskID = Integer.parseInt(parameters
+				.get(FISRT_ARRAY_INDEX + 1));
+		int pageNum;
+		if (original == TaskType.EVENT) {
+			pageNum = _currentEventPage;
+		} else if (original == TaskType.DEADLINE) {
+			pageNum = _currentDeadlinePage;
+		} else if (original == TaskType.TODO) {
+			pageNum = _currentTodoPage;
+		} else {
+			pageNum = 0;
+		}
+
+		if (modifyParam.getOriginalTaskType() == null
+				|| modifyParam.getOriginalTaskType() == TaskType.UNKNOWN) {
+			modifyParam = null;
+			return modifyParam;
+		}
+
+		ArrayList<Task<?>> pageOfModifyObject = _taskView.getPage(original,
+				pageNum);
+		Task<?> modifyTask = pageOfModifyObject.get(userfriendlyTaskID - 1);
+		modifyParam.setTaskObject(modifyTask);
+		modifyParam.setTaskID(userfriendlyTaskID);
+		if (modifyTask.getTag().contains("RECUR")) {
+			modifyParam.setTag("RECUR");
+		}
+		
+		boolean isContainOnlyDescription = parameters.contains("-description")&&
+				!parameters.contains("-totype")&&!parameters.contains("-end")&&
+				!parameters.contains("-start")&&!parameters.contains("-priority");
+		if (parameters.contains("-all")) {
+			if (isContainOnlyDescription){
+				modifyParam.setModifyAll(true);
+			} else {
+				modifyParam = null;
+				return modifyParam;
+			}
+		}
+
+		if (parameters.contains("-every")) {
+			String timeType = parameters.get(parameters.indexOf("-every") + 1)
+					.toUpperCase();
+			modifyParam.setTimeType(timeType);
+			modifyParam.setFreqOfTimeType(1);
+		}
+
+		if (parameters.contains("-until")) {
+			try {
+				Date recurEndDate = DateUtil.parse(parameters.get(parameters
+						.indexOf("-until") + 1));
+				modifyParam.setEndRecurOn(recurEndDate);
+			} catch (Exception e) {
+				modifyParam = null;
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+
+		if (parameters.contains("-totype")) {
+			int indexOfNewTaskType = parameters.indexOf("-totype") + 1;
+			TaskType newType = processTaskTypeFromString(parameters
+					.get(indexOfNewTaskType));
+			modifyParam.setNewTaskType(newType);
+		} else {
+			modifyParam.setNewTaskType(original);
+		}
+		if (parameters.contains("-end")) {
+			int indexOfEndDate = parameters.indexOf("-end") + 1;
+			try {
+				Date endDate = DateUtil.parse(parameters.get(indexOfEndDate));
+				modifyParam.setEndDate(endDate);
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+		// NOTE: this can only detect error when user want to modify both start
+		// and end date, but not only one.
+		if (parameters.contains("-start")) {
+			int indexOfStartDate = parameters.indexOf("-start") + 1;
+			try {
+				Date startDate = DateUtil.parse(parameters
+						.get(indexOfStartDate));
+				modifyParam.setStartDate(startDate);
+				if (modifyParam.getEndDate() != null) {
+					if (modifyParam.getStartDate().after(
+							modifyParam.getEndDate())) {
+						modifyParam = null;
+						return modifyParam;
+					}
+				}
+			} catch (ParseException e) {
+				LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			}
+		}
+		if (parameters.contains("-description")) {
+			String newDescription;
+			int indexOfDescription = parameterString.indexOf("-description");
+			newDescription = parameterString.substring(indexOfDescription + 13);
+			int indexOfEndOfDescription = newDescription.indexOf("-");
+			if (indexOfEndOfDescription != -1) {
+				newDescription = newDescription.substring(0,
+						indexOfEndOfDescription - 1);
+			}
+			assert(newDescription!=EMPTY_STRING);
+			modifyParam.setDescription(newDescription);
+		}
+		if (modifyParam.getOriginalTaskType() == TaskType.TODO
+				&& modifyParam.getNewTaskType() == TaskType.DEADLINE
+				&& modifyParam.getEndDate() == null) {
+			modifyParam = null;
+			return modifyParam;
+		}
+		if (modifyParam.getOriginalTaskType() == TaskType.TODO
+				&& modifyParam.getNewTaskType() == TaskType.EVENT
+				&& (modifyParam.getEndDate() == null || modifyParam
+						.getStartDate() == null)) {
+			modifyParam = null;
+			return modifyParam;
+		}
+		if (modifyParam.getOriginalTaskType() == TaskType.DEADLINE
+				&& modifyParam.getNewTaskType() == TaskType.EVENT
+				&& modifyParam.getStartDate() == null) {
+			modifyParam = null;
+			return modifyParam;
+		}
+		if (modifyParam.getOriginalTaskType() == TaskType.TODO
+				&& modifyParam.getNewTaskType() == TaskType.TODO
+				&& (modifyParam.getStartDate() != null || modifyParam
+						.getEndDate() != null)) {
+			modifyParam = null;
+			return modifyParam;
+		}
+		if (modifyParam.getOriginalTaskType() == TaskType.DEADLINE
+				&& modifyParam.getNewTaskType() == TaskType.DEADLINE
+				&& modifyParam.getStartDate() != null) {
+			modifyParam = null;
+			return modifyParam;
+		}
+		if (modifyParam.getStartDate() != null
+				|| modifyParam.getEndDate() != null) {
+			if (modifyParam.getStartDate() != null
+					&& modifyParam.getEndDate() != null) {
+				if (modifyParam.getStartDate().after(modifyParam.getEndDate())) {
+					modifyParam = null;
+					return modifyParam;
+				}
+			} else if (modifyParam.getStartDate() != null) {
+				Task<?> toModifyTask = modifyParam.getTaskObject();
+				if (toModifyTask.getType() == TaskType.EVENT) {
+					if (modifyParam.getStartDate().after(
+							((EventTask) toModifyTask).getEndTime())) {
+						modifyParam = null;
+						return modifyParam;
+					}
+				} else if (toModifyTask.getType() == TaskType.DEADLINE) {
+					if (modifyParam.getStartDate().after(
+							((DeadlineTask) toModifyTask).getEndTime())) {
+						modifyParam = null;
+						return modifyParam;
+					}
+				}
+			} else if (modifyParam.getEndDate() != null) {
+				Task<?> toModifyTask = modifyParam.getTaskObject();
+				if (toModifyTask.getType() == TaskType.EVENT) {
+					if (modifyParam.getEndDate().before(
+							((EventTask) toModifyTask).getStartTime())) {
+						modifyParam = null;
+						return modifyParam;
+					}
+				}
+			}
+		}
+		if (parameters.contains("-priority")) {
+			int indexOfPriority = parameters.indexOf("-priority") + 1;
+			char priority = parameters.get(indexOfPriority).toCharArray()[FISRT_ARRAY_INDEX];
+			modifyParam.setPriority(priority);
+		} else {
+			modifyParam.setPriority(modifyParam.getTaskObject().getPriority());
+		}
+		return modifyParam;
+	}
+
+	// This method process delete/complete parameter into a DataParameter
+	// instance
+	// @param parameterString
+	// string contains parameter data
+	// @return markDeleteParam
+	// DataParameter instance contains parameter for delete/complete method
+
+	public DataParameter processMarkDeleteParameter(String parameterString) {
+		DataParameter markDeleteParam = new DataParameter();
+		ArrayList<String> parameters = new ArrayList<String>();
+		for (String word : parameterString.split(" ")) {
+			parameters.add(word);
+		}
+		TaskType original = processTaskTypeFromString(parameters
+				.get(FISRT_ARRAY_INDEX));
+		markDeleteParam.setOriginalTaskType(original);
+		int userfriendlyTaskID = Integer.parseInt(parameters
+				.get(FISRT_ARRAY_INDEX + 1));
+		int pageNum;
+		if (original == TaskType.EVENT) {
+			pageNum = _currentEventPage;
+		} else if (original == TaskType.DEADLINE) {
+			pageNum = _currentDeadlinePage;
+		} else if (original == TaskType.TODO) {
+			pageNum = _currentTodoPage;
+		} else {
+			pageNum = 0;
+		}
+
+		if (markDeleteParam.getOriginalTaskType() == null
+				|| markDeleteParam.getOriginalTaskType() == TaskType.UNKNOWN) {
+			markDeleteParam = null;
+			return markDeleteParam;
+		}
+
+		ArrayList<Task<?>> pageOfMarkDeleteObject = _taskView.getPage(original,
+				pageNum);
+		if (parameters.contains("-all")) {
+			markDeleteParam.setModifyAll(true);
+		}
+		Task<?> markDeleteTask = pageOfMarkDeleteObject
+				.get(userfriendlyTaskID - 1);
+		markDeleteParam.setTaskObject(markDeleteTask);
+		markDeleteParam.setTaskID(userfriendlyTaskID);
+
+		return markDeleteParam;
+	}
+
+	// This method process TaskType from String
+	// @param taskTypeString
+	// string contains task type
+	// @return taskType
+	// TaskType indicated by taskTypeString
+
+	public TaskType processTaskTypeFromString(String taskTypeString) {
+		if (taskTypeString.equals(TaskType.TODO.getType())) {
+			return TaskType.TODO;
+		} else if (taskTypeString.equals(TaskType.DEADLINE.getType())) {
+			return TaskType.DEADLINE;
+		} else if (taskTypeString.equals(TaskType.EVENT.getType())) {
+			return TaskType.EVENT;
+		} else {
+			return TaskType.UNKNOWN;
+		}
+	}
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\commandcontroller\CommandProcessor.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\controller\CommandManager.java
+	 */
+
+
+public class CommandManager {
+
+	private TaskDataManager _taskDataManager;
+	private TaskFilterManager _taskFilterManager;
+	private CommandProcessor _commandProcessor;
+	private CommandParser _commandParser;
+
+	private static final String CLASS_NAME = CommandManager.class.getName();
+
+	// Constructor
+	public CommandManager() {
+		_taskDataManager = new TaskDataManager();
+		_taskFilterManager = new TaskFilterManager(_taskDataManager);
+		_commandProcessor = new CommandProcessor(_taskDataManager,
+				_taskFilterManager);
+		_commandParser = new CommandParser();
+	}
+
+	public CommandManager(TaskDataManager taskDataManager,
+			TaskFilterManager taskFilterManager) {
+		_taskDataManager = taskDataManager;
+		_taskFilterManager = taskFilterManager;
+		_commandProcessor = new CommandProcessor(_taskDataManager,
+				_taskFilterManager);
+		_commandParser = new CommandParser();
+	}
+
+	public TaskDataManager getTaskDataManager() {
+		return _taskDataManager;
+	}
+
+	public TaskFilterManager getTaskFilterManager() {
+		return _taskFilterManager;
+	}
+
+	public CommandProcessor getCommandProcessor() {
+		return _commandProcessor;
+	}
+
+	public TaskView getTaskView() {
+		return _commandProcessor.getTaskView();
+	}
+
+	public TaskView processUserInput(String userInput, int eventPage,
+			int deadlinePage, int todoPage) {
+
+		String standardInput = null;
+		try {
+			standardInput = _commandParser.convertCommand(userInput);
+		} catch (NullPointerException e) {
+			LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			standardInput = "INVALID";
+		} catch (ParseException e) {
+			LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
+			standardInput = "INVALID";
+		}
+		return _commandProcessor.processUserInput(standardInput, eventPage,
+				deadlinePage, todoPage);
+	}
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\controller\CommandManager.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\HelperView.java
+	 */
+
+
+public class HelperView {
+	private String _helperFunction;
+	private ArrayList<String> _helperText;
+	private String _helperDescription;
+	
+	private final String EMPTY_STRING = "";
+	
+	public HelperView(){
+		setHelperFunction(EMPTY_STRING);
+		setHelperDescription(EMPTY_STRING);
+		setHelperText(new ArrayList<String>());
+	}
+	
+	public HelperView(String func, String desc, ArrayList<String> text){
+		setHelperFunction(func);
+		setHelperDescription(desc);
+		setHelperText(text);
+	}
+	
+	public String getHelperFunction(){
+		return _helperFunction;
+	}
+	
+	public String getHelperDescription(){
+		return _helperDescription;
+	}
+	
+	public ArrayList<String> getHelperText(){
+		return _helperText;
+	}
+	
+	public void setHelperFunction(String func){
+		_helperFunction = func;
+	}
+	
+	public void setHelperDescription(String desc){
+		_helperDescription = desc;
+	}
+	
+	public void setHelperText(ArrayList<String> text){
+		_helperText = text;
+	}
+	
+	public void set(String func, String desc, ArrayList<String> text){
+		setHelperFunction(func);
+		setHelperDescription(desc);
+		setHelperText(text);
+	}
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\HelperView.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\TaskView.java
+	 */
+
+
+public class TaskView {
+    
+    private static final int MIN_PAGE = 1;
+    HashMap<TaskType, ArrayList<Task<?>>> _tasksOutput;
+    String _status;
+
+    private static final int EVERYTHING = Integer.MAX_VALUE;
+    private static final int PAGE_ONE = 0;
+    public static int ITEMS_PER_PAGE = 1;
+    public static final int ITEMS_PER_PAGE_EVENT = 3;
+    public static final int ITEMS_PER_PAGE_DEADLINE = 4;
+    public static final int ITEMS_PER_PAGE_TODO = 7; 
+    
+    private boolean IS_EVENT_CHANGE = false;
+    private boolean IS_DEADLINE_CHANGE = false;
+    private boolean IS_TODO_CHANGE = false;
+    
+    private int TAB_SELECTED = -1;
+    
+    private int EVENT_PAGE = 0;
+    private int DEADLINE_PAGE = 0;
+    private int TODO_PAGE = 0;
+    
+    public TaskView(String status, 
+                    HashMap<TaskType, ArrayList<Task<?>>> tasksOutput) {
+        _tasksOutput = tasksOutput;
+        _status = status;
+    }
+    
+    public TaskView(String status) {
+        _tasksOutput = new HashMap<TaskType, ArrayList<Task<?>>>();
+        _status = status;        
+    }
+    
+    public boolean hasOnlyOneType(TaskType type){
+    	return _tasksOutput.containsKey(type)
+    		&&_tasksOutput.size()==1;
+    }
+    
+    public boolean hasTasks(TaskType type) {
+        return _tasksOutput.containsKey(type);
+    }
+    
+    /**
+     * Get all todos tasks in String
+     * @return String representation of all todos.
+     */
+    public ArrayList<Task<?>> getTodos() {
+        return getTasks(TaskType.TODO, PAGE_ONE, EVERYTHING);
+    }
+    
+    public ArrayList<Task<?>> getEvents() {
+        return getTasks(TaskType.EVENT, PAGE_ONE, EVERYTHING);
+    }
+    
+    public ArrayList<Task<?>> getDeadlines() {
+        return getTasks(TaskType.DEADLINE, PAGE_ONE, EVERYTHING);        
+    }
+    
+    public String getStatus(){
+        return _status;
+    }
+    
+    public int eventPageSize(){
+    	return ITEMS_PER_PAGE_EVENT;
+    }
+    
+    public int deadlinePageSize(){
+    	return ITEMS_PER_PAGE_DEADLINE;
+    }
+    
+    public int todoPageSize(){
+    	return ITEMS_PER_PAGE_TODO;
+    }
+    
+    public int maxTodoPage(){
+    	return (getTodos().size()+todoPageSize()-1)/todoPageSize();
+    }
+    
+    public int maxDeadlinePage(){
+    	return (getDeadlines().size()+deadlinePageSize()-1)/deadlinePageSize();
+    }
+    
+    public int maxEventPage(){
+    	return (getEvents().size()+eventPageSize()-1)/eventPageSize();
+    }
+    
+    public void setEventPage(int page){
+    	EVENT_PAGE = page;
+    }
+    
+    public void setDeadlinePage(int page){
+    	DEADLINE_PAGE = page;
+    }
+    
+    public void setTodoPage(int page){
+    	TODO_PAGE = page;
+    }
+    
+    public int getEventPage(){
+    	return EVENT_PAGE;
+    }
+    
+    public int getDeadlinePage(){
+    	return DEADLINE_PAGE;
+    }
+    
+    public int getTodoPage(){
+    	return TODO_PAGE;
+    }
+    
+    public void setTabSelected(int tabNum){
+    	TAB_SELECTED = tabNum;
+    }
+    
+    public int getTabSelected(){
+    	return TAB_SELECTED;
+    }
+    
+    public void setEventChange(boolean isChanged){
+    	IS_EVENT_CHANGE = isChanged;
+    }
+    
+    public void setDeadlineChange(boolean isChanged){
+    	IS_DEADLINE_CHANGE = isChanged;
+    }
+    
+    public void setTodoChange(boolean isChanged){
+    	IS_TODO_CHANGE = isChanged;
+    }
+    
+    public boolean isEventChange(){
+    	return IS_EVENT_CHANGE;
+    }
+    
+    public boolean isDeadlineChange(){
+    	return IS_DEADLINE_CHANGE;
+    }
+    
+    public boolean isTodoChange(){
+    	return IS_TODO_CHANGE;
+    }
+    
+    public ArrayList<Task<?>> getPage(TaskType type, int page) throws NumberFormatException, IndexOutOfBoundsException{
+        /* Pg   items
+         * 1  - 0-4
+         * 2  - 5-9
+         * 3  - 10-14
+         * 4  - 15-19
+         * ...
+         */
+        //Guard clause
+        if (page<MIN_PAGE) {
+           throw new NumberFormatException(); 
+        }
+        if (type == TaskType.TODO){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_TODO;
+        } else if (type == TaskType.DEADLINE){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_DEADLINE;
+        } else if (type == TaskType.EVENT){
+        	ITEMS_PER_PAGE = ITEMS_PER_PAGE_EVENT;
+        }
+        int end = page * ITEMS_PER_PAGE - 1;
+        int start = end - ITEMS_PER_PAGE + 1;
+        return getTasks(type, start, end);
+    }
+    
+    private ArrayList<Task<?>> getTasks(TaskType type, int start, int end) throws IndexOutOfBoundsException {
+        
+        //Guard clause and sanity check
+        if(!hasTasks(type)){
+            return new ArrayList<Task<?>>();
+        }       
+        assert(start<end);
+        
+        
+        ArrayList<Task<?>> tasks = _tasksOutput.get(type);
+        ArrayList<Task<?>> output = new ArrayList<Task<?>>();
+        
+        if (tasks.size()==0){
+        	return output;
+        }
+        
+        if (start >= tasks.size()) {
+           throw new IndexOutOfBoundsException();
+        }
+        
+        for(int i=start; i<=end && i<tasks.size(); i++) {
+            output.add(tasks.get(i));
+        }
+        return output;
+    }
+    
+    
+    
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\model\TaskView.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\DateUtil.java
+	 */
+
+    // Comparator
+    /**
+     * Determine whether two Calendar instances are on the same date (time can
+     * be different)
+     * 
+     * @param Calendar cal1, Calendar cal2
+     * @return boolean _isSameDate
+     */
+    public static boolean isSameDateCalendar(Calendar cal1, Calendar cal2) {
+        return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)) && (cal1
+                .get(Calendar.MONTH) == cal2.get(Calendar.MONTH)) &&
+                (cal1.get(Calendar.DAY_OF_MONTH) == cal2
+                        .get(Calendar.DAY_OF_MONTH));
+    }
+
+    /**
+     * Display date and time from a date object
+     * 
+     * @param Date date
+     * @return String _date_time in user-friendly format
+     */
+    public static String displayDateTime(Calendar date) {
+        return displayDateOnly(date).concat(" ".concat(displayTimeOnly(date)));
+    }
+
+    /**
+     * Display date only from a date object
+     * 
+     * @param Date date
+     * @return String _date in user-friendly format
+     */
+    public static String displayDateOnly(Calendar date) {
+        Calendar todayCalendar = Calendar.getInstance(TimeZone.getDefault());
+        DateTime todayDateTime = DateTime.today(TimeZone.getDefault());
+        DateTime dateToDisplay = new DateTime(date.get(Calendar.YEAR) + "-" +
+                String.format("%02d", (date.get(Calendar.MONTH) + 1)) +
+                "-" +
+                String.format("%02d", date.get(Calendar.DAY_OF_MONTH)) +
+                " " +
+                String.format("%02d", date.get(Calendar.HOUR_OF_DAY)) +
+                ":" +
+                String.format("%02d", date.get(Calendar.MINUTE)) +
+                ":" +
+                String.format("%02d", date.get(Calendar.SECOND)));
+        DateTime thisSun = getThisSunday(todayCalendar);
+        DateTime nextSun = getNextSunday(todayCalendar);
+        DateTime lastSun = getLastSunday(todayCalendar);
+        DateTime sunBeforeLast = getSundayBeforeLast(todayCalendar);
+        if (nextSun.numDaysFrom(dateToDisplay) >= 1 || dateToDisplay
+                .numDaysFrom(sunBeforeLast) >= 0) {
+            return dateToDisplay.format("WWWW, DD MMM YYYY", Locale.US);
+        } else if (thisSun.numDaysFrom(dateToDisplay) >= 1 && dateToDisplay
+                .numDaysFrom(nextSun) >= 0) {
+            return "Next ".concat(dateToDisplay.format("WWWW", Locale.US));
+        } else if (lastSun.numDaysFrom(dateToDisplay) >= 1 && dateToDisplay
+                .numDaysFrom(thisSun) >= 0) {
+            if (todayDateTime.numDaysFrom(dateToDisplay) == 0) {
+                return "Today";
+            } else if (todayDateTime.numDaysFrom(dateToDisplay) == 1) {
+                return "Tomorrow";
+            } else {
+                return dateToDisplay.format("WWWW", Locale.US);
+            }
+        } else {
+            return "Last ".concat(dateToDisplay.format("WWWW", Locale.US));
+        }
+    }
+
+    /**
+     * Display time only from a date object
+     * 
+     * @param Date date
+     * @return String _time in user-friendly format
+     */
+    public static String displayTimeOnly(Calendar date) {
+        DateTime dateToDisplay = new DateTime(date.get(Calendar.YEAR) + "-" +
+                String.format("%02d", (date.get(Calendar.MONTH) + 1)) +
+                "-" +
+                String.format("%02d", date.get(Calendar.DAY_OF_MONTH)) +
+                " " +
+                String.format("%02d", date.get(Calendar.HOUR_OF_DAY)) +
+                ":" +
+                String.format("%02d", date.get(Calendar.MINUTE)) +
+                ":" +
+                String.format("%02d", date.get(Calendar.SECOND)));
+        return dateToDisplay.format("h12:mm a", Locale.US).toLowerCase();
+    }
+
+    /**
+     * Get the calendar of current week's Sunday
+     * 
+     * @param Calendar currentDate
+     * @return Calendar _thisSunday
+     */
+    private static DateTime getThisSunday(Calendar currentDate) {
+        Calendar thisSun = Calendar.getInstance();
+        thisSun.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        DateTime thisSunday = new DateTime(thisSun.get(Calendar.YEAR) + "-" +
+                String.format("%02d", (thisSun.get(Calendar.MONTH) + 1)) +
+                "-" +
+                String.format("%02d", thisSun.get(Calendar.DAY_OF_MONTH)) +
+                " " +
+                String.format("%02d", thisSun.get(Calendar.HOUR_OF_DAY)) +
+                ":" +
+                String.format("%02d", thisSun.get(Calendar.MINUTE)) +
+                ":" +
+                String.format("%02d", thisSun.get(Calendar.SECOND)));
+        thisSunday = thisSunday.plusDays(7);
+        return thisSunday;
+    }
+
+    /**
+     * Get the calendar of next week's Sunday
+     * 
+     * @param Calendar currentDate
+     * @return Calendar _nextSunday
+     */
+    private static DateTime getNextSunday(Calendar currentDate) {
+        DateTime thisSun = getThisSunday(currentDate);
+        DateTime nextSun = thisSun.plusDays(7);
+        return nextSun;
+    }
+
+    /**
+     * Get the calendar of last week's Sunday
+     * 
+     * @param Calendar currentDate
+     * @return Calendar _lastSunday
+     */
+    private static DateTime getLastSunday(Calendar currentDate) {
+        DateTime thisSun = getThisSunday(currentDate);
+        DateTime lastSun = thisSun.minusDays(7);
+        return lastSun;
+    }
+
+    /**
+     * Get the calendar of week before last week's Sunday
+     * 
+     * @param Calendar currentDate
+     * @return Calendar _sundayBeforeLast
+     */
+    private static DateTime getSundayBeforeLast(Calendar currentDate) {
+        DateTime thisSun = getThisSunday(currentDate);
+        DateTime sunBeforeLast = thisSun.minusDays(14);
+        return sunBeforeLast;
+    }
+
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\utils\DateUtil.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\AutoCompleteDB.java
+	 */
+
+
+public class AutoCompleteDB {
+    private static final String EMPTY_STRING = "";
+	TreeSet<String> proposals;
+
+    public AutoCompleteDB() {
+    	proposals = new TreeSet<String>();
+    	proposals.add("add");
+    	proposals.add("create");
+    	proposals.add("new");
+    	proposals.add("make");
+    	proposals.add("+");
+		proposals.add("delete");
+		proposals.add("remove");
+		proposals.add("rm");
+		proposals.add("-");
+		proposals.add("modify");
+		proposals.add("change");
+		proposals.add("edit");
+		proposals.add("complete");
+		proposals.add("finish");
+		proposals.add("undo");
+		proposals.add("redo");
+		proposals.add("search");
+		proposals.add("find");
+		proposals.add("display");
+		proposals.add("filter");
+		proposals.add("show");
+		proposals.add("exit");
+		proposals.add("quit");
+		proposals.add("modify deadline");
+		proposals.add("modify event");
+		proposals.add("modify todo");
+		proposals.add("edit deadline");
+		proposals.add("edit event");
+		proposals.add("edit todo");
+		proposals.add("change deadline");
+		proposals.add("change event");
+		proposals.add("change todo");
+		proposals.add("delete deadline");
+		proposals.add("delete event");
+		proposals.add("delete todo");
+		proposals.add("remove deadline");
+		proposals.add("remove event");
+		proposals.add("remove todo");
+		proposals.add("- deadline");
+		proposals.add("- event");
+		proposals.add("- todo");
+		proposals.add("rm deadline");
+		proposals.add("rm event");
+		proposals.add("rm todo");
+		proposals.add("complete deadline");
+		proposals.add("complete event");
+		proposals.add("complete todo");
+		proposals.add("finish deadline");
+		proposals.add("finish event");
+		proposals.add("finish todo");
+		proposals.add("display deadline");
+		proposals.add("display event");
+		proposals.add("display todo");
+		proposals.add("filter deadline");
+		proposals.add("filter event");
+		proposals.add("filter todo");
+		proposals.add("show deadline");
+		proposals.add("show event");
+		proposals.add("show todo");
+    }
+
+    public String firstMatch(String input) {
+        String str = proposals.ceiling(input);
+        if (str.equals(input)||str.contains(input)){
+        	return str;
+        } else {
+        	return EMPTY_STRING;
+        }
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\AutoCompleteDB.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\MinaGuiUI.java
+	 */
+
+
+public class MinaGuiUI extends MinaView {
+
+    private static final Color COLOR_SELECTION_BOX_YELLOW = SWTResourceManager.getColor(153, 153, 51);
+	private static final Color COLOR_TEXT_YELLOW = SWTResourceManager.getColor(225, 212, 113);
+	private static final Color COLOR_TEXT_GRAY = SWTResourceManager.getColor(SWT.COLOR_GRAY);
+	private static final Color COLOR_STATUS_BLUE = SWTResourceManager.getColor(91, 192, 222);
+	private static final Color COLOR_AUTOCOMPLETE_YELLOW = SWTResourceManager.getColor(247, 150, 70);
+	private static final Color COLOR_AUTOCOMPLETE_GREEN = SWTResourceManager.getColor(155, 187, 89);
+	private static final Color COLOR_STATUS_ORANGE = SWTResourceManager.getColor(217, 83, 79);
+	private static final Color COLOR_STATUS_GREEN = SWTResourceManager.getColor(92, 184, 92);
+	private static final Color COLOR_INPUT_DARKGREEN = SWTResourceManager.getColor(0, 51, 0);
+	private static final Color COLOR_WHITE = SWTResourceManager.getColor(SWT.COLOR_WHITE);
+	private static final Color COLOR_BLACK = SWTResourceManager.getColor(SWT.COLOR_BLACK);
+	private static final Color COLOR_BACKGROUND_GRAY = SWTResourceManager.getColor(89, 89, 89);
+	private static final String MENU_EXIT = "Exit";
+    private static final String MENU_OPEN = "Open";
+    private static final String HIDE_SHOW_HOT_KEY = "alt F12";
+    private static final String EMPTY_STRING = "";
+    private static final String TRAY_TEXT = "MINA";
+
+    private static final String BUSY = "Processing command ... ";
+    private static final String ERROR = "Operation failed. Please try again.";
+    private static final String INVALID_COMMAND = "Invalid command. Please re-enter.";
+    private static final String SUCCESS = "Operation completed.";
+    private static final String PAGE_INVALID = "Invalid page number.";
+    private static final String PAGE_SUCCESS = "Page changed.";
+    private static final String HELP_OPEN = "Help opened.";
+    private static final String HELP_CLOSE = "Help closed.";
+    private static final String HELP_INSTRUCTION = "Press F1 for Help.";
+
+    private static final String CLASS_NAME = MinaGuiUI.class.getName();
+
+    private final int _timerRate = 5000;
+
+    private final int MIN_PAGE = 1;
+
+    private final String UI_FONT = "Trebuchet MS";
+    private final String UI_FONT_2 = "Tahoma";
+
+    private final String RIGHT_ARROW = "\u2192";
+    private final String LEFT_ARROW = "\u2190";
+
+    private TaskView _taskView;
+
+    private Calendar _yesterday;
+    private Calendar _today;
+    private Calendar _tomorrow;
+
+    private AutoCompleteDB _autoComplete;
+
+    private Shell _shell;
+    private Display _display;
+    private Image _icon;
+    private Tray _tray;
+
+    private StyledText _helpWindowBorder;
+    private StyledText _helpWindow;
+    private UICommandHelper _help;
+
+    private Timer _timer;
+    private Calendar _dayPrev;
+    private Calendar _dayCur;
+    private String _statusPrev = "";
+
+    private Text _userInputTextField;
+    private Label _statusBar;
+    private StyledText _eventListUI;
+    private StyledText _deadlineListUI;
+    private StyledText _todoListUI;
+    private StyledText _backgroundBox;
+    private Label _lblEvent;
+    private Label _lblDeadline;
+    private Label _lblTodo;
+
+    private int _eventPage;
+    private int _deadlinePage;
+    private int _todoPage;
+
+    private int _eventMaxPage;
+    private int _deadlineMaxPage;
+    private int _todoMaxPage;
+
+    private Label _eventPageLabel;
+    private Label _deadlinePageLabel;
+    private Label _todoPageLabel;
+
+    private Label _eventPrevPage;
+    private Label _eventNextPage;
+
+    private Label _deadlinePrevPage;
+    private Label _deadlineNextPage;
+
+    private Label _todoPrevPage;
+    private Label _todoNextPage;
+
+    private LinkedList<String> _commandHistory;
+    private int _positionInCommandHistory;
+
+    private boolean _isExpanded;
+
+    private int _currentTab;
+
+    private Listener _autoCompleteListener;
+    private Listener _functionListener;
+    private TraverseListener _tabListener;
+    private Listener _helpListener;
+
+    private boolean _isAutoComplete;
+
+    private int SHELL_WIDTH;
+    private int SHELL_HEIGHT;
+
+    private int UI_FONT_SIZE;
+
+    public MinaGuiUI(CommandManager commandController) {
+        super(commandController);
+        createContents();
+        createTray();
+        initGlobalKeyListener();
+    }
+
+    /**
+     * Add global key listener
+     */
+    private void initGlobalKeyListener() {
+        final Provider provider = Provider.getCurrentProvider(true);
+        provider.reset();
+        provider.register(KeyStroke.getKeyStroke(HIDE_SHOW_HOT_KEY),
+                new HotKeyListener() {
+
+                    @Override
+                    public void onHotKey(final HotKey key) {
+                        _display.syncExec(new Runnable() {
+                            public void run() {
+                                if (_shell.getVisible()) {
+                                    _shell.setVisible(false);
+                                } else {
+                                    _shell.setVisible(true);
+                                    _shell.setMinimized(false);
+                                    _shell.forceActive();
+                                }
+                            }
+                        });
+                    }
+                });
+
+        _shell.addListener(SWT.Close, new Listener() {
+            public void handleEvent(Event event) {
+                _tray.dispose();
+                provider.reset();
+                provider.stop();
+            }
+        });
+    }
+
+    /**
+     * Create system tray
+     */
+    private void createTray() {
+        _tray = _display.getSystemTray();
+        _icon = new Image(_display, getClass().getResourceAsStream(
+                ConfigHelper.getProperty(ConfigHelper.ICONPATH_KEY)));
+
+        TrayItem item;
+        if (_tray == null) {
+            LogHelper.log(CLASS_NAME, Level.WARN,
+                    "The system tray is not available");
+        } else {
+            item = new TrayItem(_tray, SWT.NONE);
+            item.setToolTipText(TRAY_TEXT);
+
+            final Menu menu = new Menu(_shell, SWT.POP_UP);
+
+            MenuItem openMenuItem = new MenuItem(menu, SWT.PUSH);
+            openMenuItem.setText(MENU_OPEN);
+            openMenuItem.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event event) {
+                    _shell.setVisible(true);
+                    _shell.setMinimized(false);
+                    _shell.forceActive();
+                }
+            });
+            MenuItem exitMenuItem = new MenuItem(menu, SWT.PUSH);
+            exitMenuItem.setText(MENU_EXIT);
+            exitMenuItem.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event event) {
+                    System.exit(0);
+                }
+            });
+
+            item.addListener(SWT.MenuDetect, new Listener() {
+                public void handleEvent(Event event) {
+                    menu.setVisible(true);
+                }
+            });
+
+            item.setImage(_icon);
+        }
+
+    }
+
+    /**
+     * Open the window.
+     */
+    public Shell open() {
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell open");
+        Monitor primary = _display.getPrimaryMonitor();
+        Rectangle bounds = primary.getBounds();
+        Rectangle rect = _shell.getBounds();
+        int x = bounds.x + (bounds.width - rect.width) / 2;
+        int y = bounds.y + (bounds.height - rect.height) / 2;
+        _shell.setLocation(x, y);
+        _shell.setImage(_icon);
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell set position");
+        _shell.open();
+        _shell.layout();
+        return _shell;
+    }
+
+    /**
+     * Create contents of the window.
+     */
+    protected void createContents() {
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell create contents");
+        initializeItems();
+        addAllListeners();
+        if (Boolean
+                .getBoolean(ConfigHelper.getProperty(ConfigHelper.TIMER_KEY))) {
+            startTimer();
+        }
+    }
+
+    private void startTimer() {
+        _dayPrev = Calendar.getInstance();
+        _timer = new Timer();
+        _timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                _display.asyncExec(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        _dayCur = Calendar.getInstance();
+                        if (!DateUtil.isSameDateCalendar(_dayPrev, _dayCur)) {
+                            updateLists();
+                            _dayPrev = _dayCur;
+                        }
+                        if (_statusBar.getText().contains("Welcome") || _statusBar
+                                .getText().equals(INVALID_COMMAND) ||
+                                _statusBar.getText().equals(PAGE_INVALID) ||
+                                _statusBar.getText().equals(ERROR)) {
+                            _statusPrev = _statusBar.getText();
+                            _statusBar.setText(HELP_INSTRUCTION);
+                        } else if (_statusBar.getText()
+                                .equals(HELP_INSTRUCTION)) {
+                            _statusBar.setText(_statusPrev);
+                        }
+                    }
+
+                });
+            }
+        }, 0, _timerRate);
+    }
+
+    private void initializeItems() {
+        _display = Display.getDefault();
+
+        if (_display.getBounds().width > 1024) {
+            SHELL_WIDTH = 1096;
+        } else {
+            SHELL_WIDTH = 976;
+        }
+
+        SHELL_HEIGHT = 580;
+        LogHelper.log(CLASS_NAME, Level.INFO, "width" + SHELL_WIDTH);
+
+        UI_FONT_SIZE = (SHELL_WIDTH == 1096) ? 15 : 14;
+
+        _autoComplete = new AutoCompleteDB();
+
+        _commandHistory = new LinkedList<String>();
+        _positionInCommandHistory = 0;
+
+        _currentTab = 0;
+
+        updateCalendar();
+
+        _taskView = _commandController.getTaskView();
+
+        _eventPage = 1;
+        _deadlinePage = 1;
+        _todoPage = 1;
+
+        _isAutoComplete = false;
+
+        initializeShell();
+        initializeHelp();
+        initializeStatusBar();
+        initializeUserInputTextField();
+        initializeMainPanel();
+
+        resetPanel();
+    }
+
+    private void updateCalendar() {
+        _today = Calendar.getInstance();
+        _tomorrow = Calendar.getInstance();
+        _tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+        _yesterday = Calendar.getInstance();
+        _yesterday.add(Calendar.DAY_OF_YEAR, -1);
+    }
+
+    private void initializeShell() {
+        _shell = new Shell(_display, SWT.NO_TRIM);
+        _shell.setBackground(COLOR_BLACK);
+        _shell.setSize(SHELL_WIDTH, SHELL_HEIGHT);
+        _shell.setText("MINA");
+    }
+
+    private void initializeHelp() {
+        _helpWindow = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _helpWindow.setDoubleClickEnabled(false);
+        _helpWindow.setEnabled(false);
+        _helpWindow.setEditable(false);
+        _helpWindow.setForeground(COLOR_WHITE);
+        _helpWindow.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.NORMAL));
+        _helpWindow.setBackground(COLOR_BACKGROUND_GRAY);
+
+        _helpWindowBorder = new StyledText(_shell, SWT.NONE);
+        _helpWindowBorder.setDoubleClickEnabled(false);
+        _helpWindowBorder.setEnabled(false);
+        _helpWindowBorder.setEditable(false);
+        _helpWindowBorder.setBackground(COLOR_BLACK);
+
+        _helpWindowBorder.setBounds(0, 0, SHELL_WIDTH, SHELL_HEIGHT - 40);
+        _helpWindow.setBounds(5, 5, SHELL_WIDTH - 10, SHELL_HEIGHT - 50);
+
+        _helpWindowBorder.setVisible(false);
+        _helpWindow.setVisible(false);
+        _help = new UICommandHelper();
+    }
+
+    private void initializeStatusBar() {
+        _statusBar = new Label(_shell, SWT.NONE);
+        _statusBar.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.NORMAL));
+        _statusBar.setBackground(COLOR_WHITE);
+        _statusBar.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 540,
+                (SHELL_WIDTH - 16) / 3, 36);
+    }
+
+    private void initializeUserInputTextField() {
+        _userInputTextField = new Text(_shell, SWT.NONE);
+        _userInputTextField
+                .setForeground(COLOR_INPUT_DARKGREEN);
+        _userInputTextField.setFont(SWTResourceManager.getFont(UI_FONT,
+                UI_FONT_SIZE, SWT.NORMAL));
+        _userInputTextField.setBounds(4, 540, (SHELL_WIDTH - 16) / 3 * 2 + 4,
+                36);
+
+    }
+
+    private void initializeMainPanel() {
+        initializeEventPanel();
+        initializeDeadlinePanel();
+        initializeTodoPanel();
+        initializeBackGroundBox();
+        updateArrowNavigation();
+    }
+
+    private void resetPanel() {
+        showDeadline();
+        showTodo();
+        showEvent();
+        positionBackgroundBox();
+        showBackgroundBox();
+        _isExpanded = false;
+    }
+
+    private void initializeTodoPanel() {
+        initializeTodoLabel();
+        initializeTodoPage();
+        initializeTodoList();
+    }
+
+    private void initializeTodoList() {
+        _todoListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _todoListUI.setEnabled(false);
+        _todoListUI.setEditable(false);
+        _todoListUI.setForeground(COLOR_WHITE);
+        _todoListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.NORMAL));
+        _todoListUI.setBackground(COLOR_BACKGROUND_GRAY);
+    }
+
+    private void initializeTodoPage() {
+        _todoNextPage = new Label(_shell, SWT.NONE);
+        _todoNextPage.setForeground(COLOR_WHITE);
+        _todoNextPage
+                .setFont(SWTResourceManager.getFont(UI_FONT, 20, SWT.BOLD));
+        _todoNextPage.setBackground(COLOR_BACKGROUND_GRAY);
+        _todoNextPage.setAlignment(SWT.CENTER);
+
+        _todoPrevPage = new Label(_shell, SWT.NONE);
+        _todoPrevPage.setForeground(COLOR_WHITE);
+        _todoPrevPage
+                .setFont(SWTResourceManager.getFont(UI_FONT, 20, SWT.BOLD));
+        _todoPrevPage.setBackground(COLOR_BACKGROUND_GRAY);
+        _todoPrevPage.setAlignment(SWT.CENTER);
+
+        _todoPageLabel = new Label(_shell, SWT.NONE);
+        _todoPageLabel.setForeground(COLOR_WHITE);
+        _todoPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.NORMAL));
+        _todoPageLabel.setBackground(COLOR_BACKGROUND_GRAY);
+        _todoPageLabel.setAlignment(SWT.CENTER);
+    }
+
+    private void initializeTodoLabel() {
+        _lblTodo = new Label(_shell, SWT.NONE);
+        _lblTodo.setAlignment(SWT.CENTER);
+        _lblTodo.setForeground(COLOR_WHITE);
+        _lblTodo.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.BOLD));
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
+        _lblTodo.setText("To-do(td)");
+    }
+
+    private void initializeDeadlinePanel() {
+        initializeDeadlineLabel();
+        initializeDeadlinePage();
+        initializeDeadlineList();
+    }
+
+    private void initializeDeadlineList() {
+        _deadlineListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _deadlineListUI.setEnabled(false);
+        _deadlineListUI.setEditable(false);
+        _deadlineListUI.setForeground(COLOR_WHITE);
+        _deadlineListUI.setFont(SWTResourceManager.getFont(UI_FONT,
+                UI_FONT_SIZE, SWT.NORMAL));
+        _deadlineListUI.setBackground(COLOR_BACKGROUND_GRAY);
+    }
+
+    private void initializeDeadlinePage() {
+        _deadlinePrevPage = new Label(_shell, SWT.NONE);
+        _deadlinePrevPage.setForeground(COLOR_WHITE);
+        _deadlinePrevPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.BOLD));
+        _deadlinePrevPage
+                .setBackground(COLOR_BACKGROUND_GRAY);
+        _deadlinePrevPage.setAlignment(SWT.CENTER);
+
+        _deadlineNextPage = new Label(_shell, SWT.NONE);
+        _deadlineNextPage.setForeground(COLOR_WHITE);
+        _deadlineNextPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.BOLD));
+        _deadlineNextPage
+                .setBackground(COLOR_BACKGROUND_GRAY);
+        _deadlineNextPage.setAlignment(SWT.CENTER);
+
+        _deadlinePageLabel = new Label(_shell, SWT.NONE);
+        _deadlinePageLabel.setForeground(COLOR_WHITE);
+        _deadlinePageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.NORMAL));
+        _deadlinePageLabel.setBackground(COLOR_BACKGROUND_GRAY);
+        _deadlinePageLabel.setAlignment(SWT.CENTER);
+    }
+
+    private void initializeDeadlineLabel() {
+        _lblDeadline = new Label(_shell, SWT.NONE);
+        _lblDeadline.setAlignment(SWT.CENTER);
+        _lblDeadline
+                .setForeground(COLOR_WHITE);
+        _lblDeadline.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.BOLD));
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
+        _lblDeadline.setText("Deadlines(d)");
+    }
+
+    private void initializeEventPanel() {
+        initializeEventLabel();
+        initializeEventPage();
+        initializeEventList();
+    }
+
+    private void initializeEventList() {
+        _eventListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
+        _eventListUI.setEnabled(false);
+        _eventListUI.setEditable(false);
+        _eventListUI
+                .setForeground(COLOR_WHITE);
+        _eventListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.NORMAL));
+        _eventListUI.setBackground(COLOR_BACKGROUND_GRAY);
+    }
+
+    private void initializeEventPage() {
+        _eventPrevPage = new Label(_shell, SWT.NONE);
+        _eventPrevPage.setForeground(COLOR_WHITE);
+        _eventPrevPage.setFont(SWTResourceManager
+                .getFont(UI_FONT, 20, SWT.BOLD));
+        _eventPrevPage.setBackground(COLOR_BACKGROUND_GRAY);
+        _eventPrevPage.setAlignment(SWT.CENTER);
+
+        _eventNextPage = new Label(_shell, SWT.NONE);
+        _eventNextPage.setForeground(COLOR_WHITE);
+        _eventNextPage.setFont(SWTResourceManager
+                .getFont(UI_FONT, 20, SWT.BOLD));
+        _eventNextPage.setBackground(COLOR_BACKGROUND_GRAY);
+        _eventNextPage.setAlignment(SWT.CENTER);
+
+        _eventPageLabel = new Label(_shell, SWT.NONE);
+        _eventPageLabel.setForeground(COLOR_WHITE);
+        _eventPageLabel.setFont(SWTResourceManager.getFont(UI_FONT, 20,
+                SWT.NORMAL));
+        _eventPageLabel.setBackground(COLOR_BACKGROUND_GRAY);
+        _eventPageLabel.setAlignment(SWT.CENTER);
+    }
+
+    private void initializeEventLabel() {
+        _lblEvent = new Label(_shell, SWT.NONE);
+        _lblEvent.setAlignment(SWT.CENTER);
+        _lblEvent.setForeground(COLOR_WHITE);
+        _lblEvent.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
+                SWT.BOLD));
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
+        _lblEvent.setText("Events(e)");
+    }
+
+    private void initializeBackGroundBox() {
+        _backgroundBox = new StyledText(_shell, SWT.NONE);
+        _backgroundBox.setDoubleClickEnabled(false);
+        _backgroundBox.setEnabled(false);
+        _backgroundBox.setEditable(false);
+    }
+
+    private void addAllListeners() {
+        _autoCompleteListener = new Listener() {
+            public void handleEvent(Event event) {
+                if (event.keyCode > 31 && event.keyCode < 127) {
+                    if (_isAutoComplete) {
+                        autoComplete();
+                    }
+                }
+            }
+        };
+        _userInputTextField.addListener(SWT.KeyUp, _autoCompleteListener);
+
+        _functionListener = new Listener() {
+            public void handleEvent(Event event) {
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.BS) {
+                    setAutoComplete();
+                }
+                if (event.keyCode == SWT.F11 || (event.stateMask == SWT.CTRL && event.keyCode == 'e')) {
+                    if (_isExpanded) {
+                        resetPanel();
+                        updateLists();
+                    } else {
+                        expand();
+                        updateLists();
+                    }
+                }
+                if (event.keyCode == SWT.F1 || (event.stateMask == SWT.CTRL && event.keyCode == 'h')) {
+                    startHelpWindows();
+                }
+                if (event.keyCode == SWT.CR) {
+                    showBusyStatus();
+                    String command = _userInputTextField.getText();
+                    if (!command.equals(EMPTY_STRING)) {
+                        addToHistory(command);
+                        _positionInCommandHistory = -1;
+                    }
+                    if (command.trim().toLowerCase().equals("help") || command
+                            .trim().toLowerCase().equals("-h")) {
+                        startHelpWindows();
+                        _shell.setCursor(_display
+                                .getSystemCursor(SWT.CURSOR_ARROW));
+                    } else if (command.length() >= 5 && command.substring(0, 5)
+                            .equals("page ")) {
+                        String[] commands = command.split(" ");
+                        try {
+                            int page = Integer.parseInt(commands[1]);
+                            int maxPage = 1;
+                            if (_currentTab == 0) {
+                                maxPage = _eventMaxPage;
+                            } else if (_currentTab == 1) {
+                                maxPage = _deadlineMaxPage;
+                            } else if (_currentTab == 2) {
+                                maxPage = _todoMaxPage;
+                            }
+                            if (MIN_PAGE <= page && page <= maxPage) {
+                                setPage(page);
+                                _statusBar.setBackground(COLOR_STATUS_GREEN);
+                                _statusBar.setText(PAGE_SUCCESS);
+                            } else {
+                                _statusBar.setBackground(COLOR_STATUS_ORANGE);
+                                _statusBar.setText(PAGE_INVALID);
+                            }
+                        } catch (Exception e) {
+                            _statusBar.setBackground(COLOR_STATUS_ORANGE);
+                            _statusBar.setText(PAGE_INVALID);
+                            LogHelper.log(CLASS_NAME, Level.ERROR,
+                                    e.getMessage());
+                        } finally {
+                            _shell.setCursor(_display
+                                    .getSystemCursor(SWT.CURSOR_ARROW));
+                        }
+                    } else {
+                        _taskView = _commandController.processUserInput(
+                                command, _eventPage, _deadlinePage, _todoPage);
+                        updatePageFromTaskView();
+                        displayOutput();
+                    }
+                    _userInputTextField.setText(EMPTY_STRING);
+                    if (_taskView.hasOnlyOneType(TaskType.EVENT)) {
+                        _currentTab = 0;
+                        expand();
+                    } else if (_taskView.hasOnlyOneType(TaskType.DEADLINE)) {
+                        _currentTab = 1;
+                        expand();
+                    } else if (_taskView.hasOnlyOneType(TaskType.TODO)) {
+                        _currentTab = 2;
+                        expand();
+                    } else {
+                        if (!_isExpanded || command.equals("display")) {
+                            resetPanel();
+                            if (command.equals("display")) {
+                                resetPage();
+                            }
+                        } else {
+                            _currentTab = _taskView.getTabSelected();
+                            expand();
+                        }
+                    }
+                    updatePage();
+                    updateLists();
+                    positionBackgroundBox();
+                    updateArrowNavigation();
+                }
+                if (event.keyCode == SWT.ARROW_UP) {
+                    event.doit = false;
+                    if (_commandHistory.size() > 0 && _positionInCommandHistory < _commandHistory
+                            .size() - 1) {
+                        _positionInCommandHistory++;
+                        String text = _commandHistory
+                                .get(_positionInCommandHistory);
+                        _userInputTextField.setText(text);
+                        _userInputTextField.selectAll();
+                    } else if (_commandHistory.size() > 0 && _positionInCommandHistory == _commandHistory
+                            .size() - 1) {
+                        String text = _commandHistory
+                                .get(_positionInCommandHistory);
+                        _userInputTextField.setText(text);
+                        _userInputTextField.selectAll();
+                    }
+                }
+                if (event.keyCode == SWT.ARROW_DOWN) {
+                    event.doit = false;
+                    if (_commandHistory.size() > 0 && _positionInCommandHistory > 0) {
+                        _positionInCommandHistory--;
+                        String text = _commandHistory
+                                .get(_positionInCommandHistory);
+                        _userInputTextField.setText(text);
+                        _userInputTextField.selectAll();
+                    } else if (_commandHistory.size() > 0 && _positionInCommandHistory == 0) {
+                        String text = _commandHistory
+                                .get(_positionInCommandHistory);
+                        _userInputTextField.setText(text);
+                        _userInputTextField.selectAll();
+                    }
+                }
+                if (event.keyCode == SWT.ESC) {
+                    _taskView = _commandController.processUserInput("display",
+                            _eventPage, _deadlinePage, _todoPage);
+                    resetPanel();
+                    updateLists();
+                }
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_RIGHT) {
+                    event.doit = false;
+                    event.detail = SWT.TRAVERSE_NONE;
+                    if (_currentTab == 0) {
+                        int maxNumberOfEventPages = _taskView.maxEventPage();
+                        if (_eventPage < maxNumberOfEventPages) {
+                            _eventPage++;
+                            _taskView.setEventPage(_eventPage);
+                            updateEventList();
+                        }
+                    } else if (_currentTab == 1) {
+                        int maxNumberOfDeadlinePages = _taskView
+                                .maxDeadlinePage();
+                        if (_deadlinePage < maxNumberOfDeadlinePages) {
+                            _deadlinePage++;
+                            _taskView.setDeadlinePage(_deadlinePage);
+                            updateDeadlineList();
+                        }
+                    } else {
+                        int maxNumberOfTodoPages = _taskView.maxTodoPage();
+                        if (_todoPage < maxNumberOfTodoPages) {
+                            _todoPage++;
+                            _taskView.setTodoPage(_todoPage);
+                            updateTodoList();
+                        }
+                    }
+                    updateArrowNavigation();
+                }
+                if (event.stateMask == SWT.CTRL && event.keyCode == SWT.ARROW_LEFT) {
+                    event.doit = false;
+                    event.detail = SWT.TRAVERSE_NONE;
+                    if (_currentTab == 0) {
+                        if (_eventPage > 1) {
+                            _eventPage--;
+                            _taskView.setEventPage(_eventPage);
+                            updateEventList();
+                        }
+                    } else if (_currentTab == 1) {
+                        if (_deadlinePage > 1) {
+                            _deadlinePage--;
+                            _taskView.setDeadlinePage(_deadlinePage);
+                            updateDeadlineList();
+                        }
+                    } else {
+                        if (_todoPage > 1) {
+                            _todoPage--;
+                            _taskView.setTodoPage(_todoPage);
+                            updateTodoList();
+                        }
+                    }
+                    updateArrowNavigation();
+                }
+            }
+        };
+        _userInputTextField.addListener(SWT.KeyDown, _functionListener);
+
+        _tabListener = new TraverseListener() {
+            public void keyTraversed(TraverseEvent event) {
+                if (event.stateMask == SWT.CTRL && (event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)) {
+                    event.doit = false;
+                    _currentTab = (_currentTab + 1) % 3;
+                    _taskView.setTabSelected(_currentTab);
+                    if (_currentTab == 0) {
+                        _taskView.setEventPage(_eventPage);
+                    } else if (_currentTab == 1) {
+                        _taskView.setDeadlinePage(_deadlinePage);
+                    } else if (_currentTab == 2) {
+                        _taskView.setTodoPage(_todoPage);
+                    }
+                    if (!_isExpanded) {
+                        positionBackgroundBox();
+                        showBackgroundBox();
+                    } else {
+                        if (_currentTab == 0) {
+                            expandEvent();
+                        } else if (_currentTab == 1) {
+                            expandDeadline();
+                        } else if (_currentTab == 2) {
+                            expandTodo();
+                        }
+                    }
+                }
+                if (event.stateMask != SWT.CTRL && (event.detail == SWT.TRAVERSE_TAB_NEXT || event.detail == SWT.TRAVERSE_TAB_PREVIOUS)) {
+                    event.doit = false;
+                    _userInputTextField.setSelection(_userInputTextField
+                            .getText().length());
+                }
+            }
+        };
+        _userInputTextField.addTraverseListener(_tabListener);
+    }
+
+    private void resetPage() {
+        _todoPage = 1;
+        _deadlinePage = 1;
+        _eventPage = 1;
+
+    }
+
+    private void updatePage() {
+        maxPages();
+        if (_todoPage > _todoMaxPage) {
+            _todoPage = _todoMaxPage;
+        }
+        if (_deadlinePage > _deadlineMaxPage) {
+            _deadlinePage = _deadlineMaxPage;
+        }
+        if (_eventPage > _eventMaxPage) {
+            _eventPage = _eventMaxPage;
+        }
+        if (_todoPage <= 0) {
+            _todoPage = 1;
+        }
+        if (_deadlinePage <= 0) {
+            _deadlinePage = 1;
+        }
+        if (_eventPage <= 0) {
+            _eventPage = 1;
+        }
+    }
+
+    private void updatePageFromTaskView() {
+        if (_taskView.getEventPage() > 0) {
+            _eventPage = _taskView.getEventPage();
+        }
+        if (_taskView.getDeadlinePage() > 0) {
+            _deadlinePage = _taskView.getDeadlinePage();
+        }
+        if (_taskView.getTodoPage() > 0) {
+            _todoPage = _taskView.getTodoPage();
+        }
+    }
+
+    private void setPage(int page) {
+        if (page > 0) {
+            if (_currentTab == 0) {
+                _eventPage = page;
+                _taskView.setEventPage(_eventPage);
+            } else if (_currentTab == 1) {
+                _deadlinePage = page;
+                _taskView.setDeadlinePage(_deadlinePage);
+            } else {
+                _todoPage = page;
+                _taskView.setTodoPage(_todoPage);
+            }
+        }
+    }
+
+    private void addToHistory(String text) {
+        if (_commandHistory.size() < 100) {
+            _commandHistory.addFirst(text);
+        } else {
+            _commandHistory.removeLast();
+            _commandHistory.addFirst(text);
+        }
+        _positionInCommandHistory = 0;
+    }
+
+    private void setAutoComplete() {
+        _isAutoComplete ^= true;
+        if (_isAutoComplete) {
+            _statusBar.setBackground(COLOR_AUTOCOMPLETE_GREEN);
+            _statusBar.setText("\tAutoComplete Enabled");
+        } else {
+            _statusBar.setBackground(COLOR_AUTOCOMPLETE_YELLOW);
+            _statusBar.setText("\tAutoComplete Disabled");
+        }
+    }
+
+    private void autoComplete() {
+        String curText = _userInputTextField.getText();
+        String suggestText = _autoComplete.firstMatch(curText);
+        if (suggestText.length() > 0) {
+            _userInputTextField.setText(suggestText);
+            _userInputTextField.setSelection(curText.length(),
+                    suggestText.length());
+        }
+    }
+
+    @Override
+    public String getUserInput() {
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "shell get user input: " + _userInputTextField.getText());
+        return _userInputTextField.getText();
+    }
+
+    @Override
+    public void displayOutput() {
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell diplay output");
+        _display.asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                String outputMessage = _taskView.getStatus();
+                _shell.setCursor(_display.getSystemCursor(SWT.CURSOR_ARROW));
+                if (outputMessage.contains("Error")) {
+                    _statusBar.setBackground(COLOR_STATUS_ORANGE);
+                    _statusBar.setText(ERROR);
+                } else if (outputMessage.contains("Invalid")) {
+                    _statusBar.setBackground(COLOR_AUTOCOMPLETE_YELLOW);
+                    _statusBar.setText(INVALID_COMMAND);
+                } else {
+                    _statusBar.setBackground(COLOR_STATUS_GREEN);
+                    if (outputMessage.contains("Welcome")) {
+                        _statusBar.setText(outputMessage);
+                    } else {
+                        _statusBar.setText(SUCCESS);
+                    }
+                }
+            }
+        });
+    }
+
+    private void showBusyStatus() {
+        _display.syncExec(new Runnable() {
+
+            @Override
+            public void run() {
+                _statusBar.setText(BUSY);
+                _statusBar.setBackground(COLOR_STATUS_BLUE);
+                _shell.setCursor(_display.getSystemCursor(SWT.CURSOR_WAIT));
+                _display.update();
+            }
+
+        });
+    }
+
+    @Override
+    public void updateLists() {
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell update lists");
+        updateCalendar();
+        updateEventList();
+        updateDeadlineList();
+        updateTodoList();
+        if (_taskView.getTabSelected() != -1) {
+            _currentTab = _taskView.getTabSelected();
+        }
+    }
+
+    public void loop() {
+        LogHelper.log(CLASS_NAME, Level.INFO, "shell running loop");
+        while (!_shell.isDisposed()) {
+            if (!_display.readAndDispatch()) {
+                _display.sleep();
+            }
+        }
+    }
+
+    private void updateEventList() {
+        ArrayList<Task<?>> eventList = _taskView.getPage(TaskType.EVENT,
+                _eventPage);
+        _eventListUI.setText(EMPTY_STRING);
+        Calendar currentDate = null;
+        String currentDateString = "";
+        Calendar itemStartDate;
+        Calendar itemEndDate;
+        int initialCursorPosition = 0;
+        for (int i = 0; i < eventList.size(); i++) {
+            EventTask event = (EventTask) eventList.get(i);
+            itemStartDate = DateUtil.toCalendar(event.getStartTime());
+            itemEndDate = DateUtil.toCalendar(event.getEndTime());
+            if ((currentDate == null) || (!DateUtil.isSameDateCalendar(
+                    currentDate, itemStartDate))) {
+                currentDate = itemStartDate;
+                StyleRange eventStyle = new StyleRange();
+                if (currentDate.before(_yesterday) && !DateUtil
+                        .isSameDateCalendar(_yesterday, currentDate)) {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = COLOR_TEXT_GRAY;
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_yesterday, currentDate)) {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = "Yesterday\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = COLOR_TEXT_GRAY;
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_today, currentDate)) {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = "Today\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_tomorrow, currentDate)) {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = "Tomorrow\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = COLOR_TEXT_YELLOW;
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else {
+                    eventStyle.start = initialCursorPosition;
+                    currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    eventStyle.length = currentDateString.length();
+                    eventStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
+                    _eventListUI.append(currentDateString);
+                    _eventListUI.setStyleRange(eventStyle);
+                    initialCursorPosition += currentDateString.length();
+                }
+            }
+            String eventStringIndex = "\t" + (i + 1) + ". ";
+            String eventDescription = getDisplayedText(event.getDescription()) + "\n";
+            String eventTime = "\t\t" + DateUtil.displayTimeOnly(itemStartDate) +
+                    " - " +
+                    (DateUtil.isSameDateCalendar(itemStartDate, itemEndDate) ? DateUtil
+                            .displayTimeOnly(itemEndDate) : DateUtil
+                            .displayDateTime(itemEndDate)) +
+                    "\n";
+            String eventCompleted = (event.getTag().contains("RECUR") ? "\t\tRECUR"
+                    : "") + (event.isCompleted() ? "\t\tdone" : "");
+            _eventListUI.append(eventStringIndex);
+            initialCursorPosition += eventStringIndex.length();
+
+            _eventListUI.append(eventDescription);
+            StyleRange styleRange = new StyleRange();
+            styleRange.start = initialCursorPosition;
+            styleRange.length = eventDescription.length();
+            styleRange.fontStyle = SWT.BOLD;
+            _eventListUI.setStyleRange(styleRange);
+            initialCursorPosition += eventDescription.length();
+
+            _eventListUI.append(eventTime);
+            initialCursorPosition += eventTime.length();
+
+            _eventListUI.append(eventCompleted);
+            StyleRange completedStyle = new StyleRange();
+            completedStyle.start = initialCursorPosition;
+            completedStyle.length = eventCompleted.length();
+            completedStyle.fontStyle = SWT.ITALIC;
+            completedStyle.font = SWTResourceManager.getFont(UI_FONT_2,
+                    UI_FONT_SIZE - 2, SWT.ITALIC);
+            _eventListUI.setStyleRange(completedStyle);
+            initialCursorPosition += eventCompleted.length();
+
+            if (eventCompleted.length() > 0) {
+                _eventListUI.append("\n");
+                initialCursorPosition++;
+            }
+        }
+    }
+
+    private void updateDeadlineList() {
+        ArrayList<Task<?>> deadlineList = _taskView.getPage(TaskType.DEADLINE,
+                _deadlinePage);
+        _deadlineListUI.setText(EMPTY_STRING);
+        Calendar currentDate = null;
+        String currentDateString = "";
+        Calendar itemDate;
+        int initialCursorPosition = 0;
+        for (int i = 0; i < deadlineList.size(); i++) {
+            DeadlineTask deadline = (DeadlineTask) deadlineList.get(i);
+            itemDate = DateUtil.toCalendar(deadline.getEndTime());
+            if ((currentDate == null) || (!DateUtil.isSameDateCalendar(
+                    currentDate, itemDate))) {
+                currentDate = itemDate;
+                StyleRange deadlineStyle = new StyleRange();
+                if (currentDate.before(_yesterday) && !DateUtil
+                        .isSameDateCalendar(_yesterday, currentDate)) {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = COLOR_TEXT_GRAY;
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_yesterday, currentDate)) {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = "Yesterday\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = COLOR_TEXT_GRAY;
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_today, currentDate)) {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = "Today\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else if (DateUtil.isSameDateCalendar(_tomorrow, currentDate)) {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = "Tomorrow\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = COLOR_TEXT_YELLOW;
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                } else {
+                    deadlineStyle.start = initialCursorPosition;
+                    currentDateString = DateUtil.displayDateOnly(currentDate) + "\n";
+                    deadlineStyle.length = currentDateString.length();
+                    deadlineStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
+                    _deadlineListUI.append(currentDateString);
+                    _deadlineListUI.setStyleRange(deadlineStyle);
+                    initialCursorPosition += currentDateString.length();
+                }
+            }
+            String deadlineStringIndex = "\t" + (i + 1) + ". ";
+            String deadlineDescription = getDisplayedText(deadline
+                    .getDescription());
+            String deadlineTime = " by " + DateUtil.displayTimeOnly(itemDate) +
+                    "\n";
+            String deadlineCompleted = (deadline.getTag().contains("RECUR") ? "\t\tRECUR"
+                    : "") + (deadline.isCompleted() ? "\t\tdone" : "");
+            _deadlineListUI.append(deadlineStringIndex);
+            initialCursorPosition += deadlineStringIndex.length();
+
+            _deadlineListUI.append(deadlineDescription);
+            StyleRange styleRange = new StyleRange();
+            styleRange.start = initialCursorPosition;
+            styleRange.length = deadlineDescription.length();
+            styleRange.fontStyle = SWT.BOLD;
+            _deadlineListUI.setStyleRange(styleRange);
+            initialCursorPosition += deadlineDescription.length();
+
+            _deadlineListUI.append(deadlineTime);
+            initialCursorPosition += deadlineTime.length();
+
+            _deadlineListUI.append(deadlineCompleted);
+            StyleRange completedStyle = new StyleRange();
+            completedStyle.start = initialCursorPosition;
+            completedStyle.length = deadlineCompleted.length();
+            completedStyle.fontStyle = SWT.ITALIC;
+            completedStyle.font = SWTResourceManager.getFont(UI_FONT_2,
+                    UI_FONT_SIZE - 2, SWT.ITALIC);
+            _deadlineListUI.setStyleRange(completedStyle);
+            initialCursorPosition += deadlineCompleted.length();
+
+            if (deadlineCompleted.length() > 0) {
+                _deadlineListUI.append("\n");
+                initialCursorPosition++;
+            }
+        }
+    }
+
+    private void updateTodoList() {
+        ArrayList<Task<?>> todoList = _taskView.getPage(TaskType.TODO,
+                _todoPage);
+        _todoListUI.setText(EMPTY_STRING);
+        int initialCursorPosition = 0;
+        for (int i = 0; i < todoList.size(); i++) {
+            TodoTask todo = (TodoTask) todoList.get(i);
+            String todoString = (i + 1) + ". " +
+                    getDisplayedText(todo.getDescription()) +
+                    "\n";
+            _todoListUI.append(todoString);
+            StyleRange todoStyle = new StyleRange();
+            todoStyle.start = initialCursorPosition;
+            todoStyle.length = todoString.length();
+            if (todo.getPriority() == 'H') {
+                todoStyle.foreground = COLOR_AUTOCOMPLETE_YELLOW;
+            } else if (todo.getPriority() == 'M') {
+                todoStyle.foreground = COLOR_TEXT_YELLOW;
+            } else {
+                todoStyle.foreground = COLOR_AUTOCOMPLETE_GREEN;
+            }
+            _todoListUI.setStyleRange(todoStyle);
+            initialCursorPosition += todoString.length();
+
+            String todoCompleted = (todo.isCompleted() ? "\tdone\n" : "");
+
+            _todoListUI.append(todoCompleted);
+            StyleRange completedStyle = new StyleRange();
+            completedStyle.start = initialCursorPosition;
+            completedStyle.length = todoCompleted.length();
+            completedStyle.fontStyle = SWT.ITALIC;
+            completedStyle.font = SWTResourceManager.getFont(UI_FONT_2,
+                    UI_FONT_SIZE - 2, SWT.ITALIC);
+            _todoListUI.setStyleRange(completedStyle);
+            initialCursorPosition += todoCompleted.length();
+        }
+    }
+
+    private String getDisplayedText(String des) {
+        String str = des;
+        int limit;
+        if (_isExpanded) {
+            limit = 397;
+        } else {
+            limit = 47;
+        }
+        if (str.length() > limit) {
+            str = str.substring(0, limit);
+            str = str.concat("...");
+        }
+        return str;
+    }
+
+    private void expand() {
+        if (_currentTab == 0) {
+            expandEvent();
+        } else if (_currentTab == 1) {
+            expandDeadline();
+        } else {
+            expandTodo();
+        }
+    }
+
+    private void updateArrowNavigation() {
+        if (_eventPage >= _taskView.maxEventPage()) {
+            _eventNextPage.setText("");
+        } else {
+            _eventNextPage.setText(RIGHT_ARROW);
+        }
+        if (_eventPage == 1) {
+            _eventPrevPage.setText("");
+        } else {
+            _eventPrevPage.setText(LEFT_ARROW);
+        }
+        if (_deadlinePage >= _taskView.maxDeadlinePage()) {
+            _deadlineNextPage.setText("");
+        } else {
+            _deadlineNextPage.setText(RIGHT_ARROW);
+        }
+        if (_deadlinePage == 1) {
+            _deadlinePrevPage.setText("");
+        } else {
+            _deadlinePrevPage.setText(LEFT_ARROW);
+        }
+        if (_todoPage >= _taskView.maxTodoPage()) {
+            _todoNextPage.setText("");
+        } else {
+            _todoNextPage.setText(RIGHT_ARROW);
+        }
+        if (_todoPage == 1) {
+            _todoPrevPage.setText("");
+        } else {
+            _todoPrevPage.setText(LEFT_ARROW);
+        }
+        maxPages();
+        _todoPageLabel
+                .setText(((_todoPage <= 9999) ? _todoPage : "\u221E") + "/" +
+                        ((_todoMaxPage <= 9999) ? _todoMaxPage : "\u221E"));
+        _deadlinePageLabel.setText(((_deadlinePage <= 9999) ? _deadlinePage
+                : "\u221E") + "/" +
+                ((_deadlineMaxPage <= 9999) ? _deadlineMaxPage : "\u221E"));
+        _eventPageLabel
+                .setText(((_eventPage <= 9999) ? _eventPage : "\u221E") + "/" +
+                        ((_eventMaxPage <= 9999) ? _eventMaxPage : "\u221E"));
+    }
+
+    private void maxPages() {
+        _eventMaxPage = _taskView.maxEventPage();
+        _deadlineMaxPage = _taskView.maxDeadlinePage();
+        _todoMaxPage = _taskView.maxTodoPage();
+        if (_eventMaxPage == 0) {
+            _eventMaxPage = 1;
+        }
+        if (_deadlineMaxPage == 0) {
+            _deadlineMaxPage = 1;
+        }
+        if (_todoMaxPage == 0) {
+            _todoMaxPage = 1;
+        }
+    }
+
+    private void showEvent() {
+        _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 36);
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
+        setEventPanelSize(4, 40, (SHELL_WIDTH - 16) / 3, 496);
+    }
+
+    private void hideEvent() {
+        _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 32);
+        _lblEvent.setBackground(COLOR_BLACK);
+        setEventPanelSize(4, 40, (SHELL_WIDTH - 16) / 3, 0);
+    }
+
+    private void showDeadline() {
+        _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
+                (SHELL_WIDTH - 16) / 3, 36);
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
+        setDeadlinePanelSize((SHELL_WIDTH - 16) / 3 + 8, 40,
+                (SHELL_WIDTH - 16) / 3, 496);
+    }
+
+    private void hideDeadline() {
+        _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
+                (SHELL_WIDTH - 16) / 3, 32);
+        _lblDeadline
+                .setBackground(COLOR_BLACK);
+        setDeadlinePanelSize((SHELL_WIDTH - 16) / 3 + 8, 40,
+                (SHELL_WIDTH - 16) / 3, 0);
+    }
+
+    private void showTodo() {
+        _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
+                (SHELL_WIDTH - 16) / 3, 36);
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
+        setTodoPanelSize((SHELL_WIDTH - 16) / 3 * 2 + 12, 40,
+                (SHELL_WIDTH - 16) / 3, 496);
+    }
+
+    private void hideTodo() {
+        _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
+                (SHELL_WIDTH - 16) / 3, 32);
+        _lblTodo.setBackground(COLOR_BLACK);
+        setTodoPanelSize((SHELL_WIDTH - 16) / 3 * 2 + 12, 40,
+                (SHELL_WIDTH - 16) / 3, 0);
+    }
+
+    private void positionBackgroundBox() {
+        if (_currentTab == 0) {
+            _backgroundBox.setBounds(0, 0, (SHELL_WIDTH - 16) / 3 + 8, 540);
+        } else if (_currentTab == 1) {
+            _backgroundBox.setBounds((SHELL_WIDTH - 16) / 3 + 4, 0,
+                    (SHELL_WIDTH - 16) / 3 + 8, 540);
+        } else {
+            _backgroundBox.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 8, 0,
+                    (SHELL_WIDTH - 16) / 3 + 8, 540);
+        }
+    }
+
+    private void hideBackgroundBox() {
+        _backgroundBox.setBackground(COLOR_BLACK);
+    }
+
+    private void showBackgroundBox() {
+        _backgroundBox.setBackground(COLOR_SELECTION_BOX_YELLOW);
+    }
+
+    private void expandEvent() {
+        hideDeadline();
+        hideTodo();
+        _lblEvent.setBounds(4, 4, (SHELL_WIDTH - 16) / 3, 36);
+        _lblEvent.setBackground(COLOR_BACKGROUND_GRAY);
+        setEventPanelSize(4, 40, SHELL_WIDTH - 8, 496);
+        hideBackgroundBox();
+        _isExpanded = true;
+    }
+
+    private void expandDeadline() {
+        hideEvent();
+        hideTodo();
+        _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
+                (SHELL_WIDTH - 16) / 3, 36);
+        _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
+        setDeadlinePanelSize(4, 40, SHELL_WIDTH - 8, 496);
+        hideBackgroundBox();
+        _isExpanded = true;
+    }
+
+    private void expandTodo() {
+        hideDeadline();
+        hideEvent();
+        _lblTodo.setBounds((SHELL_WIDTH - 16) / 3 * 2 + 12, 4,
+                (SHELL_WIDTH - 16) / 3, 36);
+        _lblTodo.setBackground(COLOR_BACKGROUND_GRAY);
+        setTodoPanelSize(4, 40, SHELL_WIDTH - 8, 496);
+        hideBackgroundBox();
+        _isExpanded = true;
+    }
+
+    private void setEventPanelSize(int x_coordinate, int y_coordinate,
+            int width, int height) {
+        if (height != 0) {
+            _eventListUI.setBounds(x_coordinate, y_coordinate, width, height);
+            _eventPrevPage.setBounds(x_coordinate, y_coordinate + height - 36,
+                    84, 36);
+            _eventNextPage.setBounds(x_coordinate + width - 84,
+                    y_coordinate + height - 36, 84, 36);
+            _eventPageLabel.setBounds(x_coordinate + width / 2 - 50,
+                    y_coordinate + height - 36, 125, 36);
+            _eventListUI.setVisible(true);
+            _eventPrevPage.setVisible(true);
+            _eventNextPage.setVisible(true);
+            _eventPageLabel.setVisible(true);
+        } else {
+            _eventListUI.setVisible(false);
+            _eventPrevPage.setVisible(false);
+            _eventNextPage.setVisible(false);
+            _eventPageLabel.setVisible(false);
+        }
+    }
+
+    private void setDeadlinePanelSize(int x_coordinate, int y_coordinate,
+            int width, int height) {
+        if (height != 0) {
+            _deadlineListUI
+                    .setBounds(x_coordinate, y_coordinate, width, height);
+            _deadlinePrevPage.setBounds(x_coordinate, y_coordinate + height -
+                    36, 84, 36);
+            _deadlineNextPage.setBounds(x_coordinate + width - 84,
+                    y_coordinate + height - 36, 84, 36);
+            _deadlinePageLabel.setBounds(x_coordinate + width / 2 - 50,
+                    y_coordinate + height - 36, 125, 36);
+            _deadlineListUI.setVisible(true);
+            _deadlinePrevPage.setVisible(true);
+            _deadlineNextPage.setVisible(true);
+            _deadlinePageLabel.setVisible(true);
+        } else {
+            _deadlineListUI.setVisible(false);
+            _deadlinePrevPage.setVisible(false);
+            _deadlineNextPage.setVisible(false);
+            _deadlinePageLabel.setVisible(true);
+        }
+    }
+
+    private void setTodoPanelSize(int x_coordinate, int y_coordinate,
+            int width, int height) {
+        if (height != 0) {
+            _todoListUI.setBounds(x_coordinate, y_coordinate, width, height);
+            _todoPrevPage.setBounds(x_coordinate, y_coordinate + height - 36,
+                    84, 36);
+            _todoNextPage.setBounds(x_coordinate + width - 84,
+                    y_coordinate + height - 36, 84, 36);
+            _todoPageLabel.setBounds(x_coordinate + width / 2 - 50,
+                    y_coordinate + height - 36, 125, 36);
+            _todoListUI.setVisible(true);
+            _todoPrevPage.setVisible(true);
+            _todoNextPage.setVisible(true);
+            _todoPageLabel.setVisible(true);
+        } else {
+            _todoListUI.setVisible(false);
+            _todoPrevPage.setVisible(false);
+            _todoNextPage.setVisible(false);
+            _todoPageLabel.setVisible(false);
+        }
+    }
+
+    private void startHelpWindows() {
+        _statusBar.setBackground(COLOR_STATUS_GREEN);
+        _statusBar.setText(HELP_OPEN);
+        _helpWindowBorder.setVisible(true);
+        _helpWindow.setVisible(true);
+        _userInputTextField.setEditable(false);
+        _userInputTextField.removeListener(SWT.KeyDown, _functionListener);
+        _userInputTextField.removeListener(SWT.KeyUp, _autoCompleteListener);
+        _userInputTextField.removeTraverseListener(_tabListener);
+        _help.setDefaultMenu();
+        HelperView defaultView = _help.getDefaultMenu();
+        _helpWindow.append(defaultView.getHelperDescription());
+        for (int i = 0; i < defaultView.getHelperText().size(); i++) {
+            _helpWindow.append((i + 1) + ". ");
+            _helpWindow.append(defaultView.getHelperText().get(i));
+            _helpWindow.append("\n");
+        }
+        _helpWindow.append("\n[ESC:Exit help menu]");
+        _helpListener = new Listener() {
+            public void handleEvent(Event event) {
+                if (event.keyCode == SWT.BS) {
+                    HelperView view = _help.getHelperView(0);
+                    _helpWindow.setText(EMPTY_STRING);
+                    _helpWindow.append(view.getHelperDescription());
+                    for (int i = 0; i < view.getHelperText().size(); i++) {
+                        _helpWindow.append((i + 1) + ". ");
+                        _helpWindow.append(view.getHelperText().get(i));
+                        _helpWindow.append("\n");
+                    }
+                    if (view.getHelperDescription().contains("Help Contents")) {
+                        _helpWindow.append("\n[ESC:Exit help menu]");
+                    } else {
+                        _helpWindow
+                                .append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE:Back]");
+                    }
+                }
+                if (event.keyCode == SWT.ESC) {
+                    _helpWindowBorder.setVisible(false);
+                    _helpWindow.setVisible(false);
+                    _helpWindow.setText(EMPTY_STRING);
+                    _userInputTextField.setEditable(true);
+                    _userInputTextField
+                            .removeListener(SWT.KeyUp, _helpListener);
+                    _statusBar.setText(HELP_CLOSE);
+                    addAllListeners();
+                }
+                if (event.keyCode > '0' && event.keyCode <= '9') {
+                    int menu_index = Integer.parseInt(String
+                            .valueOf((char) event.keyCode));
+                    _userInputTextField.setText(EMPTY_STRING);
+                    HelperView view = _help.getHelperView(menu_index);
+                    if (view.getHelperFunction().equals("DISPLAY")) {
+                        _helpWindow.setText(EMPTY_STRING);
+                        _helpWindow.append(view.getHelperDescription());
+                        for (int i = 0; i < view.getHelperText().size(); i++) {
+                            _helpWindow.append((i + 1) + ". ");
+                            _helpWindow.append(view.getHelperText().get(i));
+                            _helpWindow.append("\n");
+                        }
+                        if (view.getHelperDescription().contains(
+                                "Help Contents")) {
+                            _helpWindow.append("\n[ESC:Exit help menu]");
+                        } else {
+                            _helpWindow
+                                    .append("\n[ESC:Exit help menu]\t\t\t\t[BACKSPACE:Back]");
+                        }
+                    } else if (view.getHelperFunction().equals("COPY")) {
+                        String text = view.getHelperDescription();
+                        _helpWindowBorder.setVisible(false);
+                        _helpWindow.setVisible(false);
+                        _helpWindow.setText(EMPTY_STRING);
+                        _userInputTextField.setEditable(true);
+                        _userInputTextField.removeListener(SWT.KeyUp,
+                                _helpListener);
+                        _statusBar.setText(HELP_CLOSE);
+                        addAllListeners();
+                        _userInputTextField.setText(text);
+                        _userInputTextField.selectAll();
+                    }
+                } else if (_helpWindow.getVisible()) {
+                    _userInputTextField.setText(EMPTY_STRING);
+                }
+            }
+        };
+        _userInputTextField.addListener(SWT.KeyUp, _helpListener);
+    }
+}
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\MinaGuiUI.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\UICommandHelper.java
+	 */
+
+
+public class UICommandHelper {	
+	private final String MAIN_HELP_MENU_DESCRIPTION = "Help Contents\n\n\n";
+	
+	private final String ABOUT_MINA_DESCRIPTION = "MINA\nTask Manager Software\n\nVersion: 0.5\n\n"
+			+ "Copyright 2000, 2013 (c).  All rights reserved.\n\n"
+			+ "This product is developed by a group of CS2103T students from NUS\n"
+			+ "Please visit https://code.google.com/p/cs2103jan2014-w09-1j/ for more information\n";
+	
+	private final String OPEN_HELP_MENU_DESCRIPTION = "\n\n\nTo open MINA, run MINA.jar\n"
+			+ "To maximize/minimize the program, hold Alt and press F12\n\n";
+	
+	private final String HELP_MENU_NAVIGATION_DESCRIPTION = "\n\n\nTo exit help menu, press ESC\n"
+			+ "To navigate back to previous menu, press BACKSPACE\n"
+			+ "To navigate to a menu, select it by pressing 1-9 accordingly\n";
+	
+	private final String LIST_COMMANDS_HELP_MENU_DESCRIPTION = "This menu provides you all commands supported by MINA\n\n\n";
+	
+	private final String GUI_INTERACTION_HELP_DESCRIPTION = "\n\n\nTo select task panel, hold CTRL and press TAB\n"
+			+ "To change page, hold CTRL and press \u2190 or \u2192\n OR type \"page [number]\" and press Enter"
+			+ "To enable auto complete, hold CTRL and press BACKSPACE\n"
+			+ "To expand a panel, press F11 OR hold CTRL and press E\n";
+	
+	private final String ADD_HELP_MENU_DESCRIPTION = "This menu provides you information about adding a new task\n"
+			+ "Please select which type of task you want to add\n\n";
+	
+	private final String ADD_EVENT_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new event\n"
+			+ "Events are tasks with a start and an end date, e.g.: meet clients 9pm - 10pm\n\n";
+	
+	private final String ADD_DEADLINE_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new deadline\n"
+			+ "Deadlines are tasks with an end date, e.g.: submit report by 11:59pm\n\n";
+	
+	private final String ADD_TODO_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new todo\n"
+			+ "Default priority for todo task is M(medium)\n\n";
+	
+	private final String ADD_RECURRING_HELP_MENU_DESCRIPTION = "This menu provides you commands to add a new recurring task\n"
+			+ "If no end date of recurring stated, the recurring tasks will recur until the end of the current year\n\n";
+		
+	private final String DELETE_HELP_MENU_DESCRIPTION = "This menu provides you commands to delete a task\n\n\n";
+	
+	private final String MODIFY_HELP_MENU_DESCRIPTION = "This menu provides you information about modifying a task\n\n\n";
+	
+	private final String MODIFY_NORMAL_HELP_MENU_DESCRIPTION = "This menu provides you commands to modify normal information of a task without changing task type\n\n\n";
+	
+	private final String MODIFY_CHANGE_TYPE_HELP_MENU_DESCRIPTION = "This menu provides you commands to modify and change type of a task\n"
+			+ "Take note that a task may need additional information when it changes to another type\n\n";
+	
+	private final String COMPLETE_HELP_MENU_DESCRIPTION = "This menu provides you commands to complete a task\n\n\n";
+	
+	private final String UNDO_REDO_HELP_MENU_DESCRIPTION = "This menu provides you commands to undo/redo\n"
+			+ "This software supports up to 5 undos/redos\n\n";
+	
+	private final String DISPLAY_HELP_MENU_DESCRIPTION = "This menu provides you commands to display tasks\n\n\n";
+	
+	private final String SEARCH_HELP_MENU_DESCRIPTION = "This menu provides you commands to search\n\n\n";
+	
+	private final String EXIT_HELP_MENU_DESCRIPTION = "This menu provides you command to exit\n\n\n";	
+	
+	private final String DATE_FORMAT_HELP_MENU_DESCRIPTION = "This menu provides you date formats that the program supports\n"
+			+ "examples: last Thursday 6pm, tmr 9am, 23/8/2015 10:21:32\n\n";
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> MAIN_HELP_MENU = new ArrayList<String>(){
+		{
+		add("open program");
+		add("GUI interaction");
+		add("help menu navigation");
+		add("list of commands");
+		add("supported date&time formats");
+		add("about MINA");
+		}
+	};
+	
+	private final ArrayList<String> OPEN_HELP_MENU = new ArrayList<String>();
+	
+	private final ArrayList<String> GUI_INTERACTION_HELP = new ArrayList<String>();
+	
+	private final ArrayList<String> HELP_MENU_NAVIGATION =  new ArrayList<String>();
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> LIST_COMMANDS_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add");
+			add("delete");
+			add("modify");
+			add("complete");
+			add("undo, redo");
+			add("display");
+			add("search");
+			add("exit");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> DATE_FORMAT_HELP_MENU = new ArrayList<String>(){
+		{
+			add("dd/MM/yyyy\t\tdd-MM-yyyy\t\tdd.MM.yyyy\t\tdd MM yyyy");
+			add("hh:mm\t\thh.mm\t\thh:mm:ss\t\thh.mm.ss");
+			add("today\t\ttomorrow(tmr)\t\tyesterday\t\tnext\t\tlast");
+		}
+	};
+	
+	private final ArrayList<String> ABOUT_MINA = new ArrayList<String>();
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_HELP_MENU = new ArrayList<String>(){
+		{
+			add("event");
+			add("deadline");
+			add("todo");
+			add("recurring");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_EVENT_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add [description] -from [date time] -to [date time]");
+			add("new [description] -start [date time] -end [date time]");
+			add("create [description] -start [date time] -end [date time] [more description]");
+			add("+ [description] -from [date time] -to [date time]");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_DEADLINE_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add [description] -due [date time]");
+			add("new [description] -end [date time]");
+			add("create [description] -end [date time] [more description]");
+			add("+ [description] -by [date time]");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_TODO_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add [description]");
+			add("new [description]");
+			add("create [description] -priority [H/M/L]");
+			add("+ [description]");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> ADD_RECURRING_HELP_MENU = new ArrayList<String>(){
+		{
+			add("add [description] -from [date time] -to [date time] -every [hour/day/week/month/year] -until [date time]");
+			add("new [description] -by [date time] -every [hour/day/week/month/year] -until [date time]");
+			add ("create [description -by [date time] -every [hour/day/week/month/year]");
+		}
+	};
+		
+	@SuppressWarnings("serial")
+	private final ArrayList<String> DELETE_HELP_MENU = new ArrayList<String>(){
+		{
+			add("delete [todo/deadline/event] [index]");
+			add("remove [td/d/e][index]");
+			add("rm [td/d/e][index]");
+			add("delete [recurring tasktype] [index] -all");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> MODIFY_HELP_MENU = new ArrayList<String>(){
+		{
+			add("modify task information");
+			add("change task type");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> MODIFY_NORMAL_HELP_MENU = new ArrayList<String>(){
+		{
+			add("modify [task type][index] [new description]");
+			add("edit [task type][index] -priority [new priority H/M/L]");
+			add("edit [task type][index] -end [date time]");
+			add("change [task type][index] -start [date/time] -end [date/time]");
+			add("change [recurring tasktype] [description] -all");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> MODIFY_CHANGE_TYPE_HELP_MENU = new ArrayList<String>(){
+		{
+			add("change [task type][index] -totype [new type] [additional information:-start/-end]");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> COMPLETE_HELP_MENU = new ArrayList<String>(){
+		{
+			add("complete [task type][index]");
+		}		
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> UNDO_REDO_HELP_MENU = new ArrayList<String>(){
+		{
+			add("undo");
+			add("redo");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> DISPLAY_HELP_MENU = new ArrayList<String>(){
+		{
+			add("display [task type]");
+			add("filter -from [date time] -to [date time]");
+			add("show -agendaof [date]");
+		}
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> SEARCH_HELP_MENU = new ArrayList<String>(){
+		{
+			add("search keyword");
+			add("find 'phrase 1' 'phrase 2'");
+		}		
+	};
+	
+	@SuppressWarnings("serial")
+	private final ArrayList<String> EXIT_HELP_MENU = new ArrayList<String>(){
+		{
+			add("exit");
+			add("quit");
+		}
+	};
+	
+	private final String DISPLAY = "DISPLAY";
+	private final String COPY = "COPY";
+	
+	public enum MenuType {
+		MAIN,
+		OPEN,
+		GUI_INTERACTION,
+		HELP_MENU_NAVIGATION,
+		LIST_COMMANDS,
+		DATE_FORMAT,
+		ABOUT_MINA,
+		ADD, ADD_EVENT, ADD_DEADLINE, ADD_TODO, ADD_RECURRING,
+		DELETE,
+		MODIFY, MODIFY_NORMAL, MODIFY_CHANGE_TYPE,
+		COMPLETE,
+		UNDO_REDO,
+		DISPLAY,
+		SEARCH,
+		EXIT
+	};
+	
+	private MenuType _currentMenu;
+	
+	public UICommandHelper(){
+		_currentMenu = MenuType.MAIN;
+	}
+	
+	public void setDefaultMenu(){
+		_currentMenu = MenuType.MAIN;
+	}
+	
+	public HelperView getDefaultMenu(){
+		HelperView defaultView = new HelperView(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+		return defaultView;
+	}
+	
+	public HelperView getHelperView(int menu_index){
+		HelperView helperView = new HelperView();
+		switch (_currentMenu){
+		case MAIN:{
+			if (menu_index>0 && menu_index<=MAIN_HELP_MENU.size()){
+				switch(menu_index){
+				case 1:{
+					helperView.set(DISPLAY, OPEN_HELP_MENU_DESCRIPTION, OPEN_HELP_MENU);
+					_currentMenu = MenuType.OPEN;
+					break;
+				} 
+				case 2:{
+					helperView.set(DISPLAY, GUI_INTERACTION_HELP_DESCRIPTION, GUI_INTERACTION_HELP);
+					_currentMenu = MenuType.GUI_INTERACTION;
+					break;
+				}
+				case 3:{
+					helperView.set(DISPLAY, HELP_MENU_NAVIGATION_DESCRIPTION, HELP_MENU_NAVIGATION);
+					_currentMenu = MenuType.HELP_MENU_NAVIGATION;
+					break;
+				}
+				case 4:{
+					helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+					_currentMenu = MenuType.LIST_COMMANDS;
+					break;
+				}
+				case 5:{
+					helperView.set(DISPLAY, DATE_FORMAT_HELP_MENU_DESCRIPTION, DATE_FORMAT_HELP_MENU);
+					_currentMenu = MenuType.DATE_FORMAT;
+					break;
+				}
+				case 6:{
+					helperView.set(DISPLAY, ABOUT_MINA_DESCRIPTION, ABOUT_MINA);
+					_currentMenu = MenuType.ABOUT_MINA;
+					break;
+				}
+				default: break;
+			}
+			} else {
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case OPEN:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case GUI_INTERACTION:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case HELP_MENU_NAVIGATION:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case DATE_FORMAT:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case ABOUT_MINA:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			}
+			return helperView;
+		}
+		case LIST_COMMANDS:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MAIN_HELP_MENU_DESCRIPTION, MAIN_HELP_MENU);
+				_currentMenu = MenuType.MAIN;
+			} else if (menu_index>0 && menu_index<=LIST_COMMANDS_HELP_MENU.size()){
+				switch(menu_index){
+				case 1:{
+					helperView.set(DISPLAY, ADD_HELP_MENU_DESCRIPTION, ADD_HELP_MENU);
+					_currentMenu = MenuType.ADD;
+					break;
+				}
+				case 2:{
+					helperView.set(DISPLAY, DELETE_HELP_MENU_DESCRIPTION, DELETE_HELP_MENU);
+					_currentMenu = MenuType.DELETE;
+					break;
+				}
+				case 3:{
+					helperView.set(DISPLAY, MODIFY_HELP_MENU_DESCRIPTION, MODIFY_HELP_MENU);
+					_currentMenu = MenuType.MODIFY;
+					break;
+				}
+				case 4:{
+					helperView.set(DISPLAY, COMPLETE_HELP_MENU_DESCRIPTION, COMPLETE_HELP_MENU);
+					_currentMenu = MenuType.COMPLETE;
+					break;
+				}
+				case 5:{
+					helperView.set(DISPLAY, UNDO_REDO_HELP_MENU_DESCRIPTION, UNDO_REDO_HELP_MENU);
+					_currentMenu = MenuType.UNDO_REDO;
+					break;
+				}
+				case 6:{
+					helperView.set(DISPLAY, DISPLAY_HELP_MENU_DESCRIPTION, DISPLAY_HELP_MENU);
+					_currentMenu = MenuType.DISPLAY;
+					break;
+				}
+				case 7:{
+					helperView.set(DISPLAY, SEARCH_HELP_MENU_DESCRIPTION, SEARCH_HELP_MENU);
+					_currentMenu = MenuType.SEARCH;
+					break;
+				}
+				case 8:{
+					helperView.set(DISPLAY, EXIT_HELP_MENU_DESCRIPTION, EXIT_HELP_MENU);
+					_currentMenu = MenuType.EXIT;
+					break;
+				}
+				default: break;	
+				}
+			}
+			return helperView;
+		}
+		case ADD:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=ADD_HELP_MENU.size()){
+				switch(menu_index){
+				case 1:{
+					helperView.set(DISPLAY, ADD_EVENT_HELP_MENU_DESCRIPTION, ADD_EVENT_HELP_MENU);
+					_currentMenu = MenuType.ADD_EVENT;
+					break;
+				}
+				case 2:{
+					helperView.set(DISPLAY, ADD_DEADLINE_HELP_MENU_DESCRIPTION, ADD_DEADLINE_HELP_MENU);
+					_currentMenu = MenuType.ADD_DEADLINE;
+					break;
+				}
+				case 3:{
+					helperView.set(DISPLAY, ADD_TODO_HELP_MENU_DESCRIPTION, ADD_TODO_HELP_MENU);
+					_currentMenu = MenuType.ADD_TODO;
+					break;
+				}
+				case 4:{
+					helperView.set(DISPLAY, ADD_RECURRING_HELP_MENU_DESCRIPTION, ADD_RECURRING_HELP_MENU);
+					_currentMenu = MenuType.ADD_RECURRING;
+					break;
+				}
+				default: break;	
+				}
+			}
+			return helperView;
+		}
+		case MODIFY:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=MODIFY_HELP_MENU.size()){
+				switch(menu_index){
+				case 1:{
+					helperView.set(DISPLAY, MODIFY_NORMAL_HELP_MENU_DESCRIPTION, MODIFY_NORMAL_HELP_MENU);
+					_currentMenu = MenuType.MODIFY_NORMAL;
+					break;
+				}
+				case 2:{
+					helperView.set(DISPLAY, MODIFY_CHANGE_TYPE_HELP_MENU_DESCRIPTION, MODIFY_CHANGE_TYPE_HELP_MENU);
+					_currentMenu = MenuType.MODIFY_CHANGE_TYPE;
+					break;
+				}
+				default: break;	
+				}
+			}
+			return helperView;
+		}
+		case ADD_EVENT:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, ADD_HELP_MENU_DESCRIPTION, ADD_HELP_MENU);
+				_currentMenu = MenuType.ADD;
+			} else if (menu_index>0 && menu_index<=ADD_EVENT_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(ADD_EVENT_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case ADD_DEADLINE:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, ADD_HELP_MENU_DESCRIPTION, ADD_HELP_MENU);
+				_currentMenu = MenuType.ADD;
+			} else if (menu_index>0 && menu_index<=ADD_DEADLINE_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(ADD_DEADLINE_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case ADD_TODO:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, ADD_HELP_MENU_DESCRIPTION, ADD_HELP_MENU);
+				_currentMenu = MenuType.ADD;
+			} else if (menu_index>0 && menu_index<=ADD_TODO_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(ADD_TODO_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case DELETE:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=DELETE_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(DELETE_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case MODIFY_NORMAL:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MODIFY_HELP_MENU_DESCRIPTION, MODIFY_HELP_MENU);
+				_currentMenu = MenuType.MODIFY;
+			} else if (menu_index>0 && menu_index<=MODIFY_NORMAL_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(MODIFY_NORMAL_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case MODIFY_CHANGE_TYPE:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, MODIFY_HELP_MENU_DESCRIPTION, MODIFY_HELP_MENU);
+				_currentMenu = MenuType.MODIFY;
+			} else if (menu_index>0 && menu_index<=MODIFY_CHANGE_TYPE_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(MODIFY_CHANGE_TYPE_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case COMPLETE:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=COMPLETE_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(COMPLETE_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case UNDO_REDO:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=UNDO_REDO_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(UNDO_REDO_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case DISPLAY:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=DISPLAY_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(DISPLAY_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case SEARCH:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=SEARCH_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(SEARCH_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		case EXIT:{
+			if (menu_index==0){
+				helperView.set(DISPLAY, LIST_COMMANDS_HELP_MENU_DESCRIPTION, LIST_COMMANDS_HELP_MENU);
+				_currentMenu = MenuType.LIST_COMMANDS;
+			} else if (menu_index>0 && menu_index<=EXIT_HELP_MENU.size()){
+				helperView.setHelperFunction(COPY);
+				helperView.setHelperDescription(EXIT_HELP_MENU.get(menu_index-1));
+			}
+			return helperView;
+		}
+		default: return helperView;
+		}
+	}
+	
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\main\java\sg\edu\nus\cs2103t\mina\view\UICommandHelper.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\controller\CommandProcessorTest.java
+	 */
+
+
+public class CommandProcessorTest {
+	
+    @Test
+    public void testProcessAddParameter() throws ParseException {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+ 
+        /*This is the non-null return partition*/
+        assertEquals(commandProcessorTest.processAddParameter("do laundry"), new DataParameter(
+                "do laundry", 'M', null, null, null, TaskType.TODO, -1));
+        assertEquals(commandProcessorTest.processAddParameter("do laundry -priority H"),
+                new DataParameter("do laundry", 'H', null, null, null,
+                        TaskType.TODO, -1));
+        assertEquals(
+                commandProcessorTest.processAddParameter("do homework -end 12/12/1212"),
+                new DataParameter("do homework", 'M', null, DateUtil
+                        .parse("12/12/1212"), null, TaskType.DEADLINE, -1));
+        assertEquals(
+                commandProcessorTest.processAddParameter("do homework -end 12/12/1212 -priority L"),
+                new DataParameter("do homework", 'L', null, DateUtil
+                        .parse("12/12/1212"), null, TaskType.DEADLINE, -1));
+        assertEquals(
+                commandProcessorTest.processAddParameter("meet friends -start 11/11/1111 -end 12/12/1212"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("11/11/1111"), DateUtil.parse("12/12/1212"),
+                        null, TaskType.EVENT, -1));        
+        assertEquals(
+                commandProcessorTest.processAddParameter("meet friends -start 11/11/1111 -end 12/12/1212 -priority L"),
+                new DataParameter("meet friends", 'L', DateUtil
+                        .parse("11/11/1111"), DateUtil.parse("12/12/1212"),
+                        null, TaskType.EVENT, -1));
+        
+        /* This is the null return partition*/
+        /* This is the empty description partition*/
+        assertEquals(commandProcessorTest.processAddParameter(""), null);
+        assertEquals(commandProcessorTest.processAddParameter("-end 12/12/1212"),
+        				null);        
+        
+        /* This is the wrong start/end date partition*/
+        assertEquals(
+        		commandProcessorTest.processAddParameter("meet friends -start 12/12/1212"),
+        		null);
+        assertEquals(
+        		commandProcessorTest.processAddParameter("meet friends -start 12/12/1212 -end 11/11/1111 -priority L"),
+        		null);
+        assertEquals(
+        		commandProcessorTest.processAddParameter("meet friends -start 12/12/1212 -end 12/12/1212"),
+        		null);
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testProcessSearchParameter() {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+
+        assertEquals(commandProcessorTest.processSearchParameter("yesterday//today//tomorrow")
+                .getKeywords(), new ArrayList<String>() {
+            {
+                add("yesterday");
+                add("today");
+                add("tomorrow");
+            }
+        });
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testProcessFilterParameter() {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+        
+        ArrayList<FilterType> targetFilter = new ArrayList<FilterType>() {
+            {
+                add(FilterType.TODO);
+                add(FilterType.EVENT);
+                add(FilterType.COMPLETE);
+            }
+        };
+        assertEquals(targetFilter,
+                commandProcessorTest.processFilterParameter("complete todo event").getFilters());
+    }
+    
+    @Test
+    public void testProcessModifyParameter() throws ParseException {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+
+    	commandProcessorTest.processUserInput("add todo1", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo2", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo3", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo4", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo5", 1, 1, 1);
+    	
+    	commandProcessorTest.processUserInput("add deadline1 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline2 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline3 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline4 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline5 -end 25032014", 1, 1, 1);
+    	
+    	commandProcessorTest.processUserInput("add event1 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event2 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event3 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event4 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event5 -start 25032014 -end 26032014", 1, 1, 1);
+    	
+    	/*This is test for modify todo partition*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -description do laundry"),
+                new DataParameter("do laundry", 'M', null, null, TaskType.TODO,
+                        TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -description do laundry -priority H"),
+                new DataParameter("do laundry", 'H', null, null, TaskType.TODO,
+                        TaskType.TODO, 1));
+        assertEquals(commandProcessorTest.processModifyParameter("todo 1 -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.TODO,
+                        TaskType.TODO, 1));
+        /* This is an invalid case that return null*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -end 26/03/2014"),
+                	null);
+        
+    	/*This is test for modify deadline partition*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -description do homework"),
+                new DataParameter("do homework", 'M', null, null,
+                        TaskType.DEADLINE, TaskType.DEADLINE, 1));
+        assertEquals(commandProcessorTest.processModifyParameter("deadline 1 -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1));
+        assertEquals(commandProcessorTest.processModifyParameter("deadline 1 -end 12/12/2012"),
+                new DataParameter(null, 'M', null,
+                        DateUtil.parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -description do homework -priority H"),
+                new DataParameter("do homework", 'H', null, null,
+                        TaskType.DEADLINE, TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -description do homework -end 12/12/2012"),
+                new DataParameter("do homework", 'M', null, DateUtil
+                        .parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -priority L -end 12/12/2012"),
+                new DataParameter(null, 'L', null,
+                        DateUtil.parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -description do homework -end 12/12/2012 -priority H"),
+                new DataParameter("do homework", 'H', null, DateUtil
+                        .parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.DEADLINE, 1));
+        /* This is an invalid case that return null*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -start 26/03/2014"),
+                	null);
+
+    	/*This is test for modify event partition*/
+        assertEquals(commandProcessorTest
+                .processModifyParameter("event 1 -description meet friends"),
+                new DataParameter("meet friends", 'M', null, null,
+                        TaskType.EVENT, TaskType.EVENT, 1));
+        assertEquals(commandProcessorTest.processModifyParameter("event 1 -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.EVENT,
+                        TaskType.EVENT, 1));
+        assertEquals(commandProcessorTest.processModifyParameter("event 1 -start 12/12/2012"),
+                new DataParameter(null, 'M', DateUtil.parse("12/12/2012"),
+                        null, TaskType.EVENT, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -priority L"),
+                new DataParameter("meet friends", 'L', null, null,
+                        TaskType.EVENT, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -start 12/12/2012"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("12/12/2012"), null, TaskType.EVENT,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -priority L -start 12/12/2012"),
+                new DataParameter(null, 'L', DateUtil.parse("12/12/2012"),
+                        null, TaskType.EVENT, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter(null, 'M', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.EVENT,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.EVENT, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter(null, 'H', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.EVENT,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -start 11/11/2011 -priority H"),
+                new DataParameter("meet friends", 'H', DateUtil
+                        .parse("11/11/2011"), null, TaskType.EVENT,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter("meet friends", 'H', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.EVENT, TaskType.EVENT, 1));
+        /*These are test cases that return null*/
+        assertEquals(commandProcessorTest.processModifyParameter("event 1 -end 12/12/2012"),
+            	null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -end 12/12/2012"),
+                null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -priority L -end 12/12/2012"),
+                null);
+        assertEquals(
+        		commandProcessorTest.processModifyParameter("event 1 -start 12/12/2012 -end 11/11/2011 -priority H"),
+        		null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -description meet friends -end 12/12/2012 -priority H"),
+                null);
+        
+    	/*This is test for change type event to todo partition*/
+        assertEquals(commandProcessorTest.processModifyParameter("event 1 -totype todo"),
+                new DataParameter(null, 'M', null, null, TaskType.EVENT,
+                        TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype todo -description do laundry"),
+                new DataParameter("do laundry", 'M', null, null,
+                        TaskType.EVENT, TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype todo -description do laundry -priority H"),
+                new DataParameter("do laundry", 'H', null, null,
+                        TaskType.EVENT, TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype todo -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.EVENT,
+                        TaskType.TODO, 1));
+
+        /*This is test for change type deadline to todo partition*/
+        assertEquals(commandProcessorTest.processModifyParameter("deadline 1 -totype todo"),
+                new DataParameter(null, 'M', null, null, TaskType.DEADLINE,
+                        TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype todo -description do laundry"),
+                new DataParameter("do laundry", 'M', null, null,
+                        TaskType.DEADLINE, TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype todo -description do laundry -priority H"),
+                new DataParameter("do laundry", 'H', null, null,
+                        TaskType.DEADLINE, TaskType.TODO, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype todo -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.DEADLINE,
+                        TaskType.TODO, 1));
+        
+        /*This is test for change type event to deadline partition*/
+        assertEquals(commandProcessorTest.processModifyParameter("event 1 -totype deadline"),
+                new DataParameter(null, 'M', null, null, TaskType.EVENT,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -description do homework"),
+                new DataParameter("do homework", 'M', null, null,
+                        TaskType.EVENT, TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -priority L"),
+                new DataParameter(null, 'L', null, null, TaskType.EVENT,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -description do homework -priority H"),
+                new DataParameter("do homework", 'H', null, null,
+                        TaskType.EVENT, TaskType.DEADLINE, 1));
+        /*These are test cases that return null*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -end 12/12/2012"),
+                	null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -description do homework -end 12/12/2012"),
+                	null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -priority L -end 12/12/2012"),
+                	null);
+        assertEquals(
+                commandProcessorTest.processModifyParameter("event 1 -totype deadline -description do homework -end 12/12/2012 -priority H"),
+                	null);
+        
+        /*This is test for change type todo to deadline partition*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype deadline -end 12/12/2012"),
+                new DataParameter(null, 'M', null,
+                        DateUtil.parse("12/12/2012"), TaskType.TODO,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype deadline -description do homework -end 12/12/2012"),
+                new DataParameter("do homework", 'M', null, DateUtil
+                        .parse("12/12/2012"), TaskType.TODO, TaskType.DEADLINE,
+                        1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype deadline -priority L -end 12/12/2012"),
+                new DataParameter(null, 'L', null,
+                        DateUtil.parse("12/12/2012"), TaskType.TODO,
+                        TaskType.DEADLINE, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype deadline -description do homework -end 12/12/2012 -priority H"),
+                new DataParameter("do homework", 'H', null, DateUtil
+                        .parse("12/12/2012"), TaskType.TODO, TaskType.DEADLINE,
+                        1));
+        
+        /*This is test for change type deadline to event partition*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -start 12/12/2012"),
+                new DataParameter(null, 'M', DateUtil.parse("12/12/2012"),
+                        null, TaskType.DEADLINE, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -description meet friends -start 12/12/2012"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("12/12/2012"), null, TaskType.DEADLINE,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -priority L -start 12/12/2012"),
+                new DataParameter(null, 'L', DateUtil.parse("12/12/2012"),
+                        null, TaskType.DEADLINE, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter(null, 'M', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -description meet friends -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.DEADLINE, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter(null, 'H', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.DEADLINE,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -description meet friends -start 11/11/2011 -priority H"),
+                new DataParameter("meet friends", 'H', DateUtil
+                        .parse("11/11/2011"), null, TaskType.DEADLINE,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("deadline 1 -totype event -description meet friends -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter("meet friends", 'H', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.DEADLINE, TaskType.EVENT, 1));
+
+        /*This is test for change type todo to event partition*/
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype event -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter(null, 'M', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.TODO,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype event -description meet friends -start 11/11/2011 -end 12/12/2012"),
+                new DataParameter("meet friends", 'M', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.TODO, TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype event -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter(null, 'H', DateUtil.parse("11/11/2011"),
+                        DateUtil.parse("12/12/2012"), TaskType.TODO,
+                        TaskType.EVENT, 1));
+        assertEquals(
+                commandProcessorTest.processModifyParameter("todo 1 -totype event -description meet friends -start 11/11/2011 -end 12/12/2012 -priority H"),
+                new DataParameter("meet friends", 'H', DateUtil
+                        .parse("11/11/2011"), DateUtil.parse("12/12/2012"),
+                        TaskType.TODO, TaskType.EVENT, 1));
+    }
+    
+    @Test
+    public void testProcessMarkDeleteParameter() {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+
+    	commandProcessorTest.processUserInput("add todo1", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo2", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo3", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo4", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add todo5", 1, 1, 1);
+    	
+    	commandProcessorTest.processUserInput("add deadline1 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline2 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline3 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline4 -end 25032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add deadline5 -end 25032014", 1, 1, 1);
+    	
+    	commandProcessorTest.processUserInput("add event1 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event2 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event3 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event4 -start 25032014 -end 26032014", 1, 1, 1);
+    	commandProcessorTest.processUserInput("add event5 -start 25032014 -end 26032014", 1, 1, 1);
+    	
+        assertEquals(commandProcessorTest.processMarkDeleteParameter("todo 5"),
+                new DataParameter(null, 'M', null, null, TaskType.TODO, null,
+                        5));
+        assertEquals(
+                commandProcessorTest.processMarkDeleteParameter("todo 2"),
+                new DataParameter(null, 'M', null, null, TaskType.TODO, null, 2));
+        assertEquals(commandProcessorTest.processMarkDeleteParameter("deadline 2"),
+                new DataParameter(null, 'M', null, null, TaskType.DEADLINE,
+                        null, 2));
+        assertEquals(commandProcessorTest.processMarkDeleteParameter("event 1"),
+                new DataParameter(null, 'M', null, null, TaskType.EVENT, null,
+                        1));
+                        
+    }
+    
+    @Test
+    public void testProcessTaskTypeFromString() {
+        CommandProcessor commandProcessorTest = new CommandProcessor();
+
+        assertEquals(commandProcessorTest.processTaskTypeFromString("todo"), TaskType.TODO);
+        assertEquals(commandProcessorTest.processTaskTypeFromString("deadline"),
+                TaskType.DEADLINE);
+        assertEquals(commandProcessorTest.processTaskTypeFromString("event"), TaskType.EVENT);
+    }
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\controller\CommandProcessorTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\test\commandcontroller\CommandHistoryTest.java
+	 */
+
+
+public class CommandHistoryTest {
+	@Test
+	public void testUndo() {
+		CommandHistory commandHistory = new CommandHistory();
+		assertTrue(commandHistory.isEmptyUndo());
+
+		SortedSet<TodoTask> undoTodoUncompletedSet = new TreeSet<TodoTask>();
+		SortedSet<DeadlineTask> undoDeadlineUncompletedSet = new TreeSet<DeadlineTask>();
+		SortedSet<EventTask> undoEventUncompletedSet = new TreeSet<EventTask>();
+
+		SortedSet<TodoTask> undoTodoCompletedSet = new TreeSet<TodoTask>();
+		SortedSet<DeadlineTask> undoDeadlineCompletedSet = new TreeSet<DeadlineTask>();
+		SortedSet<EventTask> undoEventCompletedSet = new TreeSet<EventTask>();
+
+		FilterParameter latestFilter = new FilterParameter();		
+		
+		commandHistory.addUndo(undoTodoUncompletedSet, undoDeadlineUncompletedSet, undoEventUncompletedSet, undoTodoCompletedSet, undoDeadlineCompletedSet, undoEventCompletedSet, latestFilter, 0, 0, 0, 0);
+		
+		assertFalse(commandHistory.isEmptyUndo());
+		
+		commandHistory.addUndoAfter(latestFilter, 1, 2, 3, 4);
+		
+		assertFalse(commandHistory.isEmptyUndo());
+		
+		commandHistory.getUndoDeadlineCompleted();
+		commandHistory.getUndoDeadlineUncompleted();
+		commandHistory.getUndoEventCompleted();
+		commandHistory.getUndoEventUncompleted();
+		commandHistory.getUndoTodoCompleted();
+		commandHistory.getUndoTodoUncompleted();
+		commandHistory.getUndoFilterParameter();
+		commandHistory.getUndoFilterParameterAfter();
+		int[] undoPageBefore = commandHistory.getUndoPageChanged();
+		assertEquals(0, undoPageBefore[0]);
+		assertEquals(0, undoPageBefore[1]);
+		assertEquals(0, undoPageBefore[2]);
+		int[] undoPageAfter = commandHistory.getUndoPageChangedAfter();
+		assertEquals(2, undoPageAfter[0]);
+		assertEquals(3, undoPageAfter[1]);
+		assertEquals(4, undoPageAfter[2]);
+		int undoTabBefore = commandHistory.getUndoTabSelected();
+		assertEquals(0, undoTabBefore);
+		int undoTabAfter = commandHistory.getUndoTabSelectedAfter();
+		assertEquals(1, undoTabAfter);
+		
+		assertTrue(commandHistory.isEmptyUndo());
+	}
+	
+	@Test
+	public void testRedo() {
+		CommandHistory commandHistory = new CommandHistory();
+		assertTrue(commandHistory.isEmptyRedo());
+
+		SortedSet<TodoTask> redoTodoUncompletedSet = new TreeSet<TodoTask>();
+		SortedSet<DeadlineTask> redoDeadlineUncompletedSet = new TreeSet<DeadlineTask>();
+		SortedSet<EventTask> redoEventUncompletedSet = new TreeSet<EventTask>();
+
+		SortedSet<TodoTask> redoTodoCompletedSet = new TreeSet<TodoTask>();
+		SortedSet<DeadlineTask> redoDeadlineCompletedSet = new TreeSet<DeadlineTask>();
+		SortedSet<EventTask> redoEventCompletedSet = new TreeSet<EventTask>();
+
+		FilterParameter latestFilter = new FilterParameter();		
+		
+		commandHistory.addRedo(redoTodoUncompletedSet, redoDeadlineUncompletedSet, redoEventUncompletedSet, redoTodoCompletedSet, redoDeadlineCompletedSet, redoEventCompletedSet, latestFilter, 0, 0, 0, 0);
+		
+		assertFalse(commandHistory.isEmptyRedo());
+		
+		commandHistory.addRedoAfter(latestFilter, 1, 2, 3, 4);
+		
+		assertFalse(commandHistory.isEmptyRedo());
+		
+		commandHistory.getRedoDeadlineCompleted();
+		commandHistory.getRedoDeadlineUncompleted();
+		commandHistory.getRedoEventCompleted();
+		commandHistory.getRedoEventUncompleted();
+		commandHistory.getRedoTodoCompleted();
+		commandHistory.getRedoTodoUncompleted();
+		commandHistory.getRedoFilterParameter();
+		commandHistory.getRedoFilterParameterAfter();
+		int[] redoPageBefore = commandHistory.getRedoPageChanged();
+		assertEquals(0, redoPageBefore[0]);
+		assertEquals(0, redoPageBefore[1]);
+		assertEquals(0, redoPageBefore[2]);
+		int[] redoPageAfter = commandHistory.getRedoPageChangedAfter();
+		assertEquals(2, redoPageAfter[0]);
+		assertEquals(3, redoPageAfter[1]);
+		assertEquals(4, redoPageAfter[2]);
+		int redoTabBefore = commandHistory.getRedoTabSelected();
+		assertEquals(0, redoTabBefore);
+		int redoTabAfter = commandHistory.getRedoTabSelectedAfter();
+		assertEquals(1, redoTabAfter);
+		
+		assertTrue(commandHistory.isEmptyRedo());
+	}
+}
+
+	// End of segment: C:\Users\Sony\Desktop\cs2103jan2014-w09-1j\src\test\java\sg\edu\nus\cs2103t\mina\test\commandcontroller\CommandHistoryTest.java
+
+
+
+
+

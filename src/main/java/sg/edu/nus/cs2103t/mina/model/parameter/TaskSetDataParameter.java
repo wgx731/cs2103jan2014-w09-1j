@@ -5,15 +5,11 @@ import java.util.SortedSet;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 
-/**
- * 
+/** 
  * Parameters for TaskDAO
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0105853H
+
 public class TaskSetDataParameter {
 
     private SortedSet<? extends Task<?>> _taskSet;

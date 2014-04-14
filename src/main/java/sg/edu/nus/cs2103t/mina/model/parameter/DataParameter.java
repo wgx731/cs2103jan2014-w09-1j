@@ -1,15 +1,26 @@
 package sg.edu.nus.cs2103t.mina.model.parameter;
 
 import java.util.Date;
-import java.util.List;
 
+import org.apache.logging.log4j.Level;
+
+import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
-import sg.edu.nus.cs2103t.mina.model.TimePair;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
+
+/**
+ * Stores variables of a new task that a user will want to add or delete, or
+ * modified variables of an existing task that a user will want to modify.
+ */
+// @author A0080412W
 
 public class DataParameter {
+
+    private static final String CLASS_NAME = TaskDataManager.class.getName();
+
     /* for all tasks */
     private String _description;
     private char _priority;
@@ -18,25 +29,20 @@ public class DataParameter {
     private TaskType _originalTaskType;
     private TaskType _newTaskType;
     private int _taskID;
+    private Task<?> _taskObject;
 
-    /* for recurring and block tasks */
-    private String _tag; // either 'RECUR' or 'BLOCK'
+    /* for RECURRING Tasks */
+    private String _tag; // either "RECUR" or ""
     private boolean _modifyAll;
 
-    /* for BLOCK tasks */
-    private List<TimePair> _timeSlots; // for BLOCK only
-    /* for RECURRING Tasks */
     private String _timeType; // refer to field values of CALENDAR
     private int _freqOfTimeType;
 
     private Date _endRecurOn;
 
-    private Task<?> _taskObject;
-
     /**
-     * Constructors for DataParameter
+     * Creates a DataParameter with all values set to their default.
      */
-    // default constructor
     public DataParameter() {
         setDescription(null);
         setPriority('M');
@@ -49,8 +55,6 @@ public class DataParameter {
         setTag("");
         setModifyAll(false);
 
-        setTimeSlots(null);
-
         setTimeType(null);
         setFreqOfTimeType(0);
 
@@ -60,7 +64,17 @@ public class DataParameter {
 
     }
 
-    // if task is not recurring or block, for adding task
+    /**
+     * Creates a DataParameter to hold variables for a new non-recurring task.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id) {
         setDescription(des);
@@ -74,8 +88,6 @@ public class DataParameter {
         setTag("");
         setModifyAll(false);
 
-        setTimeSlots(null);
-
         setTimeType(null);
         setFreqOfTimeType(0);
 
@@ -84,7 +96,21 @@ public class DataParameter {
         setTaskObject(null);
     }
 
-    // if task is not recurring or block, for deleting, modifying, marking tasks
+    /**
+     * Creates a DataParameter to hold variables for modifying or deleting an
+     * existing non-recurring task.
+     * <p>
+     * Returns null if the taskObj does not exist.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param taskObj
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj) {
         setDescription(des);
@@ -113,51 +139,76 @@ public class DataParameter {
         setTag("");
         setModifyAll(false);
 
-        setTimeSlots(null);
-
         setTimeType(null);
         setFreqOfTimeType(0);
         setEndRecurOn(null);
 
     }
 
-    // for adding recurring or block tasks
+    /**
+     * Creates a DataParameter to hold variables for a new recurring task.
+     * <p>
+     * A recurring task can only be of TaskType DEADLINE or EVENT.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param tag
+     * @param endRecurOn
+     * @param timeType
+     * @param freqOfTimeType
+     * @throws Exception
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, String tag,
-            Date endRecurOn, String timeType, int freqOfTimeType,
-            List<TimePair> timeSlots) throws Exception {
+            Date endRecurOn, String timeType, int freqOfTimeType)
+            throws Exception {
         assert (!tag.equals(null));
 
-        if (!tag.equals(null) && tag.equals("BLOCK")) {
-            assert (newType.equals(TaskType.EVENT));
-            createAddBlockParameters(des, pri, start, end, origType, newType,
-                    id, tag, timeSlots);
-
-        } else if (!tag.equals(null) && tag.equals("RECUR")) {
+        if (!tag.equals(null) && tag.equals("RECUR")) {
             assert (!newType.equals(TaskType.TODO));
             createAddRecurParameters(des, pri, start, end, origType, newType,
                     id, tag, timeType, freqOfTimeType, endRecurOn);
 
         } else {
+            LogHelper.log(CLASS_NAME, Level.ERROR, "tag: " + tag);
+
             throw new Exception("invalid tag used");
         }
 
     }
 
-    // for modifying or deleting recurring or block tasks
+    /**
+     * Creates a DataParameter to hold variables for modifying or deleting an
+     * existing recurring task.
+     * <p>
+     * A recurring task can only be of TaskType DEADLINE or EVENT.
+     * <p>
+     * Returns null if the taskObj does not exist.
+     * 
+     * @param des
+     * @param pri
+     * @param start
+     * @param end
+     * @param origType
+     * @param newType
+     * @param id
+     * @param tag
+     * @param endRecurOn
+     * @param timeType
+     * @param freqOfTimeType
+     * @throws Exception
+     */
     public DataParameter(String des, char pri, Date start, Date end,
             TaskType origType, TaskType newType, int id, Task<?> taskObj,
             String tag, String timeType, int freqOfTimeType, Date endRecurOn,
-            List<TimePair> timeSlots, boolean isModifyAll) throws Exception {
+            boolean isModifyAll) throws Exception {
 
-        if (taskObj.getTag().contains("BLOCK")) {
-            assert (!taskObj.getType().equals(null) && taskObj.getType()
-                    .equals(TaskType.EVENT) || !newType.equals(null) && newType
-                    .equals(TaskType.EVENT));
-            createBlockParameters(des, pri, start, end, origType, newType, id,
-                    taskObj, tag, timeSlots, isModifyAll);
-
-        } else if (taskObj.getTag().contains("RECUR")) {
+        if (taskObj.getTag().contains("RECUR")) {
             assert (!taskObj.getType().equals(null) && !taskObj.getType()
                     .equals(TaskType.TODO) || !newType.equals(null) && !newType
                     .equals(TaskType.TODO));
@@ -166,60 +217,12 @@ public class DataParameter {
                     isModifyAll);
 
         } else {
-            System.out.println("task obj: " + taskObj);
-            System.out.println("tag: " + taskObj.getTag());
-            throw new Exception("invalid tag used by CC");
+            LogHelper.log(CLASS_NAME, Level.ERROR,
+                    "invalid tag: " + taskObj.getTag());
+
+            throw new Exception("invalid tag used");
+
         }
-
-    }
-
-    // only for event TaskTypes
-    private void createAddBlockParameters(String des, char pri, Date start,
-            Date end, TaskType origType, TaskType newType, int id, String tag,
-            List<TimePair> timeSlots) {
-        setDescription(des);
-        setPriority(pri);
-        setStartDate(start);
-        setEndDate(end);
-        setOriginalTaskType(origType);
-        setNewTaskType(newType);
-        setTaskID(id);
-
-        setTag(tag);
-        setTimeType(null);
-        setFreqOfTimeType(0);
-
-        setTimeSlots(timeSlots);
-        setModifyAll(false);
-
-    }
-
-    private void createBlockParameters(String des, char pri, Date start,
-            Date end, TaskType origType, TaskType newType, int id,
-            Task<?> taskObj, String tag, List<TimePair> timeSlots,
-            boolean isModifyAll) {
-        setDescription(des);
-        setPriority(pri);
-        setStartDate(start);
-        setEndDate(end);
-        setOriginalTaskType(origType);
-        setNewTaskType(newType);
-        setTaskID(id);
-
-        setTaskObject(taskObj);
-
-        // parameters specific to EventTask
-        EventTask eventTaskObj = (EventTask) taskObj;
-        setEndDate(end == null ? eventTaskObj.getEndTime() : end);
-        setStartDate(start == null ? eventTaskObj.getStartTime() : start);
-
-        setTag(tag);
-        setTimeType(null);
-        setFreqOfTimeType(0);
-        setEndRecurOn(null);
-
-        setTimeSlots(timeSlots);
-        setModifyAll(isModifyAll);
 
     }
 
@@ -239,8 +242,6 @@ public class DataParameter {
         setTimeType(timeType);
         setFreqOfTimeType(freqOfTimeType);
         setEndRecurOn(endRecurOn);
-
-        setTimeSlots(null);
 
         setModifyAll(false);
 
@@ -279,7 +280,6 @@ public class DataParameter {
         setEndRecurOn(endRecurOn);
 
         setTag(tag);
-        setTimeSlots(null);
         setModifyAll(isModifyAll);
 
         setEndRecurOn(endRecurOn);
@@ -339,9 +339,8 @@ public class DataParameter {
     }
 
     /**
-     * For the modify function. Call this function after you call
-     * loadOldTask(Task taskToModify).Takes in the values that user wants to
-     * modify, and adds it onto existing values.
+     * Takes in the values that user wants to modify from another DataParameter
+     * variable, and adds it onto existing values.
      */
     public void loadNewParameters(DataParameter modifyParam) {
         if (modifyParam.getDescription() != null) {
@@ -367,7 +366,7 @@ public class DataParameter {
         if (modifyParam.getTaskId() != -1) {
             setTaskID(modifyParam.getTaskId());
         }
-        
+
         if (modifyParam.getTag() != "") {
             setTag(modifyParam.getTag());
         }
@@ -378,33 +377,12 @@ public class DataParameter {
             setFreqOfTimeType(modifyParam.getFreqOfTimeType());
         }
         if (modifyParam.getEndRecurOn() != null) {
-            setEndRecurOn(modifyParam.getEndRecurOn()); 
+            setEndRecurOn(modifyParam.getEndRecurOn());
         }
-        
+
         if (modifyParam.isModifyAll()) {
             setModifyAll(true);
         }
-        
-        // not doing for TimeSlots
-
-        // if (_originalTaskType != _newTaskType) {
-        // if (_originalTaskType == TaskType.DEADLINE && _newTaskType ==
-        // TaskType.TODO) {
-        // // _description += (" by " + _end);
-        // // _end = null;
-        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
-        // TaskType.TODO) {
-        // // _description += (" from " + _start + " to " + _end);
-        // // _start = null;
-        // // _end = null;
-        // } else if (_originalTaskType == TaskType.EVENT && _newTaskType ==
-        // TaskType.DEADLINE) {
-        // // _end = _start;
-        // // _start = null;
-        // }
-        //
-        // _originalTaskType = _newTaskType;
-        // }
     }
 
     @Override
@@ -483,10 +461,6 @@ public class DataParameter {
         return _modifyAll;
     }
 
-    public List<TimePair> getTimeSlots() {
-        return _timeSlots;
-    }
-
     public Date getEndRecurOn() {
         return _endRecurOn;
     }
@@ -538,10 +512,6 @@ public class DataParameter {
 
     public void setModifyAll(boolean modifyAll) {
         _modifyAll = modifyAll;
-    }
-
-    public void setTimeSlots(List<TimePair> timeSlots) {
-        _timeSlots = timeSlots;
     }
 
     public void setEndRecurOn(Date endRecurOn) {

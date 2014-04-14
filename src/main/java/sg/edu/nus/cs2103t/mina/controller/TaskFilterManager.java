@@ -3,24 +3,16 @@ package sg.edu.nus.cs2103t.mina.controller;
 /**
  * This class is in charged to filtering tasks based on certain
  * criteria
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 
-//@author Du Zhiyuan
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
 import sg.edu.nus.cs2103t.mina.model.EventTask;
@@ -30,7 +22,9 @@ import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.TodoTask;
 import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
+//@author A0099151B
 public class TaskFilterManager {
 
     private static final boolean IS_END = false;
@@ -48,11 +42,9 @@ public class TaskFilterManager {
     private static final int END_TIME[] = { 23, 59, 59 };
     private static final int START = 0;
     private static final int END = 1;
+    private static final String CLASS_NAME = TaskFilterManager.class.getName();
 
     private TaskDataManager _taskStore;
-
-    private static Logger logger = LogManager.getLogger(TaskFilterManager.class
-            .getName());
 
     public TaskFilterManager(TaskDataManager taskStore) {
         _taskStore = taskStore;
@@ -70,7 +62,8 @@ public class TaskFilterManager {
 
         // GuardClause
         assert (filters != null);
-        logger.info("Filtering tasks with " + filters.getFilters());
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Filtering tasks with " + filters.getFilters());
 
         HashMap<TaskType, ArrayList<Task<?>>> result = new HashMap<TaskType, ArrayList<Task<?>>>();
 
@@ -115,7 +108,7 @@ public class TaskFilterManager {
         for (TaskType type : uncompletedTasks.keySet()) {
             ArrayList<Task<?>> currentTasks = uncompletedTasks.get(type);
             currentTasks.addAll(completedTasks.get(type));
-            //Collections.sort(currentTasks, new GenericTaskComparator);
+            // Collections.sort(currentTasks, new GenericTaskComparator);
             result.put(type, currentTasks);
         }
 
@@ -133,26 +126,32 @@ public class TaskFilterManager {
         }
 
         if (filters.contains(FilterType.DEADLINE)) {
-            logger.info("Getting uncompleted deadlines");
+
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Getting uncompleted deadlines");
             neededTasks = getTasks(_taskStore.getUncompletedDeadlineTasks());
             result.put(TaskType.DEADLINE, neededTasks);
         }
 
         if (filters.contains(FilterType.TODO)) {
-            logger.info("Getting uncompleted todos");
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Getting uncompleted todos");
             neededTasks = getTasks(_taskStore.getUncompletedTodoTasks());
             result.put(TaskType.TODO, neededTasks);
         }
 
         if (filters.contains(FilterType.EVENT)) {
-            logger.info("Getting uncompleted events");
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Getting uncompleted events");
             neededTasks = getTasks(_taskStore.getUncompletedEventTasks());
             result.put(TaskType.EVENT, neededTasks);
         }
 
         if (hasDateRange(filters)) {
             // Note that the individual type will mix up
-            logger.info("Filtering uncompleted tasks by date range");
+
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Filtering uncompleted tasks by date range");
             result = filterResultsByDate(TaskType.DEADLINE, result, filters);
             result = filterResultsByDate(TaskType.EVENT, result, filters);
         }
@@ -180,9 +179,12 @@ public class TaskFilterManager {
         ArrayList<Task<?>> filteredResult;
         ArrayList<Task<?>> timedTasks;
 
-        logger.info("Checking to see it contains " + currType);
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Checking to see it contains " + currType);
         if (result.containsKey(currType)) {
-            logger.info("Found " + currType + " filtering date.");
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Found " + currType +
+                    " filtering date.");
             timedTasks = result.get(currType);
             filteredResult = filterByDate(timedTasks, filters);
             result.put(currType, filteredResult);
@@ -210,26 +212,39 @@ public class TaskFilterManager {
         boolean hasEndTime = filters.hasEndTime();
 
         if (!hasStartTime) {
-            logger.info("Writing date to appropriate format for START: " + start);
+
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Writing date to appropriate format for START: " + start);
             start = sanitiseDate(start, IS_START);
         }
 
         if (!hasEndTime) {
-            logger.info("Writing date to appropriate format for END: " + end);
+
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Writing date to appropriate format for END: " + end);
             end = sanitiseDate(end, IS_END);
         }
-        logger.info("Date returned START: " + start + "and END: " + end);
+
+        LogHelper.log(CLASS_NAME, Level.INFO, "Date returned START: " + start +
+                "and END: " +
+                end);
 
         // Only EventTask / DeadlineTask will be checked
         for (Task<?> task : result) {
             assert (!(task instanceof TodoTask));
-            logger.info("START: " + start + " END: " + end);
-            logger.info(task);
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "START: " + start +
+                    " END: " +
+                    end +
+                    "Task: " +
+                    task);
             if (isInDateRange(task, start, end)) {
-                logger.info("Within range");
+
+                LogHelper.log(CLASS_NAME, Level.INFO, "Within range");
                 filteredResult.add(task);
             } else {
-                logger.info("Not within range");
+
+                LogHelper.log(CLASS_NAME, Level.INFO, "Not within range");
             }
         }
 
@@ -263,16 +278,17 @@ public class TaskFilterManager {
 
         if (start != null && end != null) {
 
-            logger.info("StartTargetDate: " + targetDate[START].toString() +
-                    "\n" +
-                    "EndTargetDate: " +
-                    targetDate[END].toString() +
-                    "\n" +
-                    "Start: " +
-                    start.toString() +
-                    "\n" +
-                    "End: " +
-                    end.toString());
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "StartTargetDate: " + targetDate[START].toString() +
+                            "\n" +
+                            "EndTargetDate: " +
+                            targetDate[END].toString() +
+                            "\n" +
+                            "Start: " +
+                            start.toString() +
+                            "\n" +
+                            "End: " +
+                            end.toString());
 
             return !(end.before(targetDate[START]) || start
                     .after(targetDate[END]));
@@ -312,14 +328,12 @@ public class TaskFilterManager {
 
         if (isStart) {
             currDate.set(currDate.get(Calendar.YEAR),
-                    currDate.get(Calendar.MONTH),
-                    currDate.get(Calendar.DATE), START_TIME[HOUR],
-                    START_TIME[MIN], START_TIME[SEC]);
+                    currDate.get(Calendar.MONTH), currDate.get(Calendar.DATE),
+                    START_TIME[HOUR], START_TIME[MIN], START_TIME[SEC]);
         } else {
             currDate.set(currDate.get(Calendar.YEAR),
-                    currDate.get(Calendar.MONTH),
-                    currDate.get(Calendar.DATE), END_TIME[HOUR],
-                    END_TIME[MIN], END_TIME[SEC]);
+                    currDate.get(Calendar.MONTH), currDate.get(Calendar.DATE),
+                    END_TIME[HOUR], END_TIME[MIN], END_TIME[SEC]);
         }
 
         return currDate.getTime();
@@ -347,26 +361,32 @@ public class TaskFilterManager {
         }
 
         if (filters.contains(FilterType.DEADLINE)) {
-            logger.info("Getting completed deadlines");
+
+            LogHelper
+                    .log(CLASS_NAME, Level.INFO, "Getting completed deadlines");
             neededTasks = getTasks(_taskStore.getCompletedDeadlineTasks());
             result.put(TaskType.DEADLINE, neededTasks);
         }
 
         if (filters.contains(FilterType.TODO)) {
-            logger.info("Getting completed todos");
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Getting completed todos");
             neededTasks = getTasks(_taskStore.getCompletedTodoTasks());
             result.put(TaskType.TODO, neededTasks);
         }
 
         if (filters.contains(FilterType.EVENT)) {
-            logger.info("Getting completed events");
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Getting completed events");
             neededTasks = getTasks(_taskStore.getCompletedEventTasks());
             result.put(TaskType.EVENT, neededTasks);
         }
 
         if (hasDateRange(filters)) {
             // Note that the individual type will mix up
-            logger.info("Filtering completed tasks by date range");
+
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Filtering completed tasks by date range");
             result = filterResultsByDate(TaskType.DEADLINE, result, filters);
             result = filterResultsByDate(TaskType.EVENT, result, filters);
         }
@@ -400,7 +420,8 @@ public class TaskFilterManager {
      */
     private FilterParameter fillNoTasksFilter(FilterParameter existingFilter) {
 
-        logger.info("Add default filter types: deadlines, events and todos");
+        LogHelper.log(CLASS_NAME, Level.INFO,
+                "Add default filter types: deadlines, events and todos");
 
         ArrayList<FilterType> newFilters = existingFilter.getFilters();
 
@@ -431,7 +452,7 @@ public class TaskFilterManager {
             return result;
         }
 
-        logger.info("Getting task set");
+        LogHelper.log(CLASS_NAME, Level.INFO, "Getting task set");
 
         FilterParameter allTypes = fillNoTasksFilter(new FilterParameter());
         HashMap<TaskType, ArrayList<Task<?>>> uncompletedTasks;
@@ -439,20 +460,26 @@ public class TaskFilterManager {
 
         for (TaskType type : uncompletedTasks.keySet()) {
 
-            logger.info("Searching for " + param.getKeywords());
+            LogHelper.log(CLASS_NAME, Level.INFO,
+                    "Searching for " + param.getKeywords());
 
             ArrayList<Task<?>> specificResult = new ArrayList<Task<?>>();
             for (Task<?> task : uncompletedTasks.get(type)) {
 
-                logger.info("Searching by " + type + " in " + task);
+                LogHelper.log(CLASS_NAME, Level.INFO, "Searching by " + type +
+                        " in " +
+                        task);
                 if (searchKeywords(task, keywords)) {
-                    logger.info("Found");
+
+                    LogHelper.log(CLASS_NAME, Level.INFO, "Found");
                     specificResult.add(task);
                 } else {
-                    logger.info("Not found");
+
+                    LogHelper.log(CLASS_NAME, Level.INFO, "Not found");
                 }
             }
-            logger.info("Finished with " + type);
+
+            LogHelper.log(CLASS_NAME, Level.INFO, "Finished with " + type);
             result.put(type, specificResult);
 
         }

@@ -6,12 +6,8 @@ import java.util.HashMap;
 /**
  * A TaskView object for the UI module to read the tasks and 
  * status of commands executed
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0099324X
 
 public class TaskView {
     
@@ -22,8 +18,8 @@ public class TaskView {
     private static final int EVERYTHING = Integer.MAX_VALUE;
     private static final int PAGE_ONE = 0;
     public static int ITEMS_PER_PAGE = 1;
-    public static final int ITEMS_PER_PAGE_EVENT = 4;
-    public static final int ITEMS_PER_PAGE_DEADLINE = 5;
+    public static final int ITEMS_PER_PAGE_EVENT = 3;
+    public static final int ITEMS_PER_PAGE_DEADLINE = 4;
     public static final int ITEMS_PER_PAGE_TODO = 7; 
     
     private boolean IS_EVENT_CHANGE = false;

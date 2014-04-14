@@ -18,13 +18,9 @@ import com.google.gson.JsonSyntaxException;
 /**
  * 
  * File based implementation for TaskSetDao
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
-// @author A0105853H
+//@author A0105853H
+
 public class JsonFileTaskDaoImpl implements TaskDao {
 
     private static final String COMPLETED_SUFFIX = "-compl";
@@ -44,16 +40,18 @@ public class JsonFileTaskDaoImpl implements TaskDao {
     /**
      * Create a new json file task dao instance and initialize required files
      */
-    public JsonFileTaskDaoImpl() {
-        _fileOperationHelper = new FileOperationHelper(COMPLETED_SUFFIX,
-                FILE_EXTENSION);
-        _fileOperationHelper.createFileStorage();
+    public JsonFileTaskDaoImpl(FileOperationHelper fileOperationHelper) {
+        _fileOperationHelper = fileOperationHelper;
+        _fileOperationHelper.createTaskSetDaoFiles();
     }
 
     JsonFileTaskDaoImpl(Map<TaskType, String> storageMap) {
-        _fileOperationHelper = new FileOperationHelper(COMPLETED_SUFFIX,
-                FILE_EXTENSION, storageMap);
-        _fileOperationHelper.createFileStorage();
+        _fileOperationHelper = new FileOperationHelper(storageMap);
+        _fileOperationHelper.createTaskSetDaoFiles();
+    }
+    
+    FileOperationHelper getFileOperationHelper() {
+        return _fileOperationHelper;
     }
 
     private BufferedWriter getOutputWriter(String fileName) throws IOException {
@@ -76,7 +74,7 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         }
         String json = JsonHelper.taskSetToJson(taskSet, taskType);
         BufferedWriter writer = getOutputWriter(_fileOperationHelper
-                .getFileLocation(taskType, isCompleted));
+                .getTaskSetFileLocation(taskType, isCompleted));
         writer.write(json);
         writer.close();
     }
@@ -86,7 +84,7 @@ public class JsonFileTaskDaoImpl implements TaskDao {
             boolean isCompleted) throws IOException {
         assert taskType != TaskType.UNKNOWN;
         BufferedReader reader = getInputReader(_fileOperationHelper
-                .getFileLocation(taskType, isCompleted));
+                .getTaskSetFileLocation(taskType, isCompleted));
         StringBuffer sb = new StringBuffer();
         String line = null;
         while ((line = reader.readLine()) != null) {

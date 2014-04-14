@@ -2,12 +2,8 @@ package sg.edu.nus.cs2103t.mina.model;
 
 /**
  * Available filter types
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
+//@author A0099151B
 
 public enum FilterType {
 	DEADLINE("deadline"),

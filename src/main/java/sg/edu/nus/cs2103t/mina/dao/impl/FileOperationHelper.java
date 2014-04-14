@@ -5,32 +5,31 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
- * 
  * Common file operations to be used by file based Dao implementation
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
-// @author A0105853H
+//@author A0105853H
+
 public class FileOperationHelper {
 
-    private static Logger logger = LogManager
-            .getLogger(FileOperationHelper.class.getName());
+    private static final String CLASS_NAME = FileOperationHelper.class
+            .getName();
+    private static final boolean COMPLETED = true;
+    private static final boolean UNCOMPLETED = false;
 
     private Map<TaskType, String> _fileLocationMap;
-    private String _completedSuffix;
-    private String _fileExtension;
+    private String _taskSetCompletedSuffix;
+    private String _taskSetfileExtension;
+    private String _taskMapfileExtension;
 
-    public FileOperationHelper(String completedSuffix, String fileExtension) {
+    public FileOperationHelper(String completedSuffix,
+            String taskSetFileExtension, String taskMapFileExtension) {
         _fileLocationMap = new HashMap<TaskType, String>();
         _fileLocationMap.put(TaskType.TODO,
                 ConfigHelper.getProperty(ConfigHelper.TODO_KEY));
@@ -38,49 +37,99 @@ public class FileOperationHelper {
                 ConfigHelper.getProperty(ConfigHelper.EVENT_KEY));
         _fileLocationMap.put(TaskType.DEADLINE,
                 ConfigHelper.getProperty(ConfigHelper.DEADLINE_KEY));
-        _completedSuffix = completedSuffix;
-        _fileExtension = fileExtension;
+        _taskSetCompletedSuffix = completedSuffix;
+        _taskSetfileExtension = taskSetFileExtension;
+        _taskMapfileExtension = taskMapFileExtension;
     }
 
-    FileOperationHelper(String completedSuffix, String fileExtension,
-            Map<TaskType, String> fileLocationMap) {
-        _fileLocationMap = fileLocationMap;
-        _completedSuffix = completedSuffix;
-        _fileExtension = fileExtension;
+    FileOperationHelper(Map<TaskType, String> storageMap) {
+        _fileLocationMap = storageMap;
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
+    }
+    
+    FileOperationHelper() {
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
     }
 
-    public void cleanUp() {
-        new File(getFileLocation(TaskType.TODO, false)).delete();
-        new File(getFileLocation(TaskType.TODO, true)).delete();
-        new File(getFileLocation(TaskType.EVENT, false)).delete();
-        new File(getFileLocation(TaskType.EVENT, true)).delete();
-        new File(getFileLocation(TaskType.DEADLINE, false)).delete();
-        new File(getFileLocation(TaskType.DEADLINE, true)).delete();
+    public synchronized void cleanAll() {
+        cleanTaskSetDao();
+        cleanTaskMapDao();
     }
 
-    boolean createFileStorage() {
+    public synchronized boolean setUpAll() {
+        boolean isTaskSetCreated = createTaskSetDaoFiles();
+        boolean isTaskMapCreated = createTaskMapDaoFiles();
+        return isTaskMapCreated && isTaskSetCreated;
+    }
+
+    synchronized void cleanTaskSetDao() {
+        new File(getTaskSetFileLocation(TaskType.TODO, UNCOMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.TODO, COMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.EVENT, UNCOMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.EVENT, COMPLETED)).delete();
+        new File(getTaskSetFileLocation(TaskType.DEADLINE, UNCOMPLETED))
+                .delete();
+        new File(getTaskSetFileLocation(TaskType.DEADLINE, COMPLETED)).delete();
+    }
+
+    synchronized void cleanTaskMapDao() {
+        new File(getTaskMapFileLocation()).delete();
+    }
+
+    synchronized boolean createTaskSetDaoFiles() {
         try {
-            createFileIfNotExist(getFileLocation(TaskType.TODO, false));
-            createFileIfNotExist(getFileLocation(TaskType.TODO, true));
-            createFileIfNotExist(getFileLocation(TaskType.EVENT, false));
-            createFileIfNotExist(getFileLocation(TaskType.EVENT, true));
-            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, false));
-            createFileIfNotExist(getFileLocation(TaskType.DEADLINE, true));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.TODO,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.TODO,
+                    COMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.EVENT,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.EVENT,
+                    COMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.DEADLINE,
+                    UNCOMPLETED));
+            createFileIfNotExist(getTaskSetFileLocation(TaskType.DEADLINE,
+                    COMPLETED));
         } catch (IOException e) {
-            logger.error("failed to create storage files.");
-            logger.error(e, e);
+            LogHelper.log(
+                    CLASS_NAME,
+                    Level.ERROR,
+                    "failed to create task set storage files: " + e
+                            .getMessage());
             return false;
         }
         return true;
     }
 
-    String getFileLocation(TaskType taskType, boolean isCompleted) {
+    synchronized boolean createTaskMapDaoFiles() {
+        try {
+            createFileIfNotExist(getTaskMapFileLocation());
+        } catch (IOException e) {
+            LogHelper
+                    .log(CLASS_NAME,
+                            Level.ERROR,
+                            "failed to create task map storage file: " + e
+                                    .getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    String getTaskSetFileLocation(TaskType taskType, boolean isCompleted) {
         String fileLocation = _fileLocationMap.get(taskType);
         if (isCompleted) {
-            fileLocation += _completedSuffix;
+            fileLocation += _taskSetCompletedSuffix;
         }
-        fileLocation += _fileExtension;
+        fileLocation += _taskSetfileExtension;
         return fileLocation;
+    }
+
+    String getTaskMapFileLocation() {
+        return ConfigHelper.getProperty(ConfigHelper.TASK_MAP_KEY) + _taskMapfileExtension;
     }
 
     private void createFileIfNotExist(String fileName) throws IOException {

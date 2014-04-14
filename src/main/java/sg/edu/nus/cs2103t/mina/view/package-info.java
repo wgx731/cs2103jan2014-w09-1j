@@ -1,9 +1,4 @@
 /**
- * UI component for MINA
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * UI components for MINA
  */
 package sg.edu.nus.cs2103t.mina.view;

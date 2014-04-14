@@ -4,11 +4,55 @@
 
 	<groupId>sg.edu.nus.cs2103t</groupId>
 	<artifactId>mina</artifactId>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.5</version>
 	<name>mina</name>
 	<description>Monday Is Not Available is a TODO application for NUS CS2103T module</description>
 	<packaging>jar</packaging>
 	<url>https://code.google.com/p/cs2103jan2014-w09-1j</url>
+
+	<developers>
+		<developer>
+			<id>wgx731</id>
+			<name>Wang Gaoxiang</name>
+			<email>wgx731@gmail.com</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>joannemah.j.w</id>
+			<name>Joanne Mah</name>
+			<email>joannemah.j.w@gmail.com</email>
+			<roles>
+				<role>designer</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>Ud.Connexus</id>
+			<name>Du Zhiyuan</name>
+			<email>Ud.Connexus@gmail.com</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>viettrung9012</id>
+			<name>Truong Viet Trung</name>
+			<email>viettrung9012@gmail.com</email>
+			<roles>
+				<role>tester</role>
+				<role>video editor</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
 
 	<issueManagement>
 		<url>https://code.google.com/p/cs2103jan2014-w09-1j/issues/list</url>
@@ -40,8 +84,6 @@
 		<maven.checkstyle.plugin.version>2.12</maven.checkstyle.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
 		<maven.project.info.reports.plugin.version>2.7</maven.project.info.reports.plugin.version>
-		<maven.dependency.plugin.version>2.8</maven.dependency.plugin.version>
-		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<failsafe.and.surefire.version>2.17</failsafe.and.surefire.version>
 		<cobertura.maven.plugin.version>2.6</cobertura.maven.plugin.version>
 		<findbugs.maven.plugin.version>2.5.3</findbugs.maven.plugin.version>
@@ -57,6 +99,7 @@
 		<gson.version>2.2.4</gson.version>
 		<jkeymaster.version>1.1</jkeymaster.version>
 	</properties>
+
 	<repositories>
 		<repository>
 			<id>swt-repo</id>
@@ -67,6 +110,7 @@
 			<url>https://neptuno.uca.es/nexus/content/groups/release-repos</url>
 		</repository>
 	</repositories>
+
 	<profiles>
 		<profile>
 			<id>Linux-x86</id>
@@ -200,6 +244,20 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>${project.build.finalName}-${project.activeProfiles[0].id}</finalName>
+					<archive>
+						<manifest>
+							<mainClass>sg.edu.nus.cs2103t.mina.MinaDriver</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>${maven.clean.plugin.version}</version>
 				<configuration>
@@ -244,38 +302,28 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>${maven.jar.plugin.version}</version>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>${cobertura.maven.plugin.version}</version>
 				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>sg.edu.nus.cs2103t.mina.MinaDriver</mainClass>
-							<classpathPrefix>dependency-jars/</classpathPrefix>
-						</manifest>
-					</archive>
+					<aggregate>true</aggregate>
+					<instrumentation>
+						<excludes>
+							<exclude>org/eclipse/wb/swt/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/view/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/dao/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/controller/CommandManager*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/controller/DataSyncManager*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/utils/FileLockHelper*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/utils/LogHelper*</exclude>
+						</excludes>
+					</instrumentation>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>${maven.dependency.plugin.version}</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -324,15 +372,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${cobertura.maven.plugin.version}</version>
-				<configuration>
-					<ignores>
-						<ignore>org.eclipse.wb.swt.*</ignore>
-					</ignores>
-					<formats>
-						<format>html</format>
-						<format>xml</format>
-					</formats>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

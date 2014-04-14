@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+//@author A0099151B
 public class EveryKeyword extends Keyword {
     
     private static final int EVERY_LOOKAHEAD_LIMIT = 1;
@@ -63,8 +64,12 @@ public class EveryKeyword extends Keyword {
         return tokens;
     }
 
-    private void updateArgument(String everyKeyword, Argument argument) {
-        argument.setKeywordValue(_type, everyKeyword);
+    private void updateArgument(String everyKeyword, Argument argument) throws ParseException {
+        if(!hasExistingKeywordValue(argument)){
+            argument.setKeywordValue(_type, everyKeyword);
+        } else {
+            throw new ParseException(getExistingFlagErr(), 0);
+        }
     }
 
     private ArrayList<String> nullifyTokens(ArrayList<String> tokens, int currIndex) {

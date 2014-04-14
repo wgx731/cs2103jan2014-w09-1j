@@ -1,9 +1,6 @@
 /**
- * DAO for MINA
+ * DAO package for MINA
  * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * It contains all the DAO interfaces
  */
 package sg.edu.nus.cs2103t.mina.dao;

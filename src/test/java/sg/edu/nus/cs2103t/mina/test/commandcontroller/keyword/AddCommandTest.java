@@ -8,9 +8,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import sg.edu.nus.cs2103t.mina.commandcontroller.CommandFormat.AddCommand;
+import sg.edu.nus.cs2103t.mina.commandcontroller.commandformat.AddCommand;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.CommandType;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.KeywordFactory;
+
+//@author A0099151B
 
 public class AddCommandTest {
     
@@ -19,7 +21,7 @@ public class AddCommandTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        KeywordFactory.getInstance();
+        KeywordFactory.initialiseKeywordFactory();
     }
 
     @Before

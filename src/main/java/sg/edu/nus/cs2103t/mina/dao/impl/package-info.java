@@ -1,9 +1,6 @@
 /**
- * DAO implementation for MINA
+ * DAO Impl package for MINA
  * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
+ * It contains all the DAO implementations
  */
 package sg.edu.nus.cs2103t.mina.dao.impl;
