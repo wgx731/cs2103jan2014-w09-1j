@@ -12,12 +12,12 @@ import sg.edu.nus.cs2103t.mina.utils.ConfigHelper;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
- * 
  * Common file operations to be used by file based Dao implementation
  * 
  * @author wgx731
  */
-// @author A0105853H
+//@author A0105853H
+
 public class FileOperationHelper {
 
     private static final String CLASS_NAME = FileOperationHelper.class
@@ -52,8 +52,8 @@ public class FileOperationHelper {
     }
 
     public synchronized void cleanAll() {
-        cleanTaskMapDao();
         cleanTaskSetDao();
+        cleanTaskMapDao();
     }
 
     public synchronized boolean setUpAll() {

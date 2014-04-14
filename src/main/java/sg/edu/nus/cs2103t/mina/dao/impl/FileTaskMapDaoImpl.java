@@ -32,11 +32,11 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
 
     public FileTaskMapDaoImpl(FileOperationHelper fileOperationHelper) {
         _fileOperationHelper = fileOperationHelper;
+        _fileOperationHelper.createTaskMapDaoFiles();
     }
 
     private ObjectOutput getOutputWriter() throws IOException {
         OutputStream file;
-        _fileOperationHelper.createTaskMapDaoFiles();
         file = new FileOutputStream(
                 _fileOperationHelper.getTaskMapFileLocation());
         OutputStream buffer = new BufferedOutputStream(file);
@@ -45,7 +45,6 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
 
     private ObjectInput getInputReader() throws IOException {
         InputStream file;
-        _fileOperationHelper.createTaskMapDaoFiles();
         file = new FileInputStream(
                 _fileOperationHelper.getTaskMapFileLocation());
         InputStream buffer = new BufferedInputStream(file);

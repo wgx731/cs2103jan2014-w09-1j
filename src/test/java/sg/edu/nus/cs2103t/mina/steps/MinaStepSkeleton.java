@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.steps;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import org.apache.logging.log4j.Level;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -20,6 +21,7 @@ import sg.edu.nus.cs2103t.mina.MinaDriver;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
+import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Template class jbehave steps definition
@@ -27,6 +29,8 @@ import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
 //@author A0105853H
 
 public abstract class MinaStepSkeleton {
+
+    private static final String CLASS_NAME = MinaStepSkeleton.class.getName();
 
     protected static final int INPUT_TEXT_INDEX = 0;
     protected static final int FEEDBACK_LABEL_INDEX = 0;
@@ -40,7 +44,7 @@ public abstract class MinaStepSkeleton {
     protected static SWTBot bot;
     protected static MinaDriver driver;
 
-    private static FileOperationHelper jsonFileOperationHelper = new FileOperationHelper(
+    private static FileOperationHelper fileOperationHelper = new FileOperationHelper(
             JsonFileTaskDaoImpl.getCompletedSuffix(),
             JsonFileTaskDaoImpl.getFileExtension(),
             FileTaskMapDaoImpl.getFileExtension());
@@ -65,7 +69,8 @@ public abstract class MinaStepSkeleton {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogHelper.log(CLASS_NAME, Level.ERROR, e.getStackTrace()
+                            .toString());
                 }
             }
         });
@@ -93,7 +98,7 @@ public abstract class MinaStepSkeleton {
             }
         });
         driver.cleanUp();
-        jsonFileOperationHelper.cleanAll();
+        fileOperationHelper.cleanAll();
     }
 
     /**
