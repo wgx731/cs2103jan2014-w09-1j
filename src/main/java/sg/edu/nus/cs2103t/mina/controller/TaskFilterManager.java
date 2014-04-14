@@ -3,11 +3,6 @@ package sg.edu.nus.cs2103t.mina.controller;
 /**
  * This class is in charged to filtering tasks based on certain
  * criteria
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 
 import java.util.ArrayList;

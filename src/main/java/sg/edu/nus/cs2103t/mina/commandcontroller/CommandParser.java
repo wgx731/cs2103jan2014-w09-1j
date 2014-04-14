@@ -2,11 +2,6 @@ package sg.edu.nus.cs2103t.mina.commandcontroller;
 
 /**
  * This class is in charges of normalizing the command for CommandProcessor
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 
 import java.text.ParseException;
