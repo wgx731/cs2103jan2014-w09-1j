@@ -80,8 +80,8 @@ public class CommandProcessor {
 	public CommandProcessor() {
 		_taskDataManager = new TaskDataManager();
 		_taskFilterManager = new TaskFilterManager(_taskDataManager);
-		initializeTaskView();
 		_commandHistory = new CommandHistory();
+	      initializeTaskView();
 	}
 
 	public CommandProcessor(TaskDataManager taskDataManager,
