@@ -1,5 +1,16 @@
 # MINA CHANGE LOG #
 
+## 0.5 MINA-done (2014-04-12) ##
+
+#### Features: ####
+
+* recuring task
+* known bug fixed
+
+#### Known issues: ####
+
+* In the developer guide 
+
 ## 0.4 MINA-almost (2014-04-09) ##
 
 #### Features: ####
