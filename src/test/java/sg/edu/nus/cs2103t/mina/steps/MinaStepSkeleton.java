@@ -19,7 +19,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.junit.Assert;
 
-import sg.edu.nus.cs2103t.mina.MinaDriver;
+import sg.edu.nus.cs2103t.mina.MinaTestDriver;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileOperationHelper;
 import sg.edu.nus.cs2103t.mina.dao.impl.FileTaskMapDaoImpl;
 import sg.edu.nus.cs2103t.mina.dao.impl.JsonFileTaskDaoImpl;
@@ -51,15 +51,15 @@ public abstract class MinaStepSkeleton {
 
     protected static final String EMPTY_COMMAND = "";
 
+    private static CyclicBarrier swtBarrier = new CyclicBarrier(2);
+
     protected static SWTBot bot;
-    protected static MinaDriver driver;
+    protected static MinaTestDriver driver;
 
     private static FileOperationHelper fileOperationHelper = new FileOperationHelper(
             JsonFileTaskDaoImpl.getCompletedSuffix(),
             JsonFileTaskDaoImpl.getFileExtension(),
             FileTaskMapDaoImpl.getFileExtension());
-
-    private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
     private static Thread uiThread;
     private static Shell appShell;
 
@@ -90,24 +90,19 @@ public abstract class MinaStepSkeleton {
     @BeforeStories
     public void beforeStories() throws InterruptedException,
             BrokenBarrierException {
-        if (driver == null) {
-            driver = MinaDriver.getMinaDriver();
-        }
+        driver = MinaTestDriver.getMinaTestDriver();
         if (uiThread == null) {
             initializeUIThread();
             uiThread.start();
+            swtBarrier.await();
         }
-        swtBarrier.await();
     }
 
     @AfterStories
-    public void afterStories() throws InterruptedException {
-        Display.getDefault().syncExec(new Runnable() {
-            public void run() {
-                appShell.close();
-            }
-        });
+    public void afterStories() throws InterruptedException,
+            BrokenBarrierException {
         driver.cleanUp();
+        //driver.updateLists();
         fileOperationHelper.cleanAll();
     }
 

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.Level;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import sg.edu.nus.cs2103t.mina.controller.CommandManager;
 import sg.edu.nus.cs2103t.mina.controller.DataSyncManager;
@@ -36,7 +35,7 @@ public class MinaDriver {
 
     private static final String CLASS_NAME = MinaDriver.class.getName();
 
-    private static MinaDriver _driver;
+    static MinaDriver _driver;
 
     private CommandManager _commandManager;
     private TaskDataManager _taskDataManager;
@@ -44,7 +43,7 @@ public class MinaDriver {
     private MinaView _uiView;
     private DataSyncManager _dataSyncManager;
 
-    private MinaDriver() {
+    MinaDriver() {
     
     }
 
@@ -87,6 +86,14 @@ public class MinaDriver {
         this._dataSyncManager = dataSyncManager;
     }
 
+    MinaView getUiView() {
+        return _uiView;
+    }
+
+    void setUiView(MinaView uiView) {
+        _uiView = uiView;
+    }
+
     void initDao() {
         FileOperationHelper fileOperationHelper = new FileOperationHelper(
                 JsonFileTaskDaoImpl.getCompletedSuffix(),
@@ -114,22 +121,6 @@ public class MinaDriver {
         gui.open();
         _uiView = gui;
         _uiView.updateLists();
-    }
-
-    public Shell guiTestSetUp() {
-        initDao();
-        initTDM();
-        initTFM();
-        initCC();
-        MinaGuiUI gui = new MinaGuiUI(_commandManager);
-        gui.updateLists();
-        return gui.open();
-    }
-
-    public void cleanUp() {
-        if (_taskDataManager != null) {
-            _taskDataManager.resetTrees();
-        }
     }
 
     public void processLoop() {

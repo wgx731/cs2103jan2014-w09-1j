@@ -54,7 +54,7 @@ import com.tulskiy.keymaster.common.Provider;
  * @author duzhiyuan
  * @author joannemah
  */
-//@author A0099324X
+// @author A0099324X
 
 public class MinaGuiUI extends MinaView {
 
@@ -85,16 +85,16 @@ public class MinaGuiUI extends MinaView {
     private static final String HELP_OPEN = "Help opened.";
     private static final String HELP_CLOSE = "Help closed.";
     private static final String HELP_INSTRUCTION = "Press F1 for Help.";
-    
+
     private static final String CLASS_NAME = MinaGuiUI.class.getName();
-    
+
     private final int _timerRate = 5000;
-    
+
     private final int MIN_PAGE = 1;
-    
+
     private final String UI_FONT = "Trebuchet MS";
     private final String UI_FONT_2 = "Tahoma";
-    
+
     private final String RIGHT_ARROW = "\u2192";
     private final String LEFT_ARROW = "\u2190";
 
@@ -282,7 +282,10 @@ public class MinaGuiUI extends MinaView {
         LogHelper.log(CLASS_NAME, Level.INFO, "shell create contents");
         initializeItems();
         addAllListeners();
-        startTimer();
+        if (Boolean
+                .getBoolean(ConfigHelper.getProperty(ConfigHelper.TIMER_KEY))) {
+            startTimer();
+        }
     }
 
     private void startTimer() {
