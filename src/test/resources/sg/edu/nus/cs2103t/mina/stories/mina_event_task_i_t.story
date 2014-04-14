@@ -50,4 +50,4 @@ Examples:
 |command|feedback|type|task|line|color|colorline|date|dateline|daterange|daterangeline|
 |modify e1 meet imaginary friends|Operation completed.|event|\t1. meet imaginary friends|2|yellow|1|Tomorrow|1|\t\t9:00 am - 9:00 pm|3|
 |modify e2 -start friday|Operation completed.|event|\t2. this is going a long event|5|green|4|Friday|4|\t\t12:00 am - Next Tuesday 9:00 pm|6|
-|modify e2 -start thursday 1200 -end friday 1300 tmr|Operation completed.|event|\t2. this is going a long event|5|green|4|Friday|4|\t\t12:00 am - Next Tuesday 9:00 pm|6|
+|modify e2 -start thursday 1200 -end friday 1300|Operation completed.|event|\t2. this is going a long event|5|green|4|Thursday|4|\t\t12:00 pm - Friday 1:00 pm|6|

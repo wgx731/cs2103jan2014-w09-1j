@@ -1,6 +1,5 @@
 package sg.edu.nus.cs2103t.mina.steps;
 
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import org.apache.logging.log4j.Level;
@@ -55,13 +54,13 @@ public abstract class MinaStepSkeleton {
 
     protected static SWTBot bot;
     protected static MinaTestDriver driver;
+    private static Thread uiThread;
+    private static Shell appShell;
 
     private static FileOperationHelper fileOperationHelper = new FileOperationHelper(
             JsonFileTaskDaoImpl.getCompletedSuffix(),
             JsonFileTaskDaoImpl.getFileExtension(),
             FileTaskMapDaoImpl.getFileExtension());
-    private static Thread uiThread;
-    private static Shell appShell;
 
     private void initializeUIThread() {
         uiThread = new Thread(new Runnable() {
@@ -88,22 +87,30 @@ public abstract class MinaStepSkeleton {
     }
 
     @BeforeStories
-    public void beforeStories() throws InterruptedException,
-            BrokenBarrierException {
-        driver = MinaTestDriver.getMinaTestDriver();
-        if (uiThread == null) {
-            initializeUIThread();
-            uiThread.start();
-            swtBarrier.await();
+    public void beforeStories() {
+        try {
+            if (uiThread == null) {
+                driver = MinaTestDriver.getMinaTestDriver();
+                initializeUIThread();
+                uiThread.start();
+                swtBarrier.await();
+            }
+        } catch (Exception e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
         }
     }
 
     @AfterStories
-    public void afterStories() throws InterruptedException,
-            BrokenBarrierException {
-        driver.cleanUp();
-        //driver.updateLists();
-        fileOperationHelper.cleanAll();
+    public void afterStories() {
+        try {
+            driver.cleanUp();
+            driver.updateLists();
+            fileOperationHelper.cleanAll();
+        } catch (Exception e) {
+            LogHelper
+                    .log(CLASS_NAME, Level.ERROR, e.getStackTrace().toString());
+        }
     }
 
     /**
@@ -206,13 +213,14 @@ public abstract class MinaStepSkeleton {
         Assert.assertNotEquals(UNKOWN_INDEX, listIndex);
         return bot.styledText(listIndex);
     }
-    
+
     @Then("the <type> list at line number <dateline> should be <date>")
-    public void checkDate(@Named("type") String type, @Named("dateline") int dateLine, @Named("date") String date) {
+    public void checkDate(@Named("type") String type,
+            @Named("dateline") int dateLine, @Named("date") String date) {
         date = date.replace(NEXT_LINE, System.getProperty(LINE_SEPARATOR));
         date = date.replace(TAB, TAB_SEPARATOR);
         SWTBotStyledText list = getList(type);
-        dateLine-=1;
+        dateLine -= 1;
         Assert.assertNotNull(list);
         Assert.assertEquals(list.getTextOnLine(dateLine), date);
     }
