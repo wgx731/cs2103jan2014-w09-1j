@@ -246,6 +246,19 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>sg.edu.nus.cs2103t.mina.MinaDriver</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>${maven.clean.plugin.version}</version>
 				<configuration>
