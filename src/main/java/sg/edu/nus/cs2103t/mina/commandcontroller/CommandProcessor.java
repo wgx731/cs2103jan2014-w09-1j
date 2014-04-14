@@ -817,6 +817,7 @@ public class CommandProcessor {
 				newDescription = newDescription.substring(0,
 						indexOfEndOfDescription - 1);
 			}
+			assert(newDescription!=EMPTY_STRING);
 			modifyParam.setDescription(newDescription);
 		}
 		if (modifyParam.getOriginalTaskType() == TaskType.TODO
