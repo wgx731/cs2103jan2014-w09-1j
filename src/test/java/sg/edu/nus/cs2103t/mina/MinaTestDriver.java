@@ -6,6 +6,12 @@ import sg.edu.nus.cs2103t.mina.controller.TaskDataManager;
 import sg.edu.nus.cs2103t.mina.view.MinaGuiUI;
 import sg.edu.nus.cs2103t.mina.view.MinaView;
 
+
+/**
+ * MINA test driver
+ */
+//@author A0105853H
+
 public class MinaTestDriver extends MinaDriver {
 
     private static MinaTestDriver _driver;

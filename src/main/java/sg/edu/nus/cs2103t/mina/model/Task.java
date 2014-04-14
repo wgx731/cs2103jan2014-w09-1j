@@ -9,6 +9,7 @@ import java.util.UUID;
  * @param <T>
  */
 //@author A0080412W
+
 public abstract class Task<T> implements Comparable<T>, Serializable {
 
     private static final long serialVersionUID = 7038530852821069011L;

@@ -27,8 +27,8 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * only simple and composite keywords are used.
  * 
  */
+//@author A0099151B
 
-// @author A0099151B
 public abstract class CommandFormat {
 
     private static final int DESCRIPT_NOT_FOUND = -1;

@@ -24,9 +24,9 @@ import sg.edu.nus.cs2103t.mina.view.SplashScreen;
 /**
  * This is the start point of MINA which links all component and start the
  * application
- * 
  */
 //@author A0105853H
+
 public class MinaDriver {
 
     private static final String MINA_ALREADY_STARTED = "MINA already started.";

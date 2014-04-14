@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.model;
 /**
  * Available task types
  */
+//@author A0080412W
 
 public enum TaskType {
 

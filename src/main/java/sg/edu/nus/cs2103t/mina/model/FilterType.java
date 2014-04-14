@@ -3,6 +3,7 @@ package sg.edu.nus.cs2103t.mina.model;
 /**
  * Available filter types
  */
+//@author A0099151B
 
 public enum FilterType {
 	DEADLINE("deadline"),

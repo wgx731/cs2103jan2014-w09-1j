@@ -13,8 +13,6 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Common file operations to be used by file based Dao implementation
- * 
- * @author wgx731
  */
 //@author A0105853H
 

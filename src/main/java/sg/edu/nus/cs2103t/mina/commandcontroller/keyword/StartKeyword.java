@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Level;
 import sg.edu.nus.cs2103t.mina.utils.DateUtil;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
-// @author A0099151B
+//@author A0099151B
 public class StartKeyword extends Keyword {
 
     private LinkedHashMap<String, DateTime> _startValues;

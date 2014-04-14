@@ -4,11 +4,6 @@ import java.util.TreeSet;
 
 /**
  * Helper class uses for auto complete function
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 //@author A0099324X
 

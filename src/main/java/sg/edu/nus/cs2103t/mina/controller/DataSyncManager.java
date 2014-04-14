@@ -20,7 +20,7 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * DataSyncManager is a facade class responsible for providing all required API
  * in one place.
  */
-// @author A0105853H
+//@author A0105853H
 public class DataSyncManager {
 
     private static final String CLASS_NAME = DataSyncManager.class.getName();

@@ -8,6 +8,7 @@ import sg.edu.nus.cs2103t.mina.utils.DateUtil;
  * Appointment task
  */
 //@author A0080412W
+
 public class EventTask extends Task<EventTask> implements Comparable<EventTask> {
 
     private static final long serialVersionUID = 5531321810458646971L;

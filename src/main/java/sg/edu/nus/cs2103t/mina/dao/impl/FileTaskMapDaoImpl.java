@@ -1,6 +1,7 @@
 package sg.edu.nus.cs2103t.mina.dao.impl;
 
 import java.io.BufferedInputStream;
+
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +18,11 @@ import org.apache.logging.log4j.Level;
 import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
+
+/**
+ * Task map Dao implementation
+ */
+//@author A0105853H
 
 public class FileTaskMapDaoImpl implements TaskMapDao {
 

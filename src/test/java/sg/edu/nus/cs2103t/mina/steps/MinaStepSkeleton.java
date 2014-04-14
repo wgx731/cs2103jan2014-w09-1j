@@ -27,7 +27,7 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 /**
  * Template class jbehave steps definition
  */
-// @author A0105853H
+//@author A0105853H
 
 public abstract class MinaStepSkeleton {
 

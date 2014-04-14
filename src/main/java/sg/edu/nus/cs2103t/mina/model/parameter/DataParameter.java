@@ -14,10 +14,9 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 /**
  * Stores variables of a new task that a user will want to add or delete, or
  * modified variables of an existing task that a user will want to modify.
- * 
- * @author joannemah
  */
 // @author A0080412W
+
 public class DataParameter {
 
     private static final String CLASS_NAME = TaskDataManager.class.getName();

@@ -6,6 +6,7 @@ import java.util.Date;
  * Task without restriction
  */
 //@author A0080412W
+
 public class TodoTask extends Task<TodoTask> implements Comparable<TodoTask> {
 
     private static final long serialVersionUID = -6501529436053212805L;

@@ -16,7 +16,7 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * - All '-' will be escaped with the unicode \u2010 hyphen. 
  */
 
-// @author A0099151B
+//@author A0099151B
 public class DescriptionKeyword extends Keyword {
 
     private static final StandardKeyword DESCRIPTION = SimpleKeyword.DESCRIPTION;

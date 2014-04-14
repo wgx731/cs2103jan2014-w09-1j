@@ -11,11 +11,6 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Facade class uses for process user commands
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 //@author A0099324X
 

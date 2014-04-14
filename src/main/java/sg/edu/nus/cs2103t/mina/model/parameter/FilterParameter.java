@@ -5,6 +5,8 @@ import java.util.Date;
 
 import sg.edu.nus.cs2103t.mina.model.FilterType;
 
+//@author A0099151B
+
 public class FilterParameter {
 
     private ArrayList<FilterType> _filters;

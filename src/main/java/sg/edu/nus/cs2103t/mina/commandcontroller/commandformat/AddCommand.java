@@ -21,8 +21,8 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * 
  * 
  */
+//@author A0099151B
 
-// @author A0099151B
 public class AddCommand extends CommandFormat {
 
     private static final String CLASS_NAME = AddCommand.class.getName();

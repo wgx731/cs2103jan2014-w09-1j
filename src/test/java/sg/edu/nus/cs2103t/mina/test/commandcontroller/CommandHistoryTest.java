@@ -16,7 +16,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 /**
  * Actual test case for CommandHistory
  */
-// @author A0099324X
+//@author A0099324X
 
 public class CommandHistoryTest {
 	@Test

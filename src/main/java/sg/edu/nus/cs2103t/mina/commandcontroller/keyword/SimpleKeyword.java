@@ -1,10 +1,11 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller.keyword;
 
-//@author A0099151B
 /**
  * This enum contains standard keywords that CommandProcessor recognized 
  * (with the exception of COMPOSITE (that's only for CommandParser) )
  */
+//@author A0099151B
+
 public enum SimpleKeyword implements StandardKeyword{
     
     //Add your standard keywords here

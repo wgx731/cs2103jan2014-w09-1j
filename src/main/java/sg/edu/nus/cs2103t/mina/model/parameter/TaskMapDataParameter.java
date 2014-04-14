@@ -6,6 +6,11 @@ import java.util.HashMap;
 
 import sg.edu.nus.cs2103t.mina.model.Task;
 
+/** 
+ * Parameters for TaskMapDAO
+ */
+//@author A0105853H
+
 public class TaskMapDataParameter implements Serializable {
 
     private static final long serialVersionUID = -1665500740615897037L;

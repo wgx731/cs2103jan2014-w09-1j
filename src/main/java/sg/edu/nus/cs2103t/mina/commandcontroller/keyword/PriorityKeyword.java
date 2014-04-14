@@ -11,14 +11,9 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
 /**
  * Priority keyword.
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  */
 
-// @author A0099151B
+//@author A0099151B
 public class PriorityKeyword extends Keyword {
 
     private static final int PREV = -1;
