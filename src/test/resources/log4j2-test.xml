@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" strict="true" name="MINATestLoggerConfig"
+	packages="sg.edu.nus.cs2103t">
+	<Filter type="ThresholdFilter" level="trace" />
+	<Appenders>
+		<Appender type="Console" name="STDOUT">
+			<Layout type="PatternLayout"
+				patten="======%nTime: %d [%t]%nClass: %logger{36}%nMessage: [%p] %m%n======%n" />
+			<Filters>
+				<Filter type="MarkerFilter" marker="FLOW" onMatch="DENY"
+					onMismatch="NEUTRAL" />
+				<Filter type="MarkerFilter" marker="EXCEPTION" onMatch="DENY"
+					onMismatch="ACCEPT" />
+			</Filters>
+		</Appender>
+	</Appenders>
+	<Loggers>
+		<Logger name="sg.edu.nus.cs2103t" level="info" additivity="false">
+			<AppenderRef ref="STDOUT" />
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+</Configuration>
