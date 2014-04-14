@@ -35,6 +35,15 @@ public class FileTaskMapDaoImpl implements TaskMapDao {
         _fileOperationHelper.createTaskMapDaoFiles();
     }
 
+    FileTaskMapDaoImpl() {
+        _fileOperationHelper = new FileOperationHelper();
+        _fileOperationHelper.createTaskMapDaoFiles();
+    }
+    
+    FileOperationHelper getFileOperationHelper() {
+        return _fileOperationHelper;
+    }
+
     private ObjectOutput getOutputWriter() throws IOException {
         OutputStream file;
         file = new FileOutputStream(

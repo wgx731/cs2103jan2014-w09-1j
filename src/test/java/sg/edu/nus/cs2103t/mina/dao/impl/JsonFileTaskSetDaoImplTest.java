@@ -1,9 +1,5 @@
 package sg.edu.nus.cs2103t.mina.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +10,7 @@ import java.util.Iterator;
 import java.util.SortedSet;
 
 import org.apache.logging.log4j.Level;
+import org.junit.Assert;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -117,12 +114,12 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
     }
 
     private void checkSavedFile(File savedFile, String json) {
-        assertTrue(savedFile.exists());
-        assertTrue(savedFile.isFile());
-        assertTrue(savedFile.length() > 0);
+        Assert.assertTrue(savedFile.exists());
+        Assert.assertTrue(savedFile.isFile());
+        Assert.assertTrue(savedFile.length() > 0);
         String fileContent = readFileContent(savedFile);
-        assertTrue(fileContent.replaceAll(WHITE_SPACES, EMPTY_STRING).equals(
-                json.replaceAll(WHITE_SPACES, EMPTY_STRING)));
+        Assert.assertTrue(fileContent.replaceAll(WHITE_SPACES, EMPTY_STRING)
+                .equals(json.replaceAll(WHITE_SPACES, EMPTY_STRING)));
     }
 
     @SuppressWarnings("unchecked")
@@ -131,18 +128,18 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
         switch (taskType) {
             case TODO :
                 SortedSet<TodoTask> todoTaskSet = (SortedSet<TodoTask>) loadedSet;
-                assertNotNull(todoTaskSet);
-                assertEquals(sampleTodoTaskSet, todoTaskSet);
+                Assert.assertNotNull(todoTaskSet);
+                Assert.assertEquals(sampleTodoTaskSet, todoTaskSet);
                 break;
             case EVENT :
                 SortedSet<EventTask> eventTaskSet = (SortedSet<EventTask>) loadedSet;
-                assertNotNull(eventTaskSet);
-                assertEquals(sampleEventTaskSet, eventTaskSet);
+                Assert.assertNotNull(eventTaskSet);
+                Assert.assertEquals(sampleEventTaskSet, eventTaskSet);
                 break;
             case DEADLINE :
                 SortedSet<DeadlineTask> deadlineTaskSet = (SortedSet<DeadlineTask>) loadedSet;
-                assertNotNull(deadlineTaskSet);
-                assertEquals(sampleDeadlineTaskSet, deadlineTaskSet);
+                Assert.assertNotNull(deadlineTaskSet);
+                Assert.assertEquals(sampleDeadlineTaskSet, deadlineTaskSet);
                 break;
             default :
                 break;
@@ -223,20 +220,20 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
     public void testLoadEmptyFile() {
         SortedSet<DeadlineTask> deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(
                 TaskType.DEADLINE, false);
-        assertTrue(deadlineSet.isEmpty());
+        Assert.assertTrue(deadlineSet.isEmpty());
         deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.DEADLINE,
                 true);
-        assertTrue(deadlineSet.isEmpty());
+        Assert.assertTrue(deadlineSet.isEmpty());
         SortedSet<DeadlineTask> eventSet = (SortedSet<DeadlineTask>) loadTaskSet(
                 TaskType.EVENT, false);
-        assertTrue(eventSet.isEmpty());
+        Assert.assertTrue(eventSet.isEmpty());
         eventSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.EVENT, true);
-        assertTrue(eventSet.isEmpty());
+        Assert.assertTrue(eventSet.isEmpty());
         SortedSet<TodoTask> todoSet = (SortedSet<TodoTask>) loadTaskSet(
                 TaskType.TODO, false);
-        assertTrue(todoSet.isEmpty());
+        Assert.assertTrue(todoSet.isEmpty());
         todoSet = (SortedSet<TodoTask>) loadTaskSet(TaskType.TODO, true);
-        assertTrue(todoSet.isEmpty());
+        Assert.assertTrue(todoSet.isEmpty());
     }
 
 }

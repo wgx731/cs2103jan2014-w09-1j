@@ -50,6 +50,12 @@ public class FileOperationHelper {
         _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
         _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
     }
+    
+    FileOperationHelper() {
+        _taskSetCompletedSuffix = JsonFileTaskDaoImpl.getCompletedSuffix();
+        _taskSetfileExtension = JsonFileTaskDaoImpl.getFileExtension();
+        _taskMapfileExtension = FileTaskMapDaoImpl.getFileExtension();
+    }
 
     public synchronized void cleanAll() {
         cleanTaskSetDao();
