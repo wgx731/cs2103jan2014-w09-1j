@@ -14,17 +14,32 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 /**
  * Memory Data Observer Implementation
  */
-public class MemoryDataObserverImp implements MemoryDataObserver {
+//@author A0105853H
 
-    private static final String CLASS_NAME = MemoryDataObserverImp.class
+public class MemoryDataObserverImpl implements MemoryDataObserver {
+
+    private static final String CLASS_NAME = MemoryDataObserverImpl.class
             .getName();
 
     private TaskDao _taskDao;
     private TaskMapDao _taskMapDao;
 
-    public MemoryDataObserverImp(TaskDao taskDao, TaskMapDao taskMapDao) {
+    public MemoryDataObserverImpl(TaskDao taskDao, TaskMapDao taskMapDao) {
         _taskDao = taskDao;
         _taskMapDao = taskMapDao;
+    }
+
+    MemoryDataObserverImpl(FileOperationHelper fileOperationHelper) {
+        _taskDao = new JsonFileTaskDaoImpl(fileOperationHelper);
+        _taskMapDao = new FileTaskMapDaoImpl(fileOperationHelper);
+    }
+
+    TaskDao getTaskDao() {
+        return _taskDao;
+    }
+
+    TaskMapDao getTaskMapDao() {
+        return _taskMapDao;
     }
 
     @Override

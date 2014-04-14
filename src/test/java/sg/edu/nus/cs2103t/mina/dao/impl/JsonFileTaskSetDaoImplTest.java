@@ -29,30 +29,29 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
 
     private static final String EMPTY_STRING = "";
-
     private static final String WHITE_SPACES = "\\s+";
-
     private static final String CLASS_NAME = JsonFileTaskSetDaoImplTest.class
             .getName();
 
-    private JsonFileTaskDaoImpl storage;
+    private JsonFileTaskDaoImpl _storage;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        storage = new JsonFileTaskDaoImpl(storageMap);
+        _storage = new JsonFileTaskDaoImpl(storageMap);
     }
 
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-        storage = null;
+        _storage.getFileOperationHelper().cleanTaskSetDao();
+        _storage = null;
     }
 
     private File saveTaskSet(SortedSet<? extends Task<?>> taskSet,
             TaskType taskType, boolean isCompleted) {
         try {
-            storage.saveTaskSet(taskSet, taskType, isCompleted);
+            _storage.saveTaskSet(taskSet, taskType, isCompleted);
         } catch (IOException e) {
             LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
         }
@@ -84,7 +83,7 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
     private SortedSet<? extends Task<?>> loadTaskSet(TaskType taskType,
             boolean isCompleted) {
         try {
-            return storage.loadTaskSet(taskType, isCompleted);
+            return _storage.loadTaskSet(taskType, isCompleted);
         } catch (IOException e) {
             LogHelper.log(CLASS_NAME, Level.ERROR, e.getMessage());
             return null;
@@ -148,10 +147,11 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
 
     @Test
     public void testUnCompletedTodo() {
-        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO, false);
+        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO,
+                UNCOMPLETED);
         checkSavedFile(savedFile,
                 JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
-        checkLoadedSet(loadTaskSet(TaskType.TODO, false), TaskType.TODO);
+        checkLoadedSet(loadTaskSet(TaskType.TODO, UNCOMPLETED), TaskType.TODO);
     }
 
     @Test
@@ -159,21 +159,23 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
         Iterator<TodoTask> iterator = sampleTodoTaskSet.iterator();
         TodoTask task = iterator.next();
         sampleTodoTaskSet.remove(task);
-        task.setCompleted(true);
+        task.setCompleted(COMPLETED);
         sampleTodoTaskSet.add(task);
 
-        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO, true);
+        File savedFile = saveTaskSet(sampleTodoTaskSet, TaskType.TODO,
+                COMPLETED);
         checkSavedFile(savedFile,
                 JsonHelper.taskSetToJson(sampleTodoTaskSet, TaskType.TODO));
-        checkLoadedSet(loadTaskSet(TaskType.TODO, true), TaskType.TODO);
+        checkLoadedSet(loadTaskSet(TaskType.TODO, COMPLETED), TaskType.TODO);
     }
 
     @Test
     public void testUnCompletedEvent() {
-        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT, false);
+        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT,
+                UNCOMPLETED);
         checkSavedFile(savedFile,
                 JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
-        checkLoadedSet(loadTaskSet(TaskType.EVENT, false), TaskType.EVENT);
+        checkLoadedSet(loadTaskSet(TaskType.EVENT, UNCOMPLETED), TaskType.EVENT);
     }
 
     @Test
@@ -181,22 +183,24 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
         Iterator<EventTask> iterator = sampleEventTaskSet.iterator();
         EventTask task = iterator.next();
         sampleEventTaskSet.remove(task);
-        task.setCompleted(true);
+        task.setCompleted(COMPLETED);
         sampleEventTaskSet.add(task);
 
-        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT, true);
+        File savedFile = saveTaskSet(sampleEventTaskSet, TaskType.EVENT,
+                COMPLETED);
         checkSavedFile(savedFile,
                 JsonHelper.taskSetToJson(sampleEventTaskSet, TaskType.EVENT));
-        checkLoadedSet(loadTaskSet(TaskType.EVENT, true), TaskType.EVENT);
+        checkLoadedSet(loadTaskSet(TaskType.EVENT, COMPLETED), TaskType.EVENT);
     }
 
     @Test
     public void testUnCompletedDeadline() {
         File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
-                false);
+                UNCOMPLETED);
         checkSavedFile(savedFile, JsonHelper.taskSetToJson(
                 sampleDeadlineTaskSet, TaskType.DEADLINE));
-        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, false), TaskType.DEADLINE);
+        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, UNCOMPLETED),
+                TaskType.DEADLINE);
     }
 
     @Test
@@ -204,14 +208,15 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
         Iterator<DeadlineTask> iterator = sampleDeadlineTaskSet.iterator();
         DeadlineTask task = iterator.next();
         sampleDeadlineTaskSet.remove(task);
-        task.setCompleted(true);
+        task.setCompleted(COMPLETED);
         sampleDeadlineTaskSet.add(task);
 
         File savedFile = saveTaskSet(sampleDeadlineTaskSet, TaskType.DEADLINE,
-                true);
+                COMPLETED);
         checkSavedFile(savedFile, JsonHelper.taskSetToJson(
                 sampleDeadlineTaskSet, TaskType.DEADLINE));
-        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, true), TaskType.DEADLINE);
+        checkLoadedSet(loadTaskSet(TaskType.DEADLINE, COMPLETED),
+                TaskType.DEADLINE);
     }
 
     /* This is a boundary case for the ‘empty file’ partition */
@@ -219,20 +224,21 @@ public class JsonFileTaskSetDaoImplTest extends FileDaoImplTest {
     @Override
     public void testLoadEmptyFile() {
         SortedSet<DeadlineTask> deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(
-                TaskType.DEADLINE, false);
+                TaskType.DEADLINE, UNCOMPLETED);
         Assert.assertTrue(deadlineSet.isEmpty());
         deadlineSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.DEADLINE,
-                true);
+                COMPLETED);
         Assert.assertTrue(deadlineSet.isEmpty());
         SortedSet<DeadlineTask> eventSet = (SortedSet<DeadlineTask>) loadTaskSet(
-                TaskType.EVENT, false);
+                TaskType.EVENT, UNCOMPLETED);
         Assert.assertTrue(eventSet.isEmpty());
-        eventSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.EVENT, true);
+        eventSet = (SortedSet<DeadlineTask>) loadTaskSet(TaskType.EVENT,
+                COMPLETED);
         Assert.assertTrue(eventSet.isEmpty());
         SortedSet<TodoTask> todoSet = (SortedSet<TodoTask>) loadTaskSet(
-                TaskType.TODO, false);
+                TaskType.TODO, UNCOMPLETED);
         Assert.assertTrue(todoSet.isEmpty());
-        todoSet = (SortedSet<TodoTask>) loadTaskSet(TaskType.TODO, true);
+        todoSet = (SortedSet<TodoTask>) loadTaskSet(TaskType.TODO, COMPLETED);
         Assert.assertTrue(todoSet.isEmpty());
     }
 

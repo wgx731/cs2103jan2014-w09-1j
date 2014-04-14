@@ -48,6 +48,10 @@ public class JsonFileTaskDaoImpl implements TaskDao {
         _fileOperationHelper = new FileOperationHelper(storageMap);
         _fileOperationHelper.createTaskSetDaoFiles();
     }
+    
+    FileOperationHelper getFileOperationHelper() {
+        return _fileOperationHelper;
+    }
 
     private BufferedWriter getOutputWriter(String fileName) throws IOException {
         FileWriter fileWriter = new FileWriter(fileName);

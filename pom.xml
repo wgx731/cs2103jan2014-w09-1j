@@ -324,6 +324,30 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>${cobertura.maven.plugin.version}</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<instrumentation>
+						<excludes>
+							<exclude>org/eclipse/wb/swt/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/view/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/dao/*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/controller/CommandManager*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/controller/DataSyncManager*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/utils/FileLockHelper*</exclude>
+							<exclude>sg/edu/nus/cs2103t/mina/utils/LogHelper*</exclude>
+						</excludes>
+					</instrumentation>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -371,15 +395,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${cobertura.maven.plugin.version}</version>
-				<configuration>
-					<ignores>
-						<ignore>org.eclipse.wb.swt.*</ignore>
-					</ignores>
-					<formats>
-						<format>html</format>
-						<format>xml</format>
-					</formats>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

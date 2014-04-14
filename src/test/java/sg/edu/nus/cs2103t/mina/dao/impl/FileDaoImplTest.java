@@ -36,7 +36,9 @@ public abstract class FileDaoImplTest {
     protected static final String DEADLINE_FILE_NAME = "deadline";
     protected static final String RECUR_DEADLINE_DESCRIPTION = "This is an recurring deadline task";
     protected static final String TEST_RECUR_TAG = "RECUR_0";
-    
+    protected static final boolean COMPLETED = true;
+    protected static final boolean UNCOMPLETED = false;
+
     protected static final int MAX_RECUR_INT = 0;
 
     protected static final Date startDate = new Date(1393243200);
@@ -91,7 +93,7 @@ public abstract class FileDaoImplTest {
         storageMap = null;
         sampleTodoTaskSet = null;
         sampleEventTaskSet = null;
-        sampleDeadlineTaskSet = null;
+        sampleDeadlineTaskSet = null; 
     }
 
     @Test

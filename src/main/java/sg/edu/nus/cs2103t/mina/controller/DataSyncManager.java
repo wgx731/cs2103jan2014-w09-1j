@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Level;
 import sg.edu.nus.cs2103t.mina.dao.MemoryDataObserver;
 import sg.edu.nus.cs2103t.mina.dao.TaskDao;
 import sg.edu.nus.cs2103t.mina.dao.TaskMapDao;
-import sg.edu.nus.cs2103t.mina.dao.impl.MemoryDataObserverImp;
+import sg.edu.nus.cs2103t.mina.dao.impl.MemoryDataObserverImpl;
 import sg.edu.nus.cs2103t.mina.model.Task;
 import sg.edu.nus.cs2103t.mina.model.TaskType;
 import sg.edu.nus.cs2103t.mina.model.parameter.TaskMapDataParameter;
@@ -20,7 +20,7 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * DataSyncManager is a facade class responsible for providing all required API
  * in one place.
  */
-//@author A0105853H
+// @author A0105853H
 public class DataSyncManager {
 
     private static final String CLASS_NAME = DataSyncManager.class.getName();
@@ -38,7 +38,7 @@ public class DataSyncManager {
     public DataSyncManager(TaskDao taskDao, TaskMapDao taskMapDao) {
         _taskDao = taskDao;
         _taskMapDao = taskMapDao;
-        _dataObserver = new MemoryDataObserverImp(taskDao, taskMapDao);
+        _dataObserver = new MemoryDataObserverImpl(taskDao, taskMapDao);
     }
 
     /**
