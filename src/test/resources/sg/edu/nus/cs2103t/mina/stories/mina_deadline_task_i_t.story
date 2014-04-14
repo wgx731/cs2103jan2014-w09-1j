@@ -38,7 +38,7 @@ Examples:
 |modify d 2 -by next Sun|Operation completed.|deadline|\t4. Assignment by 11:59 pm|8|7|green|7|Next Sunday|
 |modify d3 -by next friday 11am              'whahaha'|Operation completed.|deadline|\t3. whahaha by 11:00 am|6|5|green|5|Next Friday|
 |modify deadlines 2 'start and end done' by tmr|Operation completed.|deadline|\t2. start and end done by 11:59 pm|4|3|yellow|3|Tomorrow|
-|modify deadlines 2|Operation completed.|deadline|\t2. start and end done by 11:59 pm|4|3|yellow|3|Tomorrow|
+|modify deadlines 2|Invalid command. Please re-enter.|deadline|\t2. start and end done by 11:59 pm|4|3|yellow|3|Tomorrow|
 |modify deadlines 100|Invalid command. Please re-enter.|deadline|\t2. start and end done by 11:59 pm|4|3|yellow|3|Tomorrow|
 
 Scenario:  Delete existing deadline task
