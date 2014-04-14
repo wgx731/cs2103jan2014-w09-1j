@@ -15,7 +15,8 @@ public enum SimpleKeyword implements StandardKeyword{
     END("End"), 
     RECURRING("Every"), 
     UNTIL("Until"), 
-    PRIORITY("Priority");
+    PRIORITY("Priority"),
+    ALL("All");
     
     private String _keyword;
 

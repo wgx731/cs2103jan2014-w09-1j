@@ -11,15 +11,9 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 /**
  * Description keyword and its associated methods.
  * 
- * Like its parent, Keyword, processKeyword only process tokens after the
- * keyword. Developers would have to manually extract out the value of the
- * keyword with getValue(). However, the CommandParser should have done it.
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
- * 
+ * Things to note:
+ * - DescriptionKeyword only parse the index of the token that was provided. No lookahead is done here.
+ * - All '-' will be escaped with the unicode \u2010 hyphen. 
  */
 
 // @author A0099151B
@@ -28,9 +22,7 @@ public class DescriptionKeyword extends Keyword {
     private static final StandardKeyword DESCRIPTION = SimpleKeyword.DESCRIPTION;
     private static final String CLASS_NAME = DescriptionKeyword.class.getName();
     private static final String DELIMITER_ESCAPE =  "\u2010";
-    // Static initalizer to add entry to KeywordFactory. This is only for
-    // standard keyword, alias will be added
-    // else where.
+    
     static {
         DescriptionKeyword newDescript = new DescriptionKeyword();
         KeywordFactory.addAliasEntry(DESCRIPTION.getFormattedKeyword(),
@@ -89,10 +81,7 @@ public class DescriptionKeyword extends Keyword {
         }
 
         String word = tokens.get(currIndex);
-        
-        if(word.startsWith(StandardKeyword.DELIMITER) && !word.equalsIgnoreCase("-all")) {
-            word = word.replace(StandardKeyword.DELIMITER, DELIMITER_ESCAPE);
-        }
+        word = word.replace(StandardKeyword.DELIMITER, DELIMITER_ESCAPE);
         
         LogHelper.log(CLASS_NAME, Level.INFO, "Appending " + word +
                 " to " +

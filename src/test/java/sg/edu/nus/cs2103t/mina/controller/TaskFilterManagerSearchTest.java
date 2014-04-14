@@ -19,7 +19,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.SearchParameter;
 import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
-//@author Du Zhiyuan
+//@author A0099151B
 public class TaskFilterManagerSearchTest {
 
     private TaskDataManagerStub tdmStub = new TaskDataManagerStub();

@@ -2,8 +2,6 @@ package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import org.apache.logging.log4j.Level;
 
@@ -23,19 +21,10 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * string. Thus, a CommandKeyword has to be created to reign in the different
  * formats/keywords.
  * 
- * Certain CommandType only belong to certain keywords/format thus it's
- * neccessary for developers to intialise a set of accepted CommandTypes when
- * they decided to extend this class.
- * 
  * Terminology: CommandKeyword: The CommandType used for the keyword Arguments:
  * The rest of the string minus the CommandKeyword Keyword and Values: The
  * corresponding keyword and values that made up the arguments. From here on,
  * only simple and composite keywords are used.
- * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  * 
  */
 

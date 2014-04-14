@@ -1,7 +1,6 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 
 import org.apache.logging.log4j.Level;
 
@@ -20,10 +19,6 @@ import sg.edu.nus.cs2103t.mina.utils.LogHelper;
  * will probably be mostly used when keywords (with their corresponding values)
  * and values can be reordered at any position.
  * 
- * @author wgx731
- * @author viettrung9012
- * @author duzhiyuan
- * @author joannemah
  * 
  */
 

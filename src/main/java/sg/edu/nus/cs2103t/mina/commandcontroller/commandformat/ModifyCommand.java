@@ -1,7 +1,6 @@
 package sg.edu.nus.cs2103t.mina.commandcontroller.commandformat;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 
 import org.apache.logging.log4j.Level;
 

@@ -7,8 +7,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,6 +17,7 @@ import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.SimpleKeyword;
 import sg.edu.nus.cs2103t.mina.commandcontroller.keyword.StandardKeyword;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
+//@author A0099151B
 public class KeywordFactoryTest {
 
     private static final String CLASS_NAME = KeywordFactoryTest.class.getName();

@@ -14,7 +14,6 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.Level;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import sg.edu.nus.cs2103t.mina.model.DeadlineTask;
@@ -27,7 +26,7 @@ import sg.edu.nus.cs2103t.mina.model.parameter.FilterParameter;
 import sg.edu.nus.cs2103t.mina.stub.TaskDataManagerStub;
 import sg.edu.nus.cs2103t.mina.utils.LogHelper;
 
-//@author Du Zhiyuan
+//@author A0099151B
 public class TaskFilterManagerFilterTest {
 
     private static final int SEC = 2;
@@ -48,37 +47,6 @@ public class TaskFilterManagerFilterTest {
     private TaskFilterManager tfmTest = new TaskFilterManager(tdmStub);
     private static final String CLASS_NAME = TaskFilterManagerFilterTest.class
             .getName();
-
-    @Ignore
-    @Test
-    public void viewOutput() {
-        // check for output
-        TaskDataManagerStub tdm = tdmStub;
-
-        Iterator<TodoTask> todoIterator;
-        todoIterator = tdm.getUncompletedTodoTasks().iterator();
-
-        while (todoIterator.hasNext()) {
-            TodoTask task = todoIterator.next();
-            if (task != null)
-                printTodo(task);
-        }
-
-        Iterator<EventTask> eventIterator;
-        eventIterator = tdm.getUncompletedEventTasks().iterator();
-
-        while (eventIterator.hasNext()) {
-            printEvent(eventIterator.next());
-        }
-
-        Iterator<DeadlineTask> deadlineIterator;
-        deadlineIterator = tdm.getUncompletedDeadlineTasks().iterator();
-
-        while (deadlineIterator.hasNext()) {
-            printDeadline(deadlineIterator.next());
-        }
-        assertTrue(true);
-    }
 
     /**
      * Test for passing an empty filter parameter Expected: Returned all
