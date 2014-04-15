@@ -53,19 +53,31 @@ import com.tulskiy.keymaster.common.Provider;
 
 public class MinaGuiUI extends MinaView {
 
-    private static final Color COLOR_SELECTION_BOX_YELLOW = SWTResourceManager.getColor(153, 153, 51);
-	private static final Color COLOR_TEXT_YELLOW = SWTResourceManager.getColor(225, 212, 113);
-	private static final Color COLOR_TEXT_GRAY = SWTResourceManager.getColor(SWT.COLOR_GRAY);
-	private static final Color COLOR_STATUS_BLUE = SWTResourceManager.getColor(91, 192, 222);
-	private static final Color COLOR_AUTOCOMPLETE_YELLOW = SWTResourceManager.getColor(247, 150, 70);
-	private static final Color COLOR_AUTOCOMPLETE_GREEN = SWTResourceManager.getColor(155, 187, 89);
-	private static final Color COLOR_STATUS_ORANGE = SWTResourceManager.getColor(217, 83, 79);
-	private static final Color COLOR_STATUS_GREEN = SWTResourceManager.getColor(92, 184, 92);
-	private static final Color COLOR_INPUT_DARKGREEN = SWTResourceManager.getColor(0, 51, 0);
-	private static final Color COLOR_WHITE = SWTResourceManager.getColor(SWT.COLOR_WHITE);
-	private static final Color COLOR_BLACK = SWTResourceManager.getColor(SWT.COLOR_BLACK);
-	private static final Color COLOR_BACKGROUND_GRAY = SWTResourceManager.getColor(89, 89, 89);
-	private static final String MENU_EXIT = "Exit";
+    private static final Color COLOR_SELECTION_BOX_YELLOW = SWTResourceManager
+            .getColor(153, 153, 51);
+    private static final Color COLOR_TEXT_YELLOW = SWTResourceManager.getColor(
+            225, 212, 113);
+    private static final Color COLOR_TEXT_GRAY = SWTResourceManager
+            .getColor(SWT.COLOR_GRAY);
+    private static final Color COLOR_STATUS_BLUE = SWTResourceManager.getColor(
+            91, 192, 222);
+    private static final Color COLOR_AUTOCOMPLETE_YELLOW = SWTResourceManager
+            .getColor(247, 150, 70);
+    private static final Color COLOR_AUTOCOMPLETE_GREEN = SWTResourceManager
+            .getColor(155, 187, 89);
+    private static final Color COLOR_STATUS_ORANGE = SWTResourceManager
+            .getColor(217, 83, 79);
+    private static final Color COLOR_STATUS_GREEN = SWTResourceManager
+            .getColor(92, 184, 92);
+    private static final Color COLOR_INPUT_DARKGREEN = SWTResourceManager
+            .getColor(0, 51, 0);
+    private static final Color COLOR_WHITE = SWTResourceManager
+            .getColor(SWT.COLOR_WHITE);
+    private static final Color COLOR_BLACK = SWTResourceManager
+            .getColor(SWT.COLOR_BLACK);
+    private static final Color COLOR_BACKGROUND_GRAY = SWTResourceManager
+            .getColor(89, 89, 89);
+    private static final String MENU_EXIT = "Exit";
     private static final String MENU_OPEN = "Open";
     private static final String HIDE_SHOW_HOT_KEY = "alt F12";
     private static final String EMPTY_STRING = "";
@@ -277,8 +289,8 @@ public class MinaGuiUI extends MinaView {
         LogHelper.log(CLASS_NAME, Level.INFO, "shell create contents");
         initializeItems();
         addAllListeners();
-        if (Boolean
-                .getBoolean(ConfigHelper.getProperty(ConfigHelper.TIMER_KEY))) {
+        if (Boolean.parseBoolean(ConfigHelper
+                .getProperty(ConfigHelper.TIMER_KEY))) {
             startTimer();
         }
     }
@@ -405,8 +417,7 @@ public class MinaGuiUI extends MinaView {
 
     private void initializeUserInputTextField() {
         _userInputTextField = new Text(_shell, SWT.NONE);
-        _userInputTextField
-                .setForeground(COLOR_INPUT_DARKGREEN);
+        _userInputTextField.setForeground(COLOR_INPUT_DARKGREEN);
         _userInputTextField.setFont(SWTResourceManager.getFont(UI_FONT,
                 UI_FONT_SIZE, SWT.NORMAL));
         _userInputTextField.setBounds(4, 540, (SHELL_WIDTH - 16) / 3 * 2 + 4,
@@ -501,16 +512,14 @@ public class MinaGuiUI extends MinaView {
         _deadlinePrevPage.setForeground(COLOR_WHITE);
         _deadlinePrevPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
-        _deadlinePrevPage
-                .setBackground(COLOR_BACKGROUND_GRAY);
+        _deadlinePrevPage.setBackground(COLOR_BACKGROUND_GRAY);
         _deadlinePrevPage.setAlignment(SWT.CENTER);
 
         _deadlineNextPage = new Label(_shell, SWT.NONE);
         _deadlineNextPage.setForeground(COLOR_WHITE);
         _deadlineNextPage.setFont(SWTResourceManager.getFont(UI_FONT, 20,
                 SWT.BOLD));
-        _deadlineNextPage
-                .setBackground(COLOR_BACKGROUND_GRAY);
+        _deadlineNextPage.setBackground(COLOR_BACKGROUND_GRAY);
         _deadlineNextPage.setAlignment(SWT.CENTER);
 
         _deadlinePageLabel = new Label(_shell, SWT.NONE);
@@ -524,8 +533,7 @@ public class MinaGuiUI extends MinaView {
     private void initializeDeadlineLabel() {
         _lblDeadline = new Label(_shell, SWT.NONE);
         _lblDeadline.setAlignment(SWT.CENTER);
-        _lblDeadline
-                .setForeground(COLOR_WHITE);
+        _lblDeadline.setForeground(COLOR_WHITE);
         _lblDeadline.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.BOLD));
         _lblDeadline.setBackground(COLOR_BACKGROUND_GRAY);
@@ -542,8 +550,7 @@ public class MinaGuiUI extends MinaView {
         _eventListUI = new StyledText(_shell, SWT.NONE | SWT.WRAP);
         _eventListUI.setEnabled(false);
         _eventListUI.setEditable(false);
-        _eventListUI
-                .setForeground(COLOR_WHITE);
+        _eventListUI.setForeground(COLOR_WHITE);
         _eventListUI.setFont(SWTResourceManager.getFont(UI_FONT, UI_FONT_SIZE,
                 SWT.NORMAL));
         _eventListUI.setBackground(COLOR_BACKGROUND_GRAY);
@@ -1318,8 +1325,7 @@ public class MinaGuiUI extends MinaView {
     private void hideDeadline() {
         _lblDeadline.setBounds((SHELL_WIDTH - 16) / 3 + 8, 4,
                 (SHELL_WIDTH - 16) / 3, 32);
-        _lblDeadline
-                .setBackground(COLOR_BLACK);
+        _lblDeadline.setBackground(COLOR_BLACK);
         setDeadlinePanelSize((SHELL_WIDTH - 16) / 3 + 8, 40,
                 (SHELL_WIDTH - 16) / 3, 0);
     }
